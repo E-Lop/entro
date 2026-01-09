@@ -143,7 +143,7 @@ npm install -D @types/node
 - ✅ Preservazione valori form in modalità edit
 - ✅ Validazione date nel passato bloccata
 
-**Commit**: `TBD` - feat: implement complete food management CRUD system with React Query
+**Commit**: `f6f2d91` - feat: implement complete food management CRUD system with React Query
 **Data Completamento**: 09/01/2026
 
 ### Week 2: UI & Features 🔄 IN CORSO
@@ -541,7 +541,7 @@ Week 2: Polish & Validation
 
 **Fase Attuale**: Fase 1 - MVP Core (Week 2: UI & Features)
 **Progress**: 50% (Week 1 completata ✅ - CRUD funzionante!)
-**Ultimo Commit**: `TBD` (09/01/2026)
+**Ultimo Commit**: `f6f2d91` (09/01/2026)
 **Next Action**: Upload immagini + Filtri/Ricerca
 
 **Completato nella sessione corrente**:
