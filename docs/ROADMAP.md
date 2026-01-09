@@ -83,13 +83,35 @@ npm install -D @types/node
 **Commit**: `9bfc037` - feat: complete Supabase database setup with migration and connection test
 **Data Completamento**: 09/01/2026
 
-#### Tasks (Giorno 3-4) 🔄 PROSSIMO
-- [ ] Implementare auth flow (signup/login/logout)
-- [ ] Creare layout app con navigation
-- [ ] Protected routes setup
-- [ ] User context/store con Zustand
+#### Tasks (Giorno 3-4) ✅ COMPLETATO
+- ✅ Implementare auth flow (signup/login/logout)
+- ✅ Creare layout app con navigation
+- ✅ Protected routes setup
+- ✅ User context/store con Zustand
 
-#### Tasks (Giorno 5-7)
+**Implementazione Completa**:
+- ✅ React Router con routes pubbliche (/login, /signup) e protette (/)
+- ✅ Zustand auth store con listener Supabase onAuthStateChange
+- ✅ Custom hook useAuth per accesso auth state
+- ✅ AuthForm component con react-hook-form + zod validation
+- ✅ ProtectedRoute component con loading states
+- ✅ AppLayout con header, logo, user menu dropdown
+- ✅ DashboardPage placeholder
+- ✅ shadcn/ui components: Button, Input, Form, Card, Label, Dropdown Menu
+- ✅ Toast notifications con Sonner
+- ✅ Session persistence verificata
+- ✅ Form validation con password min 6 caratteri
+- ✅ Test completo: signup, login, logout, protected routes, session refresh
+
+**Architettura**:
+- Service Layer (`src/lib/auth.ts`) → Zustand Store (`src/stores/authStore.ts`) → Custom Hook (`src/hooks/useAuth.ts`) → UI Components
+- 13 nuovi file creati, 2 file modificati
+- Pattern clean: separation of concerns, testabilità, DX ottima
+
+**Commit**: (prossimo commit)
+**Data Completamento**: 09/01/2026
+
+#### Tasks (Giorno 5-7) 🔄 PROSSIMO
 - [ ] Componente FoodCard (presentational)
 - [ ] Componente FoodForm (create/edit)
 - [ ] Setup React Query per foods
@@ -118,12 +140,12 @@ npm install -D @types/node
 - [ ] Test manuale completo
 
 ### Deliverables Fase 1
-✅ **MVP Funzionante**:
-- Login/Signup working
-- CRUD completo alimenti
-- Filtri e ricerca base
-- UI responsive
-- Deployed su Netlify
+**MVP Funzionante**:
+- ✅ Login/Signup working
+- [ ] CRUD completo alimenti
+- [ ] Filtri e ricerca base
+- [ ] UI responsive
+- [ ] Deployed su Netlify
 
 ### Definition of Done
 - [ ] Posso creare/modificare/eliminare alimenti
