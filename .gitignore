@@ -9,6 +9,7 @@ node_modules/
 # Production
 dist/
 build/
+tsconfig.tsbuildinfo
 
 # Misc
 .DS_Store
