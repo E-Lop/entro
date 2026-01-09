@@ -111,48 +111,76 @@ npm install -D @types/node
 **Commit**: `de0f9fb` - feat: implement complete Supabase authentication system
 **Data Completamento**: 09/01/2026
 
-#### Tasks (Giorno 5-7) 🔄 PROSSIMO
-- [ ] Componente FoodCard (presentational)
-- [ ] Componente FoodForm (create/edit)
-- [ ] Setup React Query per foods
-- [ ] API layer per CRUD operations
+#### Tasks (Giorno 5-7) ✅ COMPLETATO
+- [x] ✅ Setup React Query per foods
+- [x] ✅ API layer per CRUD operations (src/lib/foods.ts)
+- [x] ✅ Componente FoodCard (presentational con color coding)
+- [x] ✅ Componente FoodForm (create/edit con validation)
+- [x] ✅ Dashboard page con grid di cards
+- [x] ✅ Implementare CREATE food
+- [x] ✅ Implementare UPDATE food
+- [x] ✅ Implementare DELETE food (con conferma)
+- [x] ✅ Calcolo giorni alla scadenza con color coding
 
-### Week 2: UI & Features
+**Implementazione Completa**:
+- ✅ React Query hooks (useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood)
+- ✅ Service layer completo per Supabase CRUD (getFoods, createFood, updateFood, deleteFood)
+- ✅ Zod validation schemas con enum per storage locations e quantity units
+- ✅ FoodCard component con color coding: 🟢 >7gg | 🟡 4-7gg | 🟠 1-3gg | 🔴 scaduto
+- ✅ FoodForm con react-hook-form + zod, validazione date future only
+- ✅ Dialog modals (Aggiungi/Modifica con shadcn/ui Dialog)
+- ✅ AlertDialog per conferma eliminazione
+- ✅ Dashboard stats real-time (totali, in scadenza, scaduti)
+- ✅ Grid responsive layout (1/2/3 colonne)
+- ✅ Optimistic updates per UX fluida
+- ✅ Toast notifications con Sonner
+- ✅ Empty state quando nessun alimento
+- ✅ Loading states con skeleton
+- ✅ Dropdown select per unità di misura (pz, kg, g, l, ml, confezioni)
 
-#### Tasks (Giorno 1-3)
-- [ ] Dashboard page con grid di cards
-- [ ] Implementare CREATE food
-- [ ] Implementare UPDATE food
-- [ ] Implementare DELETE food (con conferma)
+**Bug Fix**:
+- ✅ Database constraint validation per quantity_unit
+- ✅ Preservazione valori form in modalità edit
+- ✅ Validazione date nel passato bloccata
+
+**Commit**: `TBD` - feat: implement complete food management CRUD system with React Query
+**Data Completamento**: 09/01/2026
+
+### Week 2: UI & Features 🔄 IN CORSO
+
+#### Tasks (Giorno 1-3) 🔄 PROSSIMO
 - [ ] Upload immagini a Supabase Storage
-- [ ] Calcolo giorni alla scadenza con color coding
+- [ ] Image preview nel FoodCard
+- [ ] Componente ImageUpload riusabile
+- [ ] Ottimizzazione immagini (resize, compress)
 
 #### Tasks (Giorno 4-5)
-- [ ] Filtri base (categoria, storage location)
+- [ ] Filtri base (categoria, storage location, status)
 - [ ] Search bar con debounce
-- [ ] Ordinamenti (scadenza, alfabetico)
-- [ ] Empty states e loading states
+- [ ] Ordinamenti (scadenza, alfabetico, categoria)
+- [ ] Persistenza filtri in URL query params
 
 #### Tasks (Giorno 6-7)
-- [ ] Responsive design mobile/desktop
-- [ ] Toast notifications
-- [ ] Error handling e validation
-- [ ] Test manuale completo
+- [ ] Test manuale completo su device reali
+- [ ] Bug fixes da testing
+- [ ] Performance optimization
+- [ ] Deploy su Netlify
 
 ### Deliverables Fase 1
 **MVP Funzionante**:
 - ✅ Login/Signup working
-- [ ] CRUD completo alimenti
+- ✅ CRUD completo alimenti
+- [ ] Upload immagini
 - [ ] Filtri e ricerca base
-- [ ] UI responsive
+- ✅ UI responsive
 - [ ] Deployed su Netlify
 
 ### Definition of Done
-- [ ] Posso creare/modificare/eliminare alimenti
-- [ ] Vedo giorni alla scadenza con colori
+- ✅ Posso creare/modificare/eliminare alimenti
+- ✅ Vedo giorni alla scadenza con colori
 - [ ] Filtri funzionano correttamente
-- [ ] App responsive su mobile
-- [ ] Nessun bug bloccante
+- ✅ App responsive su mobile
+- ✅ Nessun bug bloccante
 
 ---
 
@@ -511,17 +539,27 @@ Week 2: Polish & Validation
 
 ## ✅ Current Status
 
-**Fase Attuale**: Fase 1 - MVP Core (Week 1: Database & Auth)
-**Progress**: 15% (Fase 0 completata ✅)
-**Ultimo Commit**: `1ac1964` (09/01/2026)
-**Next Action**: Database setup + Migrations Supabase
+**Fase Attuale**: Fase 1 - MVP Core (Week 2: UI & Features)
+**Progress**: 50% (Week 1 completata ✅ - CRUD funzionante!)
+**Ultimo Commit**: `TBD` (09/01/2026)
+**Next Action**: Upload immagini + Filtri/Ricerca
+
+**Completato nella sessione corrente**:
+1. ✅ React Query setup con QueryClientProvider
+2. ✅ Service layer foods.ts con CRUD completo
+3. ✅ React Query hooks (useFoods, useCategories, mutations)
+4. ✅ FoodCard component con color coding scadenze
+5. ✅ FoodForm con validation (zod + react-hook-form)
+6. ✅ Dashboard con grid, dialogs, stats real-time
+7. ✅ Optimistic updates e toast notifications
+8. ✅ Bug fixes: quantity_unit enum, date validation, form preservation
 
 **Prossimi Step Immediati**:
-1. ✅ ~~Vite setup + Tailwind config~~ COMPLETATO
-2. ✅ ~~Configure environment variables~~ COMPLETATO
-3. 🔄 Create initial database schema (Supabase migrations)
-4. 🔄 Configure RLS policies
-5. 🔄 Setup basic auth flow (signup/login/logout)
+1. 🔄 Upload immagini a Supabase Storage
+2. 🔄 Filtri per categoria, storage location, status
+3. 🔄 Search bar con debounce
+4. 🔄 Ordinamenti multipli
+5. 🔄 Deploy MVP su Netlify
 
 ---
 

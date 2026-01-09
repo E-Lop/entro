@@ -29,7 +29,7 @@ export type Database = {
           user_id: string
           name: string
           quantity: number | null
-          quantity_unit: string | null
+          quantity_unit: 'pz' | 'kg' | 'g' | 'l' | 'ml' | 'confezioni' | null
           expiry_date: string
           category_id: string
           storage_location: 'fridge' | 'freezer' | 'pantry'
