@@ -8,26 +8,32 @@ Questo roadmap è organizzato in fasi incrementali, ognuna delle quali produce u
 
 ---
 
-## 🚀 Fase 0: Setup Iniziale (1-2 giorni)
+## 🚀 Fase 0: Setup Iniziale (1-2 giorni) ✅ COMPLETATA
 
 **Obiettivo**: Ambiente di sviluppo pronto e configurato
 
 ### Tasks
 
 - [x] ✅ Repository GitHub creato
-- [ ] Setup progetto Vite + React + TypeScript
-- [ ] Installazione dipendenze core
-- [ ] Configurazione Tailwind CSS
-- [ ] Setup shadcn/ui
-- [ ] Configurazione ESLint + Prettier
-- [ ] Setup Supabase project
-- [ ] Configurazione environment variables
-- [ ] Test build & deploy Netlify
+- [x] ✅ Setup progetto Vite + React + TypeScript
+- [x] ✅ Installazione dipendenze core
+- [x] ✅ Configurazione Tailwind CSS 3.4
+- [x] ✅ Setup shadcn/ui
+- [x] ✅ Configurazione ESLint
+- [x] ✅ Setup Supabase project
+- [x] ✅ Configurazione environment variables
+- [x] ✅ Test build verificato
+- [ ] Deploy Netlify (da fare dopo setup database)
 
 ### Deliverables
 - ✅ Progetto buildabile
 - ✅ Landing page base visibile
-- ✅ CI/CD configurato
+- ✅ Struttura directory completa
+- ✅ Client Supabase configurato
+- ✅ Types TypeScript definiti
+
+**Commit**: `1ac1964` - feat: initial project setup with React, TypeScript, and Supabase
+**Data Completamento**: 09/01/2026
 
 ### Checklist Tecnica
 ```bash
@@ -471,15 +477,17 @@ Week 2: Polish & Validation
 
 ## ✅ Current Status
 
-**Fase Attuale**: Fase 0 - Setup Iniziale  
-**Progress**: 10% (Repository created, planning done)  
-**Next Action**: Vite setup + Tailwind config
+**Fase Attuale**: Fase 1 - MVP Core (Week 1: Database & Auth)
+**Progress**: 15% (Fase 0 completata ✅)
+**Ultimo Commit**: `1ac1964` (09/01/2026)
+**Next Action**: Database setup + Migrations Supabase
 
 **Prossimi Step Immediati**:
-1. Run initial setup commands
-2. Configure Supabase project
-3. Create initial database schema
-4. Setup basic routing
+1. ✅ ~~Vite setup + Tailwind config~~ COMPLETATO
+2. ✅ ~~Configure environment variables~~ COMPLETATO
+3. 🔄 Create initial database schema (Supabase migrations)
+4. 🔄 Configure RLS policies
+5. 🔄 Setup basic auth flow (signup/login/logout)
 
 ---
 
