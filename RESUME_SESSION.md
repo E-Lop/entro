@@ -1,4 +1,4 @@
-# 🔄 Resume Session - Setup Database Supabase
+# 🔄 Resume Session - Autenticazione Supabase
 
 ## 📍 Contesto Progetto
 
@@ -8,45 +8,43 @@
 
 **Repository:** https://github.com/E-Lop/entro
 **Branch:** main
-**Ultimo Commit:** `fc868a8` - docs: update ROADMAP with Fase 0 completion
+**Ultimo Commit:** `c4eb9e5` - docs: update ROADMAP with Fase 1 Week 1 Day 1-2 completion
 
 ---
 
-## ✅ Stato Attuale (Fase 0 Completata)
+## ✅ Stato Attuale (Fase 1 Week 1 Day 1-2 Completata)
 
 ### Cosa è Già Configurato
 
-#### 1. Progetto Base
+#### 1. Progetto Base (Fase 0 - Completata 100%)
 - ✅ Vite + React 19 + TypeScript setup completo
-- ✅ Tailwind CSS 3.4 configurato con variabili CSS
-- ✅ shadcn/ui base configurato (components.json, src/lib/utils.ts)
+- ✅ Tailwind CSS 3.4 configurato
+- ✅ shadcn/ui base configurato
 - ✅ ESLint configurato
 - ✅ Build verificato funzionante
 - ✅ Dev server: `npm run dev` → http://localhost:5174
 
-#### 2. Dipendenze Installate
-```json
-{
-  "@supabase/supabase-js": "^2.90.1",
-  "zustand": "^5.0.9",
-  "@tanstack/react-query": "^5.90.16",
-  "date-fns": "^4.1.0",
-  "react-hook-form": "^7.70.0",
-  "zod": "^4.3.5",
-  "clsx": "^2.1.1",
-  "tailwind-merge": "^3.4.0",
-  "lucide-react": "^0.562.0",
-  "sonner": "^2.0.7"
-}
-```
+#### 2. Database Supabase (Fase 1 Day 1-2 - Completata 100%)
+- ✅ **Tabella `categories`**: 11 categorie italiane inserite
+  - dairy (Latticini), meat (Carne), fish (Pesce), fruits (Frutta)
+  - vegetables (Verdura), bakery (Pane e Pasta), beverages (Bevande)
+  - frozen (Surgelati), condiments (Condimenti), snacks (Snack), other (Altro)
+- ✅ **Tabella `foods`**: creata con schema completo
+  - UUID, user_id, name, quantity, quantity_unit, expiry_date
+  - category_id, storage_location, image_url, barcode, notes
+  - status, consumed_at, created_at, updated_at, deleted_at
+- ✅ **8 Indexes** per performance ottimali
+- ✅ **RLS policies** configurate (anonymous access per categories)
+- ✅ **Trigger** `update_updated_at_column()` attivo
+- ✅ **Frontend** TestConnection page funzionante
 
 #### 3. Supabase Client Configurato
-- **File:** `src/lib/supabase.ts` ✅ Già creato
+- **File:** `src/lib/supabase.ts` ✅
 - **URL:** `https://rmbmmwcxtnanacxbkihc.supabase.co`
 - **Anon Key:** `sb_publishable_z3U1GiNSYhbi_9WccIzOjg_aD0mUyYY`
-- **Environment:** `.env.local` già configurato (gitignored)
+- **Environment:** `.env.local` configurato (gitignored)
 
-#### 4. Struttura Directory Completa
+#### 4. Struttura Directory
 ```
 src/
 ├── components/
@@ -60,12 +58,13 @@ src/
 ├── lib/
 │   ├── supabase.ts      # ✅ Client configurato
 │   └── utils.ts         # ✅ cn() utility
-├── stores/              # (vuoto, pronto)
+├── stores/              # (vuoto, pronto per Zustand)
 ├── types/
 │   ├── food.types.ts    # ✅ Types completi
 │   └── auth.types.ts    # ✅ Types completi
-├── pages/               # (vuoto, pronto)
-├── App.tsx              # Placeholder base
+├── pages/
+│   └── TestConnection.tsx  # ✅ Pagina test DB
+├── App.tsx              # ✅ Mostra TestConnection
 ├── main.tsx             # Entry point
 └── index.css            # Tailwind + shadcn vars
 ```
@@ -73,44 +72,55 @@ src/
 #### 5. Types TypeScript Definiti
 - `src/types/food.types.ts` - Food, Category, FoodFormData, FoodFilters
 - `src/types/auth.types.ts` - User, AuthState, LoginCredentials
-- `src/lib/supabase.ts` - Database types stub
 
 ---
 
-## 🎯 PROSSIMO OBIETTIVO: Setup Database Supabase
+## 🎯 PROSSIMO OBIETTIVO: Autenticazione Supabase (Fase 1 Week 1 Day 3-4)
 
-### Fase 1 - Week 1: Database & Auth (Giorni 1-2)
-
-**Obiettivo Sessione:** Creare database PostgreSQL su Supabase con tabelle e RLS
+### Obiettivo Sessione
+Implementare sistema di autenticazione completo con Supabase Auth:
+- Signup / Login / Logout
+- Session management con Zustand
+- Protected routes
+- Layout app con navigation
 
 ### Task da Completare
 
-#### 1. **Accesso Supabase Dashboard**
-   - URL: https://supabase.com/dashboard/project/rmbmmwcxtnanacxbkihc
-   - Progetto: "entro"
-   - Verificare che il progetto sia accessibile
+#### 1. **Implementare Auth Flow**
+   - Creare `src/lib/auth.ts` con funzioni:
+     - `signUp(email, password)`
+     - `signIn(email, password)`
+     - `signOut()`
+     - `getCurrentUser()`
+     - `onAuthStateChange()`
+   - Gestire errori e validazione
 
-#### 2. **Eseguire Migration SQL**
-   - Usare SQL Editor nel dashboard Supabase
-   - Copiare migration completa da: `docs/DATABASE_SCHEMA.md` (linee 480-575)
-   - La migration include:
-     - Tabella `categories` con 11 categorie predefinite italiane
-     - Tabella `foods` con tutti i campi necessari
-     - Indexes per performance
-     - Row Level Security (RLS) policies
-     - Trigger per updated_at automatico
+#### 2. **Setup Zustand Auth Store**
+   - Creare `src/stores/authStore.ts`
+   - State: `user`, `session`, `loading`, `isAuthenticated`
+   - Actions: `setUser`, `clearUser`, `initialize`
+   - Integrare con Supabase auth listener
 
-#### 3. **Verificare Tabelle Create**
-   - Verificare nel Table Editor che esistano:
-     - `categories` (11 rows inserite automaticamente)
-     - `foods` (vuota inizialmente)
-   - Verificare RLS abilitato su entrambe le tabelle
+#### 3. **Creare Componenti Auth UI**
+   - `src/pages/LoginPage.tsx` - Form login/signup con tab
+   - `src/components/auth/AuthForm.tsx` - Form riutilizzabile
+   - Usare `react-hook-form` + `zod` per validazione
+   - Styling con Tailwind + shadcn/ui components
 
-#### 4. **Testare Connessione dal Frontend**
-   - Creare pagina di test che:
-     - Mostra connessione a Supabase
-     - Fetcha e mostra le categorie
-     - Verifica che il client funzioni
+#### 4. **Implementare Protected Routes**
+   - Creare `src/components/auth/ProtectedRoute.tsx`
+   - Redirect a `/login` se non autenticato
+   - Setup router con React Router (installare se necessario)
+
+#### 5. **Creare Layout App**
+   - `src/components/layout/AppLayout.tsx`
+   - Header con user menu e logout
+   - Sidebar/navigation (opzionale per ora)
+   - Footer (opzionale)
+
+#### 6. **Update RLS Policies**
+   - Verificare che le policies `foods` richiedano autenticazione
+   - Testare che utenti vedano solo i propri alimenti
 
 ---
 
@@ -118,23 +128,19 @@ src/
 
 ### File da Consultare (in ordine di importanza)
 
-1. **`docs/DATABASE_SCHEMA.md`** ⭐ ESSENZIALE
-   - Contiene la migration SQL completa (linee 480-575)
-   - Schema completo tabelle
-   - RLS policies dettagliate
-   - Funzioni database
+1. **`docs/ROADMAP.md`** ⭐ Roadmap aggiornata
+   - Fase 1 Week 1 Day 3-4 task dettagliati
 
-2. **`docs/ROADMAP.md`**
-   - Task dettagliati per Fase 1
-   - Checklist per completamento
+2. **`docs/TECHNICAL_SPECS.md`**
+   - Specifiche autenticazione (Sezione 3)
+   - User flow diagrams
 
-3. **`docs/TECHNICAL_SPECS.md`**
-   - Architettura generale
-   - Specifiche implementazione
+3. **`docs/DATABASE_SCHEMA.md`**
+   - RLS policies per `foods` table
+   - User authentication schema
 
-4. **`docs/FEATURES.md`**
-   - Specifiche funzionalità CRUD
-   - User stories
+4. **`src/lib/supabase.ts`**
+   - Client Supabase già configurato
 
 5. **`.env.local`** (gitignored)
    - Credenziali Supabase già configurate
@@ -152,13 +158,13 @@ src/
 ### Git Repository
 - **Remote:** https://github.com/E-Lop/entro.git
 - **Branch:** main
-- **Ultimo commit:** fc868a8
+- **Ultimo commit:** c4eb9e5
 
 ---
 
-## 📋 Schema Database (Quick Reference)
+## 📊 Database Schema (Quick Reference)
 
-### Tabella: categories
+### Tabella: categories ✅ POPOLATA
 ```sql
 - id: UUID (PK)
 - name: TEXT (english key)
@@ -170,12 +176,12 @@ src/
 - created_at: TIMESTAMP
 ```
 
-**11 Categorie Predefinite:** dairy, meat, fish, fruits, vegetables, bakery, beverages, frozen, condiments, snacks, other
+**11 Categorie:** dairy, meat, fish, fruits, vegetables, bakery, beverages, frozen, condiments, snacks, other
 
-### Tabella: foods
+### Tabella: foods ✅ CREATA (vuota)
 ```sql
 - id: UUID (PK)
-- user_id: UUID (FK → auth.users)
+- user_id: UUID (FK → auth.users) ⚠️ RICHIEDE AUTH
 - name: TEXT (required)
 - quantity: DECIMAL
 - quantity_unit: ENUM('pz', 'kg', 'g', 'l', 'ml', 'confezioni')
@@ -188,13 +194,13 @@ src/
 - status: ENUM('active', 'consumed', 'expired', 'wasted')
 - consumed_at: TIMESTAMP
 - created_at: TIMESTAMP
-- updated_at: TIMESTAMP (auto-update trigger)
+- updated_at: TIMESTAMP (auto-update trigger ✅)
 - deleted_at: TIMESTAMP (soft delete)
 ```
 
 ### RLS Policies
-- Users can only see/modify their own foods
-- Categories are public (read-only)
+- ✅ `categories`: PUBLIC read access (USING true)
+- ✅ `foods`: Users can only see/modify their own foods (auth.uid() = user_id)
 
 ---
 
@@ -206,44 +212,63 @@ cd /Users/edmondo/Documents/entro
 npm run dev  # Verifica che parta su localhost:5174
 ```
 
-### Step 2: Accedi a Supabase Dashboard
-- Aprire: https://supabase.com/dashboard/project/rmbmmwcxtnanacxbkihc
-- Navigare a: SQL Editor (sidebar sinistra)
+### Step 2: Installa Dipendenze Mancanti (se necessario)
+```bash
+# React Router (se non già installato)
+npm install react-router-dom
+npm install -D @types/react-router-dom
 
-### Step 3: Esegui Migration
-1. Leggere `docs/DATABASE_SCHEMA.md` linee 480-575
-2. Copiare l'intero SQL block dalla migration
-3. Incollare nel SQL Editor
-4. Cliccare "Run" o CMD+Enter
-5. Verificare che l'esecuzione completi senza errori
+# Verifica che siano già installati:
+# - react-hook-form ✅
+# - zod ✅
+# - @hookform/resolvers ✅
+# - zustand ✅
+```
 
-### Step 4: Verifica Tabelle Create
-- Navigare a: Table Editor
-- Verificare presenza di:
-  - `categories` (11 rows)
-  - `foods` (0 rows inizialmente)
+### Step 3: Implementa Auth Flow
+1. Creare `src/lib/auth.ts` con funzioni Supabase Auth
+2. Testare signup/login/logout in console
 
-### Step 5: Test Connessione
-Creare `src/pages/TestConnection.tsx` per verificare:
-- Client Supabase funzionante
-- Query alle categorie
-- Visualizzazione dati
+### Step 4: Setup Zustand Store
+1. Creare `src/stores/authStore.ts`
+2. Integrare auth listener di Supabase
+3. Testare state management
+
+### Step 5: Creare UI Components
+1. LoginPage con form
+2. AuthForm component riutilizzabile
+3. Validazione con zod
+
+### Step 6: Setup Routing
+1. Installare React Router
+2. Creare ProtectedRoute component
+3. Definire routes in App.tsx
+
+### Step 7: Testare Auth Flow
+1. Registrare nuovo utente
+2. Fare login
+3. Verificare session persistente
+4. Testare logout
+5. Verificare redirect su protected routes
 
 ---
 
 ## ⚠️ Note Importanti
 
-### Prima Volta con Supabase
-- **SQL Editor:** Sidebar → SQL Editor → New Query
-- **Esecuzione Query:** CMD+Enter o bottone "Run"
-- **Table Editor:** Visualizzazione dati come Excel
-- **RLS:** Policies definiscono chi può vedere/modificare dati
+### Supabase Auth
+- **Email verification**: Disabilitata di default in dev
+- **Password requirements**: Minimo 6 caratteri
+- **Session storage**: localStorage (default)
+- **Auto-refresh**: Gestito da Supabase client
 
-### Zustand (Non Ancora Usato)
-State management globale - verrà usato dopo per auth e UI state
+### RLS Important
+- Le policies `foods` richiedono `auth.uid()`
+- Senza autenticazione, le query a `foods` torneranno vuote
+- Dopo il login, gli utenti vedranno solo i propri alimenti
 
-### TanStack Query (Non Ancora Usato)
-Data fetching/caching - verrà configurato dopo database setup
+### Zustand State Management
+- Usare `persist` middleware per session persistence (opzionale)
+- Inizializzare store in `App.tsx` con `useEffect`
 
 ---
 
@@ -251,33 +276,33 @@ Data fetching/caching - verrà configurato dopo database setup
 
 Al termine di questa sessione dovremmo avere:
 
-✅ Database Supabase completo con:
-  - Tabella `categories` popolata (11 categorie)
-  - Tabella `foods` creata e pronta
-  - RLS policies attive
-  - Indexes configurati
+✅ **Sistema di Autenticazione Completo:**
+  - Signup/Login/Logout funzionanti
+  - Session management con Zustand
+  - UI forms con validazione
 
-✅ Connessione verificata:
-  - Test query dal frontend funzionante
-  - Categorie visualizzate nell'app
-  - Nessun errore di connessione
+✅ **Routing Configurato:**
+  - Protected routes setup
+  - Redirect automatico se non autenticato
+  - Layout app base
 
-✅ Pronto per:
-  - Implementare autenticazione (Fase 1 - Giorni 3-4)
-  - Creare CRUD alimenti (Fase 1 - Week 2)
+✅ **Pronto per:**
+  - Implementare CRUD alimenti (Fase 1 Week 1 Day 5-7)
+  - Dashboard con lista foods
+  - Form create/edit food
 
 ---
 
 ## 📞 Domande Frequenti
 
-**Q: Le credenziali in .env.local sono sicure?**
-A: Sì, il file è in .gitignore. La anon key è pubblica per design di Supabase (protetta da RLS).
+**Q: Come testo l'autenticazione senza email verification?**
+A: In Supabase Dashboard → Authentication → Settings, disabilita "Enable email confirmations"
 
-**Q: Posso modificare lo schema dopo?**
-A: Sì, Supabase supporta migrations. Creare nuovi file SQL per modifiche future.
+**Q: Dove vedo gli utenti registrati?**
+A: Supabase Dashboard → Authentication → Users
 
-**Q: Come verifico che RLS funzioni?**
-A: Le policies impediscono accesso non autorizzato automaticamente. Testeremo con l'auth.
+**Q: Come gestisco password reset?**
+A: Supabase fornisce `resetPasswordForEmail()` - implementare in fase successiva
 
 ---
 
@@ -288,31 +313,40 @@ A: Le policies impediscono accesso non autorizzato automaticamente. Testeremo co
 ```
 Ciao! Sto continuando lo sviluppo del progetto "entro" (food expiry tracker).
 
-Ho appena fatto /clear dopo aver completato la Fase 0 (setup iniziale).
+Ho appena fatto /clear dopo aver completato il setup database Supabase.
 
 STATO ATTUALE:
 - Progetto React + TypeScript + Vite + Supabase configurato ✅
+- Database Supabase completato con 11 categorie ✅
+- Tabella foods creata e RLS configurato ✅
+- TestConnection page funzionante ✅
 - Repository: /Users/edmondo/Documents/entro
-- Ultimo commit: fc868a8
-- Fase 0 completata al 100%
+- Ultimo commit: c4eb9e5
+- Fase 1 Week 1 Day 1-2 completata al 100%
 
 PROSSIMO OBIETTIVO:
-Guidami passo-passo nel setup del database Supabase:
-1. Accesso al dashboard Supabase
-2. Esecuzione migration SQL da docs/DATABASE_SCHEMA.md
-3. Verifica tabelle create (categories + foods)
-4. Test connessione dal frontend
+Implementare sistema di autenticazione Supabase completo:
+1. Auth flow (signup/login/logout) con Supabase Auth
+2. Zustand store per session management
+3. Protected routes con React Router
+4. UI components (LoginPage, AuthForm) con react-hook-form + zod
+5. Layout app con header e user menu
+6. Test completo del flusso di autenticazione
 
-Ho letto il file RESUME_SESSION.md che contiene tutti i dettagli del progetto.
+Leggi il file RESUME_SESSION.md che contiene tutti i dettagli del progetto.
 
 CREDENZIALI SUPABASE:
 - URL: https://rmbmmwcxtnanacxbkihc.supabase.co
 - Anon Key: sb_publishable_z3U1GiNSYhbi_9WccIzOjg_aD0mUyYY
 - Dashboard: https://supabase.com/dashboard/project/rmbmmwcxtnanacxbkihc
 
-Questa è la prima volta che uso Supabase, quindi guidami passo-passo.
+IMPORTANTE:
+- Le RLS policies su `foods` richiedono autenticazione (auth.uid())
+- Dopo il login, verificare che le query alla tabella foods funzionino
+- Usare react-hook-form + zod per validazione form
+- Session persistence con Zustand
 
-Pronto per iniziare! 🚀
+Pronto per iniziare con l'autenticazione! 🚀
 ```
 
 ---
