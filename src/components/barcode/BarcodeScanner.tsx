@@ -80,12 +80,30 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
           </DialogDescription>
         </DialogHeader>
 
+        {/* Inject CSS for html5-qrcode video */}
+        <style>{`
+          #${elementId} video {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 400px !important;
+            display: block !important;
+          }
+          #${elementId} > div {
+            width: 100% !important;
+          }
+        `}</style>
+
         <div className="space-y-4">
           {/* Scanner View */}
           <div className="relative">
             <div
               id={elementId}
-              className="rounded-lg overflow-hidden bg-black min-h-[300px] flex items-center justify-center"
+              className="rounded-lg overflow-hidden bg-black min-h-[300px] w-full"
+              style={{
+                display: state === 'idle' ? 'flex' : 'block',
+                alignItems: state === 'idle' ? 'center' : 'initial',
+                justifyContent: state === 'idle' ? 'center' : 'initial',
+              }}
             >
               {/* Loading state */}
               {state === 'idle' && (
