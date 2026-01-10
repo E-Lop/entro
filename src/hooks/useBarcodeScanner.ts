@@ -37,8 +37,8 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         { facingMode: 'environment' }, // Use back camera on mobile
         {
           fps: 10, // Scans per second
-          qrbox: { width: 250, height: 250 }, // Scanning box size
-          aspectRatio: 1.0,
+          qrbox: 250, // Scanning box size (will be adaptive based on video size)
+          // Remove aspectRatio to let the scanner adapt to camera's native ratio
         },
         (decodedText: string) => {
           // Successfully scanned
@@ -83,15 +83,22 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
    */
   const stopScanning = useCallback(async () => {
     try {
-      if (scannerRef.current?.isScanning) {
-        await scannerRef.current.stop()
+      if (scannerRef.current) {
+        // Check if scanner is actually running before stopping
+        const isRunning = scannerRef.current.getState?.() === 1 // 1 = SCANNING state
+        if (isRunning) {
+          await scannerRef.current.stop()
+        }
       }
       setState('idle')
       setError(null)
     } catch (err) {
       console.error('Error stopping scanner:', err)
-      const errorMsg = err instanceof Error ? err.message : 'Errore durante la chiusura dello scanner'
-      setError(errorMsg)
+      // Don't show error to user if it's just a "not running" error
+      if (err instanceof Error && !err.message.includes('not running')) {
+        const errorMsg = 'Errore durante la chiusura dello scanner'
+        setError(errorMsg)
+      }
     }
   }, [])
 
