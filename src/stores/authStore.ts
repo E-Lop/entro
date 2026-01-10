@@ -31,7 +31,7 @@ type AuthStore = AuthState & AuthActions
 /**
  * Zustand Auth Store with Supabase Auth Integration
  */
-export const useAuthStore = create<AuthStore>((set, get) => ({
+export const useAuthStore = create<AuthStore>((set) => ({
   // Initial state
   user: null,
   session: null,

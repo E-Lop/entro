@@ -11,7 +11,6 @@ import {
   type Food,
   type FoodInsert,
   type FoodUpdate,
-  type Category,
   type FilterParams,
 } from '@/lib/foods'
 
