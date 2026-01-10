@@ -1,293 +1,317 @@
-# Resume Session - Entro Food Expiry Tracker
+# 🚀 Resume Session Guide - Fase 2
 
-## 🎯 Contesto Progetto
-Food expiry tracker con React + TypeScript + Vite + Supabase
-**Fase**: Fase 1 Week 2 - MVP Core (95% completato)
-**Branch**: main
-**Ultimo Deploy**: Dev server su localhost:5174
+**Data**: 10/01/2026
+**Sessione Precedente**: Deploy MVP + Testing + Bug Fixes ✅
+**Prossima Fase**: Barcode Scanner Integration
 
 ---
 
-## ✅ Completato Oggi (10 Gennaio 2026)
+## 🎉 FASE 1 COMPLETATA!
 
-### Sessione Mattina - Image Upload System
-1. ✅ Supabase Storage bucket privato con RLS policies
-2. ✅ Signed URLs per accesso sicuro (1 ora expiration)
-3. ✅ Upload on submit pattern (zero orphan files)
-4. ✅ Image compression (max 800px, ~1MB)
-5. ✅ **HEIC/HEIF support** con conversione automatica a JPEG (iPhone compatible)
-6. ✅ ImageUpload component riusabile con preview
-7. ✅ useSignedUrl hook per gestione signed URLs
-8. ✅ FoodCard con display immagini e loading states
-9. ✅ Delete cascade automatico da storage
+### ✅ MVP Deployed & Production-Ready
 
-### Sessione Pomeriggio - Filters & Mobile-First Layout
-1. ✅ Sistema filtri completo con server-side filtering Supabase
-2. ✅ FoodFilters component collassabile (mobile-first)
-3. ✅ Debounced search (300ms) con useDebounce custom hook
-4. ✅ URL query params persistence con react-router useSearchParams
-5. ✅ Stats cards cliccabili per quick filters (Totali/In Scadenza/Scaduti)
-6. ✅ Layout mobile ottimizzato:
-   - Stats cards compatte in griglia 3 colonne
-   - Floating Action Button (FAB) verde bottom-right (solo mobile)
-   - FoodCard layout ottimizzato (quantità inline, categoria+posizione justify-between)
-   - Note con sfondo ambra (senza bordo)
-   - Spacing ridotto per meno scrolling verticale
-7. ✅ Bug fix: calcolo giorni scadenza normalizzato a midnight (Ricotta ora mostra 4 giorni invece di 3)
+**Production URL**: https://entro-il.netlify.app 🚀
+
+**Completato al 100%**:
+- ✅ Supabase database (11 categorie italiane)
+- ✅ Authentication completa (signup/login/logout)
+- ✅ CRUD alimenti funzionante
+- ✅ Upload immagini con HEIC support (iPhone compatible)
+- ✅ Filtri e ricerca server-side
+- ✅ Mobile-first responsive layout
+- ✅ Netlify CI/CD deployment
+- ✅ Testing completo su Desktop, iPhone, Android
+- ✅ 3 bug critici fixati in production
 
 ---
 
-## 🚀 Prossimo Obiettivo: Deploy & Testing
+## 📊 Stato Attuale del Progetto
 
-**Priorità**: Deploy MVP su Netlify PRIMA del testing mobile
-**Motivo**: URL pubblico HTTPS necessario per testare facilmente su device reali e per camera permissions
+### Tech Stack Implementato
+```
+Frontend: React 19 + TypeScript + Vite
+Styling: Tailwind CSS 3.4 + shadcn/ui
+State: Zustand + React Query
+Backend: Supabase (PostgreSQL + Storage + Auth)
+Deployment: Netlify (auto-deploy da GitHub main)
+```
 
-### Task List Prossima Sessione
-
-#### 1. Deploy su Netlify (30-45 min)
-- [ ] Creare account Netlify (se non già fatto)
-- [ ] Configurare build settings:
-  - Build command: `npm run build`
-  - Publish directory: `dist`
-- [ ] Aggiungere environment variables:
-  - `VITE_SUPABASE_URL`
-  - `VITE_SUPABASE_ANON_KEY`
-- [ ] Deploy e verificare build success
-- [ ] Testare login/signup su URL pubblico
-- [ ] Aggiungere alimenti di test
-
-#### 2. Test su Device Reali (1-2 ore)
-**Test su iPhone/Android**:
-- [ ] Signup/Login flow
-- [ ] CRUD completo alimenti
-- [ ] Upload immagini (HEIC da iPhone)
-- [ ] Filtri collassabili funzionano
-- [ ] Stats cards cliccabili
-- [ ] FAB visibile e funzionante
-- [ ] Responsive layout corretto
-- [ ] Performance (loading times)
-- [ ] Gesture e tap responsiveness
-
-#### 3. Bug Fixes & Optimization (tempo variabile)
-- [ ] Fix bugs trovati durante testing
-- [ ] Performance optimization se necessario
-- [ ] Re-deploy con fix
-
----
-
-## 📋 Architettura File Chiave
-
-### Filtri e Ricerca
+### Architettura Codice
 ```
 src/
-├── lib/
-│   └── foods.ts                    # getFoods() con FilterParams support
-├── hooks/
-│   ├── useFoods.ts                 # useFoods(filters) hook
-│   └── useDebounce.ts              # Custom debounce hook
-├── components/
-│   └── foods/
-│       └── FoodFilters.tsx         # Collapsible filters component
-└── pages/
-    └── DashboardPage.tsx           # URL params integration
+├── components/       # UI components (foods/, ui/)
+├── hooks/           # Custom React hooks
+├── lib/             # Services (auth, foods, storage, supabase)
+├── pages/           # Route pages (Dashboard, Login, Signup)
+├── stores/          # Zustand stores (authStore)
+└── validations/     # Zod schemas
 ```
 
-### Image Upload
-```
-src/
-├── lib/
-│   └── storage.ts                  # uploadFoodImage, deleteFoodImage, getSignedUrl
-├── hooks/
-│   └── useSignedUrl.ts             # Signed URL generation hook
-└── components/
-    └── foods/
-        ├── ImageUpload.tsx         # Upload component con HEIC support
-        └── FoodCard.tsx            # Display con signed URLs
-```
-
----
-
-## 🔧 Comandi Utili
-
-### Dev Server
+### Environment Variables Production
 ```bash
-npm run dev                          # Start dev server (porta 5174)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-key-here
+VITE_APP_NAME=entro
+VITE_APP_URL=https://entro-il.netlify.app
+# Feature flags per future features
 ```
 
-### Build & Preview
+---
+
+## 🐛 Bug Fixes Applicati (Sessione 10/01)
+
+### Bug #1: Email Confirmation Redirect
+**Problema**: Link conferma email puntava a `localhost`
+**Fix**: Configurato Supabase Site URL a `https://entro-il.netlify.app`
+**Location**: Supabase Dashboard → Auth → URL Configuration
+
+### Bug #2: Stats Calculation Inconsistency
+**Problema**: Alimento a 8gg contato come "in scadenza" (≤7gg)
+**Fix**: Normalizzazione date a midnight in `DashboardPage.tsx`
+**Commit**: `b706b6d`
+
+### Bug #3: Android 14+ Camera Access
+**Problema**: Android Chrome mostrava solo galleria, non camera
+**Fix**: Dual-button UI (Camera + Galleria) con input separati
+**Commit**: `2c2a596`
+**Soluzione**: `capture="environment"` per camera, no capture per gallery
+
+---
+
+## 🎯 PROSSIMO OBIETTIVO: Fase 2 - Barcode Scanner
+
+### Obiettivo
+Implementare scansione barcode con pre-compilazione automatica dati prodotto
+
+### Priority Tasks
+
+#### 1. **Setup Barcode Scanner** (Giorno 1-2)
+**Opzioni da valutare**:
+- **html5-qrcode** (Web-based, facile, cross-platform)
+- **Capacitor BarcodeScanner** (Native, più performante ma richiede Capacitor)
+- **@zxing/browser** (ZXing port, affidabile)
+
+**Decision criteria**:
+- ✅ Cross-platform (iOS + Android + Desktop)
+- ✅ Facilità di integrazione
+- ✅ Performance accettabile (<3s scan)
+- ✅ Supporto EAN-13 e altri formati comuni
+
+**Task list**:
 ```bash
-npm run build                        # Build per production
-npm run preview                      # Preview build locale
+- [ ] Research e decisione libreria scanner
+- [ ] npm install libreria scelta
+- [ ] Creare useBarcodeScanner custom hook
+- [ ] Implementare UI scanner modal
+- [ ] Gestione permessi camera (iOS/Android)
+- [ ] Error handling e feedback visivo
+- [ ] Testing su device reali
 ```
 
-### Database
+#### 2. **Open Food Facts API Integration** (Giorno 3-4)
+**API**: https://world.openfoodfacts.org/api/v2
+
+**Endpoints da usare**:
 ```bash
-# Supabase già configurato, nessun setup necessario
-# RLS policies attive
-# Storage bucket: food-images (private)
+GET /api/v2/product/{barcode}
+# Example: https://world.openfoodfacts.org/api/v2/product/8001050121376
+```
+
+**Task list**:
+```bash
+- [ ] Creare service client OpenFoodFacts (src/lib/openfoodfacts.ts)
+- [ ] Implementare fetchProductByBarcode function
+- [ ] Type definitions per API response
+- [ ] Error handling (prodotto non trovato, API down)
+- [ ] Testing con barcode italiani comuni
+```
+
+#### 3. **Category Mapping Logic** (Giorno 4-5)
+**Challenge**: Open Food Facts ha categorie diverse dalle nostre 11 italiane
+
+**Nostre categorie**:
+```
+1. Latticini (dairy)
+2. Carni e Salumi (meat)
+3. Pesce e Frutti di Mare (fish)
+4. Frutta e Verdura (produce)
+5. Pane e Cereali (bakery)
+6. Bevande (beverages)
+7. Snack e Dolci (snacks)
+8. Surgelati (frozen)
+9. Scatolame (canned)
+10. Condimenti (condiments)
+11. Altro (other)
+```
+
+**Task list**:
+```bash
+- [ ] Creare category mapping table (OFF → nostre categorie)
+- [ ] Implementare getCategoryFromOFFData function
+- [ ] Suggerimenti durata shelf-life per categoria
+- [ ] Suggerimenti storage location per categoria
+- [ ] Testing mapping con prodotti reali
+```
+
+#### 4. **Scanner UI/UX** (Giorno 5-6)
+**Task list**:
+```bash
+- [ ] Modal scanner component (BarcodeScanner.tsx)
+- [ ] Camera preview con overlay
+- [ ] Visual feedback durante scan (target box, beep)
+- [ ] Loading state durante fetch API
+- [ ] Success/error messages
+- [ ] Manual barcode input fallback
+- [ ] Close scanner button
+```
+
+#### 5. **Form Pre-fill Integration** (Giorno 6-7)
+**Task list**:
+```bash
+- [ ] Aggiungere scanner button in FoodForm
+- [ ] Integrazione scanner → form data
+- [ ] Pre-fill: name, category, image_url
+- [ ] User override dopo pre-fill
+- [ ] Handle prodotti non trovati gracefully
+- [ ] Testing end-to-end workflow
 ```
 
 ---
 
-## 🐛 Known Issues / Note
+## 💡 Note Tecniche per Implementazione
 
-### Risolti
-- ✅ Calcolo giorni scadenza normalizzato a midnight
-- ✅ Categoria dropdown pulito (rimosso campo icon)
-- ✅ Layout mobile ottimizzato
+### Barcode Scanner Best Practices
+```typescript
+// Hook structure example
+export function useBarcodeScanner() {
+  const [isScanning, setIsScanning] = useState(false)
+  const [result, setResult] = useState<string | null>(null)
+  const [error, setError] = useState<Error | null>(null)
 
-### Da Verificare
-- ⚠️ HEIC upload su iPhone (da testare post-deploy)
-- ⚠️ Performance su Android (da testare post-deploy)
-- ⚠️ Camera permissions su HTTPS (richiesto per barcode future)
+  const startScanning = async () => { /* ... */ }
+  const stopScanning = () => { /* ... */ }
+
+  return { isScanning, result, error, startScanning, stopScanning }
+}
+```
+
+### Open Food Facts API Response Structure
+```typescript
+interface OFFProduct {
+  code: string // barcode
+  product: {
+    product_name: string
+    categories: string
+    image_url: string
+    // ... altri campi
+  }
+}
+```
+
+### Category Mapping Strategy
+```typescript
+// Simple keyword-based mapping
+const categoryKeywords = {
+  latticini: ['milk', 'cheese', 'yogurt', 'latte', 'formaggio'],
+  carni: ['meat', 'chicken', 'beef', 'carne', 'pollo'],
+  // ...
+}
+```
 
 ---
 
-## 📱 Mobile Testing Checklist
+## 📱 Testing Checklist Barcode Scanner
 
-Quando avrai deploy su Netlify, testa questi scenari:
-
-### Scenario 1: Primo Utilizzo
-1. Apri URL Netlify su iPhone
-2. Signup nuovo utente
-3. Aggiungi 3 alimenti (con foto da camera)
-4. Verifica layout compatto
-5. Prova filtri collassabili
-6. Tap su stats cards
-
-### Scenario 2: Ricerca e Filtri
-1. Aggiungi 10+ alimenti vari
-2. Usa search bar
-3. Prova tutti i filtri
-4. Combina filtri + search
-5. Verifica performance
-
-### Scenario 3: Edit e Delete
-1. Tap su "Modifica" di un alimento
-2. Cambia foto
-3. Salva modifiche
-4. Verifica update immediato
-5. Prova delete con conferma
+Quando implementato, testare:
+- [ ] **iOS Safari**: Scanner funziona, permissions OK
+- [ ] **Android Chrome**: Scanner funziona, camera access OK
+- [ ] **Desktop**: Fallback a manual input
+- [ ] **Barcode italiani**: Riconoscimento prodotti locali
+- [ ] **Prodotti non trovati**: Graceful fallback
+- [ ] **Performance**: Scan time <3s
+- [ ] **UX**: Feedback chiaro, errori informativi
 
 ---
 
-## 🎨 UI/UX Highlights
+## 🚦 Come Riprendere
 
-### Mobile-First Design
-- **Stats Cards**: Griglia 3 colonne compatta (risparmio 60% spazio)
-- **FAB**: Bottone "+" verde fixed bottom-right (solo mobile)
-- **Filtri**: Collapsabili di default, apertura con chevron
-- **FoodCard**: Layout verticale ottimizzato, note con bg ambra
-
-### Desktop
-- **Bottone Header**: "Alimento" visibile (nascosto su mobile)
-- **Filtri**: Sempre espansi
-- **Layout**: Griglia responsive (1/2/3 colonne)
-
----
-
-## 🚢 Deployment Notes
-
-### Environment Variables Netlify
-```
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
-```
-
-### Build Settings Netlify
-```
-Build command: npm run build
-Publish directory: dist
-Node version: 18.x (or latest)
-```
-
-### Post-Deploy Checklist
-- [ ] URL pubblico accessibile
-- [ ] Login funziona
-- [ ] Supabase RLS policies attive
-- [ ] Images storage accessible
-- [ ] Console pulita (no errors)
-
----
-
-## 💡 Prompt per Prossima Sessione
-
-Usa questo prompt dopo `/clear`:
+### Prompt per la prossima sessione Claude Code:
 
 ```
 Ciao! Sto continuando lo sviluppo del progetto 'entro' (food expiry tracker).
 
-## 📊 STATO ATTUALE
+## STATO ATTUALE
+✅ FASE 1 COMPLETATA: MVP deployed su https://entro-il.netlify.app
+- CRUD alimenti, filtri, ricerca, upload immagini (HEIC support)
+- Testing completato su Desktop, iPhone, Android
+- 3 bug critici fixati in production
 
-**Progetto**: Food expiry tracker con React + TypeScript + Vite + Supabase
-**Branch**: main
-**Working Directory**: /Users/edmondo/Documents/entro
-**Progress**: Fase 1 Week 2 - 95% completato
+## OBIETTIVO SESSIONE
+🎯 Iniziare Fase 2: Barcode Scanner Integration
 
-### ✅ COMPLETATO
+## TASKS PRIORITARI
+1. Research e decisione libreria scanner (html5-qrcode vs Capacitor vs ZXing)
+2. Setup barcode scanner con useBarcodeScanner hook
+3. Integrare Open Food Facts API
+4. Implementare category mapping logic
 
-**Week 1** (commit: `f6f2d91`):
-- ✅ Supabase database con 11 categorie italiane
-- ✅ Sistema auth completo (signup/login/logout)
-- ✅ CRUD alimenti completo con React Query
-- ✅ FoodCard con color coding scadenze
-- ✅ Dashboard con stats real-time
+## DOMANDE INIZIALI
+- Quale libreria barcode consigli per web app React + TypeScript (cross-platform)?
+- Possiamo iniziare con html5-qrcode per prototipo veloce?
 
-**Week 2 Day 1-3** (commit: `0d696c7`):
-- ✅ Image upload con Supabase Storage
-- ✅ HEIC/HEIF support per iPhone
-- ✅ Signed URLs per sicurezza
-- ✅ Upload on submit pattern
-
-**Week 2 Day 4-5** (commit: pending):
-- ✅ Sistema filtri e ricerca completo
-- ✅ Server-side filtering con Supabase
-- ✅ FoodFilters component collapsabile
-- ✅ URL query params persistence
-- ✅ Stats cards cliccabili per quick filters
-- ✅ Layout mobile-first ottimizzato:
-  - Stats cards compatte (3 colonne)
-  - FAB verde bottom-right
-  - FoodCard layout ottimizzato
-- ✅ Bug fix: calcolo giorni normalizzato
-
-### 🎯 PROSSIMO OBIETTIVO
-
-**Deploy MVP su Netlify + Test su Device Reali**
-
-Per testare facilmente su iPhone/Android, dobbiamo prima fare il deploy su Netlify per avere un URL pubblico HTTPS.
-
-#### Task da completare:
-1. **Deploy Netlify** (priorità):
-   - Configurare build settings
-   - Aggiungere environment variables
-   - Deploy e verify
-
-2. **Test Mobile**:
-   - Test completo su iPhone/Android via URL pubblico
-   - Verificare HEIC upload da camera
-   - Testing filtri e layout responsive
-
-3. **Bug Fixes**:
-   - Fix eventuali problemi trovati
-   - Re-deploy
-
-**Dev Server**: Attualmente running su http://localhost:5174/
-
-Procedi con il deploy su Netlify come primo step!
+Procediamo con il primo task! 🚀
 ```
 
 ---
 
-## 📚 Risorse Utili
+## 📚 Resources Utili
 
-- **ROADMAP**: `/docs/ROADMAP.md` (aggiornato oggi)
-- **Supabase Dashboard**: https://supabase.com/dashboard
-- **Netlify Dashboard**: https://app.netlify.com
-- **Repo GitHub**: (da configurare per auto-deploy)
+### Barcode Scanner Libraries
+- [html5-qrcode](https://github.com/mebjas/html5-qrcode) - Web-based, facile
+- [Capacitor BarcodeScanner](https://github.com/capacitor-community/barcode-scanner) - Native
+- [@zxing/browser](https://github.com/zxing-js/browser) - ZXing port
+
+### Open Food Facts
+- [API Documentation](https://openfoodfacts.github.io/openfoodfacts-server/api/)
+- [Product Search](https://world.openfoodfacts.org/)
+- [SDK TypeScript](https://github.com/openfoodfacts/openfoodfacts-nodejs)
+
+### Testing Resources
+- [BrowserStack](https://www.browserstack.com/) - Device testing
+- [Can I Use](https://caniuse.com/?search=getUserMedia) - Browser support
 
 ---
 
-**Data Aggiornamento**: 10 Gennaio 2026
-**Prossima Sessione**: Deploy + Mobile Testing
-**Status**: Ready for Production! 🚀
+## ⚠️ Known Issues / Tech Debt
+
+Nessun issue critico al momento! MVP è stabile e production-ready.
+
+**Minor improvements (backlog)**:
+- Bundle size optimization (chunk splitting)
+- Lighthouse performance score >90
+- Error tracking (Sentry integration?)
+- Analytics (Plausible/PostHog?)
+
+---
+
+## 🎊 Celebriamo i Successi!
+
+**🏆 Traguardi Raggiunti (Fase 1)**:
+- ✅ 100% Fase 1 completata
+- ✅ MVP deployed e accessibile pubblicamente
+- ✅ Testing completo 3 piattaforme
+- ✅ Zero bug critici in production
+- ✅ CI/CD automation attivo
+- ✅ HEIC support per iPhone (raramente implementato!)
+- ✅ Android 14+ camera fix (issue recente risolto!)
+
+**Tempo impiegato**: ~2 giorni full-time equivalent
+**Code quality**: Alta (TypeScript strict, separation of concerns, reusable components)
+**User experience**: Ottima (feedback testato su device reali)
+
+🚀 **Ready for Fase 2!** Let's build the barcode scanner! 📸
+
+---
+
+**Ultima modifica**: 10/01/2026
+**Next session**: Quando sei pronto per Fase 2! 🎯
