@@ -68,14 +68,28 @@ export function DashboardPage() {
 
   // Handlers
   const handleCreateFood = async (data: FoodFormData) => {
+    // Upload image if File is selected
+    let imagePath: string | null = null
+    if (data.image_url instanceof File) {
+      try {
+        const { uploadFoodImage } = await import('@/lib/storage')
+        imagePath = await uploadFoodImage(data.image_url, user!.id)
+      } catch (error) {
+        console.error('Image upload failed:', error)
+        // Continue without image rather than failing the whole operation
+      }
+    } else if (typeof data.image_url === 'string') {
+      imagePath = data.image_url
+    }
+
     const foodData: FoodInsert = {
       ...data,
       quantity: data.quantity ?? null,
       quantity_unit: data.quantity_unit ?? null,
       notes: data.notes ?? null,
+      image_url: imagePath,
       status: 'active',
       user_id: user!.id,
-      image_url: null,
       barcode: null,
       consumed_at: null,
       deleted_at: null,
@@ -88,8 +102,28 @@ export function DashboardPage() {
   const handleUpdateFood = async (data: FoodFormData) => {
     if (!editingFood) return
 
+    // Upload image if File is selected
+    let imagePath: string | null | undefined
+    if (data.image_url instanceof File) {
+      try {
+        const { uploadFoodImage } = await import('@/lib/storage')
+        imagePath = await uploadFoodImage(data.image_url, user!.id)
+      } catch (error) {
+        console.error('Image upload failed:', error)
+        // Keep existing image on upload failure
+        imagePath = editingFood.image_url
+      }
+    } else {
+      // Keep string path or null
+      imagePath = data.image_url ?? undefined
+    }
+
+    // Exclude image_url from spread since we handle it separately
+    const { image_url: _, ...dataWithoutImage } = data
+
     const foodData: FoodUpdate = {
-      ...data,
+      ...dataWithoutImage,
+      image_url: imagePath,
     }
 
     await updateMutation.mutateAsync({ id: editingFood.id, data: foodData })

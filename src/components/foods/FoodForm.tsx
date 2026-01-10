@@ -8,6 +8,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
+import { ImageUpload } from './ImageUpload'
 import type { Food } from '@/lib/foods'
 
 interface FoodFormProps {
@@ -35,6 +36,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       quantity: null,
       quantity_unit: null,
       notes: null,
+      image_url: null,
     },
   })
 
@@ -49,6 +51,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         quantity: initialData.quantity,
         quantity_unit: initialData.quantity_unit,
         notes: initialData.notes,
+        image_url: initialData.image_url,
       })
     }
   }, [mode, initialData, form])
@@ -213,6 +216,25 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             )}
           />
         </div>
+
+        {/* Image Upload Field */}
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Immagine (opzionale)</FormLabel>
+              <FormControl>
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Notes Field */}
         <FormField

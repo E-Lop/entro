@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { Database } from './supabase'
+import { deleteFoodImage } from './storage'
 
 /**
  * Foods Service Layer - Wrapper functions around Supabase Foods API
@@ -147,9 +148,36 @@ export async function createFood(foodData: FoodInsert): Promise<FoodResponse> {
 
 /**
  * Update an existing food item
+ * If image_url is being changed/removed, deletes the old image from storage
  */
 export async function updateFood(id: string, foodData: FoodUpdate): Promise<FoodResponse> {
   try {
+    // Get current user ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      throw new Error('Utente non autenticato')
+    }
+
+    // If image_url is being updated, get the old image to delete it
+    if ('image_url' in foodData) {
+      const { data: oldFood, error: fetchError } = await supabase
+        .from('foods')
+        .select('image_url')
+        .eq('id', id)
+        .single()
+
+      // Only try to delete old image if fetch succeeded
+      if (!fetchError && oldFood?.image_url && oldFood.image_url !== foodData.image_url) {
+        try {
+          await deleteFoodImage(oldFood.image_url, user.id)
+        } catch (imageError) {
+          console.warn('Failed to delete old image, continuing with update:', imageError)
+          // Continue with update even if image deletion fails
+        }
+      }
+    }
+
     const { data, error } = await supabase
       .from('foods')
       .update(foodData)
@@ -176,9 +204,39 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
 /**
  * Delete a food item (hard delete)
  * For soft delete, use updateFood with deleted_at timestamp
+ * Also deletes associated image from storage if exists
  */
 export async function deleteFood(id: string): Promise<{ error: Error | null }> {
   try {
+    // Get current user ID
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      throw new Error('Utente non autenticato')
+    }
+
+    // First, get the food to check if it has an image
+    const { data: food, error: fetchError } = await supabase
+      .from('foods')
+      .select('image_url')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) {
+      throw new Error(fetchError.message)
+    }
+
+    // Delete image from storage if exists
+    if (food?.image_url) {
+      try {
+        await deleteFoodImage(food.image_url, user.id)
+      } catch (imageError) {
+        console.warn('Failed to delete image, continuing with food deletion:', imageError)
+        // Continue with food deletion even if image deletion fails
+      }
+    }
+
+    // Delete food from database
     const { error } = await supabase
       .from('foods')
       .delete()

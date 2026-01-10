@@ -1,10 +1,11 @@
 import { differenceInDays, format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar, Package, Trash2, Edit, MapPin } from 'lucide-react'
+import { Calendar, Package, Trash2, Edit, MapPin, ImageIcon, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import type { Food, Category } from '@/lib/foods'
 import { cn } from '@/lib/utils'
+import { useSignedUrl } from '@/hooks/useSignedUrl'
 
 interface FoodCardProps {
   food: Food
@@ -69,6 +70,9 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
   const { colorClasses, badgeText, daysUntilExpiry } = getExpiryStatus(food.expiry_date)
   const formattedExpiryDate = format(new Date(food.expiry_date), 'dd MMM yyyy', { locale: it })
 
+  // Generate signed URL for private image
+  const { signedUrl, isLoading: imageLoading, error: imageError } = useSignedUrl(food.image_url)
+
   return (
     <Card className={cn('hover:shadow-md transition-shadow', daysUntilExpiry <= 3 && 'border-orange-300')}>
       <CardHeader className="pb-3">
@@ -83,6 +87,32 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
       </CardHeader>
 
       <CardContent className="pb-3 space-y-2">
+        {/* Food Image */}
+        {food.image_url ? (
+          <div className="w-full h-40 rounded-lg overflow-hidden bg-slate-50 mb-3 relative">
+            {imageLoading ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+              </div>
+            ) : imageError || !signedUrl ? (
+              <div className="w-full h-full flex flex-col items-center justify-center text-slate-400">
+                <ImageIcon className="w-12 h-12 mb-2" />
+                <span className="text-xs">Errore caricamento</span>
+              </div>
+            ) : (
+              <img
+                src={signedUrl}
+                alt={food.name}
+                className="w-full h-full object-cover"
+              />
+            )}
+          </div>
+        ) : (
+          <div className="w-full h-40 rounded-lg bg-slate-50 flex items-center justify-center mb-3 border-2 border-dashed border-slate-200">
+            <ImageIcon className="w-12 h-12 text-slate-300" />
+          </div>
+        )}
+
         {/* Category */}
         {category && (
           <div className="flex items-center gap-2 text-sm text-slate-600">

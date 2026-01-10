@@ -148,11 +148,34 @@ npm install -D @types/node
 
 ### Week 2: UI & Features 🔄 IN CORSO
 
-#### Tasks (Giorno 1-3) 🔄 PROSSIMO
-- [ ] Upload immagini a Supabase Storage
-- [ ] Image preview nel FoodCard
-- [ ] Componente ImageUpload riusabile
-- [ ] Ottimizzazione immagini (resize, compress)
+#### Tasks (Giorno 1-3) ✅ COMPLETATO
+- [x] ✅ Upload immagini a Supabase Storage
+- [x] ✅ Image preview nel FoodCard
+- [x] ✅ Componente ImageUpload riusabile
+- [x] ✅ Ottimizzazione immagini (resize, compress)
+
+**Implementazione Completa**:
+- ✅ Supabase Storage bucket privato con RLS policies per sicurezza
+- ✅ Signed URLs per accesso sicuro alle immagini (1 ora expiration)
+- ✅ ImageUpload component con local preview (File | string | null support)
+- ✅ Upload on submit pattern (no orphan images)
+- ✅ Image compression (max 800px, ~1MB target)
+- ✅ useSignedUrl hook per gestione signed URLs con caching
+- ✅ FoodCard con display immagini via signed URLs
+- ✅ Delete cascade automatico (rimozione immagine da storage)
+- ✅ Error handling completo (upload failures, missing images)
+- ✅ Loading states durante generazione signed URLs
+- ✅ Validation schema con support File | string per upload differito
+
+**Architettura Storage**:
+- Path structure: `{user_id}/{timestamp}-{filename}`
+- Private bucket con Row Level Security
+- Accepted formats: JPEG, PNG, WebP
+- Max size: 5MB (compressed to ~1MB)
+- Upload happens only on form submit (prevents orphan files)
+
+**Commit**: Pending - feat: implement complete image upload system with upload-on-submit
+**Data Completamento**: 10/01/2026
 
 #### Tasks (Giorno 4-5)
 - [ ] Filtri base (categoria, storage location, status)
@@ -540,25 +563,25 @@ Week 2: Polish & Validation
 ## ✅ Current Status
 
 **Fase Attuale**: Fase 1 - MVP Core (Week 2: UI & Features)
-**Progress**: 50% (Week 1 completata ✅ - CRUD funzionante!)
-**Ultimo Commit**: `f6f2d91` (09/01/2026)
-**Next Action**: Upload immagini + Filtri/Ricerca
+**Progress**: 65% (Week 1 ✅ + Image Upload ✅)
+**Ultimo Commit**: Pending (10/01/2026)
+**Next Action**: Filtri/Ricerca + Deploy MVP
 
 **Completato nella sessione corrente**:
-1. ✅ React Query setup con QueryClientProvider
-2. ✅ Service layer foods.ts con CRUD completo
-3. ✅ React Query hooks (useFoods, useCategories, mutations)
-4. ✅ FoodCard component con color coding scadenze
-5. ✅ FoodForm con validation (zod + react-hook-form)
-6. ✅ Dashboard con grid, dialogs, stats real-time
-7. ✅ Optimistic updates e toast notifications
-8. ✅ Bug fixes: quantity_unit enum, date validation, form preservation
+1. ✅ Image upload system completo con Supabase Storage
+2. ✅ Private bucket con signed URLs per sicurezza
+3. ✅ Upload on submit pattern (eliminati orphan files)
+4. ✅ ImageUpload component riusabile
+5. ✅ Image compression e optimization (max 800px, ~1MB)
+6. ✅ useSignedUrl hook con caching
+7. ✅ FoodCard con image display via signed URLs
+8. ✅ Delete cascade per pulizia automatica storage
 
 **Prossimi Step Immediati**:
-1. 🔄 Upload immagini a Supabase Storage
-2. 🔄 Filtri per categoria, storage location, status
-3. 🔄 Search bar con debounce
-4. 🔄 Ordinamenti multipli
+1. 🔄 Filtri per categoria, storage location, status
+2. 🔄 Search bar con debounce
+3. 🔄 Ordinamenti multipli
+4. 🔄 Test completo su device reali
 5. 🔄 Deploy MVP su Netlify
 
 ---

@@ -46,6 +46,13 @@ export const foodFormSchema = z.object({
     .max(500, 'Le note non possono superare 500 caratteri')
     .nullable()
     .optional(),
+  image_url: z
+    .union([
+      z.string().min(1, 'Path immagine non valido'),
+      z.instanceof(File),
+    ])
+    .nullable()
+    .optional(),
 })
 
 // Export inferred TypeScript types
