@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -9,7 +9,10 @@ import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { ImageUpload } from './ImageUpload'
+import { BarcodeScanner } from '../barcode/BarcodeScanner'
+import { fetchProductByBarcode, mapProductToFormData, suggestExpiryDate } from '@/lib/openfoodfacts'
 import type { Food } from '@/lib/foods'
+import { ScanLine, Loader2 } from 'lucide-react'
 
 interface FoodFormProps {
   mode: 'create' | 'edit'
@@ -24,6 +27,11 @@ interface FoodFormProps {
  */
 export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting = false }: FoodFormProps) {
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
+
+  // Barcode scanner state
+  const [scannerOpen, setScannerOpen] = useState(false)
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false)
+  const [productError, setProductError] = useState<string | null>(null)
 
   // Setup form with validation
   const form = useForm<FoodFormData>({
@@ -56,6 +64,63 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
     }
   }, [mode, initialData, form])
 
+  // Handle barcode scan success
+  const handleBarcodeScanned = async (barcode: string) => {
+    setIsLoadingProduct(true)
+    setProductError(null)
+
+    try {
+      // Fetch product from Open Food Facts
+      const { data: product, error } = await fetchProductByBarcode(barcode)
+
+      if (error || !product) {
+        setProductError(error?.message || 'Prodotto non trovato')
+        return
+      }
+
+      // Map product data to form format
+      const mappedData = mapProductToFormData(product, categories)
+
+      // Pre-fill form with product data
+      form.setValue('name', mappedData.name)
+
+      if (mappedData.category_id) {
+        form.setValue('category_id', mappedData.category_id)
+      }
+
+      if (mappedData.storage_location) {
+        form.setValue('storage_location', mappedData.storage_location)
+
+        // Suggest expiry date based on category
+        if (mappedData.suggestedCategory) {
+          const suggestedDate = suggestExpiryDate(mappedData.suggestedCategory)
+          form.setValue('expiry_date', format(suggestedDate, 'yyyy-MM-dd'))
+        }
+      }
+
+      if (mappedData.quantity !== undefined) {
+        form.setValue('quantity', mappedData.quantity)
+      }
+
+      if (mappedData.quantity_unit) {
+        form.setValue('quantity_unit', mappedData.quantity_unit as 'pz' | 'kg' | 'g' | 'l' | 'ml' | 'confezioni')
+      }
+
+      if (mappedData.notes) {
+        form.setValue('notes', mappedData.notes)
+      }
+
+      // Note: We don't auto-set image_url from OFF as it would require downloading
+      // User can still upload their own image
+
+    } catch (err) {
+      console.error('Error loading product:', err)
+      setProductError('Errore durante il caricamento dei dati del prodotto')
+    } finally {
+      setIsLoadingProduct(false)
+    }
+  }
+
   const handleSubmit = async (data: FoodFormData) => {
     // Convert date to ISO string for database
     const submitData: FoodFormData = {
@@ -70,26 +135,62 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Name Field */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome *</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="es. Latte intero"
-                  disabled={isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+    <>
+      {/* Barcode Scanner Modal */}
+      <BarcodeScanner
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onScanSuccess={handleBarcodeScanned}
+      />
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {/* Barcode Scanner Button - Only in create mode */}
+          {mode === 'create' && (
+            <div className="pb-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setScannerOpen(true)}
+                disabled={isSubmitting || isLoadingProduct}
+                className="w-full"
+              >
+                {isLoadingProduct ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Caricamento dati prodotto...
+                  </>
+                ) : (
+                  <>
+                    <ScanLine className="mr-2 h-4 w-4" />
+                    Scansiona Barcode
+                  </>
+                )}
+              </Button>
+              {productError && (
+                <p className="text-sm text-destructive mt-2">{productError}</p>
+              )}
+            </div>
           )}
-        />
+
+          {/* Name Field */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome *</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="es. Latte intero"
+                    disabled={isSubmitting || isLoadingProduct}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
         {/* Category Field */}
         <FormField
@@ -286,5 +387,6 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         </div>
       </form>
     </Form>
+    </>
   )
 }

@@ -262,48 +262,92 @@ npm install -D @types/node
 
 ---
 
-## 📷 Fase 2: Barcode Scanner (Settimana 3)
+## 📷 Fase 2: Barcode Scanner (Settimana 3) 🔄 IN CORSO
 
 **Obiettivo**: Scansione barcode funzionante con pre-compilazione dati
 
 ### Week 3: Barcode Integration
 
-#### Tasks (Giorno 1-2)
-- [ ] Setup html5-qrcode
-- [ ] Implementare useBarcodeScanner hook
-- [ ] Gestione permessi camera iOS/Android
-- [ ] UI scanner modal con feedback
+#### Tasks (Giorno 1-2) ✅ COMPLETATO
+- [x] ✅ Setup html5-qrcode
+- [x] ✅ Implementare useBarcodeScanner hook
+- [x] ✅ Gestione permessi camera iOS/Android
+- [x] ✅ UI scanner modal con feedback
 
-#### Tasks (Giorno 3-4)
-- [ ] Integrare Open Food Facts API
-- [ ] Creare service client per API
-- [ ] Implementare category mapping logic
-- [ ] Sistema suggerimenti durata/storage
+**Implementazione Completa**:
+- ✅ html5-qrcode library installata e configurata
+- ✅ useBarcodeScanner custom hook con state management
+- ✅ Camera permissions handled automaticamente dal browser
+- ✅ BarcodeScanner modal component con Dialog UI
+- ✅ Scanner states: idle, scanning, processing, success, error
+- ✅ Visual feedback durante scan (loading, success overlay, error messages)
+- ✅ Auto-start scanning on modal open
+- ✅ Cleanup automatico su unmount
 
-#### Tasks (Giorno 5-6)
-- [ ] Integrazione scanner nel FoodForm
-- [ ] Pre-compilazione form con dati barcode
-- [ ] Fallback a inserimento manuale
-- [ ] Handle prodotti non trovati
+#### Tasks (Giorno 3-4) ✅ COMPLETATO
+- [x] ✅ Integrare Open Food Facts API
+- [x] ✅ Creare service client per API
+- [x] ✅ Implementare category mapping logic
+- [x] ✅ Sistema suggerimenti durata/storage
 
-#### Tasks (Giorno 7)
+**Implementazione Completa**:
+- ✅ Open Food Facts API client (src/lib/openfoodfacts.ts)
+- ✅ TypeScript types per OFF API responses
+- ✅ fetchProductByBarcode() function con error handling
+- ✅ mapProductToFormData() con intelligent mapping
+- ✅ Category mapping: 10 categorie OFF → 11 categorie italiane
+- ✅ Storage location suggestions (fridge, freezer, pantry)
+- ✅ suggestExpiryDate() basato su shelf-life per categoria
+- ✅ Quantity parsing da stringhe OFF (es. "500g" → quantity: 500, unit: g)
+
+**Category Mappings Implemented**:
+- Latticini: 7 giorni shelf-life, fridge
+- Carni: 3 giorni, fridge
+- Pesce: 2 giorni, fridge
+- Frutta: 7 giorni, fridge
+- Verdure: 5 giorni, fridge
+- Cereali: 30 giorni, pantry
+- Bevande: 14 giorni, fridge
+- Dolci: 60 giorni, pantry
+- Condimenti: 90 giorni, pantry
+- Surgelati: 90 giorni, freezer
+
+#### Tasks (Giorno 5-6) ✅ COMPLETATO
+- [x] ✅ Integrazione scanner nel FoodForm
+- [x] ✅ Pre-compilazione form con dati barcode
+- [x] ✅ Fallback a inserimento manuale
+- [x] ✅ Handle prodotti non trovati
+
+**Implementazione Completa**:
+- ✅ "Scansiona Barcode" button in FoodForm (create mode only)
+- ✅ BarcodeScanner modal integration
+- ✅ handleBarcodeScanned() con fetch + mapping automatico
+- ✅ Auto-fill form fields: nome, categoria, storage, scadenza, quantità, note
+- ✅ Loading states durante fetch OFF API
+- ✅ Error handling con messaggi user-friendly
+- ✅ Graceful fallback: prodotto non trovato → inserimento manuale
+- ✅ Product error display con feedback chiaro
+
+#### Tasks (Giorno 7) 🚧 DA TESTARE
 - [ ] Testing su device reali (iOS + Android)
 - [ ] Ottimizzazioni performance scanner
 - [ ] UX polish e error states
 - [ ] Documentazione utilizzo
 
 ### Deliverables Fase 2
-✅ **Barcode Scanning Attivo**:
-- Scanner camera funzionante
-- Riconoscimento prodotti italiani
-- Form pre-compilato automaticamente
-- Graceful fallback per prodotti sconosciuti
+🚧 **Barcode Scanning Implementation Ready**:
+- ✅ Scanner camera implementation completo
+- ✅ Open Food Facts API integration
+- ✅ Form pre-fill automatico
+- ✅ Category mapping intelligente
+- 🚧 Testing su device reali pending
+- 🚧 Performance validation pending
 
 ### Definition of Done
-- [ ] Scansiono barcode e vedo dati prodotto
-- [ ] Funziona su iPhone e Android
+- [x] ✅ Scansiono barcode (implementation ready)
+- [ ] Funziona su iPhone e Android (da testare su production)
 - [ ] Performance accettabile (<3s riconoscimento)
-- [ ] UI chiara e intuitiva
+- [ ] UI chiara e intuitiva (da validare su device reali)
 
 ---
 
@@ -618,12 +662,13 @@ Week 2: Polish & Validation
 ## ✅ Current Status
 
 **🎉 FASE 1 COMPLETATA! MVP DEPLOYED & TESTED 🎉**
+**📷 FASE 2 IN CORSO! BARCODE SCANNER IMPLEMENTATION 🚧**
 
-**Fase Attuale**: Fase 1 - MVP Core ✅ COMPLETATA
-**Progress**: 100% ✅
+**Fase Attuale**: Fase 2 - Barcode Scanner 🔄 IN CORSO
+**Progress Fase 2**: 85% (6/7 tasks completati, testing pending)
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `2c2a596` (10/01/2026)
-**Next Milestone**: Fase 2 - Barcode Scanner
+**Ultimo Commit**: Pending deploy - feat: barcode scanner implementation
+**Next Milestone**: Testing su device reali (iOS + Android)
 
 ---
 
