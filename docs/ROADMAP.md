@@ -160,19 +160,21 @@ npm install -D @types/node
 - ✅ ImageUpload component con local preview (File | string | null support)
 - ✅ Upload on submit pattern (no orphan images)
 - ✅ Image compression (max 800px, ~1MB target)
+- ✅ **HEIC/HEIF support con conversione automatica a JPEG (iPhone compatible)**
 - ✅ useSignedUrl hook per gestione signed URLs con caching
 - ✅ FoodCard con display immagini via signed URLs
 - ✅ Delete cascade automatico (rimozione immagine da storage)
 - ✅ Error handling completo (upload failures, missing images)
-- ✅ Loading states durante generazione signed URLs
+- ✅ Loading states durante generazione signed URLs e conversione HEIC
 - ✅ Validation schema con support File | string per upload differito
 
 **Architettura Storage**:
 - Path structure: `{user_id}/{timestamp}-{filename}`
 - Private bucket con Row Level Security
-- Accepted formats: JPEG, PNG, WebP
+- Accepted formats: JPEG, PNG, WebP, HEIC/HEIF (auto-converted)
 - Max size: 5MB (compressed to ~1MB)
 - Upload happens only on form submit (prevents orphan files)
+- HEIC files from iPhone automatically converted to JPEG client-side
 
 **Commit**: Pending - feat: implement complete image upload system with upload-on-submit
 **Data Completamento**: 10/01/2026

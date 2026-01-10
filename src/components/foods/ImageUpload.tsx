@@ -2,6 +2,7 @@ import { useState, useRef, ChangeEvent, useEffect } from 'react'
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
+import heic2any from 'heic2any'
 
 interface ImageUploadProps {
   /** Current image: File (new upload), string (existing path), or null */
@@ -15,10 +16,12 @@ interface ImageUploadProps {
 /**
  * ImageUpload Component - Select food images with local preview
  * Upload happens on form submit, not immediately
+ * Supports HEIC/HEIF (iPhone) with automatic conversion to JPEG
  */
 export function ImageUpload({ value, onChange, disabled = false }: ImageUploadProps) {
   const [localPreview, setLocalPreview] = useState<string | null>(null) // Local file preview (FileReader)
   const [error, setError] = useState<string | null>(null)
+  const [isConverting, setIsConverting] = useState(false) // HEIC conversion in progress
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Generate signed URL for existing image path (edit mode with string path)
@@ -47,16 +50,51 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
   const displayPreview = localPreview || signedUrl
   const isLoadingPreview = !localPreview && signedUrlLoading && !!existingImagePath
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    let file = e.target.files?.[0]
     if (!file) return
 
     setError(null)
+    setIsConverting(false)
 
-    // Validate file type
+    // Check if file is HEIC/HEIF (iPhone format) and convert to JPEG
+    const isHEIC =
+      file.type === 'image/heic' ||
+      file.type === 'image/heif' ||
+      file.name.toLowerCase().endsWith('.heic') ||
+      file.name.toLowerCase().endsWith('.heif')
+
+    if (isHEIC) {
+      try {
+        setIsConverting(true)
+        const convertedBlob = await heic2any({
+          blob: file,
+          toType: 'image/jpeg',
+          quality: 0.9,
+        })
+
+        // heic2any can return Blob or Blob[], handle both cases
+        const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob
+
+        // Create new File from converted Blob
+        file = new File(
+          [blob],
+          file.name.replace(/\.heic$/i, '.jpg').replace(/\.heif$/i, '.jpg'),
+          { type: 'image/jpeg' }
+        )
+        setIsConverting(false)
+      } catch (conversionError) {
+        console.error('HEIC conversion error:', conversionError)
+        setError('Errore nella conversione dell\'immagine HEIC. Riprova con un\'altra foto.')
+        setIsConverting(false)
+        return
+      }
+    }
+
+    // Validate file type (after potential HEIC conversion)
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
-      setError('Tipo di file non valido. Usa JPG, PNG o WebP.')
+      setError('Tipo di file non valido. Usa JPG, PNG, WebP o HEIC (iPhone).')
       return
     }
 
@@ -87,7 +125,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
   return (
     <div className="space-y-2">
       {/* Preview or Upload Button */}
-      {displayPreview || isLoadingPreview ? (
+      {displayPreview || isLoadingPreview || isConverting ? (
         <div className="relative group">
           {/* Image Preview */}
           <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
@@ -96,6 +134,13 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
                 <div className="text-white text-center">
                   <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
                   <p className="text-sm">Caricamento immagine...</p>
+                </div>
+              </div>
+            ) : isConverting ? (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <div className="text-white text-center">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                  <p className="text-sm">Conversione immagine HEIC...</p>
                 </div>
               </div>
             ) : signedUrlError ? (
@@ -113,7 +158,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
           </div>
 
           {/* Remove Button */}
-          {!disabled && !isLoadingPreview && (
+          {!disabled && !isLoadingPreview && !isConverting && (
             <Button
               type="button"
               variant="destructive"
@@ -134,7 +179,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             variant="outline"
             className="w-full h-48 flex flex-col items-center justify-center gap-2 border-dashed border-2"
             onClick={handleButtonClick}
-            disabled={disabled}
+            disabled={disabled || isConverting}
           >
             <ImageIcon className="w-8 h-8 text-gray-400" />
             <div className="text-center">
@@ -143,7 +188,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
                 Seleziona immagine
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                JPG, PNG o WebP (max 5MB)
+                JPG, PNG, WebP o HEIC (max 5MB)
               </p>
             </div>
           </Button>
@@ -152,10 +197,10 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif"
             onChange={handleFileSelect}
             className="hidden"
-            disabled={disabled}
+            disabled={disabled || isConverting}
           />
         </div>
       )}
@@ -168,9 +213,10 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
       )}
 
       {/* Help Text */}
-      {!displayPreview && !error && !isLoadingPreview && (
+      {!displayPreview && !error && !isLoadingPreview && !isConverting && (
         <p className="text-xs text-gray-500">
-          L'immagine verrà automaticamente compressa e ridimensionata
+          L'immagine verrà automaticamente compressa e ridimensionata.
+          Le foto iPhone (HEIC) vengono convertite in JPEG.
         </p>
       )}
     </div>
