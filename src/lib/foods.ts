@@ -28,6 +28,18 @@ export interface CategoriesResponse {
 }
 
 /**
+ * Filter parameters for getFoods query
+ */
+export interface FilterParams {
+  category_id?: string
+  storage_location?: 'fridge' | 'freezer' | 'pantry'
+  status?: 'all' | 'active' | 'expired' | 'expiring_soon'
+  search?: string
+  sortBy?: 'expiry_date' | 'name' | 'created_at' | 'category_id'
+  sortOrder?: 'asc' | 'desc'
+}
+
+/**
  * Fetch all categories
  */
 export async function getCategories(): Promise<CategoriesResponse> {
@@ -55,15 +67,56 @@ export async function getCategories(): Promise<CategoriesResponse> {
 
 /**
  * Fetch all foods for the current user (filtered by RLS)
- * Includes category information via join
+ * Supports filtering, searching, and sorting
  */
-export async function getFoods(): Promise<FoodsResponse> {
+export async function getFoods(filters?: FilterParams): Promise<FoodsResponse> {
   try {
-    const { data, error } = await supabase
+    // Start building the query
+    let query = supabase
       .from('foods')
       .select('*')
       .is('deleted_at', null) // Exclude soft-deleted items
-      .order('expiry_date', { ascending: true })
+
+    // Apply category filter
+    if (filters?.category_id) {
+      query = query.eq('category_id', filters.category_id)
+    }
+
+    // Apply storage location filter
+    if (filters?.storage_location) {
+      query = query.eq('storage_location', filters.storage_location)
+    }
+
+    // Apply search filter (case-insensitive partial match)
+    if (filters?.search && filters.search.trim()) {
+      query = query.ilike('name', `%${filters.search.trim()}%`)
+    }
+
+    // Apply status filter based on expiry date
+    if (filters?.status && filters.status !== 'all') {
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+
+      if (filters.status === 'expired') {
+        // Expiry date is in the past
+        query = query.lt('expiry_date', today)
+      } else if (filters.status === 'expiring_soon') {
+        // Expiry date is within the next 7 days
+        const sevenDaysFromNow = new Date()
+        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
+        const futureDate = sevenDaysFromNow.toISOString().split('T')[0]
+        query = query.gte('expiry_date', today).lte('expiry_date', futureDate)
+      } else if (filters.status === 'active') {
+        // Expiry date is in the future (not expired)
+        query = query.gte('expiry_date', today)
+      }
+    }
+
+    // Apply sorting
+    const sortBy = filters?.sortBy || 'expiry_date'
+    const sortOrder = filters?.sortOrder || 'asc'
+    query = query.order(sortBy, { ascending: sortOrder === 'asc' })
+
+    const { data, error } = await query
 
     if (error) {
       throw new Error(error.message)

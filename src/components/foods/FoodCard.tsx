@@ -16,10 +16,16 @@ interface FoodCardProps {
 
 /**
  * Get expiry status and color based on days until expiry
+ * FIX: Normalize dates to midnight to avoid time-of-day issues
  */
 function getExpiryStatus(expiryDate: string) {
+  // Normalize both dates to midnight to get accurate calendar day difference
   const now = new Date()
+  now.setHours(0, 0, 0, 0)
+
   const expiry = new Date(expiryDate)
+  expiry.setHours(0, 0, 0, 0)
+
   const daysUntilExpiry = differenceInDays(expiry, now)
 
   let status: 'expired' | 'critical' | 'warning' | 'good'
@@ -77,9 +83,16 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
     <Card className={cn('hover:shadow-md transition-shadow', daysUntilExpiry <= 3 && 'border-orange-300')}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-lg font-semibold text-slate-900 line-clamp-2">
-            {food.name}
-          </CardTitle>
+          <div className="flex-1">
+            <CardTitle className="text-lg font-semibold text-slate-900 line-clamp-2">
+              {food.name}
+              {food.quantity && (
+                <span className="font-normal text-slate-600 ml-1">
+                  ({food.quantity} {food.quantity_unit || 'pz'})
+                </span>
+              )}
+            </CardTitle>
+          </div>
           <div className={cn('px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap', colorClasses)}>
             {badgeText}
           </div>
@@ -113,18 +126,18 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
           </div>
         )}
 
-        {/* Category */}
-        {category && (
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <Package className="h-4 w-4 text-slate-400" />
-            <span>{category.name_it}</span>
+        {/* Category + Storage Location (same row with space between) */}
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          {category && (
+            <div className="flex items-center gap-1.5">
+              <Package className="h-4 w-4 text-slate-400" />
+              <span>{category.name_it}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4 text-slate-400" />
+            <span>{getStorageLabel(food.storage_location)}</span>
           </div>
-        )}
-
-        {/* Storage Location */}
-        <div className="flex items-center gap-2 text-sm text-slate-600">
-          <MapPin className="h-4 w-4 text-slate-400" />
-          <span>{getStorageLabel(food.storage_location)}</span>
         </div>
 
         {/* Expiry Date */}
@@ -133,16 +146,9 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
           <span>Scadenza: {formattedExpiryDate}</span>
         </div>
 
-        {/* Quantity */}
-        {food.quantity && (
-          <div className="text-sm text-slate-600">
-            Quantità: {food.quantity} {food.quantity_unit || ''}
-          </div>
-        )}
-
-        {/* Notes */}
+        {/* Notes - Highlighted as user content */}
         {food.notes && (
-          <div className="text-sm text-slate-500 line-clamp-2 mt-2">
+          <div className="text-sm text-slate-700 line-clamp-2 mt-2 bg-amber-50 rounded-md px-3 py-2">
             {food.notes}
           </div>
         )}

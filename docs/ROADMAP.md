@@ -179,33 +179,60 @@ npm install -D @types/node
 **Commit**: Pending - feat: implement complete image upload system with upload-on-submit
 **Data Completamento**: 10/01/2026
 
-#### Tasks (Giorno 4-5)
-- [ ] Filtri base (categoria, storage location, status)
-- [ ] Search bar con debounce
-- [ ] Ordinamenti (scadenza, alfabetico, categoria)
-- [ ] Persistenza filtri in URL query params
+#### Tasks (Giorno 4-5) ✅ COMPLETATO
+- [x] ✅ Filtri base (categoria, storage location, status)
+- [x] ✅ Search bar con debounce (300ms)
+- [x] ✅ Ordinamenti (scadenza, alfabetico, categoria, data creazione)
+- [x] ✅ Persistenza filtri in URL query params
 
-#### Tasks (Giorno 6-7)
-- [ ] Test manuale completo su device reali
+**Implementazione Completa**:
+- ✅ Server-side filtering con Supabase query builder
+- ✅ FilterParams interface con tutti i campi (category_id, storage_location, status, search, sortBy, sortOrder)
+- ✅ useDebounce custom hook per ricerca ottimizzata
+- ✅ FoodFilters component collassabile (mobile-first)
+- ✅ URL query params persistence (react-router useSearchParams)
+- ✅ Stats cards cliccabili per filtri rapidi
+- ✅ Empty states differenziati (no foods vs no results)
+- ✅ Loading states con spinner animato
+- ✅ Active filters counter badge
+- ✅ Clear filters functionality
+
+**Mobile-First Optimizations**:
+- ✅ Filtri collassabili di default su mobile
+- ✅ Stats cards compatte in griglia 3 colonne
+- ✅ Floating Action Button (FAB) verde bottom-right
+- ✅ FoodCard layout ottimizzato (quantità inline, categoria+posizione stesso rigo)
+- ✅ Note con sfondo ambra per distinguere contenuto utente
+- ✅ Spacing ridotto per meno scrolling
+
+**Bug Fixes**:
+- ✅ Calcolo giorni scadenza normalizzato a midnight (fix: ricotta mostrava 3 giorni invece di 4)
+
+**Commit**: Pending - feat: implement complete filters and search system with mobile-first layout
+**Data Completamento**: 10/01/2026
+
+#### Tasks (Giorno 6-7) 🔄 PROSSIMO
+- [ ] Deploy MVP su Netlify (PRIORITÀ)
+- [ ] Test manuale completo su device reali (via URL pubblico)
 - [ ] Bug fixes da testing
-- [ ] Performance optimization
-- [ ] Deploy su Netlify
+- [ ] Performance optimization (se necessario)
 
 ### Deliverables Fase 1
 **MVP Funzionante**:
 - ✅ Login/Signup working
 - ✅ CRUD completo alimenti
-- [ ] Upload immagini
-- [ ] Filtri e ricerca base
-- ✅ UI responsive
-- [ ] Deployed su Netlify
+- ✅ Upload immagini con HEIC support
+- ✅ Filtri e ricerca completi
+- ✅ UI responsive mobile-first
+- [ ] Deployed su Netlify (prossimo step)
 
 ### Definition of Done
 - ✅ Posso creare/modificare/eliminare alimenti
 - ✅ Vedo giorni alla scadenza con colori
-- [ ] Filtri funzionano correttamente
+- ✅ Filtri funzionano correttamente
 - ✅ App responsive su mobile
 - ✅ Nessun bug bloccante
+- [ ] Testato su device reali
 
 ---
 
@@ -565,26 +592,41 @@ Week 2: Polish & Validation
 ## ✅ Current Status
 
 **Fase Attuale**: Fase 1 - MVP Core (Week 2: UI & Features)
-**Progress**: 65% (Week 1 ✅ + Image Upload ✅)
+**Progress**: 95% (Pronto per Deploy!)
 **Ultimo Commit**: Pending (10/01/2026)
-**Next Action**: Filtri/Ricerca + Deploy MVP
+**Next Action**: Deploy su Netlify + Test su device reali
 
-**Completato nella sessione corrente**:
+**Completato nella sessione 10/01/2026**:
+
+**Mattina** (Image Upload System):
 1. ✅ Image upload system completo con Supabase Storage
 2. ✅ Private bucket con signed URLs per sicurezza
 3. ✅ Upload on submit pattern (eliminati orphan files)
 4. ✅ ImageUpload component riusabile
 5. ✅ Image compression e optimization (max 800px, ~1MB)
-6. ✅ useSignedUrl hook con caching
-7. ✅ FoodCard con image display via signed URLs
-8. ✅ Delete cascade per pulizia automatica storage
+6. ✅ HEIC/HEIF support per foto iPhone
+7. ✅ useSignedUrl hook con caching
+8. ✅ FoodCard con image display via signed URLs
+9. ✅ Delete cascade per pulizia automatica storage
+
+**Pomeriggio** (Filters + Mobile-First Optimizations):
+1. ✅ Sistema filtri e ricerca completo con server-side filtering
+2. ✅ FoodFilters component collassabile per mobile
+3. ✅ Debounced search (300ms) con useDebounce hook
+4. ✅ URL query params persistence
+5. ✅ Stats cards cliccabili per quick filters
+6. ✅ Layout mobile-first ottimizzato:
+   - Stats cards compatte (griglia 3 colonne)
+   - Floating Action Button (FAB)
+   - FoodCard layout ottimizzato
+   - Note con sfondo ambra
+7. ✅ Bug fix: calcolo giorni scadenza normalizzato
 
 **Prossimi Step Immediati**:
-1. 🔄 Filtri per categoria, storage location, status
-2. 🔄 Search bar con debounce
-3. 🔄 Ordinamenti multipli
-4. 🔄 Test completo su device reali
-5. 🔄 Deploy MVP su Netlify
+1. 🎯 **Deploy MVP su Netlify** (PRIORITÀ)
+2. 📱 Test completo su device reali (iPhone/Android)
+3. 🐛 Bug fixes da testing
+4. ⚡ Performance optimization (se necessario)
 
 ---
 

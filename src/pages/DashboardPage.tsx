@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react'
-import { Plus, ShoppingBasket, CalendarDays, AlertTriangle } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
+import { useDebounce } from '../hooks/useDebounce'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
+import { FoodFilters } from '../components/foods/FoodFilters'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
@@ -23,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../components/ui/alert-dialog'
-import type { Food, FoodInsert, FoodUpdate } from '@/lib/foods'
+import type { Food, FoodInsert, FoodUpdate, FilterParams } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { differenceInDays } from 'date-fns'
 
@@ -32,9 +35,31 @@ import { differenceInDays } from 'date-fns'
  */
 export function DashboardPage() {
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Fetch data
-  const { data: foods = [], isLoading: foodsLoading } = useFoods()
+  // Parse filters from URL query params
+  const filters = useMemo<FilterParams>(() => {
+    return {
+      category_id: searchParams.get('category') || undefined,
+      storage_location: (searchParams.get('storage') as FilterParams['storage_location']) || undefined,
+      status: (searchParams.get('status') as FilterParams['status']) || 'all',
+      search: searchParams.get('search') || undefined,
+      sortBy: (searchParams.get('sortBy') as FilterParams['sortBy']) || 'expiry_date',
+      sortOrder: (searchParams.get('sortOrder') as FilterParams['sortOrder']) || 'asc',
+    }
+  }, [searchParams])
+
+  // Debounce search to avoid excessive API calls
+  const debouncedSearch = useDebounce(filters.search, 300)
+  const debouncedFilters = useMemo<FilterParams>(() => {
+    return {
+      ...filters,
+      search: debouncedSearch,
+    }
+  }, [filters, debouncedSearch])
+
+  // Fetch data with filters
+  const { data: foods = [], isLoading: foodsLoading } = useFoods(debouncedFilters)
   const { data: categories = [] } = useCategories()
 
   // Mutations
@@ -46,6 +71,57 @@ export function DashboardPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingFood, setEditingFood] = useState<Food | null>(null)
   const [deletingFood, setDeletingFood] = useState<Food | null>(null)
+
+  // Filters UI state - collapsed by default on mobile
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false)
+
+  // Calculate active filters count (excluding default values)
+  const activeFiltersCount = useMemo(() => {
+    let count = 0
+    if (filters.category_id) count++
+    if (filters.storage_location) count++
+    if (filters.status && filters.status !== 'all') count++
+    if (filters.search) count++
+    // Don't count sort as active filter since it always has a value
+    return count
+  }, [filters])
+
+  // Handlers for filter changes
+  const handleFiltersChange = (newFilters: FilterParams) => {
+    const params = new URLSearchParams()
+
+    if (newFilters.category_id) params.set('category', newFilters.category_id)
+    if (newFilters.storage_location) params.set('storage', newFilters.storage_location)
+    if (newFilters.status && newFilters.status !== 'all') params.set('status', newFilters.status)
+    if (newFilters.search) params.set('search', newFilters.search)
+    if (newFilters.sortBy) params.set('sortBy', newFilters.sortBy)
+    if (newFilters.sortOrder) params.set('sortOrder', newFilters.sortOrder)
+
+    setSearchParams(params)
+  }
+
+  const handleClearFilters = () => {
+    setSearchParams({})
+  }
+
+  const handleToggleFilters = () => {
+    setIsFiltersExpanded(!isFiltersExpanded)
+  }
+
+  // Quick filter handlers for stats cards
+  const handleQuickFilter = (status: 'all' | 'expiring_soon' | 'expired') => {
+    if (status === 'all') {
+      // Clear all filters to show everything
+      setSearchParams({})
+    } else {
+      // Apply status filter
+      const params = new URLSearchParams()
+      params.set('status', status)
+      setSearchParams(params)
+    }
+    // Scroll to foods section on mobile
+    window.scrollTo({ top: 400, behavior: 'smooth' })
+  }
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -151,99 +227,141 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
+    <div className="space-y-6 pb-20">
+      {/* Welcome Section - Compact on Mobile */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-            Benvenuto, {user?.email?.split('@')[0] || 'Utente'}!
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            Ciao, {user?.email?.split('@')[0] || 'Utente'}!
           </h2>
-          <p className="text-slate-600 mt-2">
-            Gestisci le scadenze dei tuoi alimenti e riduci gli sprechi.
+          <p className="text-sm sm:text-base text-slate-600 mt-1">
+            Gestisci le scadenze e riduci gli sprechi.
           </p>
         </div>
-        <Button onClick={() => setIsAddDialogOpen(true)} size="lg">
+        {/* Desktop Button */}
+        <Button
+          onClick={() => setIsAddDialogOpen(true)}
+          size="lg"
+          className="hidden sm:flex"
+        >
           <Plus className="h-5 w-5 mr-2" />
-          Aggiungi Alimento
+          Alimento
         </Button>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alimenti Totali</CardTitle>
-            <ShoppingBasket className="h-4 w-4 text-slate-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-slate-600 mt-1">
-              {stats.total === 0 ? 'Nessun alimento ancora' : 'Nella tua dispensa'}
-            </p>
+      {/* Quick Stats - Compact Mobile Grid */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-md ${
+            !filters.status || filters.status === 'all' ? 'ring-2 ring-blue-500' : ''
+          }`}
+          onClick={() => handleQuickFilter('all')}
+        >
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <ShoppingBasket className="h-6 w-6 text-slate-600 mb-2" />
+            <div className="text-2xl font-bold mb-1">{stats.total}</div>
+            <p className="text-xs text-slate-600 leading-tight">Totali</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Scadenza</CardTitle>
-            <CalendarDays className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.expiringSoon}</div>
-            <p className="text-xs text-slate-600 mt-1">
-              Prossimi 7 giorni
-            </p>
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-md ${
+            filters.status === 'expiring_soon' ? 'ring-2 ring-orange-500' : ''
+          }`}
+          onClick={() => handleQuickFilter('expiring_soon')}
+        >
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <CalendarDays className="h-6 w-6 text-orange-600 mb-2" />
+            <div className="text-2xl font-bold mb-1">{stats.expiringSoon}</div>
+            <p className="text-xs text-slate-600 leading-tight">In scadenza</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Scaduti</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.expired}</div>
-            <p className="text-xs text-slate-600 mt-1">
-              Da rimuovere
-            </p>
+        <Card
+          className={`cursor-pointer transition-all hover:shadow-md ${
+            filters.status === 'expired' ? 'ring-2 ring-red-500' : ''
+          }`}
+          onClick={() => handleQuickFilter('expired')}
+        >
+          <CardContent className="p-4 flex flex-col items-center text-center">
+            <AlertTriangle className="h-6 w-6 text-red-600 mb-2" />
+            <div className="text-2xl font-bold mb-1">{stats.expired}</div>
+            <p className="text-xs text-slate-600 leading-tight">Scaduti</p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Filters and Search - Collapsible */}
+      <FoodFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        categories={categories}
+        activeFiltersCount={activeFiltersCount}
+        onClearFilters={handleClearFilters}
+        isExpanded={isFiltersExpanded}
+        onToggle={handleToggleFilters}
+      />
 
       {/* Foods Grid */}
       {foodsLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="text-slate-600">Caricamento...</div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
+            <div className="text-slate-600">Caricamento alimenti...</div>
+          </div>
         </div>
       ) : foods.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>I Tuoi Alimenti</CardTitle>
-            <CardDescription>
-              Qui appariranno tutti gli alimenti che aggiungerai
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ShoppingBasket className="h-16 w-16 text-slate-300 mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                Nessun alimento ancora
-              </h3>
-              <p className="text-sm text-slate-600 max-w-sm mb-6">
-                Inizia ad aggiungere gli alimenti dalla tua dispensa, frigo o freezer
-                per tenere traccia delle scadenze.
-              </p>
-              <Button onClick={() => setIsAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Aggiungi il primo alimento
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        activeFiltersCount > 0 ? (
+          // Empty state for filtered results
+          <Card>
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center justify-center text-center">
+                <ShoppingBasket className="h-16 w-16 text-slate-300 mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  Nessun risultato trovato
+                </h3>
+                <p className="text-sm text-slate-600 max-w-sm mb-6">
+                  Non ci sono alimenti che corrispondono ai filtri selezionati.
+                  Prova a modificare i criteri di ricerca o cancella i filtri.
+                </p>
+                <Button onClick={handleClearFilters} variant="outline">
+                  <X className="h-4 w-4 mr-2" />
+                  Cancella tutti i filtri
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          // Empty state for no foods at all
+          <Card>
+            <CardHeader>
+              <CardTitle>I Tuoi Alimenti</CardTitle>
+              <CardDescription>
+                Qui appariranno tutti gli alimenti che aggiungerai
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <ShoppingBasket className="h-16 w-16 text-slate-300 mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  Nessun alimento ancora
+                </h3>
+                <p className="text-sm text-slate-600 max-w-sm mb-6">
+                  Inizia ad aggiungere gli alimenti dalla tua dispensa, frigo o freezer
+                  per tenere traccia delle scadenze.
+                </p>
+                <Button onClick={() => setIsAddDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Aggiungi il primo alimento
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )
       ) : (
         <div>
           <h3 className="text-xl font-semibold text-slate-900 mb-4">
-            I Tuoi Alimenti ({foods.length})
+            {activeFiltersCount > 0 ? `Risultati filtrati (${foods.length})` : `I Tuoi Alimenti (${foods.length})`}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {foods.map((food) => (
@@ -319,6 +437,15 @@ export function DashboardPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Floating Action Button (FAB) - Mobile Only */}
+      <button
+        onClick={() => setIsAddDialogOpen(true)}
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center sm:hidden"
+        aria-label="Aggiungi alimento"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
     </div>
   )
 }

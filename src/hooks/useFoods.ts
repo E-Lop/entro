@@ -12,6 +12,7 @@ import {
   type FoodInsert,
   type FoodUpdate,
   type Category,
+  type FilterParams,
 } from '@/lib/foods'
 
 /**
@@ -20,7 +21,7 @@ import {
 export const foodsKeys = {
   all: ['foods'] as const,
   lists: () => [...foodsKeys.all, 'list'] as const,
-  list: (filters?: string) => [...foodsKeys.lists(), { filters }] as const,
+  list: (filters?: FilterParams) => [...foodsKeys.lists(), filters || {}] as const,
   details: () => [...foodsKeys.all, 'detail'] as const,
   detail: (id: string) => [...foodsKeys.details(), id] as const,
 }
@@ -45,13 +46,13 @@ export function useCategories() {
 }
 
 /**
- * Fetch all foods for current user
+ * Fetch all foods for current user with optional filters
  */
-export function useFoods() {
+export function useFoods(filters?: FilterParams) {
   return useQuery({
-    queryKey: foodsKeys.lists(),
+    queryKey: foodsKeys.list(filters),
     queryFn: async () => {
-      const { foods, error } = await getFoods()
+      const { foods, error } = await getFoods(filters)
       if (error) throw error
       return foods
     },
