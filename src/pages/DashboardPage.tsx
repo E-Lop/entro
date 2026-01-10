@@ -124,14 +124,22 @@ export function DashboardPage() {
   }
 
   // Calculate stats
+  // FIX: Normalize dates to midnight to avoid time-of-day calculation issues
   const stats = useMemo(() => {
+    // Normalize now to midnight for accurate calendar day difference
     const now = new Date()
+    now.setHours(0, 0, 0, 0)
+
     const expiringSoon = foods.filter((food) => {
-      const daysUntilExpiry = differenceInDays(new Date(food.expiry_date), now)
+      const expiryDate = new Date(food.expiry_date)
+      expiryDate.setHours(0, 0, 0, 0)
+      const daysUntilExpiry = differenceInDays(expiryDate, now)
       return daysUntilExpiry >= 0 && daysUntilExpiry <= 7
     })
     const expired = foods.filter((food) => {
-      const daysUntilExpiry = differenceInDays(new Date(food.expiry_date), now)
+      const expiryDate = new Date(food.expiry_date)
+      expiryDate.setHours(0, 0, 0, 0)
+      const daysUntilExpiry = differenceInDays(expiryDate, now)
       return daysUntilExpiry < 0
     })
 
