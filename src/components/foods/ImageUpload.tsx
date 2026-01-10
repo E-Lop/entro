@@ -1,5 +1,5 @@
 import { useState, useRef, ChangeEvent, useEffect } from 'react'
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Upload, X, Image as ImageIcon, Loader2, Camera } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
 import heic2any from 'heic2any'
@@ -22,7 +22,8 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
   const [localPreview, setLocalPreview] = useState<string | null>(null) // Local file preview (FileReader)
   const [error, setError] = useState<string | null>(null)
   const [isConverting, setIsConverting] = useState(false) // HEIC conversion in progress
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null) // Gallery picker
+  const cameraInputRef = useRef<HTMLInputElement>(null) // Camera capture
 
   // Generate signed URL for existing image path (edit mode with string path)
   const existingImagePath = typeof value === 'string' ? value : null
@@ -113,13 +114,21 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
     setLocalPreview(null)
     onChange(null)
     setError(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    // Clear both inputs
+    if (galleryInputRef.current) {
+      galleryInputRef.current.value = ''
+    }
+    if (cameraInputRef.current) {
+      cameraInputRef.current.value = ''
     }
   }
 
-  const handleButtonClick = () => {
-    fileInputRef.current?.click()
+  const handleGalleryClick = () => {
+    galleryInputRef.current?.click()
+  }
+
+  const handleCameraClick = () => {
+    cameraInputRef.current?.click()
   }
 
   return (
@@ -172,30 +181,54 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          {/* Upload Button */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-48 flex flex-col items-center justify-center gap-2 border-dashed border-2"
-            onClick={handleButtonClick}
-            disabled={disabled || isConverting}
-          >
-            <ImageIcon className="w-8 h-8 text-gray-400" />
-            <div className="text-center">
-              <div className="flex items-center gap-2 text-sm font-medium">
-                <Upload className="w-4 h-4" />
-                Seleziona immagine
+        <div className="space-y-3">
+          {/* Two-button layout: Camera + Gallery */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Camera Button - Android 14+ compatible */}
+            <Button
+              type="button"
+              variant="outline"
+              className="h-32 flex flex-col items-center justify-center gap-2 border-dashed border-2"
+              onClick={handleCameraClick}
+              disabled={disabled || isConverting}
+            >
+              <Camera className="w-6 h-6 text-gray-400" />
+              <div className="text-center">
+                <div className="text-sm font-medium">Fotocamera</div>
+                <p className="text-xs text-gray-500 mt-1">Scatta foto</p>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                JPG, PNG, WebP o HEIC (max 5MB)
-              </p>
-            </div>
-          </Button>
+            </Button>
 
-          {/* Hidden File Input */}
+            {/* Gallery Button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="h-32 flex flex-col items-center justify-center gap-2 border-dashed border-2"
+              onClick={handleGalleryClick}
+              disabled={disabled || isConverting}
+            >
+              <Upload className="w-6 h-6 text-gray-400" />
+              <div className="text-center">
+                <div className="text-sm font-medium">Galleria</div>
+                <p className="text-xs text-gray-500 mt-1">Scegli foto</p>
+              </div>
+            </Button>
+          </div>
+
+          {/* Hidden File Inputs */}
+          {/* Camera input - uses capture to force camera on Android */}
           <input
-            ref={fileInputRef}
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileSelect}
+            className="hidden"
+            disabled={disabled || isConverting}
+          />
+          {/* Gallery input - no capture, allows file picker */}
+          <input
+            ref={galleryInputRef}
             type="file"
             accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif"
             onChange={handleFileSelect}
