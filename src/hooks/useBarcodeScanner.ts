@@ -45,26 +45,38 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
 
       console.log('Starting ZXing scanner...')
 
+      // Check if mediaDevices API is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('API fotocamera non disponibile su questo browser')
+      }
+
       // Get available video devices (cameras)
-      const devices = await BrowserMultiFormatReader.listVideoInputDevices()
-      console.log('Available cameras:', devices.length)
+      let devices: MediaDeviceInfo[] = []
+      try {
+        devices = await BrowserMultiFormatReader.listVideoInputDevices()
+        console.log('Available cameras:', devices.length)
+      } catch (err) {
+        console.warn('Error listing cameras:', err)
+        // Continue with undefined deviceId to use default camera
+      }
 
       // Try to find back camera on mobile, otherwise use first available
       let selectedDeviceId: string | undefined
-      const backCamera = devices.find(
-        (device: MediaDeviceInfo) =>
-          device.label.toLowerCase().includes('back') ||
-          device.label.toLowerCase().includes('rear') ||
-          device.label.toLowerCase().includes('environment')
-      )
 
-      selectedDeviceId = backCamera?.deviceId || devices[0]?.deviceId
-
-      if (!selectedDeviceId) {
-        throw new Error('Nessuna fotocamera disponibile')
+      if (devices.length > 0) {
+        const backCamera = devices.find(
+          (device: MediaDeviceInfo) =>
+            device.label.toLowerCase().includes('back') ||
+            device.label.toLowerCase().includes('rear') ||
+            device.label.toLowerCase().includes('environment')
+        )
+        selectedDeviceId = backCamera?.deviceId || devices[0]?.deviceId
+        console.log('Using camera:', selectedDeviceId)
+      } else {
+        // Fallback: use undefined to let browser choose default camera
+        console.log('Using default camera (no devices listed)')
+        selectedDeviceId = undefined
       }
-
-      console.log('Using camera:', selectedDeviceId)
 
       // Start continuous decoding from video device
       await reader.decodeFromVideoDevice(

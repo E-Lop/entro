@@ -10,7 +10,7 @@ import { Textarea } from '../ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { ImageUpload } from './ImageUpload'
 import { BarcodeScanner } from '../barcode/BarcodeScanner'
-import { fetchProductByBarcode, mapProductToFormData, suggestExpiryDate } from '@/lib/openfoodfacts'
+import { fetchProductByBarcode, mapProductToFormData } from '@/lib/openfoodfacts'
 import type { Food } from '@/lib/foods'
 import { ScanLine, Loader2 } from 'lucide-react'
 
@@ -39,7 +39,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
     defaultValues: {
       name: '',
       category_id: '',
-      expiry_date: format(new Date(), 'yyyy-MM-dd'),
+      expiry_date: '', // User must set expiry date manually
       storage_location: 'fridge',
       quantity: null,
       quantity_unit: null,
@@ -75,6 +75,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
       if (error || !product) {
         setProductError(error?.message || 'Prodotto non trovato')
+        setIsLoadingProduct(false) // MUST set false before return
         return
       }
 
@@ -90,13 +91,10 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
       if (mappedData.storage_location) {
         form.setValue('storage_location', mappedData.storage_location)
-
-        // Suggest expiry date based on category
-        if (mappedData.suggestedCategory) {
-          const suggestedDate = suggestExpiryDate(mappedData.suggestedCategory)
-          form.setValue('expiry_date', format(suggestedDate, 'yyyy-MM-dd'))
-        }
       }
+
+      // DO NOT auto-fill expiry date - user should set it manually
+      // Shelf-life suggestions vary too much by product condition
 
       if (mappedData.quantity !== undefined) {
         form.setValue('quantity', mappedData.quantity)
@@ -113,10 +111,10 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       // Note: We don't auto-set image_url from OFF as it would require downloading
       // User can still upload their own image
 
+      setIsLoadingProduct(false)
     } catch (err) {
       console.error('Error loading product:', err)
       setProductError('Errore durante il caricamento dei dati del prodotto')
-    } finally {
       setIsLoadingProduct(false)
     }
   }
