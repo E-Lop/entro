@@ -8,6 +8,7 @@ interface SwipeableCardProps {
   onEdit?: () => void
   onDelete?: () => void
   className?: string
+  showHintAnimation?: boolean
 }
 
 /**
@@ -16,15 +17,17 @@ interface SwipeableCardProps {
  * Features:
  * - Swipe right → Edit action (green background)
  * - Swipe left → Delete action (red background)
- * - Visual cues (subtle lines) only on mobile
+ * - Animated hint on first card (mini-swipe demonstration)
  * - Smooth animations with CSS transitions
  * - Works on iOS and Android
  */
-export function SwipeableCard({ children, onEdit, onDelete, className }: SwipeableCardProps) {
+export function SwipeableCard({ children, onEdit, onDelete, className, showHintAnimation = false }: SwipeableCardProps) {
   const [isMobile, setIsMobile] = useState(false)
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+
+  const HINT_ANIMATION_KEY = 'entro_hasSeenSwipeAnimation'
 
   // Detect if device is touch-enabled (mobile)
   useEffect(() => {
@@ -38,6 +41,35 @@ export function SwipeableCard({ children, onEdit, onDelete, className }: Swipeab
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Animated hint: mini-swipe demonstration on first card (first time only)
+  useEffect(() => {
+    if (!showHintAnimation || !isMobile) return
+
+    const hasSeenAnimation = localStorage.getItem(HINT_ANIMATION_KEY) === 'true'
+    if (hasSeenAnimation) return
+
+    // Wait 2 seconds after page load, then show hint animation
+    const timer = setTimeout(() => {
+      setIsAnimating(true)
+
+      // Swipe right 30px
+      setSwipeOffset(30)
+
+      // Hold for 400ms, then return to center
+      setTimeout(() => {
+        setSwipeOffset(0)
+
+        // Mark animation as shown after it completes
+        setTimeout(() => {
+          setIsAnimating(false)
+          localStorage.setItem(HINT_ANIMATION_KEY, 'true')
+        }, 300)
+      }, 400)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [showHintAnimation, isMobile])
 
   // Swipe handlers
   const handlers = useSwipeable({
@@ -145,18 +177,6 @@ export function SwipeableCard({ children, onEdit, onDelete, className }: Swipeab
           transition: isAnimating ? 'transform 0.2s ease-out' : 'none',
         }}
       >
-        {/* Visual cues - subtle lines on edges (only mobile) */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 opacity-40 pointer-events-none">
-          <div className="w-1 h-3 bg-slate-500 rounded-full" />
-          <div className="w-1 h-3 bg-slate-500 rounded-full" />
-          <div className="w-1 h-3 bg-slate-500 rounded-full" />
-        </div>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 opacity-40 pointer-events-none">
-          <div className="w-1 h-3 bg-slate-500 rounded-full" />
-          <div className="w-1 h-3 bg-slate-500 rounded-full" />
-          <div className="w-1 h-3 bg-slate-500 rounded-full" />
-        </div>
-
         {children}
       </div>
     </div>

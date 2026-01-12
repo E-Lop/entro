@@ -376,13 +376,14 @@ export function DashboardPage() {
             {activeFiltersCount > 0 ? `Risultati filtrati (${foods.length})` : `I Tuoi Alimenti (${foods.length})`}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {foods.map((food) => (
+            {foods.map((food, index) => (
               <FoodCard
                 key={food.id}
                 food={food}
                 category={getCategoryForFood(food)}
                 onEdit={handleEditClick}
                 onDelete={handleDeleteClick}
+                showHintAnimation={index === 0}
               />
             ))}
           </div>

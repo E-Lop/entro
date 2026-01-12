@@ -13,6 +13,7 @@ interface FoodCardProps {
   category?: Category
   onEdit?: (food: Food) => void
   onDelete?: (food: Food) => void
+  showHintAnimation?: boolean
 }
 
 /**
@@ -73,7 +74,7 @@ function getStorageLabel(location: Food['storage_location']): string {
 /**
  * FoodCard Component - Displays a single food item with expiry status
  */
-export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
+export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation = false }: FoodCardProps) {
   const { colorClasses, badgeText, daysUntilExpiry } = getExpiryStatus(food.expiry_date)
   const formattedExpiryDate = format(new Date(food.expiry_date), 'dd MMM yyyy', { locale: it })
 
@@ -84,6 +85,7 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
     <SwipeableCard
       onEdit={onEdit ? () => onEdit(food) : undefined}
       onDelete={onDelete ? () => onDelete(food) : undefined}
+      showHintAnimation={showHintAnimation}
     >
       <Card className={cn('hover:shadow-md transition-shadow', daysUntilExpiry <= 3 && 'border-orange-300')}>
         <CardHeader className="pb-3">
