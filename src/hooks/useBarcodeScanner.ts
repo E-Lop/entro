@@ -18,6 +18,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const hasScannedRef = useRef<boolean>(false)
+  const lastScanTimeRef = useRef<number>(0)
   const elementIdRef = useRef<string>(`barcode-scanner-${Date.now()}`)
 
   /**
@@ -29,6 +30,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       setError(null)
       setScannedCode(null)
       hasScannedRef.current = false // Reset scan flag
+      lastScanTimeRef.current = 0 // Reset timestamp
 
       // Initialize reader if not already initialized
       if (!readerRef.current) {
@@ -86,8 +88,19 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         videoElement,
         (result, error) => {
           if (result && !hasScannedRef.current) {
+            // Debounce check: prevent callback spam (ZXing calls this MANY times)
+            const now = Date.now()
+            const timeSinceLastScan = now - lastScanTimeRef.current
+
+            // Require at least 500ms between scans to prevent callback spam
+            if (timeSinceLastScan < 500 && lastScanTimeRef.current > 0) {
+              console.debug('Ignoring duplicate scan callback (debounce)')
+              return
+            }
+
             // Successfully scanned - only process ONCE
             hasScannedRef.current = true
+            lastScanTimeRef.current = now
 
             const barcode = result.getText()
             console.log('Barcode scanned:', barcode)
@@ -134,6 +147,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   const stopScanning = useCallback(async () => {
     try {
       hasScannedRef.current = false // Reset scan flag
+      lastScanTimeRef.current = 0 // Reset timestamp
 
       // Stop video stream
       if (videoRef.current && videoRef.current.srcObject) {
@@ -163,6 +177,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
    */
   const reset = useCallback(() => {
     hasScannedRef.current = false // Reset scan flag
+    lastScanTimeRef.current = 0 // Reset timestamp
     setState('idle')
     setError(null)
     setScannedCode(null)
