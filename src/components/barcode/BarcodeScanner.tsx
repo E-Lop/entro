@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +21,8 @@ interface BarcodeScannerProps {
  * Uses html5-qrcode library to access device camera and scan EAN/UPC barcodes
  */
 export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeScannerProps) {
+  const isClosingRef = useRef(false)
+
   const {
     state,
     error,
@@ -35,11 +37,11 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
     isError,
   } = useBarcodeScanner({
     onScanSuccess: (barcode) => {
-      // Short delay before closing to show success state
-      setTimeout(() => {
-        onScanSuccess(barcode)
-        onOpenChange(false)
-      }, 800)
+      // Stop scanner and close IMMEDIATELY - no delay
+      isClosingRef.current = true
+      stopScanning()
+      onScanSuccess(barcode)
+      onOpenChange(false)
     },
     onScanError: (err) => {
       console.error('Barcode scan error:', err)
@@ -48,17 +50,18 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
   // Auto-start scanning when dialog opens
   useEffect(() => {
-    if (open) {
+    if (open && !isClosingRef.current) {
       // Small delay to ensure DOM is ready
       const timer = setTimeout(() => {
         startScanning()
       }, 300)
 
       return () => clearTimeout(timer)
-    } else {
+    } else if (!open) {
       // Stop scanning when dialog closes
       stopScanning()
       reset()
+      isClosingRef.current = false // Reset flag
     }
   }, [open, startScanning, stopScanning, reset])
 
