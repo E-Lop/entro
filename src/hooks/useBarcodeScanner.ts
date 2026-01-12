@@ -37,8 +37,14 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         { facingMode: 'environment' }, // Use back camera on mobile
         {
           fps: 10, // Scans per second
-          qrbox: 250, // Scanning box size (will be adaptive based on video size)
-          // Remove aspectRatio to let the scanner adapt to camera's native ratio
+          // Use function to dynamically calculate qrbox based on actual video dimensions
+          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+            // Use 70% of the smaller dimension to ensure it fits
+            const minDimension = Math.min(viewfinderWidth, viewfinderHeight)
+            const qrboxSize = Math.floor(minDimension * 0.7)
+            console.log(`Video dimensions: ${viewfinderWidth}x${viewfinderHeight}, qrbox: ${qrboxSize}`)
+            return { width: qrboxSize, height: qrboxSize }
+          },
         },
         (decodedText: string) => {
           // Successfully scanned
