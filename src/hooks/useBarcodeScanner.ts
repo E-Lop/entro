@@ -39,9 +39,10 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
           fps: 10, // Scans per second
           // Use function to dynamically calculate qrbox based on actual video dimensions
           qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-            // Use 70% of the smaller dimension to ensure it fits
+            // Use 70% of the smaller dimension, but ensure minimum 50px (html5-qrcode requirement)
             const minDimension = Math.min(viewfinderWidth, viewfinderHeight)
-            const qrboxSize = Math.floor(minDimension * 0.7)
+            const calculatedSize = Math.floor(minDimension * 0.7)
+            const qrboxSize = Math.max(50, Math.min(calculatedSize, 300)) // Between 50-300px
             console.log(`Video dimensions: ${viewfinderWidth}x${viewfinderHeight}, qrbox: ${qrboxSize}`)
             return { width: qrboxSize, height: qrboxSize }
           },
