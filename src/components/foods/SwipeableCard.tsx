@@ -146,15 +146,15 @@ export function SwipeableCard({ children, onEdit, onDelete, className }: Swipeab
         }}
       >
         {/* Visual cues - subtle lines on edges (only mobile) */}
-        <div className="absolute left-1 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-20 pointer-events-none">
-          <div className="w-0.5 h-1 bg-slate-400 rounded-full" />
-          <div className="w-0.5 h-1 bg-slate-400 rounded-full" />
-          <div className="w-0.5 h-1 bg-slate-400 rounded-full" />
+        <div className="absolute left-2 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 opacity-40 pointer-events-none">
+          <div className="w-1 h-3 bg-slate-500 rounded-full" />
+          <div className="w-1 h-3 bg-slate-500 rounded-full" />
+          <div className="w-1 h-3 bg-slate-500 rounded-full" />
         </div>
-        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-20 pointer-events-none">
-          <div className="w-0.5 h-1 bg-slate-400 rounded-full" />
-          <div className="w-0.5 h-1 bg-slate-400 rounded-full" />
-          <div className="w-0.5 h-1 bg-slate-400 rounded-full" />
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 opacity-40 pointer-events-none">
+          <div className="w-1 h-3 bg-slate-500 rounded-full" />
+          <div className="w-1 h-3 bg-slate-500 rounded-full" />
+          <div className="w-1 h-3 bg-slate-500 rounded-full" />
         </div>
 
         {children}
