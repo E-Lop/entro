@@ -46,7 +46,7 @@ Voglio implementare gli UX enhancements:
 3. Animations e transitions
 
 COSA VOGLIO FARE ORA:
-[Descrivi qui cosa vuoi fare - es: "Iniziamo con i swipe gestures" oppure "Prima voglio rivedere il design" o "Ho un bug da fixare"]
+Iniziamo con i swipe gestures e con proposte per un visual cue su mobile che suggerisca la possibilità di fare swipe sulle card per modificare o cancellare la card
 
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (fasi e progress)

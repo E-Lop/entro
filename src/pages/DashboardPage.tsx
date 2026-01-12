@@ -4,6 +4,7 @@ import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X } from 'lucide-rea
 import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
 import { useDebounce } from '../hooks/useDebounce'
+import { useSwipeHint } from '../hooks/useSwipeHint'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
@@ -36,6 +37,9 @@ import { differenceInDays } from 'date-fns'
 export function DashboardPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  // Show swipe hint on first load (mobile only)
+  useSwipeHint()
 
   // Parse filters from URL query params
   const filters = useMemo<FilterParams>(() => {

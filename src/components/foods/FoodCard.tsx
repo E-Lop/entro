@@ -6,6 +6,7 @@ import { Button } from '../ui/button'
 import type { Food, Category } from '@/lib/foods'
 import { cn } from '@/lib/utils'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
+import { SwipeableCard } from './SwipeableCard'
 
 interface FoodCardProps {
   food: Food
@@ -80,24 +81,28 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
   const { signedUrl, isLoading: imageLoading, error: imageError } = useSignedUrl(food.image_url)
 
   return (
-    <Card className={cn('hover:shadow-md transition-shadow', daysUntilExpiry <= 3 && 'border-orange-300')}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-slate-900 line-clamp-2">
-              {food.name}
-              {food.quantity && (
-                <span className="font-normal text-slate-600 ml-1">
-                  ({food.quantity} {food.quantity_unit || 'pz'})
-                </span>
-              )}
-            </CardTitle>
+    <SwipeableCard
+      onEdit={onEdit ? () => onEdit(food) : undefined}
+      onDelete={onDelete ? () => onDelete(food) : undefined}
+    >
+      <Card className={cn('hover:shadow-md transition-shadow', daysUntilExpiry <= 3 && 'border-orange-300')}>
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              <CardTitle className="text-lg font-semibold text-slate-900 line-clamp-2">
+                {food.name}
+                {food.quantity && (
+                  <span className="font-normal text-slate-600 ml-1">
+                    ({food.quantity} {food.quantity_unit || 'pz'})
+                  </span>
+                )}
+              </CardTitle>
+            </div>
+            <div className={cn('px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap', colorClasses)}>
+              {badgeText}
+            </div>
           </div>
-          <div className={cn('px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap', colorClasses)}>
-            {badgeText}
-          </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
       <CardContent className="pb-3 space-y-2">
         {/* Food Image */}
@@ -154,7 +159,8 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex gap-2 pt-2">
+      {/* Action buttons - hidden on mobile (swipe gestures), visible on desktop */}
+      <CardFooter className="hidden sm:flex gap-2 pt-2">
         {onEdit && (
           <Button
             variant="outline"
@@ -179,5 +185,6 @@ export function FoodCard({ food, category, onEdit, onDelete }: FoodCardProps) {
         )}
       </CardFooter>
     </Card>
+    </SwipeableCard>
   )
 }
