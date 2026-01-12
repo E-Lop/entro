@@ -17,6 +17,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const hasScannedRef = useRef<boolean>(false)
   const elementIdRef = useRef<string>(`barcode-scanner-${Date.now()}`)
 
   /**
@@ -27,6 +28,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       setState('scanning')
       setError(null)
       setScannedCode(null)
+      hasScannedRef.current = false // Reset scan flag
 
       // Initialize reader if not already initialized
       if (!readerRef.current) {
@@ -83,16 +85,26 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         selectedDeviceId,
         videoElement,
         (result, error) => {
-          if (result) {
-            // Successfully scanned
+          if (result && !hasScannedRef.current) {
+            // Successfully scanned - only process ONCE
+            hasScannedRef.current = true
+
             const barcode = result.getText()
             console.log('Barcode scanned:', barcode)
 
             setState('processing')
             setScannedCode(barcode)
 
-            // Stop scanning - stopContinuousDecode doesn't exist, need to track stream
-            // The stream will be stopped when we call reset on stopScanning
+            // CRITICAL: Stop video stream IMMEDIATELY to prevent continuous scanning
+            if (videoRef.current && videoRef.current.srcObject) {
+              const stream = videoRef.current.srcObject as MediaStream
+              stream.getTracks().forEach(track => {
+                track.stop()
+                console.log('Track stopped:', track.kind)
+              })
+              videoRef.current.srcObject = null
+              console.log('Video stream stopped after scan')
+            }
 
             setState('success')
             onScanSuccess?.(barcode)
@@ -121,6 +133,8 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
    */
   const stopScanning = useCallback(async () => {
     try {
+      hasScannedRef.current = false // Reset scan flag
+
       // Stop video stream
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream
@@ -148,6 +162,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
    * Reset scanner state
    */
   const reset = useCallback(() => {
+    hasScannedRef.current = false // Reset scan flag
     setState('idle')
     setError(null)
     setScannedCode(null)
