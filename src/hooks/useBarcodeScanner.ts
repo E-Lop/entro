@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { BrowserMultiFormatReader } from '@zxing/browser'
+import { BrowserMultiFormatReader, BrowserCodeReader, IScannerControls } from '@zxing/browser'
 import { NotFoundException } from '@zxing/library'
 
 export type ScannerState = 'idle' | 'scanning' | 'processing' | 'success' | 'error'
@@ -16,7 +16,8 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
 
   const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
+  const controlsRef = useRef<IScannerControls | null>(null)
+  const mountedRef = useRef<boolean>(true)
   const hasScannedRef = useRef<boolean>(false)
   const elementIdRef = useRef<string>(`barcode-scanner-${Date.now()}`)
 
@@ -30,9 +31,12 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       setScannedCode(null)
       hasScannedRef.current = false // Reset scan flag
 
-      // Initialize reader if not already initialized
+      // Initialize reader with delay configuration to prevent callback spam
       if (!readerRef.current) {
-        readerRef.current = new BrowserMultiFormatReader()
+        readerRef.current = new BrowserMultiFormatReader(undefined, {
+          delayBetweenScanSuccess: 2000, // 2 second delay after successful scan
+          delayBetweenScanAttempts: 600, // 600ms delay between scan attempts
+        })
       }
 
       const reader = readerRef.current
@@ -81,10 +85,18 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       }
 
       // Start continuous decoding from video device
-      await reader.decodeFromVideoDevice(
+      // CRITICAL: Save the controls object returned by decodeFromVideoDevice
+      const controls = await reader.decodeFromVideoDevice(
         selectedDeviceId,
         videoElement,
-        (result, error) => {
+        (result, error, controls) => {
+          // Check if component is still mounted - stop if unmounted
+          if (!mountedRef.current) {
+            console.log('Component unmounted, stopping scanner')
+            controls.stop()
+            return
+          }
+
           if (result && !hasScannedRef.current) {
             // Successfully scanned - only process ONCE
             hasScannedRef.current = true
@@ -92,10 +104,10 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
             const barcode = result.getText()
             console.log('Barcode scanned:', barcode)
 
-            // CRITICAL FIX: Null out reader reference to stop continuous decode callbacks
-            // This destroys the reader instance and prevents further callbacks
-            readerRef.current = null
-            console.log('ZXing reader instance destroyed')
+            // CRITICAL FIX: Stop scanner controls IMMEDIATELY
+            console.log('Calling controls.stop()...')
+            controls.stop()
+            console.log('Scanner controls stopped')
 
             // Stop video stream
             if (videoRef.current && videoRef.current.srcObject) {
@@ -121,7 +133,9 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         }
       )
 
-      console.log('Scanner started successfully')
+      // Save controls reference for external stop
+      controlsRef.current = controls
+      console.log('Scanner started successfully, controls saved')
     } catch (err) {
       console.error('Error starting scanner:', err)
       const errorMsg =
@@ -133,11 +147,23 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   }, [onScanSuccess, onScanError])
 
   /**
-   * Stop scanning
+   * Stop scanning with complete cleanup
    */
   const stopScanning = useCallback(async () => {
     try {
+      console.log('Stopping scanner...')
       hasScannedRef.current = false // Reset scan flag
+
+      // Stop scanner controls first
+      if (controlsRef.current) {
+        try {
+          controlsRef.current.stop()
+          console.log('Scanner controls stopped')
+        } catch (err) {
+          console.warn('Error stopping scanner controls:', err)
+        }
+        controlsRef.current = null
+      }
 
       // Stop video stream
       if (videoRef.current && videoRef.current.srcObject) {
@@ -147,10 +173,22 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         console.log('Video stream stopped')
       }
 
-      // Stop stream ref if exists
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
-        streamRef.current = null
+      // Release all ZXing streams (global cleanup)
+      try {
+        BrowserCodeReader.releaseAllStreams()
+        console.log('All ZXing streams released')
+      } catch (err) {
+        console.warn('Error releasing streams:', err)
+      }
+
+      // Clean video element source
+      if (videoRef.current) {
+        try {
+          BrowserCodeReader.cleanVideoSource(videoRef.current)
+          console.log('Video source cleaned')
+        } catch (err) {
+          console.warn('Error cleaning video source:', err)
+        }
       }
 
       setState('idle')
@@ -173,32 +211,20 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   }, [])
 
   /**
-   * Cleanup on unmount
+   * Manage mounted state and cleanup on unmount
    */
   useEffect(() => {
+    mountedRef.current = true
+
     return () => {
-      // Cleanup scanner when component unmounts
-      try {
-        // Stop video stream
-        if (videoRef.current && videoRef.current.srcObject) {
-          const stream = videoRef.current.srcObject as MediaStream
-          stream.getTracks().forEach(track => track.stop())
-          videoRef.current.srcObject = null
-        }
+      // Mark component as unmounted
+      mountedRef.current = false
+      console.log('Component unmounting, cleaning up scanner...')
 
-        // Stop stream ref if exists
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop())
-          streamRef.current = null
-        }
-
-        readerRef.current = null
-        console.log('Scanner cleaned up')
-      } catch (err) {
-        console.error('Error cleaning up scanner:', err)
-      }
+      // Perform complete cleanup
+      stopScanning()
     }
-  }, [])
+  }, [stopScanning])
 
   return {
     state,
