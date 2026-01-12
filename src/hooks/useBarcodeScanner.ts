@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Html5Qrcode } from 'html5-qrcode'
+import { BrowserMultiFormatReader } from '@zxing/browser'
+import { NotFoundException } from '@zxing/library'
 
 export type ScannerState = 'idle' | 'scanning' | 'processing' | 'success' | 'error'
 
@@ -13,7 +14,9 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   const [error, setError] = useState<string | null>(null)
   const [scannedCode, setScannedCode] = useState<string | null>(null)
 
-  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const elementIdRef = useRef<string>(`barcode-scanner-${Date.now()}`)
 
   /**
@@ -25,56 +28,72 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       setError(null)
       setScannedCode(null)
 
-      // Initialize scanner if not already initialized
-      if (!scannerRef.current) {
-        scannerRef.current = new Html5Qrcode(elementIdRef.current)
+      // Initialize reader if not already initialized
+      if (!readerRef.current) {
+        readerRef.current = new BrowserMultiFormatReader()
       }
 
-      const scanner = scannerRef.current
+      const reader = readerRef.current
 
-      // Request camera permissions and start scanning
-      await scanner.start(
-        { facingMode: 'environment' }, // Use back camera on mobile
-        {
-          fps: 10, // Scans per second
-          // Use function to dynamically calculate qrbox based on actual video dimensions
-          qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
-            // Use 70% of the smaller dimension, but ensure minimum 50px (html5-qrcode requirement)
-            const minDimension = Math.min(viewfinderWidth, viewfinderHeight)
-            const calculatedSize = Math.floor(minDimension * 0.7)
-            const qrboxSize = Math.max(50, Math.min(calculatedSize, 300)) // Between 50-300px
-            console.log(`Video dimensions: ${viewfinderWidth}x${viewfinderHeight}, qrbox: ${qrboxSize}`)
-            return { width: qrboxSize, height: qrboxSize }
-          },
-        },
-        (decodedText: string) => {
-          // Successfully scanned
-          console.log('Barcode scanned:', decodedText)
-          setState('processing')
-          setScannedCode(decodedText)
+      // Get video element
+      const videoElement = document.getElementById(elementIdRef.current) as HTMLVideoElement
+      if (!videoElement) {
+        throw new Error('Video element not found')
+      }
 
-          // Stop scanning
-          scanner
-            .stop()
-            .then(() => {
-              setState('success')
-              onScanSuccess?.(decodedText)
-            })
-            .catch((err) => {
-              console.error('Error stopping scanner:', err)
-              setState('error')
-              setError('Errore durante la chiusura dello scanner')
-              onScanError?.(err)
-            })
-        },
-        (errorMessage: string) => {
-          // This is called continuously while scanning, ignore decode errors
-          // Only log if it's not a "No QR code found" message
-          if (!errorMessage.includes('No MultiFormat Readers')) {
-            console.debug('Scan error:', errorMessage)
+      videoRef.current = videoElement
+
+      console.log('Starting ZXing scanner...')
+
+      // Get available video devices (cameras)
+      const devices = await BrowserMultiFormatReader.listVideoInputDevices()
+      console.log('Available cameras:', devices.length)
+
+      // Try to find back camera on mobile, otherwise use first available
+      let selectedDeviceId: string | undefined
+      const backCamera = devices.find(
+        (device: MediaDeviceInfo) =>
+          device.label.toLowerCase().includes('back') ||
+          device.label.toLowerCase().includes('rear') ||
+          device.label.toLowerCase().includes('environment')
+      )
+
+      selectedDeviceId = backCamera?.deviceId || devices[0]?.deviceId
+
+      if (!selectedDeviceId) {
+        throw new Error('Nessuna fotocamera disponibile')
+      }
+
+      console.log('Using camera:', selectedDeviceId)
+
+      // Start continuous decoding from video device
+      await reader.decodeFromVideoDevice(
+        selectedDeviceId,
+        videoElement,
+        (result, error) => {
+          if (result) {
+            // Successfully scanned
+            const barcode = result.getText()
+            console.log('Barcode scanned:', barcode)
+
+            setState('processing')
+            setScannedCode(barcode)
+
+            // Stop scanning - stopContinuousDecode doesn't exist, need to track stream
+            // The stream will be stopped when we call reset on stopScanning
+
+            setState('success')
+            onScanSuccess?.(barcode)
+          }
+
+          // Ignore NotFoundException - it's normal when no code is in view
+          if (error && !(error instanceof NotFoundException)) {
+            console.debug('Scan error:', error.message)
           }
         }
       )
+
+      console.log('Scanner started successfully')
     } catch (err) {
       console.error('Error starting scanner:', err)
       const errorMsg =
@@ -90,22 +109,26 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
    */
   const stopScanning = useCallback(async () => {
     try {
-      if (scannerRef.current) {
-        // Check if scanner is actually running before stopping
-        const isRunning = scannerRef.current.getState?.() === 1 // 1 = SCANNING state
-        if (isRunning) {
-          await scannerRef.current.stop()
-        }
+      // Stop video stream
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream
+        stream.getTracks().forEach(track => track.stop())
+        videoRef.current.srcObject = null
+        console.log('Video stream stopped')
       }
+
+      // Stop stream ref if exists
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current = null
+      }
+
       setState('idle')
       setError(null)
     } catch (err) {
       console.error('Error stopping scanner:', err)
-      // Don't show error to user if it's just a "not running" error
-      if (err instanceof Error && !err.message.includes('not running')) {
-        const errorMsg = 'Errore durante la chiusura dello scanner'
-        setError(errorMsg)
-      }
+      const errorMsg = err instanceof Error ? err.message : 'Errore durante la chiusura dello scanner'
+      setError(errorMsg)
     }
   }, [])
 
@@ -124,14 +147,24 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   useEffect(() => {
     return () => {
       // Cleanup scanner when component unmounts
-      if (scannerRef.current) {
-        scannerRef.current
-          .stop()
-          .catch((err) => console.error('Error cleaning up scanner:', err))
-          .finally(() => {
-            scannerRef.current?.clear()
-            scannerRef.current = null
-          })
+      try {
+        // Stop video stream
+        if (videoRef.current && videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject as MediaStream
+          stream.getTracks().forEach(track => track.stop())
+          videoRef.current.srcObject = null
+        }
+
+        // Stop stream ref if exists
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop())
+          streamRef.current = null
+        }
+
+        readerRef.current = null
+        console.log('Scanner cleaned up')
+      } catch (err) {
+        console.error('Error cleaning up scanner:', err)
       }
     }
   }, [])

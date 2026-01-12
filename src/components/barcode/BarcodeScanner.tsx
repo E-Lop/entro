@@ -80,39 +80,27 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
           </DialogDescription>
         </DialogHeader>
 
-        {/* Inject CSS for html5-qrcode video */}
-        <style>{`
-          #${elementId} video {
-            width: 100% !important;
-            height: auto !important;
-            max-height: 400px !important;
-            display: block !important;
-          }
-          #${elementId} > div {
-            width: 100% !important;
-          }
-        `}</style>
-
         <div className="space-y-4">
           {/* Scanner View */}
-          <div className="relative">
-            <div
+          <div className="relative min-h-[300px] bg-black rounded-lg overflow-hidden">
+            {/* Video element for ZXing scanner */}
+            <video
               id={elementId}
-              className="rounded-lg overflow-hidden bg-black min-h-[300px] w-full"
+              className="w-full h-auto max-h-[400px]"
               style={{
-                display: state === 'idle' ? 'flex' : 'block',
-                alignItems: state === 'idle' ? 'center' : 'initial',
-                justifyContent: state === 'idle' ? 'center' : 'initial',
+                display: state === 'idle' ? 'none' : 'block',
               }}
-            >
-              {/* Loading state */}
-              {state === 'idle' && (
-                <div className="flex flex-col items-center gap-3 text-muted-foreground p-8">
+            />
+
+            {/* Loading state overlay */}
+            {state === 'idle' && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3 text-white">
                   <Loader2 className="h-8 w-8 animate-spin" />
                   <p className="text-sm">Inizializzazione fotocamera...</p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Processing overlay */}
             {isProcessing && (
