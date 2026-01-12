@@ -262,27 +262,27 @@ npm install -D @types/node
 
 ---
 
-## 📷 Fase 2: Barcode Scanner (Settimana 3) 🔄 IN CORSO
+## 📷 Fase 2: Barcode Scanner (Settimana 3) ✅ COMPLETATA
 
 **Obiettivo**: Scansione barcode funzionante con pre-compilazione dati
 
 ### Week 3: Barcode Integration
 
 #### Tasks (Giorno 1-2) ✅ COMPLETATO
-- [x] ✅ Setup html5-qrcode
+- [x] ✅ Setup barcode scanner library
 - [x] ✅ Implementare useBarcodeScanner hook
 - [x] ✅ Gestione permessi camera iOS/Android
 - [x] ✅ UI scanner modal con feedback
 
 **Implementazione Completa**:
-- ✅ html5-qrcode library installata e configurata
-- ✅ useBarcodeScanner custom hook con state management
+- ✅ **Switch da html5-qrcode a @zxing/browser** (iOS Safari compatibility)
+- ✅ useBarcodeScanner custom hook con proper lifecycle management
 - ✅ Camera permissions handled automaticamente dal browser
 - ✅ BarcodeScanner modal component con Dialog UI
 - ✅ Scanner states: idle, scanning, processing, success, error
 - ✅ Visual feedback durante scan (loading, success overlay, error messages)
 - ✅ Auto-start scanning on modal open
-- ✅ Cleanup automatico su unmount
+- ✅ Proper cleanup con controls.stop() e BrowserCodeReader.releaseAllStreams()
 
 #### Tasks (Giorno 3-4) ✅ COMPLETATO
 - [x] ✅ Integrare Open Food Facts API
@@ -328,26 +328,44 @@ npm install -D @types/node
 - ✅ Graceful fallback: prodotto non trovato → inserimento manuale
 - ✅ Product error display con feedback chiaro
 
-#### Tasks (Giorno 7) 🚧 DA TESTARE
-- [ ] Testing su device reali (iOS + Android)
-- [ ] Ottimizzazioni performance scanner
-- [ ] UX polish e error states
-- [ ] Documentazione utilizzo
+#### Tasks (Giorno 7) ✅ COMPLETATO
+- [x] ✅ Testing su device reali (iOS + Android)
+- [x] ✅ Ottimizzazioni performance scanner (controls.stop() fix)
+- [x] ✅ UX polish e error states
+- [x] ✅ Documentazione utilizzo (BARCODE_BUG.md)
 
-### Deliverables Fase 2
-🚧 **Barcode Scanning Implementation Ready**:
+**Critical Bug Fix**:
+- ✅ **Callback spam issue risolto**: Implementato proper controls.stop() pattern
+- ✅ Research documentazione ufficiale ZXing e GitHub issues
+- ✅ Configure BrowserMultiFormatReader con delay options
+- ✅ mountedRef pattern per prevent callback dopo unmount
+- ✅ Complete cleanup: controls.stop() + releaseAllStreams() + cleanVideoSource()
+- ✅ Testing completo su iPhone e Android: funziona perfettamente
+
+**Commits Fase 2**:
+- Initial implementation: barcode scanner setup
+- Library switch: html5-qrcode → @zxing/browser
+- Multiple iteration attempts to fix callback spam
+- `cb5545a` - **Final fix**: implement proper ZXing controls.stop() pattern
+- Complete documentation: `docs/BARCODE_BUG.md`
+
+### Deliverables Fase 2 ✅ COMPLETATA
+**Barcode Scanning Funzionante in Production**:
 - ✅ Scanner camera implementation completo
 - ✅ Open Food Facts API integration
-- ✅ Form pre-fill automatico
-- ✅ Category mapping intelligente
-- 🚧 Testing su device reali pending
-- 🚧 Performance validation pending
+- ✅ Form pre-fill automatico con dati prodotto
+- ✅ Category mapping intelligente (10 categorie OFF → 11 italiane)
+- ✅ Testing completo su device reali (iPhone + Android)
+- ✅ Performance validation: scan rapido, un solo callback
+- ✅ Comprehensive bug analysis documentation
 
-### Definition of Done
-- [x] ✅ Scansiono barcode (implementation ready)
-- [ ] Funziona su iPhone e Android (da testare su production)
-- [ ] Performance accettabile (<3s riconoscimento)
-- [ ] UI chiara e intuitiva (da validare su device reali)
+### Definition of Done ✅ RAGGIUNTA
+- [x] ✅ Scansiono barcode e riconosco EAN-13
+- [x] ✅ Funziona su iPhone Safari e Android Chrome
+- [x] ✅ Performance accettabile (scan immediato, no lag)
+- [x] ✅ UI chiara e intuitiva (validato su device reali)
+- [x] ✅ Callback spam risolto con soluzione documentata
+- [x] ✅ Cleanup completo delle risorse camera
 
 ---
 
@@ -662,13 +680,13 @@ Week 2: Polish & Validation
 ## ✅ Current Status
 
 **🎉 FASE 1 COMPLETATA! MVP DEPLOYED & TESTED 🎉**
-**📷 FASE 2 IN CORSO! BARCODE SCANNER IMPLEMENTATION 🚧**
+**🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
 
-**Fase Attuale**: Fase 2 - Barcode Scanner 🔄 IN CORSO
-**Progress Fase 2**: 85% (6/7 tasks completati, testing pending)
+**Fase Attuale**: Fase 3 - UX Enhancements (READY TO START)
+**Progress Fase 2**: 100% ✅ COMPLETATA
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: Pending deploy - feat: barcode scanner implementation
-**Next Milestone**: Testing su device reali (iOS + Android)
+**Ultimo Commit**: `cb5545a` - fix: implement proper ZXing controls.stop() pattern
+**Next Milestone**: Swipe gestures e vista calendario (Fase 3)
 
 ---
 
@@ -710,17 +728,70 @@ Week 2: Polish & Validation
 
 ---
 
-## 🎯 Prossimi Step - Fase 2
+## 📅 Sessione 12/01/2026 - Fase 2 Completata
 
-**Obiettivo**: Barcode Scanner Integration
+### **Barcode Scanner Bug Fix Journey** (Critical):
 
-### Priority Tasks (Week 3):
-1. 📸 **Setup barcode scanner** (html5-qrcode o Capacitor BarcodeScanner)
-2. 🔌 **Open Food Facts API integration**
-3. 🗺️ **Category mapping logic** (OFF categories → nostre 11 categorie italiane)
-4. 🎨 **Scanner UI/UX** (modal, permissions, feedback)
-5. 📝 **Form pre-fill** con dati barcode
-6. ✅ **Testing** su device reali (priorità iPhone/Android)
+**Problema Iniziale**:
+- Callback spam: 100+ "Barcode scanned" logs dopo singolo scan
+- Callbacks continuavano anche dopo chiusura modal
+- Form fields lampeggiavano continuamente
+- Scanner continuava in background sulla dashboard
+
+**Tentativi Falliti**:
+1. ❌ Debounce basato su timestamp (500ms)
+2. ❌ Distruzione istanza reader (`readerRef.current = null`)
+3. ❌ hasScannedRef flag solamente
+4. ❌ Stop video stream solamente
+
+**Root Cause Identificato**:
+- Non stavamo salvando l'oggetto `controls` restituito da `decodeFromVideoDevice()`
+- Impossibile chiamare `controls.stop()` per fermare la queue di callback
+- ZXing continuava a processare frames anche dopo distruzione del nostro ref
+
+**Soluzione Implementata** (Commit `cb5545a`):
+1. ✅ Salvare controls da `decodeFromVideoDevice()`
+2. ✅ Chiamare `controls.stop()` dopo primo scan
+3. ✅ Configure reader con delays (delayBetweenScanSuccess: 2000ms)
+4. ✅ mountedRef pattern per prevent callback dopo unmount
+5. ✅ Complete cleanup:
+   - `controls.stop()`
+   - `BrowserCodeReader.releaseAllStreams()`
+   - `BrowserCodeReader.cleanVideoSource(videoElement)`
+
+**Documentazione**:
+- ✅ `docs/BARCODE_BUG.md` creato con analisi completa
+- ✅ Research documentazione ufficiale ZXing
+- ✅ GitHub issues #19 e #21 studiati
+- ✅ Code examples e solution planning documented
+
+**Testing Finale**:
+- ✅ iPhone Safari: Scanner funzionante, UN SOLO callback ✅
+- ✅ Android Chrome: Scanner funzionante, UN SOLO callback ✅
+- ✅ Console logs puliti, no spam
+- ✅ Modal si chiude correttamente
+- ✅ No callbacks dopo ritorno a dashboard
+
+### **Risultato**:
+🎉 **Fase 2 COMPLETATA con successo!** Barcode scanner fully functional in production.
+
+---
+
+## 🎯 Prossimi Step - Fase 3
+
+**Obiettivo**: UX Enhancements (Swipe gestures + Calendar view)
+
+### Priority Tasks (Week 4):
+1. 👆 **Swipe gestures** (react-swipeable)
+   - Swipe-to-edit
+   - Swipe-to-delete
+   - Visual feedback
+2. 📅 **Calendar views**
+   - WeekView component
+   - MonthView component con heatmap
+   - Navigation prev/next
+3. ✨ **Animations & transitions**
+4. ✅ **Testing** su mobile devices
 
 ### Optional Improvements (Backlog):
 - 🎨 Dark mode
