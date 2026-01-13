@@ -29,24 +29,29 @@ Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 Ciao! Sto continuando lo sviluppo del progetto "entro" (food expiry tracker).
 
 CONTESTO:
-- Ho appena completato la Fase 2 (Barcode Scanner) con successo
+- Ho appena completato i Swipe Gestures (Fase 3 - Parte 1) con successo
 - La feature è deployed e testata su iPhone e Android
 - L'app è in produzione su https://entro-il.netlify.app
 
 COSA È STATO FATTO:
 ✅ Fase 1: MVP completo (CRUD, auth, filters, images)
 ✅ Fase 2: Barcode scanner con ZXing + Open Food Facts API
-✅ Bug fix critico: callback spam risolto con controls.stop()
-✅ Testing completo su device reali (iPhone + Android)
+✅ Fase 3 - Parte 1: Swipe gestures implementation completa:
+  - SwipeableCard component con mobile detection
+  - Swipe right → Edit, Swipe left → Delete
+  - Animated hint su prima card (mini-swipe demo)
+  - InstructionCard per nuovi utenti senza alimenti
+  - Testing completo su iOS e Android
 
-PROSSIMO OBIETTIVO - Fase 3:
-Voglio implementare gli UX enhancements:
-1. Swipe gestures (swipe-to-edit, swipe-to-delete)
-2. Calendar view (WeekView + MonthView)
-3. Animations e transitions
+PROSSIMO OBIETTIVO - Fase 3 (Parte 2):
+Implementare le Calendar Views:
+1. WeekView component (vista settimanale delle scadenze)
+2. MonthView component (calendario mensile con heatmap)
+3. Navigazione prev/next tra settimane/mesi
+4. Integrazione con dashboard principale
 
 COSA VOGLIO FARE ORA:
-Iniziamo con i swipe gestures e con proposte per un visual cue su mobile che suggerisca la possibilità di fare swipe sulle card per modificare o cancellare la card
+Iniziamo con la WeekView component. Vorrei una vista settimanale che mostri i giorni della settimana con gli alimenti che scadono in ogni giorno. Deve essere mobile-first, scrollabile orizzontalmente, e mostrare in modo chiaro quali alimenti scadono quando.
 
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (fasi e progress)

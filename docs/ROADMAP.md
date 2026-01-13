@@ -369,18 +369,37 @@ npm install -D @types/node
 
 ---
 
-## 🎨 Fase 3: UX Enhancements (Settimana 4)
+## 🎨 Fase 3: UX Enhancements (Settimana 4) 🔄 IN CORSO
 
 **Obiettivo**: Swipe gestures e vista calendario
 
 ### Week 4: Mobile UX & Calendar
 
-#### Tasks (Giorno 1-2)
-- [ ] Setup react-swipeable
-- [ ] Implementare swipe-to-edit gesture
-- [ ] Implementare swipe-to-delete gesture
-- [ ] Visual feedback durante swipe
-- [ ] Settings per abilitare/disabilitare swipe
+#### Tasks (Giorno 1-2) ✅ COMPLETATO
+- [x] ✅ Setup react-swipeable
+- [x] ✅ Implementare swipe-to-edit gesture
+- [x] ✅ Implementare swipe-to-delete gesture
+- [x] ✅ Visual feedback durante swipe (background colorati + icone)
+- [x] ✅ Animated hint su prima card per nuovi utenti
+
+**Implementazione Completa** (Sessione 13/01/2026):
+- ✅ SwipeableCard wrapper component con mobile detection
+- ✅ react-swipeable per gesture handling (touch only)
+- ✅ Swipe right → Edit (background verde + icona Edit)
+- ✅ Swipe left → Delete (background rosso + icona Trash)
+- ✅ Threshold 80px per triggerare azioni
+- ✅ Smooth CSS transitions e animazioni
+- ✅ Animated hint: prima card si muove automaticamente (2s delay)
+- ✅ InstructionCard per nuovi utenti senza alimenti
+- ✅ LocalStorage flags per hint one-time
+- ✅ Buttons Edit/Delete nascosti su mobile, visibili su desktop
+- ✅ Testing completo su iOS Safari e Android Chrome
+
+**Commits**:
+- `7b197ff` - feat: implement swipe gestures for mobile food cards
+- `edeb9c7` - fix: improve visual cues visibility on mobile cards
+- `f98c715` - refactor: replace visual cues with animated hint on first card
+- `5c9bedf` - feat: add instruction card for new users with swipe demo
 
 #### Tasks (Giorno 3-4)
 - [ ] Implementare WeekView component
@@ -401,14 +420,14 @@ npm install -D @types/node
 - [ ] Performance optimization
 
 ### Deliverables Fase 3
-✅ **Advanced UX**:
-- Swipe gestures fluidi su mobile
-- Vista calendario settimanale funzionante
-- Vista calendario mensile con heatmap
-- Animazioni smooth
+**Advanced UX**:
+- ✅ Swipe gestures fluidi su mobile (COMPLETATO)
+- ⏳ Vista calendario settimanale funzionante (TODO)
+- ⏳ Vista calendario mensile con heatmap (TODO)
+- ✅ Animazioni smooth (COMPLETATO)
 
 ### Definition of Done
-- [ ] Swipe left/right funziona su mobile
+- [x] ✅ Swipe left/right funziona su mobile
 - [ ] Calendario mostra scadenze correttamente
 - [ ] Navigazione fluida tra viste
 - [ ] Feedback positivo da beta tester
@@ -681,12 +700,13 @@ Week 2: Polish & Validation
 
 **🎉 FASE 1 COMPLETATA! MVP DEPLOYED & TESTED 🎉**
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
+**🔄 FASE 3 IN CORSO! SWIPE GESTURES COMPLETATI 🔄**
 
-**Fase Attuale**: Fase 3 - UX Enhancements (READY TO START)
-**Progress Fase 2**: 100% ✅ COMPLETATA
+**Fase Attuale**: Fase 3 - UX Enhancements (IN CORSO)
+**Progress Fase 3**: 50% ✅ (Swipe gestures COMPLETATO, Calendar views TODO)
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `cb5545a` - fix: implement proper ZXing controls.stop() pattern
-**Next Milestone**: Swipe gestures e vista calendario (Fase 3)
+**Ultimo Commit**: `5c9bedf` - feat: add instruction card for new users with swipe demo
+**Next Milestone**: Calendar view (WeekView + MonthView)
 
 ---
 
@@ -777,7 +797,50 @@ Week 2: Polish & Validation
 
 ---
 
-## 🎯 Prossimi Step - Fase 3
+## 📅 Sessione 13/01/2026 - Fase 3: Swipe Gestures
+
+### **Swipe Gestures Implementation** (Completato):
+
+**Implementazione**:
+1. ✅ Installazione react-swipeable
+2. ✅ SwipeableCard wrapper component:
+   - Mobile detection (touch + viewport < 768px)
+   - Swipe right → Edit (background verde)
+   - Swipe left → Delete (background rosso)
+   - Threshold 80px per triggerare azioni
+   - Smooth CSS transitions
+3. ✅ Animated hint su prima card:
+   - Mini-swipe automatico dopo 2s
+   - LocalStorage flag per show once
+   - Solo su mobile
+4. ✅ InstructionCard per nuovi utenti:
+   - Appare quando nessun alimento presente
+   - Istruzioni chiare con icone colorate
+   - Dismissable con swipe left
+   - LocalStorage flag
+5. ✅ UI/UX optimization:
+   - Buttons Edit/Delete nascosti su mobile
+   - Buttons visibili su desktop
+   - Background opacity progressiva durante swipe
+
+**Testing**:
+- ✅ iOS Safari: Swipe gestures funzionanti
+- ✅ Android Chrome: Swipe gestures funzionanti
+- ✅ Desktop: Nessuna modifica (buttons visibili)
+- ✅ Animazioni smooth senza lag
+
+**Commits**:
+- `7b197ff` - feat: implement swipe gestures for mobile food cards
+- `edeb9c7` - fix: improve visual cues visibility on mobile cards
+- `f98c715` - refactor: replace visual cues with animated hint on first card
+- `5c9bedf` - feat: add instruction card for new users with swipe demo
+
+### **Risultato**:
+🎉 **Swipe Gestures COMPLETATI!** Mobile UX significantly improved.
+
+---
+
+## 🎯 Prossimi Step - Fase 3 (Calendar Views)
 
 **Obiettivo**: UX Enhancements (Swipe gestures + Calendar view)
 
