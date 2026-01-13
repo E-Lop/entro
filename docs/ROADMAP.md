@@ -401,19 +401,39 @@ npm install -D @types/node
 - `f98c715` - refactor: replace visual cues with animated hint on first card
 - `5c9bedf` - feat: add instruction card for new users with swipe demo
 
-#### Tasks (Giorno 3-4)
-- [ ] Implementare WeekView component
-- [ ] Logic per raggruppare alimenti per giorno
-- [ ] Navigazione settimane (prev/next)
-- [ ] Click su giorno → mostra dettagli
+#### Tasks (Giorno 3-4) ✅ COMPLETATO
+- [x] ✅ Implementare WeekView component
+- [x] ✅ Logic per raggruppare alimenti per giorno
+- [x] ✅ Toggle Lista/Calendario per navigazione tra viste
+- [x] ✅ Click su card calendario → mostra dialog modifica
 
-#### Tasks (Giorno 5-6)
+**Implementazione Completa** (Sessione 13/01/2026 - Parte 2):
+- ✅ Date utility functions (getNext7Days, formatDateKey, groupFoodsByDate)
+- ✅ CalendarFoodCard ultra-compatta (solo nome + quantità)
+- ✅ DayColumn con header uniformi e badge contatore alimenti
+- ✅ WeekView container con rolling 7-day window (oggi + 6 giorni)
+- ✅ Mobile: horizontal scroll con snap, 280px columns
+- ✅ Desktop: responsive 7-column grid, tutte le colonne visibili
+- ✅ Toggle Lista/Calendario sostituisce titolo pagina
+- ✅ View mode persiste in URL params (?view=list|calendar)
+- ✅ Filtri funzionano in entrambe le viste
+- ✅ Empty state quando nessun alimento scade in 7 giorni
+- ✅ Timezone fix: usa local timezone invece di UTC
+
+**Commits**:
+- `7cba90b` - feat: add WeekView calendar with 7-day rolling window
+- `a9d3acd` - fix: use local timezone for calendar date formatting
+
+**Bug Fix**:
+- ✅ Fixed timezone issue causing foods to appear one day off in calendar
+
+#### Tasks (Giorno 5-6) - FUTURE (Fase 3 Parte 3)
 - [ ] Implementare MonthView component
 - [ ] Calendario grid con heatmap
-- [ ] Navigazione mesi
-- [ ] Integration con main dashboard
+- [ ] Navigazione prev/next tra settimane
+- [ ] Integration opzionale con main dashboard
 
-#### Tasks (Giorno 7)
+#### Tasks (Giorno 7) - FUTURE
 - [ ] Polishing animazioni e transitions
 - [ ] Testing gesture su diversi device
 - [ ] Accessibility check (keyboard nav)
@@ -421,15 +441,15 @@ npm install -D @types/node
 
 ### Deliverables Fase 3
 **Advanced UX**:
-- ✅ Swipe gestures fluidi su mobile (COMPLETATO)
-- ⏳ Vista calendario settimanale funzionante (TODO)
-- ⏳ Vista calendario mensile con heatmap (TODO)
+- ✅ Swipe gestures fluidi su mobile (COMPLETATO - Parte 1)
+- ✅ Vista calendario settimanale funzionante (COMPLETATO - Parte 2)
+- ⏳ Vista calendario mensile con heatmap (TODO - Parte 3)
 - ✅ Animazioni smooth (COMPLETATO)
 
 ### Definition of Done
 - [x] ✅ Swipe left/right funziona su mobile
-- [ ] Calendario mostra scadenze correttamente
-- [ ] Navigazione fluida tra viste
+- [x] ✅ Calendario mostra scadenze correttamente
+- [x] ✅ Navigazione fluida tra viste (Lista/Calendario)
 - [ ] Feedback positivo da beta tester
 
 ---
@@ -700,13 +720,13 @@ Week 2: Polish & Validation
 
 **🎉 FASE 1 COMPLETATA! MVP DEPLOYED & TESTED 🎉**
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
-**🔄 FASE 3 IN CORSO! SWIPE GESTURES COMPLETATI 🔄**
+**🎉 FASE 3 PARTE 1 & 2 COMPLETATE! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
 
 **Fase Attuale**: Fase 3 - UX Enhancements (IN CORSO)
-**Progress Fase 3**: 50% ✅ (Swipe gestures COMPLETATO, Calendar views TODO)
+**Progress Fase 3**: 80% ✅ (Swipe gestures + WeekView COMPLETATI, MonthView TODO)
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `5c9bedf` - feat: add instruction card for new users with swipe demo
-**Next Milestone**: Calendar view (WeekView + MonthView)
+**Ultimo Commit**: `a9d3acd` - fix: use local timezone for calendar date formatting
+**Next Milestone**: MonthView (optional) o Fase 4 (PWA + Notifications)
 
 ---
 
@@ -840,21 +860,76 @@ Week 2: Polish & Validation
 
 ---
 
-## 🎯 Prossimi Step - Fase 3 (Calendar Views)
+## 📅 Sessione 13/01/2026 - Fase 3 Parte 2: WeekView Calendar
 
-**Obiettivo**: UX Enhancements (Swipe gestures + Calendar view)
+### **WeekView Implementation** (Completato):
 
-### Priority Tasks (Week 4):
-1. 👆 **Swipe gestures** (react-swipeable)
-   - Swipe-to-edit
-   - Swipe-to-delete
-   - Visual feedback
-2. 📅 **Calendar views**
-   - WeekView component
-   - MonthView component con heatmap
-   - Navigation prev/next
-3. ✨ **Animations & transitions**
-4. ✅ **Testing** su mobile devices
+**Implementazione**:
+1. ✅ Date utility functions (src/lib/utils.ts):
+   - `getNext7Days()` - genera rolling 7-day window
+   - `formatDateKey()` - formatta date YYYY-MM-DD (local timezone)
+   - `groupFoodsByDate()` - raggruppa alimenti per expiry_date
+2. ✅ CalendarFoodCard component ultra-compatto:
+   - Solo nome + quantità (es. "Ricotta (1pz)")
+   - No immagini, no icone (massima densità)
+   - Click → apre dialog modifica
+3. ✅ DayColumn component:
+   - Header uniformi: "martedì 13 gen" su singola riga
+   - Badge sempre visibile: "0 alimenti" / "1 alimento"
+   - Vertical scroll per giorni con molti items
+   - Empty state con icona verde
+4. ✅ WeekView container:
+   - Filtra alimenti nei prossimi 7 giorni
+   - Mobile: horizontal scroll con snap, 280px columns
+   - Desktop: responsive 7-column grid, tutte visibili
+   - Empty state quando nessuna scadenza
+5. ✅ DashboardPage integration:
+   - Toggle Lista/Calendario sostituisce titolo pagina
+   - View mode in URL params (?view=list|calendar)
+   - Conditional rendering tra viste
+   - Filtri applicati in entrambe le viste
+
+**Bug Fix**:
+- ✅ Timezone issue risolto: date-fns format() invece di toISOString()
+- Alimenti apparivano un giorno dopo nella calendar view
+
+**Testing**:
+- ✅ Desktop: Tutte le 7 colonne visibili
+- ✅ Mobile: Scroll orizzontale fluido con snap
+- ✅ Toggle funziona, URL si aggiorna
+- ✅ Filtri rispettati in calendar view
+- ✅ Alimenti posizionati nei giorni corretti
+
+**Commits**:
+- `7cba90b` - feat: add WeekView calendar with 7-day rolling window
+- `a9d3acd` - fix: use local timezone for calendar date formatting
+
+### **Risultato**:
+🎉 **WeekView COMPLETATA!** Calendar view funzionante in production con mobile-first design.
+
+---
+
+## 🎯 Prossimi Step
+
+### Fase 3 Completata (80%):
+- ✅ **Swipe gestures** - Completati (Parte 1)
+- ✅ **WeekView calendar** - Completata (Parte 2)
+
+### Fase 3 Opzionale (20%):
+- ⏳ **MonthView** con heatmap (opzionale)
+- ⏳ **Navigation prev/next** tra settimane/mesi (opzionale)
+
+### Prossima Fase - Fase 4: PWA & Notifications (Week 5):
+1. 📱 **PWA Setup**
+   - Service worker con Vite PWA plugin
+   - Manifest.json e icons
+   - Install prompt
+2. 🔔 **Push Notifications**
+   - Notification permissions flow
+   - Notifiche scadenze (3 giorni prima, giorno stesso)
+   - Settings per customizzazione
+3. 📴 **Offline Mode**
+   - Cache assets per basic offline functionality
 
 ### Optional Improvements (Backlog):
 - 🎨 Dark mode
