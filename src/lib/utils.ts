@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { format } from 'date-fns'
 import type { Food } from './foods'
 
 export function cn(...inputs: ClassValue[]) {
@@ -25,10 +26,10 @@ export function getNext7Days(): Date[] {
 }
 
 /**
- * Format date as YYYY-MM-DD for grouping
+ * Format date as YYYY-MM-DD for grouping (local timezone, not UTC)
  */
 export function formatDateKey(date: Date): string {
-  return date.toISOString().split('T')[0]
+  return format(date, 'yyyy-MM-dd')
 }
 
 /**
