@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X } from 'lucide-react'
+import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
 import { useDebounce } from '../hooks/useDebounce'
@@ -9,6 +9,7 @@ import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
+import { WeekView } from '../components/foods/WeekView'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
@@ -31,6 +32,7 @@ import {
 import type { Food, FoodInsert, FoodUpdate, FilterParams } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { differenceInDays } from 'date-fns'
+import { cn } from '@/lib/utils'
 
 /**
  * Dashboard Page - Home page for authenticated users with food management
@@ -48,6 +50,9 @@ export function DashboardPage() {
   const [showInstructionCard, setShowInstructionCard] = useState(() => {
     return localStorage.getItem(INSTRUCTION_CARD_KEY) !== 'true'
   })
+
+  // View mode from URL params
+  const viewMode = (searchParams.get('view') as 'list' | 'calendar') || 'list'
 
   // Parse filters from URL query params
   const filters = useMemo<FilterParams>(() => {
@@ -118,6 +123,12 @@ export function DashboardPage() {
 
   const handleToggleFilters = () => {
     setIsFiltersExpanded(!isFiltersExpanded)
+  }
+
+  const handleViewModeChange = (mode: 'list' | 'calendar') => {
+    const params = new URLSearchParams(searchParams)
+    params.set('view', mode)
+    setSearchParams(params)
   }
 
   // Quick filter handlers for stats cards
@@ -390,21 +401,62 @@ export function DashboardPage() {
         )
       ) : (
         <div>
-          <h3 className="text-xl font-semibold text-slate-900 mb-4">
-            {activeFiltersCount > 0 ? `Risultati filtrati (${foods.length})` : `I Tuoi Alimenti (${foods.length})`}
-          </h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {foods.map((food, index) => (
-              <FoodCard
-                key={food.id}
-                food={food}
-                category={getCategoryForFood(food)}
-                onEdit={handleEditClick}
-                onDelete={handleDeleteClick}
-                showHintAnimation={index === 0}
-              />
-            ))}
+          {/* View Mode Toggle */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleViewModeChange('list')}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
+                  viewMode === 'list'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                )}
+              >
+                <List className="h-4 w-4" />
+                <span className="font-medium">Lista</span>
+                <span className="text-sm opacity-75">({foods.length})</span>
+              </button>
+              <button
+                onClick={() => handleViewModeChange('calendar')}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
+                  viewMode === 'calendar'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                )}
+              >
+                <Calendar className="h-4 w-4" />
+                <span className="font-medium">Calendario</span>
+              </button>
+            </div>
+            {activeFiltersCount > 0 && (
+              <span className="text-sm text-slate-600">
+                {foods.length} risultat{foods.length === 1 ? 'o' : 'i'} filtrat{foods.length === 1 ? 'o' : 'i'}
+              </span>
+            )}
           </div>
+
+          {/* Conditional View Rendering */}
+          {viewMode === 'calendar' ? (
+            <WeekView
+              foods={foods}
+              onEdit={handleEditClick}
+            />
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {foods.map((food, index) => (
+                <FoodCard
+                  key={food.id}
+                  food={food}
+                  category={getCategoryForFood(food)}
+                  onEdit={handleEditClick}
+                  onDelete={handleDeleteClick}
+                  showHintAnimation={index === 0}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
