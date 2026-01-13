@@ -8,6 +8,7 @@ import { useSwipeHint } from '../hooks/useSwipeHint'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
+import { InstructionCard } from '../components/foods/InstructionCard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
@@ -34,12 +35,19 @@ import { differenceInDays } from 'date-fns'
 /**
  * Dashboard Page - Home page for authenticated users with food management
  */
+const INSTRUCTION_CARD_KEY = 'entro_hasSeenInstructionCard'
+
 export function DashboardPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Show swipe hint on first load (mobile only)
   useSwipeHint()
+
+  // Track instruction card visibility
+  const [showInstructionCard, setShowInstructionCard] = useState(() => {
+    return localStorage.getItem(INSTRUCTION_CARD_KEY) !== 'true'
+  })
 
   // Parse filters from URL query params
   const filters = useMemo<FilterParams>(() => {
@@ -238,6 +246,11 @@ export function DashboardPage() {
     return categories.find((cat) => cat.id === food.category_id)
   }
 
+  const handleDismissInstructionCard = () => {
+    localStorage.setItem(INSTRUCTION_CARD_KEY, 'true')
+    setShowInstructionCard(false)
+  }
+
   return (
     <div className="space-y-6 pb-20">
       {/* Welcome Section - Compact on Mobile */}
@@ -343,8 +356,13 @@ export function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+        ) : showInstructionCard ? (
+          // Instruction card for first-time users (mobile swipe demo)
+          <div className="max-w-md mx-auto">
+            <InstructionCard onDismiss={handleDismissInstructionCard} />
+          </div>
         ) : (
-          // Empty state for no foods at all
+          // Empty state for no foods at all (after instruction card dismissed)
           <Card>
             <CardHeader>
               <CardTitle>I Tuoi Alimenti</CardTitle>
