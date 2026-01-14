@@ -427,132 +427,119 @@ npm install -D @types/node
 **Bug Fix**:
 - ✅ Fixed timezone issue causing foods to appear one day off in calendar
 
-#### Tasks (Giorno 5-6) - FUTURE (Fase 3 Parte 3)
-- [ ] Implementare MonthView component
-- [ ] Calendario grid con heatmap
-- [ ] Navigazione prev/next tra settimane
-- [ ] Integration opzionale con main dashboard
-
-#### Tasks (Giorno 7) - FUTURE
-- [ ] Polishing animazioni e transitions
-- [ ] Testing gesture su diversi device
-- [ ] Accessibility check (keyboard nav)
-- [ ] Performance optimization
-
-### Deliverables Fase 3
+### Deliverables Fase 3 ✅ COMPLETATA
 **Advanced UX**:
 - ✅ Swipe gestures fluidi su mobile (COMPLETATO - Parte 1)
 - ✅ Vista calendario settimanale funzionante (COMPLETATO - Parte 2)
-- ⏳ Vista calendario mensile con heatmap (TODO - Parte 3)
 - ✅ Animazioni smooth (COMPLETATO)
 
-### Definition of Done
+### Definition of Done ✅
 - [x] ✅ Swipe left/right funziona su mobile
 - [x] ✅ Calendario mostra scadenze correttamente
 - [x] ✅ Navigazione fluida tra viste (Lista/Calendario)
-- [ ] Feedback positivo da beta tester
+- [x] ✅ Testing su device reali completato
 
 ---
 
-## 🔔 Fase 4: Notifiche & PWA (Settimana 5)
+## 📱 Fase 4: Progressive Web App (Settimana 5)
 
-**Obiettivo**: Push notifications e Progressive Web App
+**Obiettivo**: Rendere l'app installabile come PWA con funzionalità offline
 
-### Week 5: Notifications & PWA
-
-#### Tasks (Giorno 1-2)
-- [ ] Setup service worker con Vite PWA plugin
-- [ ] Configurare manifest.json
-- [ ] Icons per PWA (varie dimensioni)
-- [ ] Test install prompt
-
-#### Tasks (Giorno 3-4)
-- [ ] Implementare notification permissions flow
-- [ ] Browser push notifications setup
-- [ ] Creare notification service
-- [ ] Notifica 3 giorni prima scadenza
-
-#### Tasks (Giorno 5-6)
-- [ ] Notifica giorno della scadenza
-- [ ] Weekly digest notification (opzionale)
-- [ ] Settings per configurare notifiche
-- [ ] Testing notifiche cross-browser
-
-#### Tasks (Giorno 7)
-- [ ] Offline mode basic (cache assets)
-- [ ] Loading states per offline
-- [ ] Testing PWA features
-- [ ] Documentation PWA install
-
-### Deliverables Fase 4
-✅ **PWA Completa**:
-- Installabile su home screen
-- Push notifications funzionanti
-- Settings notifiche personalizzabili
-- Offline basic mode
-
-### Definition of Done
-- [ ] App installabile come PWA
-- [ ] Ricevo notifiche per scadenze
-- [ ] Posso customizzare timing notifiche
-- [ ] Funziona offline (basic)
-
----
-
-## 🎯 Fase 5: Polish & Features Extra (Settimana 6-7)
-
-**Obiettivo**: Statistiche, condivisione liste, ottimizzazioni
-
-### Week 6: Statistics & Sharing
+### Week 5: PWA Setup
 
 #### Tasks (Giorno 1-3)
-- [ ] Database schema per shared_lists
-- [ ] UI per invitare utenti
-- [ ] Email invito con link
-- [ ] Accept/decline inviti
+- [ ] Setup service worker con Vite PWA plugin
+- [ ] Configurare manifest.json (nome, icone, colori, display mode)
+- [ ] Generare icons per PWA (varie dimensioni: 192x192, 512x512)
+- [ ] Configurare scope e start_url
+- [ ] Test install prompt su diversi browser
 
 #### Tasks (Giorno 4-5)
+- [ ] Implementare offline mode basic
+- [ ] Cache strategy per assets statici (CSS, JS, fonts)
+- [ ] Cache strategy per immagini
+- [ ] Fallback page per offline
+- [ ] Loading states per offline mode
+
+#### Tasks (Giorno 6-7)
+- [ ] Testing PWA features cross-browser
+- [ ] Test installazione su iOS Safari
+- [ ] Test installazione su Android Chrome
+- [ ] Verificare comportamento offline
+- [ ] Documentation PWA install per utenti
+
+### Deliverables Fase 4
+✅ **PWA Installabile**:
+- App installabile su home screen (iOS + Android)
+- Offline basic mode funzionante
+- Service worker con cache strategy
+- Manifest completo e conforme
+
+### Definition of Done
+- [ ] App installabile come PWA su mobile e desktop
+- [ ] Funziona offline (almeno UI base e assets cached)
+- [ ] Icons e splash screens corretti
+- [ ] Install prompt funziona
+
+---
+
+## ✨ Fase 5: Polish, Quality & Sharing (Settimana 6-7)
+
+**Obiettivo**: Condivisione liste, ottimizzazione, accessibilità, testing e preparazione al lancio
+
+### Week 6: Shared Lists & Quality
+
+#### Tasks (Giorno 1-2)
+- [ ] Database schema per shared_lists
+- [ ] Permissions system (owner, editor, viewer)
+- [ ] UI per invitare utenti
+- [ ] Email invito con link accept
+
+#### Tasks (Giorno 3-4)
 - [ ] Real-time updates con Supabase Realtime
 - [ ] Visual feedback per modifiche altrui
 - [ ] Conflict resolution strategy
 - [ ] Testing multi-user scenarios
 
-#### Tasks (Giorno 6-7)
-- [ ] Dashboard statistiche
-- [ ] Chart per waste tracking
-- [ ] Economic impact calculator
-- [ ] Monthly trends visualization
+#### Tasks (Giorno 5-6)
+- [ ] Dark mode implementation (theme toggle + CSS variables)
+- [ ] Accessibility audit completo (WCAG AA)
+- [ ] Keyboard navigation testing
+- [ ] Screen reader compatibility
+
+#### Tasks (Giorno 7)
+- [ ] Performance optimization (Lighthouse score >90)
+- [ ] Bundle size optimization (code splitting)
+- [ ] Image optimization e lazy loading
+- [ ] Database query optimization
 
 ### Week 7: Final Polish
 
 #### Tasks (Giorno 1-2)
-- [ ] Dark mode implementation
-- [ ] Accessibility audit completo
-- [ ] Performance optimization (Lighthouse >90)
-- [ ] Bundle size optimization
+- [ ] Cross-browser testing (Chrome, Safari, Firefox, Edge)
+- [ ] Mobile device testing (iOS + Android)
+- [ ] E2E tests critical paths (opzionale con Playwright)
+- [ ] Bug fixes da testing
+- [ ] Security review
 
 #### Tasks (Giorno 3-4)
-- [ ] E2E tests critical paths (Playwright)
-- [ ] Cross-browser testing
-- [ ] Mobile device testing
-- [ ] Bug fixes da testing
-
-#### Tasks (Giorno 5-7)
-- [ ] Documentation completa per utenti
-- [ ] Video demo/tutorial
-- [ ] Privacy policy & Terms
-- [ ] Preparazione launch
+- [ ] Documentation completa per utenti (guide + FAQ)
+- [ ] Privacy policy & Terms of Service
+- [ ] Video demo/tutorial (opzionale)
+- [ ] Preparazione materiali launch
 
 ### Deliverables Fase 5
 ✅ **Production Ready**:
-- Condivisione liste funzionante
-- Statistiche complete
-- Performance ottimizzata
-- Testing completo
+- Shared lists funzionante (multi-user collaboration)
+- Dark mode funzionante
+- Accessibility compliant (WCAG AA)
+- Performance ottimizzata (Lighthouse >90)
+- Testing completo cross-browser
+- Documentazione pronta
 
 ---
 
-## 🚢 Fase 6: Launch & Iteration (Settimana 8+)
+## 🚢 Fase 6: Launch & Iteration (Settimana 7+)
 
 **Obiettivo**: Release pubblica e raccolta feedback
 
@@ -579,6 +566,82 @@ npm install -D @types/node
 - [ ] Product Hunt launch (opzionale)
 - [ ] Post su r/SideProject, r/webdev
 - [ ] Portfolio update con case study
+
+---
+
+## 🌟 Desiderata - Feature Future (Senza Data Specifica)
+
+**Nota**: Queste feature sono desiderabili ma non essenziali per il lancio. Possono essere implementate in futuro in base a feedback utenti e priorità.
+
+### 📅 Calendar Enhancements
+
+**MonthView con Heatmap**
+- [ ] Implementare MonthView component
+- [ ] Calendario mensile a griglia (7x5/6)
+- [ ] Heatmap colorata per densità scadenze
+- [ ] Click su giorno → mostra dettaglio alimenti
+- [ ] Legend per interpretare colori heatmap
+
+**Navigation tra Periodi**
+- [ ] Bottoni prev/next per navigare tra settimane
+- [ ] Bottoni prev/next per navigare tra mesi
+- [ ] Indicatore periodo corrente
+- [ ] Jump to today button
+- [ ] Date picker per salto rapido
+
+### 🔔 Push Notifications System
+
+**Notification Setup**
+- [ ] Implementare notification permissions flow
+- [ ] Browser push notifications setup
+- [ ] Creare notification service con Supabase
+- [ ] Testing notifiche cross-browser
+
+**Notification Types**
+- [ ] Notifica 3 giorni prima scadenza
+- [ ] Notifica giorno della scadenza
+- [ ] Notifica per alimenti scaduti non consumati
+- [ ] Weekly digest notification (riepilogo settimanale)
+
+**Settings & Customization**
+- [ ] Settings page per gestire notifiche
+- [ ] Toggle on/off per ogni tipo notifica
+- [ ] Orario preferito per ricevere notifiche
+- [ ] Testing notifiche su device reali
+
+### 📊 Statistics & Analytics
+
+**Dashboard Statistiche**
+- [ ] Dashboard statistiche dettagliata
+- [ ] Chart per waste tracking (alimenti sprecati)
+- [ ] Economic impact calculator (stima risparmio)
+- [ ] Monthly trends visualization
+- [ ] Category breakdown (quale categoria spreca di più)
+
+**Advanced Metrics**
+- [ ] Tasso di consumo alimenti per categoria
+- [ ] Tempo medio prima consumo/scadenza
+- [ ] Prodotti più/meno sprecati
+- [ ] Export dati in CSV/PDF
+
+### 🚀 Advanced Features
+
+**Smart Suggestions**
+- [ ] Machine learning per durate prodotti personalizzate
+- [ ] Suggerimenti ricette basate su alimenti in scadenza
+- [ ] Shopping list integration
+- [ ] OCR per leggere date stampate da foto
+
+**Gamification**
+- [ ] Badges per obiettivi raggiunti (zero waste month)
+- [ ] Streak counter (giorni consecutivi senza sprechi)
+- [ ] Leaderboard tra amici (opzionale)
+
+**Integration & Export**
+- [ ] API pubblica per terze parti
+- [ ] Integration liste spesa (Bring!, AnyList, etc.)
+- [ ] Export backup completo dati
+- [ ] Import da CSV
 
 ---
 
@@ -631,37 +694,15 @@ Week 2: Polish & Validation
 
 ### Fase 4 (PWA)
 - [ ] Install prompt >50% conversion
-- [ ] Notifiche delivery rate >80%
 - [ ] Lighthouse PWA score >90
 - [ ] Offline basic funzionante
+- [ ] Installabile su iOS + Android
 
 ### Fase 5 (Polish)
 - [ ] Lighthouse score >90 tutte le metriche
 - [ ] Zero bug critici o blockers
-- [ ] Shared lists funzionante
+- [ ] Accessibility WCAG AA compliant
 - [ ] Documentation completa
-
----
-
-## 🔮 Post-Launch Roadmap (Opzionale)
-
-### Q1 Post-Launch
-- Machine learning per durate prodotti
-- OCR per date stampate
-- Integrazione liste spesa
-- Recipe suggestions AI
-
-### Q2 Post-Launch
-- App native iOS/Android (React Native)
-- Voice commands (Alexa/Google Home)
-- B2B features per ristoranti
-- API pubblica per terze parti
-
-### Q3 Post-Launch
-- Freemium model implementation
-- Premium features
-- Team collaboration features
-- Advanced analytics
 
 ---
 
@@ -704,15 +745,15 @@ Week 2: Polish & Validation
 
 ## 📅 Milestone Summary
 
-| Milestone | Target | Key Deliverable |
-|-----------|--------|-----------------|
-| M0: Setup | Week 0 | Progetto configurato |
-| M1: MVP | Week 2 | CRUD + Auth working |
-| M2: Barcode | Week 3 | Scanner funzionante |
-| M3: UX | Week 4 | Swipe + Calendar |
-| M4: PWA | Week 5 | Notifications + PWA |
-| M5: Polish | Week 7 | Feature complete |
-| M6: Launch | Week 8 | Public release |
+| Milestone | Target | Key Deliverable | Status |
+|-----------|--------|-----------------|--------|
+| M0: Setup | Week 0 | Progetto configurato | ✅ Completato |
+| M1: MVP | Week 2 | CRUD + Auth working | ✅ Completato |
+| M2: Barcode | Week 3 | Scanner funzionante | ✅ Completato |
+| M3: UX | Week 4 | Swipe + WeekView Calendar | ✅ Completato |
+| M4: PWA | Week 5 | App installabile + Offline | ⏳ Prossimo |
+| M5: Polish | Week 6 | Quality + Accessibility | 📋 Pianificato |
+| M6: Launch | Week 7+ | Public release + Beta | 🚀 Futuro |
 
 ---
 
@@ -720,13 +761,12 @@ Week 2: Polish & Validation
 
 **🎉 FASE 1 COMPLETATA! MVP DEPLOYED & TESTED 🎉**
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
-**🎉 FASE 3 PARTE 1 & 2 COMPLETATE! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
+**🎉 FASE 3 COMPLETATA! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
 
-**Fase Attuale**: Fase 3 - UX Enhancements (IN CORSO)
-**Progress Fase 3**: 80% ✅ (Swipe gestures + WeekView COMPLETATI, MonthView TODO)
+**Fase Attuale**: Pronto per Fase 4 - Progressive Web App
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `a9d3acd` - fix: use local timezone for calendar date formatting
-**Next Milestone**: MonthView (optional) o Fase 4 (PWA + Notifications)
+**Ultimo Commit**: `071cc5a` - docs: update roadmap with Phase 3 Part 2 completion
+**Next Milestone**: Fase 4 (PWA) - App installabile + Offline mode
 
 ---
 
@@ -911,32 +951,48 @@ Week 2: Polish & Validation
 
 ## 🎯 Prossimi Step
 
-### Fase 3 Completata (80%):
-- ✅ **Swipe gestures** - Completati (Parte 1)
-- ✅ **WeekView calendar** - Completata (Parte 2)
+### ✅ Fasi Completate:
+- ✅ **Fase 1: MVP** - CRUD + Auth + Filtri + Immagini
+- ✅ **Fase 2: Barcode** - Scanner + Open Food Facts API
+- ✅ **Fase 3: UX** - Swipe gestures + WeekView calendar
 
-### Fase 3 Opzionale (20%):
-- ⏳ **MonthView** con heatmap (opzionale)
-- ⏳ **Navigation prev/next** tra settimane/mesi (opzionale)
-
-### Prossima Fase - Fase 4: PWA & Notifications (Week 5):
-1. 📱 **PWA Setup**
+### ⏳ Prossima Fase - Fase 4: PWA (Week 5):
+1. 📱 **PWA Setup & Manifest**
    - Service worker con Vite PWA plugin
-   - Manifest.json e icons
-   - Install prompt
-2. 🔔 **Push Notifications**
-   - Notification permissions flow
-   - Notifiche scadenze (3 giorni prima, giorno stesso)
-   - Settings per customizzazione
-3. 📴 **Offline Mode**
-   - Cache assets per basic offline functionality
+   - Manifest.json completo (nome, icone, colori)
+   - Icons generazione (192x192, 512x512, favicon)
+   - Test install prompt (iOS + Android + Desktop)
 
-### Optional Improvements (Backlog):
-- 🎨 Dark mode
-- 📊 Advanced statistics dashboard
-- 🔔 Push notifications reminder
-- 👥 Shared lists (multi-user)
-- ♿ Accessibility audit completo
+2. 📴 **Offline Mode**
+   - Cache strategy per assets statici
+   - Cache strategy per immagini
+   - Fallback page per offline
+   - Testing comportamento offline
+
+3. 🧪 **Testing & Validation**
+   - Cross-browser testing (Chrome, Safari, Firefox)
+   - Mobile testing (iOS + Android)
+   - Verificare installazione smooth
+   - Documentation per utenti
+
+### 📋 Fase 5: Polish & Quality (Week 6):
+- 🎨 **Dark mode** + Theme toggle
+- ♿ **Accessibility audit** WCAG AA
+- ⚡ **Performance optimization** (Lighthouse >90)
+- 🧪 **Testing completo** + Bug fixes
+- 📚 **Documentation** + Privacy Policy
+
+### 🚀 Fase 6: Launch (Week 7+):
+- Beta testing con utenti reali
+- Marketing materials (demo video, landing page)
+- Public release
+
+### 🌟 Vedi sezione "Desiderata" per feature future:
+- MonthView con heatmap
+- Push notifications
+- Statistics dashboard
+- Shared lists (multi-user)
+- E altro...
 
 ---
 
