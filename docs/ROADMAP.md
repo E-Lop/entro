@@ -672,6 +672,32 @@ npm install -D @types/node
 - [ ] Export backup completo dati
 - [ ] Import da CSV
 
+### 📴 Offline-First Enhancements
+
+**Local Data Storage**
+- [ ] IndexedDB per cache locale degli alimenti
+- [ ] Sincronizzazione dati Supabase → IndexedDB
+- [ ] Visualizzazione alimenti cachati quando offline
+- [ ] Timestamp "ultimo aggiornamento" visibile
+
+**Background Sync**
+- [ ] Queue operazioni offline (add, edit, delete)
+- [ ] Sync automatico quando torna la connessione
+- [ ] Conflict resolution per modifiche concorrenti
+- [ ] Indicatore visivo "modifiche in attesa di sync"
+
+**Enhanced Caching**
+- [ ] Cache immagini alimenti in IndexedDB
+- [ ] Strategia cache per immagini signed URLs
+- [ ] Compressione immagini per cache locale
+- [ ] Gestione quota storage e pulizia automatica
+
+**Offline UX**
+- [ ] Editing alimenti offline (salvati localmente)
+- [ ] Indicatore sync status per ogni alimento
+- [ ] Notifica quando sync completato
+- [ ] Fallback graceful per funzionalità non disponibili
+
 ---
 
 ## 📊 Sprint Planning Template
