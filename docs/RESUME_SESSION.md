@@ -1,7 +1,7 @@
 # 🚀 Resume Session Guide - Entro Food Expiry Tracker
 
-**Ultima Sessione**: 12 Gennaio 2026
-**Status**: 🎉 Fase 2 COMPLETATA - Barcode Scanner Funzionante
+**Ultima Sessione**: 14 Gennaio 2026
+**Status**: 🎉 Fase 3 COMPLETATA - UX Enhancements (Swipe + Calendar)
 
 ---
 
@@ -15,9 +15,10 @@
 ### Fasi Completate ✅
 1. **Fase 1**: MVP Core (CRUD, Auth, Filters, Image Upload, Deploy) - ✅ COMPLETATA
 2. **Fase 2**: Barcode Scanner (ZXing, Open Food Facts, Form Pre-fill) - ✅ COMPLETATA
+3. **Fase 3**: UX Enhancements (Swipe gestures + Calendar WeekView) - ✅ COMPLETATA
 
 ### Prossima Fase 🎯
-**Fase 3**: UX Enhancements (Swipe gestures + Calendar view)
+**Fase 4**: PWA Essentials (Installable + Offline Mode)
 
 ---
 
@@ -29,32 +30,46 @@ Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 Ciao! Sto continuando lo sviluppo del progetto "entro" (food expiry tracker).
 
 CONTESTO:
-- Ho appena completato i Swipe Gestures (Fase 3 - Parte 1) con successo
-- La feature è deployed e testata su iPhone e Android
+- Ho completato la Fase 3 (UX Enhancements) con successo
+- L'app include ora swipe gestures e una vista calendario settimanale
 - L'app è in produzione su https://entro-il.netlify.app
+- La roadmap è stata riorganizzata con sezione Desiderata per feature future
 
 COSA È STATO FATTO:
 ✅ Fase 1: MVP completo (CRUD, auth, filters, images)
 ✅ Fase 2: Barcode scanner con ZXing + Open Food Facts API
-✅ Fase 3 - Parte 1: Swipe gestures implementation completa:
-  - SwipeableCard component con mobile detection
-  - Swipe right → Edit, Swipe left → Delete
+✅ Fase 3: UX Enhancements - COMPLETATA:
+  - Swipe gestures (right=edit, left=delete) con SwipeableCard
   - Animated hint su prima card (mini-swipe demo)
-  - InstructionCard per nuovi utenti senza alimenti
+  - InstructionCard per nuovi utenti
+  - WeekView component (vista calendario settimanale 7 giorni)
+  - Toggle Lista/Calendario nella dashboard
+  - CalendarFoodCard ultra-compatto (solo nome + quantità)
+  - DayColumn con header uniforme e badge conteggio
+  - Date utilities con gestione timezone locale
+  - Mobile: scroll orizzontale con snap
+  - Desktop: grid 7 colonne
   - Testing completo su iOS e Android
 
-PROSSIMO OBIETTIVO - Fase 3 (Parte 2):
-Implementare le Calendar Views:
-1. WeekView component (vista settimanale delle scadenze)
-2. MonthView component (calendario mensile con heatmap)
-3. Navigazione prev/next tra settimane/mesi
-4. Integrazione con dashboard principale
+ROADMAP REORGANIZZATA:
+- Fase 4: PWA Essentials (installable + offline mode)
+- Fase 5: Shared Lists + Polish + Quality
+- Fase 6: Advanced Features
+- Desiderata: MonthView, navigazione calendario, notifiche, statistiche
+
+PROSSIMO OBIETTIVO - Fase 4:
+Trasformare l'app in una Progressive Web App:
+1. Service Worker per offline support
+2. Web App Manifest per installabilità
+3. Cache strategy per dati critici
+4. Gestione sync offline/online
+5. Install prompt UI
 
 COSA VOGLIO FARE ORA:
-Iniziamo con la WeekView component. Vorrei una vista settimanale che mostri i giorni della settimana con gli alimenti che scadono in ogni giorno. Deve essere mobile-first, scrollabile orizzontalmente, e mostrare in modo chiaro quali alimenti scadono quando.
+Iniziamo con Phase 4 - PWA Essentials. Voglio rendere l'app installabile su mobile e far funzionare le funzionalità base anche offline. Consulta docs/ROADMAP.md per i dettagli della Fase 4.
 
 DOCUMENTI UTILI:
-- docs/ROADMAP.md (fasi e progress)
+- docs/ROADMAP.md (roadmap completa con Desiderata)
 - docs/BARCODE_BUG.md (bug fix journey della Fase 2)
 - README.md (setup e overview)
 
@@ -110,6 +125,9 @@ src/
 - ✅ Stats dashboard con color coding scadenze
 - ✅ **Barcode scanner** con ZXing + Open Food Facts
 - ✅ Form pre-fill automatico da barcode
+- ✅ **Swipe gestures** (edit/delete) con visual feedback
+- ✅ **Vista calendario settimanale** (WeekView component)
+- ✅ Toggle Lista/Calendario nella dashboard
 - ✅ Responsive design mobile-first
 - ✅ Deployed su Netlify con CI/CD
 
@@ -117,11 +135,14 @@ src/
 Nessun issue critico. L'app è stabile e funzionante.
 
 ### Tech Debt / Miglioramenti Futuri 📝
-- Dark mode (backlog)
-- Advanced statistics dashboard (backlog)
-- Push notifications (backlog)
-- Shared lists multi-user (backlog)
-- Accessibility audit completo (backlog)
+- PWA: Service Worker + Offline Mode (Fase 4 - prossima)
+- PWA: Web App Manifest + Installabilità (Fase 4 - prossima)
+- Shared lists multi-user (Fase 5)
+- Dark mode (Fase 5)
+- Accessibility audit completo (Fase 5)
+- MonthView calendar (Desiderata)
+- Push notifications (Desiderata)
+- Advanced statistics dashboard (Desiderata)
 
 ---
 
@@ -186,28 +207,33 @@ git push origin main  # Auto-deploy su Netlify
 
 ---
 
-## 🎯 Fase 3 - Preview
+## 🎯 Fase 4 - Preview
 
 ### Obiettivo
-Implementare UX enhancements per migliorare l'esperienza mobile.
+Trasformare l'app in una Progressive Web App (PWA) installabile e funzionante offline.
 
 ### Tasks Principali
-1. **Swipe Gestures** (react-swipeable)
-   - Swipe left → Edit
-   - Swipe right → Delete
-   - Visual feedback durante swipe
-   - Settings per enable/disable
+1. **Service Worker** (Workbox + Vite PWA Plugin)
+   - Offline support per UI statica
+   - Cache strategy per assets
+   - Background sync per dati
 
-2. **Calendar View**
-   - WeekView: Timeline orizzontale 7 giorni
-   - MonthView: Grid calendario con heatmap scadenze
-   - Navigation prev/next settimana/mese
-   - Click su giorno → mostra alimenti
+2. **Web App Manifest**
+   - Installabilità su iOS/Android
+   - Icons e splash screens
+   - Theme colors e display mode
+   - Screenshots per app stores
 
-3. **Animations**
-   - Framer Motion per transitions smooth
-   - Card animations enter/exit
-   - Skeleton loaders migliorati
+3. **Offline Mode**
+   - IndexedDB per cache dati locali
+   - Sync queue per operazioni offline
+   - UI feedback stato connessione
+   - Conflict resolution strategy
+
+4. **Install Prompt**
+   - Custom install button
+   - Onboarding PWA benefits
+   - Detect standalone mode
 
 ### Stima
 ~5-7 giorni part-time (~15-20 ore)
@@ -252,10 +278,11 @@ Implementare UX enhancements per migliorare l'esperienza mobile.
 
 **Fase 1 Completata**: 10 Gennaio 2026
 **Fase 2 Completata**: 12 Gennaio 2026
+**Fase 3 Completata**: 14 Gennaio 2026
 
-Ottimo lavoro! L'app è stabile, performante e pronta per nuove features.
+Ottimo lavoro! L'app è stabile, performante, con UX moderna (swipe + calendario). Pronta per diventare una PWA!
 
 ---
 
-**Ultimo Update**: 12 Gennaio 2026
-**Next Session**: Fase 3 - UX Enhancements 🚀
+**Ultimo Update**: 14 Gennaio 2026
+**Next Session**: Fase 4 - PWA Essentials 🚀
