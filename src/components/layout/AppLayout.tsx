@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { AppIcon } from '../ui/AppIcon'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,9 +34,7 @@ export function AppLayout() {
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo / Brand */}
           <div className="flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="text-xl font-bold">E</span>
-            </div>
+            <AppIcon size={40} className="rounded-lg" />
             <div>
               <h1 className="text-lg font-bold text-slate-900">entro</h1>
               <p className="text-xs text-slate-500">Food Expiry Tracker</p>
