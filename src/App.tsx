@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import TestConnection from './pages/TestConnection'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
+import { OfflineBanner } from './components/pwa/OfflineBanner'
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize)
@@ -30,6 +31,7 @@ function App() {
 
   return (
     <>
+      <OfflineBanner />
       <BrowserRouter>
         <Routes>
           {/* Public routes */}

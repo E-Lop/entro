@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#16a34a"/>
+
+  <!-- Clock face (representing time/expiry) -->
+  <circle cx="256" cy="256" r="180" fill="white"/>
+
+  <!-- Clock hands -->
+  <line x1="256" y1="256" x2="256" y2="140" stroke="#16a34a" stroke-width="16" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="340" y2="256" stroke="#16a34a" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Center dot -->
+  <circle cx="256" cy="256" r="16" fill="#16a34a"/>
+
+  <!-- Small leaf accent (food theme) -->
+  <path d="M380 120 Q420 80 420 120 Q420 160 380 160 Q340 160 380 120" fill="#22c55e"/>
+  <line x1="380" y1="140" x2="400" y2="100" stroke="#166534" stroke-width="4"/>
+</svg>
