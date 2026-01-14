@@ -780,8 +780,8 @@ Week 2: Polish & Validation
 | M1: MVP | Week 2 | CRUD + Auth working | ✅ Completato |
 | M2: Barcode | Week 3 | Scanner funzionante | ✅ Completato |
 | M3: UX | Week 4 | Swipe + WeekView Calendar | ✅ Completato |
-| M4: PWA | Week 5 | App installabile + Offline | ⏳ Prossimo |
-| M5: Polish | Week 6 | Quality + Accessibility | 📋 Pianificato |
+| M4: PWA | Week 5 | App installabile + Offline | ✅ Completato |
+| M5: Polish | Week 6 | Quality + Accessibility | ⏳ Prossimo |
 | M6: Launch | Week 7+ | Public release + Beta | 🚀 Futuro |
 
 ---
@@ -791,11 +791,12 @@ Week 2: Polish & Validation
 **🎉 FASE 1 COMPLETATA! MVP DEPLOYED & TESTED 🎉**
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
 **🎉 FASE 3 COMPLETATA! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
+**🎉 FASE 4 COMPLETATA! PWA INSTALLABILE + OFFLINE MODE 🎉**
 
-**Fase Attuale**: Pronto per Fase 4 - Progressive Web App
+**Fase Attuale**: Pronto per Fase 5 - Polish, Quality & Sharing
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `071cc5a` - docs: update roadmap with Phase 3 Part 2 completion
-**Next Milestone**: Fase 4 (PWA) - App installabile + Offline mode
+**Ultimo Commit**: `84060d5` - feat: update app header icon to match PWA design
+**Next Milestone**: Fase 5 (Polish) - Dark mode, Accessibility, Performance
 
 ---
 
