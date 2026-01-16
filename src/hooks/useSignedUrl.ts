@@ -43,8 +43,18 @@ export function useSignedUrl(storagePath: string | null | undefined, expiresIn: 
       })
       .catch((err) => {
         if (!isCancelled) {
-          console.error('Error generating signed URL:', err)
-          setError(err instanceof Error ? err : new Error('Errore nel caricamento dell\'immagine'))
+          // Check if error is IMAGE_NOT_FOUND (expected for deleted images)
+          const isImageNotFound = err instanceof Error && err.message === 'IMAGE_NOT_FOUND'
+
+          if (isImageNotFound) {
+            // Silently handle missing images - this is expected when images are deleted
+            // from storage but database still has references
+            setError(new Error('IMAGE_NOT_FOUND'))
+          } else {
+            // Log unexpected errors
+            console.error('Error generating signed URL:', err)
+            setError(err instanceof Error ? err : new Error('Errore nel caricamento dell\'immagine'))
+          }
         }
       })
       .finally(() => {

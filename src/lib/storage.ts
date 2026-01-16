@@ -135,6 +135,7 @@ export async function deleteFoodImage(imagePathOrUrl: string, userId: string): P
  * @param imagePath - Storage path (e.g. "user_id/filename.jpg")
  * @param expiresIn - Expiration time in seconds (default: 1 hour)
  * @returns Signed URL that expires after the specified time
+ * @throws Error if image retrieval fails (except for missing images)
  */
 export async function getSignedImageUrl(imagePath: string, expiresIn: number = 3600): Promise<string> {
   const { data, error } = await supabase.storage
@@ -142,6 +143,17 @@ export async function getSignedImageUrl(imagePath: string, expiresIn: number = 3
     .createSignedUrl(imagePath, expiresIn)
 
   if (error) {
+    // Check if error is "Object not found" - this is expected for deleted images
+    const isNotFound = error.message?.toLowerCase().includes('object not found') ||
+                       error.message?.toLowerCase().includes('not found')
+
+    if (isNotFound) {
+      // Don't spam console with expected errors for missing images
+      // This happens when images are deleted from storage but DB still has references
+      throw new Error('IMAGE_NOT_FOUND')
+    }
+
+    // For other errors, log and throw
     console.error('Error creating signed URL:', error)
     throw new Error('Errore durante il recupero dell\'immagine')
   }
