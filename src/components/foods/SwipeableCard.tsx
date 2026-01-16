@@ -168,7 +168,7 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
       <div
         {...handlers}
         className={cn(
-          'relative bg-white',
+          'relative bg-card',
           isAnimating ? 'transition-transform duration-200 ease-out' : '',
           className
         )}

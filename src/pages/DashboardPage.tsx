@@ -267,10 +267,10 @@ export function DashboardPage() {
       {/* Welcome Section - Compact on Mobile */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Ciao, {user?.email?.split('@')[0] || 'Utente'}!
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 mt-1">
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Gestisci le scadenze e riduci gli sprechi.
           </p>
         </div>
@@ -294,9 +294,9 @@ export function DashboardPage() {
           onClick={() => handleQuickFilter('all')}
         >
           <CardContent className="p-4 flex flex-col items-center text-center">
-            <ShoppingBasket className="h-6 w-6 text-slate-600 mb-2" />
+            <ShoppingBasket className="h-6 w-6 text-muted-foreground mb-2" />
             <div className="text-2xl font-bold mb-1">{stats.total}</div>
-            <p className="text-xs text-slate-600 leading-tight">Totali</p>
+            <p className="text-xs text-muted-foreground leading-tight">Totali</p>
           </CardContent>
         </Card>
 
@@ -309,7 +309,7 @@ export function DashboardPage() {
           <CardContent className="p-4 flex flex-col items-center text-center">
             <CalendarDays className="h-6 w-6 text-orange-600 mb-2" />
             <div className="text-2xl font-bold mb-1">{stats.expiringSoon}</div>
-            <p className="text-xs text-slate-600 leading-tight">In scadenza</p>
+            <p className="text-xs text-muted-foreground leading-tight">In scadenza</p>
           </CardContent>
         </Card>
 
@@ -322,7 +322,7 @@ export function DashboardPage() {
           <CardContent className="p-4 flex flex-col items-center text-center">
             <AlertTriangle className="h-6 w-6 text-red-600 mb-2" />
             <div className="text-2xl font-bold mb-1">{stats.expired}</div>
-            <p className="text-xs text-slate-600 leading-tight">Scaduti</p>
+            <p className="text-xs text-muted-foreground leading-tight">Scaduti</p>
           </CardContent>
         </Card>
       </div>
@@ -342,8 +342,8 @@ export function DashboardPage() {
       {foodsLoading ? (
         <div className="flex items-center justify-center py-12">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600"></div>
-            <div className="text-slate-600">Caricamento alimenti...</div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary"></div>
+            <div className="text-muted-foreground">Caricamento alimenti...</div>
           </div>
         </div>
       ) : foods.length === 0 ? (
@@ -352,11 +352,11 @@ export function DashboardPage() {
           <Card>
             <CardContent className="py-12">
               <div className="flex flex-col items-center justify-center text-center">
-                <ShoppingBasket className="h-16 w-16 text-slate-300 mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <ShoppingBasket className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Nessun risultato trovato
                 </h3>
-                <p className="text-sm text-slate-600 max-w-sm mb-6">
+                <p className="text-sm text-muted-foreground max-w-sm mb-6">
                   Non ci sono alimenti che corrispondono ai filtri selezionati.
                   Prova a modificare i criteri di ricerca o cancella i filtri.
                 </p>
@@ -383,11 +383,11 @@ export function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <ShoppingBasket className="h-16 w-16 text-slate-300 mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                <ShoppingBasket className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Nessun alimento ancora
                 </h3>
-                <p className="text-sm text-slate-600 max-w-sm mb-6">
+                <p className="text-sm text-muted-foreground max-w-sm mb-6">
                   Inizia ad aggiungere gli alimenti dalla tua dispensa, frigo o freezer
                   per tenere traccia delle scadenze.
                 </p>
@@ -409,8 +409,8 @@ export function DashboardPage() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
                   viewMode === 'list'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 )}
               >
                 <List className="h-4 w-4" />
@@ -422,8 +422,8 @@ export function DashboardPage() {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
                   viewMode === 'calendar'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 )}
               >
                 <Calendar className="h-4 w-4" />
@@ -431,7 +431,7 @@ export function DashboardPage() {
               </button>
             </div>
             {activeFiltersCount > 0 && (
-              <span className="text-sm text-slate-600">
+              <span className="text-sm text-muted-foreground">
                 {foods.length} risultat{foods.length === 1 ? 'o' : 'i'} filtrat{foods.length === 1 ? 'o' : 'i'}
               </span>
             )}

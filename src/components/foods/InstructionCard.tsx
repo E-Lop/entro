@@ -33,19 +33,19 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
         <CardContent className="space-y-4 pb-4">
           {/* Instructions */}
           <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-blue-200">
+            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-blue-200">
               <ArrowRight className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-slate-900">Swipe verso destra</p>
-                <p className="text-slate-600 text-xs mt-0.5">Modifica un alimento</p>
+                <p className="font-medium text-foreground">Swipe verso destra</p>
+                <p className="text-muted-foreground text-xs mt-0.5">Modifica un alimento</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 bg-white rounded-lg p-3 border border-blue-200">
+            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-blue-200">
               <ArrowLeft className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-slate-900">Swipe verso sinistra</p>
-                <p className="text-slate-600 text-xs mt-0.5">Elimina un alimento</p>
+                <p className="font-medium text-foreground">Swipe verso sinistra</p>
+                <p className="text-muted-foreground text-xs mt-0.5">Elimina un alimento</p>
               </div>
             </div>
           </div>

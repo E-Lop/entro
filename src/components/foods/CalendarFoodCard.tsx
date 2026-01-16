@@ -14,13 +14,13 @@ export function CalendarFoodCard({ food, onEdit }: CalendarFoodCardProps) {
   return (
     <Card
       onClick={() => onEdit(food)}
-      className="cursor-pointer hover:bg-slate-50 transition-colors border-slate-200"
+      className="cursor-pointer hover:bg-muted/50 transition-colors border-border"
     >
       <CardContent className="p-2">
-        <p className="text-sm text-slate-900 truncate">
+        <p className="text-sm text-foreground truncate">
           {food.name}
           {food.quantity && food.quantity_unit && (
-            <span className="text-slate-600 ml-1">
+            <span className="text-muted-foreground ml-1">
               ({food.quantity}{food.quantity_unit})
             </span>
           )}

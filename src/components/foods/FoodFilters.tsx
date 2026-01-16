@@ -80,8 +80,8 @@ export function FoodFilters({
             className="flex w-full items-center justify-between text-left focus:outline-none"
           >
             <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-5 w-5 text-slate-600" />
-              <h3 className="font-semibold text-slate-900">Filtri e Ricerca</h3>
+              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+              <h3 className="font-semibold text-foreground">Filtri e Ricerca</h3>
               {activeFiltersCount > 0 && (
                 <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                   {activeFiltersCount}
@@ -97,16 +97,16 @@ export function FoodFilters({
                     e.stopPropagation()
                     onClearFilters()
                   }}
-                  className="text-slate-600 hover:text-slate-900"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-4 w-4 mr-1" />
                   <span className="hidden sm:inline">Cancella</span>
                 </Button>
               )}
               {isExpanded ? (
-                <ChevronUp className="h-5 w-5 text-slate-600" />
+                <ChevronUp className="h-5 w-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-slate-600" />
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
               )}
             </div>
           </button>
@@ -118,7 +118,7 @@ export function FoodFilters({
               <div className="space-y-2">
                 <Label htmlFor="search">Cerca per nome</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                   <Input
                     id="search"
                     type="text"

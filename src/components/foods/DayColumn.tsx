@@ -17,10 +17,10 @@ export function DayColumn({ date, foods, onEdit }: DayColumnProps) {
   const itemCount = foods.length
 
   return (
-    <div className="flex flex-col h-full min-h-[400px] border border-slate-200 rounded-lg bg-white p-3">
+    <div className="flex flex-col h-full min-h-[400px] border border-border rounded-lg bg-card p-3">
       {/* Day Header (sticky) */}
-      <div className="sticky top-0 bg-white pb-2 mb-3 border-b border-slate-200 z-10">
-        <div className="text-sm font-medium text-slate-900 mb-1">
+      <div className="sticky top-0 bg-card pb-2 mb-3 border-b border-border z-10">
+        <div className="text-sm font-medium text-foreground mb-1">
           {format(date, 'EEEE dd MMM', { locale: it })}
         </div>
         <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
@@ -41,7 +41,7 @@ export function DayColumn({ date, foods, onEdit }: DayColumnProps) {
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <CheckCircle className="h-8 w-8 text-green-400 mb-2" />
-            <p className="text-xs text-slate-500">Nessuna scadenza</p>
+            <p className="text-xs text-muted-foreground/70">Nessuna scadenza</p>
           </div>
         )}
       </div>

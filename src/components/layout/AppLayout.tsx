@@ -2,6 +2,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { AppIcon } from '../ui/AppIcon'
+import { ThemeToggle } from './ThemeToggle'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,33 +29,37 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo / Brand */}
           <div className="flex items-center gap-2">
             <AppIcon size={40} className="rounded-lg" />
             <div>
-              <h1 className="text-lg font-bold text-slate-900">entro</h1>
-              <p className="text-xs text-slate-500">Food Expiry Tracker</p>
+              <h1 className="text-lg font-bold text-foreground">entro</h1>
+              <p className="text-xs text-muted-foreground">Food Expiry Tracker</p>
             </div>
           </div>
 
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <User className="h-5 w-5" />
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <User className="h-5 w-5" />
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">Il mio account</p>
-                  <p className="text-xs leading-none text-slate-500">
+                  <p className="text-xs leading-none text-muted-foreground">
                     {user?.email || 'Utente'}
                   </p>
                 </div>
@@ -68,7 +73,8 @@ export function AppLayout() {
                 <span>Disconnetti</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
