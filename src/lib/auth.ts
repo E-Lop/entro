@@ -106,12 +106,28 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data, error } = await supabase.auth.getUser()
 
     if (error) {
-      throw new Error(error.message)
+      // "Auth session missing" is expected when user is not logged in
+      // Don't log this as an error
+      const isSessionMissing = error.message?.toLowerCase().includes('session') &&
+                               error.message?.toLowerCase().includes('missing')
+
+      if (!isSessionMissing) {
+        console.error('Error getting current user:', error)
+      }
+
+      return null
     }
 
     return data.user
   } catch (error) {
-    console.error('Error getting current user:', error)
+    // Only log unexpected errors
+    const errorMessage = error instanceof Error ? error.message : ''
+    const isSessionMissing = errorMessage.toLowerCase().includes('session') &&
+                             errorMessage.toLowerCase().includes('missing')
+
+    if (!isSessionMissing) {
+      console.error('Error getting current user:', error)
+    }
     return null
   }
 }
