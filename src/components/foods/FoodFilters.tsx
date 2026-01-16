@@ -75,41 +75,39 @@ export function FoodFilters({
       <CardContent className="pt-6">
         <div className="space-y-4">
           {/* Header with Toggle Button */}
-          <button
-            onClick={onToggle}
-            className="flex w-full items-center justify-between text-left focus:outline-none"
-          >
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+          <div className="flex w-full items-center justify-between">
+            <button
+              onClick={onToggle}
+              className="flex flex-1 items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-1 -m-1"
+              aria-expanded={isExpanded}
+              aria-label="Espandi o comprimi filtri"
+            >
+              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
               <h3 className="font-semibold text-foreground">Filtri e Ricerca</h3>
               {activeFiltersCount > 0 && (
                 <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                   {activeFiltersCount}
                 </span>
               )}
-            </div>
-            <div className="flex items-center gap-2">
-              {activeFiltersCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onClearFilters()
-                  }}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Cancella</span>
-                </Button>
-              )}
               {isExpanded ? (
-                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                <ChevronUp className="h-5 w-5 text-muted-foreground ml-auto" aria-hidden="true" />
               ) : (
-                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                <ChevronDown className="h-5 w-5 text-muted-foreground ml-auto" aria-hidden="true" />
               )}
-            </div>
-          </button>
+            </button>
+            {activeFiltersCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClearFilters}
+                className="text-muted-foreground hover:text-foreground ml-2"
+                aria-label="Cancella tutti i filtri"
+              >
+                <X className="h-4 w-4 mr-1" aria-hidden="true" />
+                <span className="hidden sm:inline">Cancella</span>
+              </Button>
+            )}
+          </div>
 
           {/* Collapsible Content */}
           {isExpanded && (

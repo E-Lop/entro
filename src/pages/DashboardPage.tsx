@@ -292,7 +292,7 @@ export function DashboardPage() {
         <button
           onClick={() => handleQuickFilter('all')}
           className={cn(
-            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card",
+            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card text-card-foreground shadow",
             !filters.status || filters.status === 'all' ? 'ring-2 ring-blue-500' : ''
           )}
           aria-label={`Mostra tutti gli alimenti (${stats.total})`}
@@ -308,7 +308,7 @@ export function DashboardPage() {
         <button
           onClick={() => handleQuickFilter('expiring_soon')}
           className={cn(
-            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card",
+            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card text-card-foreground shadow",
             filters.status === 'expiring_soon' ? 'ring-2 ring-orange-500' : ''
           )}
           aria-label={`Mostra alimenti in scadenza (${stats.expiringSoon})`}
@@ -324,7 +324,7 @@ export function DashboardPage() {
         <button
           onClick={() => handleQuickFilter('expired')}
           className={cn(
-            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card",
+            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card text-card-foreground shadow",
             filters.status === 'expired' ? 'ring-2 ring-red-500' : ''
           )}
           aria-label={`Mostra alimenti scaduti (${stats.expired})`}
