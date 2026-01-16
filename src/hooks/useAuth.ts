@@ -12,11 +12,11 @@ export function useAuth() {
   const { user, session, loading, isAuthenticated } = useAuthStore()
 
   /**
-   * Sign up a new user
+   * Sign up a new user with full name
    */
-  const signUp = useCallback(async (email: string, password: string) => {
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     try {
-      const { user, error } = await authService.signUp(email, password)
+      const { user, error } = await authService.signUp(email, password, fullName)
 
       if (error) {
         toast.error(error.message)

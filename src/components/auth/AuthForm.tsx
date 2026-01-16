@@ -24,7 +24,7 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
     defaultValues: {
       email: '',
       password: '',
-      ...(mode === 'signup' && { confirmPassword: '' }),
+      ...(mode === 'signup' && { full_name: '', confirmPassword: '' }),
     },
   })
 
@@ -37,7 +37,9 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
       if (mode === 'login') {
         result = await signIn(data.email, data.password)
       } else {
-        result = await signUp(data.email, data.password)
+        // Type assertion safe here because we know signup form has full_name
+        const signupData = data as SignupFormData
+        result = await signUp(data.email, data.password, signupData.full_name)
       }
 
       if (result.success) {
@@ -52,6 +54,29 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Full Name Field (only for signup) */}
+        {mode === 'signup' && (
+          <FormField
+            control={form.control}
+            name="full_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Mario Rossi"
+                    autoComplete="name"
+                    disabled={isSubmitting}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         {/* Email Field */}
         <FormField
           control={form.control}

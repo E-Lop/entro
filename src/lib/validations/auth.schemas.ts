@@ -11,9 +11,15 @@ export const loginSchema = z.object({
     .min(6, 'La password deve contenere almeno 6 caratteri'),
 })
 
-// Signup schema: email + password + confirmPassword (passwords must match)
+// Signup schema: full_name + email + password + confirmPassword (passwords must match)
 export const signupSchema = z
   .object({
+    full_name: z
+      .string()
+      .min(1, 'Nome richiesto')
+      .min(2, 'Il nome deve contenere almeno 2 caratteri')
+      .max(100, 'Il nome non può superare 100 caratteri')
+      .trim(),
     email: z
       .string()
       .min(1, 'Email richiesta')

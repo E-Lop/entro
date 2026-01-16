@@ -12,16 +12,22 @@ export interface AuthResponse {
 }
 
 /**
- * Sign up a new user with email and password
+ * Sign up a new user with email, password, and full name
  */
 export async function signUp(
   email: string,
-  password: string
+  password: string,
+  fullName: string
 ): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
     })
 
     if (error) {

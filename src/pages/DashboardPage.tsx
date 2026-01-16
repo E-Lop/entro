@@ -270,7 +270,7 @@ export function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Ciao, {user?.email?.split('@')[0] || 'Utente'}!
+            Ciao, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Utente'}!
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Gestisci le scadenze e riduci gli sprechi.
