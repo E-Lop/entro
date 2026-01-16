@@ -544,9 +544,14 @@ npm install -D @types/node
 - [ ] Focus management e ARIA labels
 
 #### Tasks (Giorno 5-6)
-- [ ] Database schema per shared_lists
-- [ ] Permissions system (owner, editor, viewer)
-- [ ] Add 'Nome' field for users and update greeting
+- [ ] Database schema per shared_lists (opzionale, complesso)
+- [ ] Permissions system (owner, editor, viewer) (opzionale)
+- [x] ✅ Add 'Nome' field for users and update greeting
+  - Campo "Nome" nel form di registrazione
+  - Salvataggio in user_metadata di Supabase Auth
+  - Dashboard: "Ciao, {nome}!" invece di "Ciao, {email}!"
+  - User menu: display nome completo
+  - Fallback graceful per utenti esistenti
 - [ ] UI per invitare utenti (opzionale)
 
 #### Tasks (Giorno 7)
@@ -830,20 +835,20 @@ Week 2: Polish & Validation
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
 **🎉 FASE 3 COMPLETATA! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
 **🎉 FASE 4 COMPLETATA! PWA INSTALLABILE + OFFLINE MODE 🎉**
-**🔄 FASE 5 IN CORSO! DARK MODE + PERFORMANCE COMPLETATI 🚀**
+**🔄 FASE 5 IN CORSO! ACCESSIBILITY + NOME FIELD COMPLETATI 🚀**
 
-**Fase Attuale**: Fase 5 - Polish, Quality & Sharing (2/7 tasks done)
+**Fase Attuale**: Fase 5 - Polish, Quality & Sharing (4/7 tasks done)
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `b1f6cf6` - perf: implement comprehensive code splitting and bundle optimization
-**Next Milestone**: Accessibility Audit WCAG AA
+**Ultimo Commit**: `8a6e223` - feat: add full name field for user registration and personalized greeting
+**Next Milestone**: Cross-browser testing
 
 ### Fase 5 Progress:
 - ✅ Dark Mode (light/dark/system + theme toggle)
 - ✅ Performance Optimization (75% bundle reduction, lazy loading)
-- ⏳ Accessibility Audit WCAG AA - PROSSIMO
-- ⏳ Shared Lists Multi-User (opzionale)
-- ⏳ Add 'Nome' field for users
-- ⏳ Cross-browser testing
+- ✅ Accessibility Audit WCAG AA (core implementation + manual testing)
+- ✅ Add 'Nome' field for users (registration + personalized greeting)
+- ⏳ Shared Lists Multi-User (opzionale, complesso)
+- ⏳ Cross-browser testing - PROSSIMO
 - ⏳ Final bug fixes and polish
 
 ---
@@ -1093,6 +1098,74 @@ Week 2: Polish & Validation
 
 ### **Risultato**:
 🎉 **Fase 5 (2/7 tasks) COMPLETATA!** Dark mode + Performance optimization deployed in production.
+
+---
+
+## 📅 Sessione 16/01/2026 - Fase 5: Accessibility + Nome Field
+
+### **Accessibility Audit WCAG AA** (Task 3) ✅ COMPLETATO:
+
+**Core Implementation**:
+1. ✅ Skip link "Vai al contenuto principale"
+2. ✅ Semantic HTML: nav landmark, role="group" for button groups
+3. ✅ Heading hierarchy fixed (single h1 per page)
+4. ✅ Keyboard navigation: all interactive elements accessible
+5. ✅ Stats cards converted to semantic buttons with aria-pressed
+6. ✅ View toggles with aria-label and aria-pressed
+7. ✅ ARIA labels for all buttons (Edit, Delete, Camera, Gallery, Remove)
+8. ✅ Decorative icons marked with aria-hidden="true"
+9. ✅ Form error messages with role="alert"
+10. ✅ Expiry badge with role="status" + aria-label
+11. ✅ Focus management: focus-visible:ring-2 on all interactive elements
+12. ✅ Comprehensive documentation in ACCESSIBILITY_AUDIT.md
+
+**Bug Fix**:
+- ✅ Fixed nested <button> error in FoodFilters component
+- ✅ Separated toggle button from "Cancella" Button
+- ✅ Added aria-expanded for toggle button state
+
+**Manual Testing Completed**:
+- ✅ Keyboard navigation tested
+- ✅ Screen reader compatibility verified
+- ✅ Color contrast checked (light + dark mode)
+- ✅ Focus indicators working correctly
+
+**Commits**:
+- `8d1d3b6` - feat: implement comprehensive WCAG AA accessibility improvements
+- `583037a` - fix: resolve nested button error in FoodFilters and improve stats cards styling
+
+---
+
+### **Add Nome Field** (Task 5) ✅ COMPLETATO:
+
+**Implementation**:
+1. ✅ Campo "Nome" aggiunto nel form di registrazione
+2. ✅ Validation: required, min 2 chars, max 100 chars, trimmed
+3. ✅ Salvataggio in user_metadata di Supabase Auth
+4. ✅ Dashboard: "Ciao, {nome}!" invece di "Ciao, {email}!"
+5. ✅ User menu: display nome completo
+6. ✅ Fallback graceful per utenti esistenti senza nome
+
+**File Modificati**:
+- `auth.schemas.ts`: signupSchema con campo full_name
+- `auth.ts`: signUp() accetta fullName e lo salva in metadata
+- `useAuth.ts`: hook aggiornato per passare fullName
+- `AuthForm.tsx`: campo Nome nel form di signup
+- `DashboardPage.tsx`: display nome nel saluto
+- `AppLayout.tsx`: display nome nel user menu
+
+**Technical Details**:
+- User metadata: user.user_metadata.full_name
+- No database migration needed (usa Supabase Auth metadata)
+- Backward compatible con utenti esistenti
+- TypeScript types aggiornati
+
+**Commit**: `8a6e223` - feat: add full name field for user registration and personalized greeting
+
+---
+
+### **Risultato Sessione**:
+🎉 **Fase 5 (4/7 tasks) AVANZATA!** Accessibility + Nome field completati con successo.
 
 ---
 
