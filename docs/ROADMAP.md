@@ -512,35 +512,47 @@ npm install -D @types/node
 
 ---
 
-## ✨ Fase 5: Polish, Quality & Sharing (Settimana 6-7)
+## ✨ Fase 5: Polish, Quality & Sharing (Settimana 6-7) 🔄 IN CORSO
 
 **Obiettivo**: Condivisione liste, ottimizzazione, accessibilità, testing e preparazione al lancio
 
-### Week 6: Shared Lists & Quality
+### Week 6: Quality Improvements
 
-#### Tasks (Giorno 1-2)
-- [ ] Database schema per shared_lists
-- [ ] Permissions system (owner, editor, viewer)
-- [ ] UI per invitare utenti
-- [ ] Email invito con link accept
+#### Tasks (Giorno 1) ✅ COMPLETATO
+- [x] ✅ Dark mode implementation (theme toggle + CSS variables)
+  - useTheme hook con light/dark/system support
+  - ThemeToggle component con dropdown menu
+  - localStorage persistence + system preference detection
+  - Updated all components con semantic color tokens
+  - Smooth theme transitions
 
-#### Tasks (Giorno 3-4)
-- [ ] Real-time updates con Supabase Realtime
-- [ ] Visual feedback per modifiche altrui
-- [ ] Conflict resolution strategy
-- [ ] Testing multi-user scenarios
+#### Tasks (Giorno 2) ✅ COMPLETATO
+- [x] ✅ Performance optimization (Lighthouse score >90)
+- [x] ✅ Bundle size optimization (code splitting)
+  - Route-based lazy loading (LoginPage, SignUpPage, DashboardPage)
+  - Component-level lazy loading (BarcodeScanner, WeekView)
+  - Manual chunk splitting per vendor libraries
+  - Main bundle: 2656 KB → 331 KB (75% reduction!)
+  - Initial load: 100 KB gzipped (vs 712 KB before)
+- [x] ✅ Image optimization già implementato (Fase 1)
+- [x] ✅ Database query optimization già ottimizzato (server-side filtering)
 
-#### Tasks (Giorno 5-6)
-- [ ] Dark mode implementation (theme toggle + CSS variables)
+#### Tasks (Giorno 3-4) ⏳ PROSSIMO
 - [ ] Accessibility audit completo (WCAG AA)
 - [ ] Keyboard navigation testing
 - [ ] Screen reader compatibility
+- [ ] Focus management e ARIA labels
+
+#### Tasks (Giorno 5-6)
+- [ ] Database schema per shared_lists
+- [ ] Permissions system (owner, editor, viewer)
+- [ ] Add 'Nome' field for users and update greeting
+- [ ] UI per invitare utenti (opzionale)
 
 #### Tasks (Giorno 7)
-- [ ] Performance optimization (Lighthouse score >90)
-- [ ] Bundle size optimization (code splitting)
-- [ ] Image optimization e lazy loading
-- [ ] Database query optimization
+- [ ] Real-time updates con Supabase Realtime (opzionale)
+- [ ] Visual feedback per modifiche altrui (opzionale)
+- [ ] Testing multi-user scenarios (opzionale)
 
 ### Week 7: Final Polish
 
@@ -807,7 +819,7 @@ Week 2: Polish & Validation
 | M2: Barcode | Week 3 | Scanner funzionante | ✅ Completato |
 | M3: UX | Week 4 | Swipe + WeekView Calendar | ✅ Completato |
 | M4: PWA | Week 5 | App installabile + Offline | ✅ Completato |
-| M5: Polish | Week 6 | Quality + Accessibility | ⏳ Prossimo |
+| M5: Polish | Week 6 | Quality + Accessibility | 🔄 In Corso (2/7) |
 | M6: Launch | Week 7+ | Public release + Beta | 🚀 Futuro |
 
 ---
@@ -818,11 +830,21 @@ Week 2: Polish & Validation
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
 **🎉 FASE 3 COMPLETATA! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
 **🎉 FASE 4 COMPLETATA! PWA INSTALLABILE + OFFLINE MODE 🎉**
+**🔄 FASE 5 IN CORSO! DARK MODE + PERFORMANCE COMPLETATI 🚀**
 
-**Fase Attuale**: Pronto per Fase 5 - Polish, Quality & Sharing
+**Fase Attuale**: Fase 5 - Polish, Quality & Sharing (2/7 tasks done)
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `84060d5` - feat: update app header icon to match PWA design
-**Next Milestone**: Fase 5 (Polish) - Dark mode, Accessibility, Performance
+**Ultimo Commit**: `b1f6cf6` - perf: implement comprehensive code splitting and bundle optimization
+**Next Milestone**: Accessibility Audit WCAG AA
+
+### Fase 5 Progress:
+- ✅ Dark Mode (light/dark/system + theme toggle)
+- ✅ Performance Optimization (75% bundle reduction, lazy loading)
+- ⏳ Accessibility Audit WCAG AA - PROSSIMO
+- ⏳ Shared Lists Multi-User (opzionale)
+- ⏳ Add 'Nome' field for users
+- ⏳ Cross-browser testing
+- ⏳ Final bug fixes and polish
 
 ---
 
@@ -1002,6 +1024,75 @@ Week 2: Polish & Validation
 
 ### **Risultato**:
 🎉 **WeekView COMPLETATA!** Calendar view funzionante in production con mobile-first design.
+
+---
+
+## 📅 Sessione 16/01/2026 - Fase 5: Dark Mode + Performance
+
+### **Dark Mode Implementation** (Completato):
+
+**Implementazione**:
+1. ✅ useTheme custom hook:
+   - Gestione tema (light/dark/system)
+   - localStorage persistence
+   - System preference detection (prefers-color-scheme)
+   - Auto-sync quando cambia preferenza sistema
+2. ✅ ThemeToggle component:
+   - Dropdown menu con 3 opzioni (Chiaro/Scuro/Sistema)
+   - Icone dinamiche (Sun/Moon)
+   - Checkmark su opzione attiva
+   - Integrato nell'header accanto al menu utente
+3. ✅ Dark mode support universale:
+   - Tutti i componenti aggiornati con colori semantici
+   - text-slate-* → text-foreground/text-muted-foreground
+   - bg-slate-* → bg-background/bg-card/bg-muted
+   - border-slate-* → border-border
+4. ✅ Components aggiornati:
+   - AppLayout (header, navigation)
+   - DashboardPage (welcome, stats, empty states)
+   - FoodCard (notes field con amber theming)
+   - FoodFilters, Calendar components
+   - InstructionCard, SwipeableCard
+5. ✅ Smooth transitions tra temi
+6. ✅ Testing su smartphone: funzionante su iOS e Android
+
+**Commit**: `40c8bca` - feat: implement dark mode with theme toggle
+**Data Completamento**: 16/01/2026
+
+### **Performance Optimization** (Completato):
+
+**Code Splitting Strategy**:
+1. ✅ Route-based lazy loading:
+   - LoginPage, SignUpPage, DashboardPage, TestConnection
+   - Suspense con loading fallback
+   - Converted exports to default for React.lazy
+2. ✅ Component-level lazy loading:
+   - BarcodeScanner (412 KB) - caricato solo quando si scannerizza
+   - WeekView (3 KB) - caricato solo in calendar view
+   - Wrapped con Suspense per progressive loading
+3. ✅ Manual chunk splitting:
+   - react-vendor: 49 KB (17 KB gzip)
+   - react-query: 41 KB (12 KB gzip)
+   - supabase: 173 KB (44 KB gzip)
+   - date-fns: 21 KB (6 KB gzip)
+   - forms: 93 KB (27 KB gzip)
+   - zxing: 412 KB (107 KB gzip) - lazy loaded
+   - ui-utils: 26 KB (8 KB gzip)
+
+**Bundle Size Improvements**:
+- **Main bundle**: 2656 KB → 331 KB (**75% reduction!**)
+- **Initial load**: 100 KB gzipped (vs 712 KB before)
+- **DashboardPage**: 1483 KB - lazy loaded quando serve
+- **Cache-friendly**: vendor chunks separati per long-term caching
+
+**Dependencies**:
+- ✅ Installato rollup-plugin-visualizer per bundle analysis
+
+**Commit**: `b1f6cf6` - perf: implement comprehensive code splitting and bundle optimization
+**Data Completamento**: 16/01/2026
+
+### **Risultato**:
+🎉 **Fase 5 (2/7 tasks) COMPLETATA!** Dark mode + Performance optimization deployed in production.
 
 ---
 

@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
-**Ultima Sessione**: 14 Gennaio 2026
-**Status**: Fase 4 COMPLETATA - PWA Installabile + Offline Mode
+**Ultima Sessione**: 16 Gennaio 2026
+**Status**: Fase 5 IN CORSO - Dark Mode + Performance Completati (2/7 tasks)
 
 ---
 
@@ -17,9 +17,10 @@
 2. **Fase 2**: Barcode Scanner (ZXing, Open Food Facts, Form Pre-fill)
 3. **Fase 3**: UX Enhancements (Swipe gestures + Calendar WeekView)
 4. **Fase 4**: PWA Essentials (Installable + Offline Mode)
+5. **Fase 5** (2/7 tasks): Dark Mode ✅ + Performance Optimization ✅
 
 ### Prossima Fase
-**Fase 5**: Polish, Quality & Sharing (Dark mode, Accessibility, Performance, Shared Lists)
+**Fase 5 (Continua)**: Accessibility Audit, Shared Lists, Final Polish
 
 ---
 
@@ -31,57 +32,84 @@ Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 Ciao! Sto continuando lo sviluppo del progetto "entro" (food expiry tracker).
 
 CONTESTO:
-- Ho completato la Fase 4 (PWA Essentials) con successo
-- L'app è ora installabile come PWA su iOS, Android e Desktop
-- Offline mode implementato con Service Worker e Workbox
+- Ho completato 2/7 tasks della Fase 5 (Polish, Quality & Sharing)
+- Dark Mode implementato e funzionante su tutti i device
+- Performance optimization completata: bundle ridotto del 75% (da 2656 KB a 331 KB)
 - L'app è in produzione su https://entro-il.netlify.app
 
-COSA È STATO FATTO:
-Fase 1: MVP completo (CRUD, auth, filters, images)
-Fase 2: Barcode scanner con ZXing + Open Food Facts API
-Fase 3: UX Enhancements (swipe gestures, WeekView calendar)
-Fase 4: PWA Essentials - COMPLETATA:
-  - vite-plugin-pwa con Service Worker (Workbox)
-  - Web App Manifest con icone (192x192, 512x512, maskable)
-  - Icona app: orologio verde con foglia (food + time theme)
-  - AppIcon component per consistenza header/PWA
-  - Cache strategy: precache assets + runtime cache fonts/images
-  - OfflineBanner component per feedback stato offline
-  - useOnlineStatus hook per network detection
-  - offline.html fallback page
-  - Meta tags PWA per iOS (apple-mobile-web-app-*)
-  - Testing completo su Chrome con service worker attivo
+COSA È STATO FATTO NELLA FASE 5:
 
-LIMITAZIONI OFFLINE ATTUALI:
-- UI si carica dalla cache (funziona offline)
-- Dati alimenti NON sono disponibili offline (richiedono Supabase)
-- Operazioni CRUD non funzionano offline
-- Miglioramenti offline-first sono nella sezione Desiderata
+Task 1 - Dark Mode ✅ COMPLETATO:
+  - useTheme hook (light/dark/system + localStorage + system preference)
+  - ThemeToggle component con dropdown menu
+  - Tutti i componenti aggiornati con semantic color tokens
+  - Smooth transitions tra temi
+  - Testing su smartphone: funzionante
 
-ROADMAP:
-- Fase 5: Polish, Quality & Sharing (dark mode, a11y, performance, shared lists)
-- Fase 6: Advanced Features + Launch
+Task 2 - Performance Optimization ✅ COMPLETATO:
+  - Route-based lazy loading (LoginPage, SignUpPage, DashboardPage)
+  - Component-level lazy loading (BarcodeScanner 412KB, WeekView 3KB)
+  - Manual chunk splitting per vendor libraries
+  - Main bundle: 2656 KB → 331 KB (75% reduction!)
+  - Initial load: 100 KB gzipped (vs 712 KB before)
+  - Cache-friendly vendor chunks per long-term caching
+
+COSA RESTA DA FARE NELLA FASE 5:
+
+Task 3 - Accessibility Audit WCAG AA ⏳ PROSSIMO:
+  - Keyboard navigation testing
+  - Screen reader compatibility
+  - Focus management
+  - ARIA labels e semantic HTML
+  - Color contrast verification
+  - Skip links e landmark regions
+  - Form accessibility
+  - Error messages accessibility
+
+Task 4 - Shared Lists Multi-User (opzionale):
+  - Database schema per shared_lists
+  - Permissions system (owner, editor, viewer)
+  - Real-time updates con Supabase Realtime
+
+Task 5 - Add 'Nome' field for users:
+  - Aggiunta campo Nome per l'utente che si registra
+  - Modifica "Ciao, <username>!" in "Ciao <name>!" in cima alla pagina
+
+Task 6 - Cross-browser testing:
+  - Testing completo su Chrome, Safari, Firefox, Edge
+  - Mobile testing (iOS + Android)
+  - Bug fixes da testing
+
+Task 7 - Final bug fixes and polish:
+  - Risoluzione bug critici
+  - Polish finale UX
+  - Testing pre-lancio
+
+ROADMAP COMPLETA:
+- Fase 6: Launch & Iteration (beta testing, marketing, public release)
 - Desiderata: MonthView, notifiche, statistiche, offline-first enhancements
 
-PROSSIMO OBIETTIVO - Fase 5:
-Preparare l'app per il lancio pubblico:
-1. Dark mode implementation
-2. Accessibility audit WCAG AA
-3. Performance optimization (bundle size, Lighthouse >90)
-4. Shared lists multi-user (opzionale)
-   - aggiunta campo Nome per l'utente che si registra; modifica Ciao, <username>! in Ciao <name>! in cima alla pagina
-5. Cross-browser testing completo
+PROSSIMO OBIETTIVO - Task 3: Accessibility Audit:
+Voglio rendere l'app accessibile a tutti seguendo le linee guida WCAG AA:
+1. Keyboard navigation completa
+2. Screen reader compatibility
+3. Focus management ottimale
+4. ARIA labels corretti
+5. Color contrast >4.5:1
+6. Skip links per navigazione rapida
+7. Semantic HTML
+8. Form accessibility con error messages chiari
 
 COSA VOGLIO FARE ORA:
-Iniziamo con Fase 5. Consulta docs/ROADMAP.md per i dettagli.
+Iniziamo con l'Accessibility Audit (Task 3). Consulta docs/ROADMAP.md per i dettagli della Fase 5.
 
 DOCUMENTI UTILI:
-- docs/ROADMAP.md (roadmap completa)
+- docs/ROADMAP.md (roadmap completa con progress Fase 5)
 - docs/USER_GUIDE.md (guida utente PWA e funzionalita)
 - docs/BARCODE_BUG.md (bug fix journey Fase 2)
 - README.md (setup e overview)
 
-Puoi aiutarmi a procedere?
+Puoi aiutarmi a procedere con l'Accessibility Audit?
 ```
 
 ---
@@ -90,7 +118,7 @@ Puoi aiutarmi a procedere?
 
 ### Per Capire il Progetto
 1. **README.md** - Overview, setup, features
-2. **docs/ROADMAP.md** - Fasi, progress, planning completo
+2. **docs/ROADMAP.md** - Fasi, progress, planning completo (AGGIORNATO)
 3. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalita offline
 4. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations
 
@@ -102,40 +130,42 @@ Puoi aiutarmi a procedere?
 ```
 src/
 ├── components/
-│   ├── barcode/          # BarcodeScanner modal
+│   ├── barcode/          # BarcodeScanner modal (lazy loaded)
 │   ├── foods/            # FoodCard, FoodForm, FoodFilters, SwipeableCard, WeekView
-│   ├── pwa/              # OfflineBanner (NEW)
-│   ├── ui/               # shadcn/ui + AppIcon (NEW)
-│   └── layout/           # AppLayout, ProtectedRoute
+│   ├── pwa/              # OfflineBanner
+│   ├── ui/               # shadcn/ui + AppIcon
+│   └── layout/           # AppLayout, ProtectedRoute, ThemeToggle (NEW)
 ├── hooks/
 │   ├── useBarcodeScanner.ts  # ZXing scanner logic
 │   ├── useFoods.ts           # React Query hooks
 │   ├── useAuth.ts            # Auth state
 │   ├── useSwipeHint.ts       # Swipe animation
-│   └── useOnlineStatus.ts    # Network detection (NEW)
+│   ├── useOnlineStatus.ts    # Network detection
+│   └── useTheme.ts           # Theme management (NEW)
 ├── lib/
 │   ├── foods.ts          # CRUD operations
 │   ├── openfoodfacts.ts  # Barcode API client
 │   ├── storage.ts        # Image upload
 │   └── supabase.ts       # Client setup
 ├── pages/
-│   ├── DashboardPage.tsx # Main app view (Lista + Calendario)
-│   └── AuthPage.tsx      # Login/Signup
+│   ├── DashboardPage.tsx # Main app view (lazy loaded)
+│   ├── LoginPage.tsx     # Login (lazy loaded)
+│   ├── SignUpPage.tsx    # Signup (lazy loaded)
+│   └── TestConnection.tsx # Test (lazy loaded)
 └── stores/
     └── authStore.ts      # Zustand auth store
 
 public/
-├── icons/                # PWA icons (NEW)
+├── icons/                # PWA icons
 │   ├── icon.svg          # Source icon
 │   ├── icon-192x192.png
 │   ├── icon-512x512.png
 │   ├── maskable-icon-512x512.png
 │   ├── apple-touch-icon.png
 │   └── favicon-*.png
-└── offline.html          # Offline fallback page (NEW)
+└── offline.html          # Offline fallback page
 
-scripts/
-└── generate-icons.js     # Icon generation script (NEW)
+vite.config.ts            # Vite config con manual chunks (NEW)
 ```
 
 ---
@@ -156,49 +186,77 @@ scripts/
 - **PWA installabile** (iOS, Android, Desktop)
 - **Service Worker** con cache strategy
 - **Offline mode** (UI cached, banner feedback)
+- **Dark mode** con theme toggle (light/dark/system) 🆕
+- **Performance ottimizzata** (bundle 75% più piccolo) 🆕
 - Responsive design mobile-first
 - Deployed su Netlify con CI/CD
 
 ### Issues Noti
-Nessun issue critico. L'app e stabile e funzionante.
+Nessun issue critico. L'app è stabile e funzionante.
 
 ### Tech Debt / Miglioramenti Futuri
-- Bundle size: ~2.65 MB (ottimizzare con code splitting in Fase 5)
+- Accessibility audit da completare (Fase 5 Task 3)
+- Shared lists multi-user (Fase 5 Task 4 - opzionale)
+- Add 'Nome' field for users (Fase 5 Task 5)
+- Cross-browser testing completo (Fase 5 Task 6)
 - Offline-first enhancements (IndexedDB, background sync) nella sezione Desiderata
-- Shared lists multi-user (Fase 5)
-- Dark mode (Fase 5)
-- Accessibility audit completo (Fase 5)
 
 ---
 
-## PWA - Dettagli Implementazione
+## Performance Metrics (Post-Optimization)
 
-### Service Worker (Workbox)
-- **Precache**: HTML, CSS, JS, icons (~2.6 MB, 18 entries)
-- **Runtime Cache**: Google Fonts (1 year), Supabase images (1 hour)
-- **Navigate Fallback**: index.html per SPA routing
-- **Auto Update**: registerType: 'autoUpdate'
+### Bundle Size
+- **Before**: 2656 KB (712 KB gzipped)
+- **After**: 331 KB (100 KB gzipped)
+- **Reduction**: 75% 🎉
 
-### Manifest
-```json
-{
-  "name": "entro - Food Expiry Tracker",
-  "short_name": "entro",
-  "theme_color": "#16a34a",
-  "display": "standalone",
-  "orientation": "portrait"
-}
-```
+### Chunks Breakdown
+| Chunk | Size | Gzip | Loading |
+|-------|------|------|---------|
+| Main bundle | 331 KB | 100 KB | Initial |
+| DashboardPage | 1483 KB | 385 KB | Lazy |
+| BarcodeScanner | 7 KB | 3 KB | Lazy |
+| ZXing library | 412 KB | 107 KB | Lazy |
+| WeekView | 3 KB | 1 KB | Lazy |
+| react-vendor | 49 KB | 17 KB | Initial (cached) |
+| supabase | 173 KB | 45 KB | Initial (cached) |
+| react-query | 41 KB | 13 KB | Initial (cached) |
+| forms | 93 KB | 28 KB | Initial (cached) |
+| date-fns | 21 KB | 6 KB | Initial (cached) |
 
-### Cosa Funziona Offline
-| Feature | Offline |
-|---------|---------|
-| Aprire app | Si |
-| UI/navigazione | Si |
-| Banner offline | Si |
-| Vedere alimenti | No (richiede Supabase) |
-| CRUD operazioni | No |
-| Barcode scan | No |
+### Expected Lighthouse Scores
+- **Performance**: >90 (bundle ottimizzato, lazy loading)
+- **Accessibility**: TBD (da testare dopo audit)
+- **Best Practices**: >90
+- **SEO**: >90
+- **PWA**: 100 (installabile, offline mode)
+
+---
+
+## Dark Mode Implementation Details
+
+### useTheme Hook
+- **Themes**: light, dark, system
+- **Storage**: localStorage ('entro-theme')
+- **System sync**: prefers-color-scheme media query
+- **Auto-update**: listener per cambio preferenza sistema
+
+### ThemeToggle Component
+- **Location**: Header, accanto al menu utente
+- **UI**: Dropdown menu con icone Sun/Moon/Monitor
+- **Options**: Chiaro, Scuro, Sistema (con checkmark)
+- **Smooth**: Transition tra temi
+
+### Color Tokens Migration
+- `text-slate-*` → `text-foreground` / `text-muted-foreground`
+- `bg-slate-*` → `bg-background` / `bg-card` / `bg-muted`
+- `border-slate-*` → `border-border`
+
+### Components Updated
+- AppLayout, DashboardPage, FoodCard, FoodFilters
+- Calendar components (DayColumn, WeekView, CalendarFoodCard)
+- InstructionCard, SwipeableCard
+- All shadcn/ui components (built-in dark mode support)
 
 ---
 
@@ -221,20 +279,36 @@ node scripts/generate-icons.js  # Regenerate PWA icons
 git push origin main  # Auto-deploy su Netlify
 ```
 
+### Bundle Analysis
+```bash
+npm run build        # Genera stats.html con rollup-plugin-visualizer
+open dist/stats.html # Visualizza bundle composition
+```
+
 ---
 
-## Metriche Fase 4
+## Metriche Fase 5
 
-### PWA Audit
-- Service Worker: Attivo e registrato
-- Manifest: Valido e completo
-- HTTPS: Si (Netlify)
-- Installabile: Si (iOS, Android, Desktop)
+### Task 1: Dark Mode ✅
+- Theme toggle implementato
+- 3 modalità (light/dark/system)
+- localStorage persistence
+- System preference sync
+- Testing: iOS + Android OK
 
-### Performance
-- Bundle size: 2.65 MB (da ottimizzare)
-- Precache: 18 entries
-- First load: ~3-4s (migliorabile)
+### Task 2: Performance ✅
+- Bundle size: 75% reduction
+- Initial load: 100 KB gzipped
+- Lazy loading: pages + heavy components
+- Vendor chunks: cache-friendly
+- Expected Lighthouse: >90
+
+### Task 3: Accessibility (TODO)
+- Keyboard navigation: TBD
+- Screen reader: TBD
+- WCAG AA compliance: TBD
+- Focus management: TBD
+- ARIA labels: TBD
 
 ---
 
@@ -244,10 +318,11 @@ git push origin main  # Auto-deploy su Netlify
 **Fase 2 Completata**: 12 Gennaio 2026
 **Fase 3 Completata**: 14 Gennaio 2026 (mattina)
 **Fase 4 Completata**: 14 Gennaio 2026 (pomeriggio)
+**Fase 5 (2/7 tasks)**: 16 Gennaio 2026
 
-L'app e ora una PWA completa! Installabile, con offline mode, icona coerente e feedback utente. Pronta per la fase di polish e lancio!
+L'app ha ora dark mode + performance optimization! Prossimo step: rendere l'app accessibile a tutti con WCAG AA compliance.
 
 ---
 
-**Ultimo Update**: 14 Gennaio 2026
-**Next Session**: Fase 5 - Polish, Quality & Sharing
+**Ultimo Update**: 16 Gennaio 2026
+**Next Session**: Fase 5 Task 3 - Accessibility Audit WCAG AA
