@@ -158,21 +158,24 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                 onClick={() => setScannerOpen(true)}
                 disabled={isSubmitting || isLoadingProduct}
                 className="w-full"
+                aria-label="Apri scanner barcode per compilare automaticamente i dati"
               >
                 {isLoadingProduct ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                     Caricamento dati prodotto...
                   </>
                 ) : (
                   <>
-                    <ScanLine className="mr-2 h-4 w-4" />
+                    <ScanLine className="mr-2 h-4 w-4" aria-hidden="true" />
                     Scansiona Barcode
                   </>
                 )}
               </Button>
               {productError && (
-                <p className="text-sm text-destructive mt-2">{productError}</p>
+                <p className="text-sm text-destructive mt-2" role="alert">
+                  {productError}
+                </p>
               )}
             </div>
           )}

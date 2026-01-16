@@ -160,7 +160,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             ) : displayPreview ? (
               <img
                 src={displayPreview}
-                alt="Preview"
+                alt="Anteprima immagine alimento"
                 className="w-full h-full object-cover"
               />
             ) : null}
@@ -174,8 +174,9 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
               size="sm"
               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={handleRemove}
+              aria-label="Rimuovi immagine"
             >
-              <X className="w-4 h-4 mr-1" />
+              <X className="w-4 h-4 mr-1" aria-hidden="true" />
               Rimuovi
             </Button>
           )}
@@ -191,8 +192,9 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
               className="h-32 flex flex-col items-center justify-center gap-2 border-dashed border-2"
               onClick={handleCameraClick}
               disabled={disabled || isConverting}
+              aria-label="Scatta foto con fotocamera"
             >
-              <Camera className="w-6 h-6 text-gray-400" />
+              <Camera className="w-6 h-6 text-gray-400" aria-hidden="true" />
               <div className="text-center">
                 <div className="text-sm font-medium">Fotocamera</div>
                 <p className="text-xs text-gray-500 mt-1">Scatta foto</p>
@@ -206,8 +208,9 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
               className="h-32 flex flex-col items-center justify-center gap-2 border-dashed border-2"
               onClick={handleGalleryClick}
               disabled={disabled || isConverting}
+              aria-label="Scegli foto dalla galleria"
             >
-              <Upload className="w-6 h-6 text-gray-400" />
+              <Upload className="w-6 h-6 text-gray-400" aria-hidden="true" />
               <div className="text-center">
                 <div className="text-sm font-medium">Galleria</div>
                 <p className="text-xs text-gray-500 mt-1">Scegli foto</p>
@@ -225,6 +228,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             onChange={handleFileSelect}
             className="hidden"
             disabled={disabled || isConverting}
+            aria-label="Input fotocamera"
           />
           {/* Gallery input - no capture, allows file picker */}
           <input
@@ -234,13 +238,17 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             onChange={handleFileSelect}
             className="hidden"
             disabled={disabled || isConverting}
+            aria-label="Input galleria immagini"
           />
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+        <div
+          className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2"
+          role="alert"
+        >
           {error}
         </div>
       )}

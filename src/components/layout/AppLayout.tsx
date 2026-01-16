@@ -30,26 +30,38 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Skip to main content link - for keyboard navigation */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg"
+      >
+        Vai al contenuto principale
+      </a>
+
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo / Brand */}
           <div className="flex items-center gap-2">
-            <AppIcon size={40} className="rounded-lg" />
+            <AppIcon size={40} className="rounded-lg" aria-label="Logo entro" />
             <div>
-              <h1 className="text-lg font-bold text-foreground">entro</h1>
+              <div className="text-lg font-bold text-foreground">entro</div>
               <p className="text-xs text-muted-foreground">Food Expiry Tracker</p>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
+          {/* Actions - Navigation landmark */}
+          <nav aria-label="Menu principale" className="flex items-center gap-2">
             <ThemeToggle />
 
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-10 w-10 rounded-full"
+                  aria-label="Menu utente"
+                >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <User className="h-5 w-5" />
                   </div>
@@ -74,12 +86,12 @@ export function AppLayout() {
               </DropdownMenuItem>
             </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </nav>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main id="main-content" className="container mx-auto px-4 py-8">
         <Outlet />
       </main>
     </div>

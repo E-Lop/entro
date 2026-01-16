@@ -100,7 +100,11 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
                 )}
               </CardTitle>
             </div>
-            <div className={cn('px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap', colorClasses)}>
+            <div
+              className={cn('px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap', colorClasses)}
+              role="status"
+              aria-label={`Stato scadenza: ${badgeText}`}
+            >
               {badgeText}
             </div>
           </div>
@@ -169,8 +173,9 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
             size="sm"
             onClick={() => onEdit(food)}
             className="flex-1"
+            aria-label={`Modifica ${food.name}`}
           >
-            <Edit className="h-4 w-4 mr-2" />
+            <Edit className="h-4 w-4 mr-2" aria-hidden="true" />
             Modifica
           </Button>
         )}
@@ -180,8 +185,9 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
             size="sm"
             onClick={() => onDelete(food)}
             className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/20"
+            aria-label={`Elimina ${food.name}`}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
+            <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
             Elimina
           </Button>
         )}

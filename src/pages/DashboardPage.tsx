@@ -269,9 +269,9 @@ export function DashboardPage() {
       {/* Welcome Section - Compact on Mobile */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Ciao, {user?.email?.split('@')[0] || 'Utente'}!
-          </h2>
+          </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Gestisci le scadenze e riduci gli sprechi.
           </p>
@@ -288,45 +288,54 @@ export function DashboardPage() {
       </div>
 
       {/* Quick Stats - Compact Mobile Grid */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            !filters.status || filters.status === 'all' ? 'ring-2 ring-blue-500' : ''
-          }`}
+      <div className="grid grid-cols-3 gap-3" role="group" aria-label="Statistiche rapide">
+        <button
           onClick={() => handleQuickFilter('all')}
+          className={cn(
+            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card",
+            !filters.status || filters.status === 'all' ? 'ring-2 ring-blue-500' : ''
+          )}
+          aria-label={`Mostra tutti gli alimenti (${stats.total})`}
+          aria-pressed={!filters.status || filters.status === 'all'}
         >
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <ShoppingBasket className="h-6 w-6 text-muted-foreground mb-2" />
+          <div className="p-4 flex flex-col items-center text-center">
+            <ShoppingBasket className="h-6 w-6 text-muted-foreground mb-2" aria-hidden="true" />
             <div className="text-2xl font-bold mb-1">{stats.total}</div>
             <p className="text-xs text-muted-foreground leading-tight">Totali</p>
-          </CardContent>
-        </Card>
+          </div>
+        </button>
 
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            filters.status === 'expiring_soon' ? 'ring-2 ring-orange-500' : ''
-          }`}
+        <button
           onClick={() => handleQuickFilter('expiring_soon')}
+          className={cn(
+            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card",
+            filters.status === 'expiring_soon' ? 'ring-2 ring-orange-500' : ''
+          )}
+          aria-label={`Mostra alimenti in scadenza (${stats.expiringSoon})`}
+          aria-pressed={filters.status === 'expiring_soon'}
         >
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <CalendarDays className="h-6 w-6 text-orange-600 mb-2" />
+          <div className="p-4 flex flex-col items-center text-center">
+            <CalendarDays className="h-6 w-6 text-orange-600 mb-2" aria-hidden="true" />
             <div className="text-2xl font-bold mb-1">{stats.expiringSoon}</div>
             <p className="text-xs text-muted-foreground leading-tight">In scadenza</p>
-          </CardContent>
-        </Card>
+          </div>
+        </button>
 
-        <Card
-          className={`cursor-pointer transition-all hover:shadow-md ${
-            filters.status === 'expired' ? 'ring-2 ring-red-500' : ''
-          }`}
+        <button
           onClick={() => handleQuickFilter('expired')}
+          className={cn(
+            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card",
+            filters.status === 'expired' ? 'ring-2 ring-red-500' : ''
+          )}
+          aria-label={`Mostra alimenti scaduti (${stats.expired})`}
+          aria-pressed={filters.status === 'expired'}
         >
-          <CardContent className="p-4 flex flex-col items-center text-center">
-            <AlertTriangle className="h-6 w-6 text-red-600 mb-2" />
+          <div className="p-4 flex flex-col items-center text-center">
+            <AlertTriangle className="h-6 w-6 text-red-600 mb-2" aria-hidden="true" />
             <div className="text-2xl font-bold mb-1">{stats.expired}</div>
             <p className="text-xs text-muted-foreground leading-tight">Scaduti</p>
-          </CardContent>
-        </Card>
+          </div>
+        </button>
       </div>
 
       {/* Filters and Search - Collapsible */}
@@ -405,30 +414,34 @@ export function DashboardPage() {
         <div>
           {/* View Mode Toggle */}
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" role="group" aria-label="Modalità visualizzazione">
               <button
                 onClick={() => handleViewModeChange('list')}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
+                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   viewMode === 'list'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 )}
+                aria-label="Visualizza come lista"
+                aria-pressed={viewMode === 'list'}
               >
-                <List className="h-4 w-4" />
+                <List className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Lista</span>
                 <span className="text-sm opacity-75">({foods.length})</span>
               </button>
               <button
                 onClick={() => handleViewModeChange('calendar')}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
+                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   viewMode === 'calendar'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
                 )}
+                aria-label="Visualizza come calendario"
+                aria-pressed={viewMode === 'calendar'}
               >
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-4 w-4" aria-hidden="true" />
                 <span className="font-medium">Calendario</span>
               </button>
             </div>
