@@ -537,22 +537,35 @@ npm install -D @types/node
 - [x] ✅ Image optimization già implementato (Fase 1)
 - [x] ✅ Database query optimization già ottimizzato (server-side filtering)
 
-#### Tasks (Giorno 3-4) ⏳ PROSSIMO
-- [ ] Accessibility audit completo (WCAG AA)
-- [ ] Keyboard navigation testing
-- [ ] Screen reader compatibility
-- [ ] Focus management e ARIA labels
+#### Tasks (Giorno 3-4) ✅ COMPLETATO
+- [x] ✅ Accessibility audit completo (WCAG AA)
+  - Skip link "Vai al contenuto principale"
+  - Semantic HTML: nav landmark, role="group"
+  - Heading hierarchy fixed (single h1 per page)
+  - Stats cards converted to semantic buttons with aria-pressed
+  - ARIA labels for all interactive elements
+  - Form error messages with role="alert"
+  - Focus management: focus-visible:ring-2
+  - Comprehensive documentation: ACCESSIBILITY_AUDIT.md
+- [x] ✅ Keyboard navigation testing completato
+- [x] ✅ Screen reader compatibility verificata
+- [x] ✅ Focus management e ARIA labels implementati
+  - Manual testing completed by user
+  - Fixed nested button error in FoodFilters
+  - All color contrast checked (light + dark mode)
 
 #### Tasks (Giorno 5-6)
-- [ ] Database schema per shared_lists (opzionale, complesso)
-- [ ] Permissions system (owner, editor, viewer) (opzionale)
-- [x] ✅ Add 'Nome' field for users and update greeting
-  - Campo "Nome" nel form di registrazione
-  - Salvataggio in user_metadata di Supabase Auth
+- [ ] Database schema per shared_lists (opzionale, complesso - rimandato)
+- [ ] Permissions system (owner, editor, viewer) (opzionale - rimandato)
+- [x] ✅ Add 'Nome' field for users and update greeting (COMPLETATO)
+  - Campo "Nome" nel form di registrazione con validation
+  - Salvataggio in user_metadata di Supabase Auth (no DB migration needed)
   - Dashboard: "Ciao, {nome}!" invece di "Ciao, {email}!"
-  - User menu: display nome completo
-  - Fallback graceful per utenti esistenti
-- [ ] UI per invitare utenti (opzionale)
+  - User menu: display nome completo come label
+  - Fallback graceful per utenti esistenti (username da email)
+  - Backward compatible con tutti gli utenti
+  - Files modified: auth.schemas.ts, auth.ts, useAuth.ts, AuthForm.tsx, DashboardPage.tsx, AppLayout.tsx
+- [ ] UI per invitare utenti (opzionale - rimandato)
 
 #### Tasks (Giorno 7)
 - [ ] Real-time updates con Supabase Realtime (opzionale)
@@ -824,7 +837,7 @@ Week 2: Polish & Validation
 | M2: Barcode | Week 3 | Scanner funzionante | ✅ Completato |
 | M3: UX | Week 4 | Swipe + WeekView Calendar | ✅ Completato |
 | M4: PWA | Week 5 | App installabile + Offline | ✅ Completato |
-| M5: Polish | Week 6 | Quality + Accessibility | 🔄 In Corso (2/7) |
+| M5: Polish | Week 6 | Quality + Accessibility | 🔄 In Corso (4/7) |
 | M6: Launch | Week 7+ | Public release + Beta | 🚀 Futuro |
 
 ---
@@ -835,11 +848,11 @@ Week 2: Polish & Validation
 **🎉 FASE 2 COMPLETATA! BARCODE SCANNER FUNZIONANTE 🎉**
 **🎉 FASE 3 COMPLETATA! SWIPE + WEEKVIEW FUNZIONANTI 🎉**
 **🎉 FASE 4 COMPLETATA! PWA INSTALLABILE + OFFLINE MODE 🎉**
-**🔄 FASE 5 IN CORSO! ACCESSIBILITY + NOME FIELD COMPLETATI 🚀**
+**🔄 FASE 5 IN CORSO! DARK MODE + PERFORMANCE + ACCESSIBILITY + NOME FIELD COMPLETATI 🚀**
 
 **Fase Attuale**: Fase 5 - Polish, Quality & Sharing (4/7 tasks done)
 **Production URL**: https://entro-il.netlify.app 🚀
-**Ultimo Commit**: `8a6e223` - feat: add full name field for user registration and personalized greeting
+**Ultimo Commit**: `054a32b` - fix: suppress expected auth session missing errors in getCurrentUser
 **Next Milestone**: Cross-browser testing
 
 ### Fase 5 Progress:
@@ -1166,6 +1179,47 @@ Week 2: Polish & Validation
 
 ### **Risultato Sessione**:
 🎉 **Fase 5 (4/7 tasks) AVANZATA!** Accessibility + Nome field completati con successo.
+
+---
+
+## 📅 Sessione 16/01/2026 (Sera) - Bug Fixes & Error Handling
+
+### **Bug Fixes Completati**:
+
+**Bug Fix #1: Nested Button Error in FoodFilters**
+- **Problema**: Console mostrava "In HTML, <button> cannot be a descendant of <button>"
+- **Root Cause**: FoodFilters aveva un toggle button che wrappava un Button component per "Cancella"
+- **Soluzione**:
+  - Separated toggle button from "Cancella" button
+  - Changed wrapper da `<button>` a `<div>`
+  - Added aria-expanded and aria-label to toggle button
+  - Both buttons now independent and accessible
+- **User Feedback**: "il fix ha funzionato"
+- **Commit**: `583037a` - fix: resolve nested button error in FoodFilters
+
+**Bug Fix #2: Missing Images Console Spam**
+- **Problema**: Console spam con "POST .../storage/v1/object/sign/food-images/... 400 (Bad Request)"
+- **Root Cause**: Database references to deleted storage images caused 400 errors for signed URLs
+- **Soluzione**:
+  1. storage.ts: Detect "Object not found" errors, throw custom "IMAGE_NOT_FOUND" error
+  2. useSignedUrl.ts: Catch "IMAGE_NOT_FOUND" silently without console logging
+  3. FoodCard already handled missing images with placeholder
+- **Result**: Clean console, graceful handling of deleted images
+- **Commit**: `73358b3` - fix: improve error handling for missing images in storage
+
+**Bug Fix #3: Auth Session Missing Errors**
+- **Problema**: Console errors "Error getting current user: Error: Auth session missing!" dopo logout/login
+- **Root Cause**: Expected "session missing" errors were being logged as errors
+- **Soluzione**:
+  - Detect "session" + "missing" keywords in error messages
+  - Return null silently for expected session missing cases
+  - Only log unexpected errors
+  - Applied to both error handler and catch block
+- **Result**: Clean console on logout, only real errors logged
+- **Commit**: `054a32b` - fix: suppress expected auth session missing errors in getCurrentUser
+
+### **Risultato**:
+✅ **Console pulita, error handling robusto!** Tutti i bug di console risolti con graceful fallbacks.
 
 ---
 

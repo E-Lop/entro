@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
 **Ultima Sessione**: 16 Gennaio 2026
-**Status**: Fase 5 IN CORSO - Dark Mode + Performance Completati (2/7 tasks)
+**Status**: Fase 5 IN CORSO - Accessibility + Nome Field Completati (4/7 tasks)
 
 ---
 
@@ -17,10 +17,10 @@
 2. **Fase 2**: Barcode Scanner (ZXing, Open Food Facts, Form Pre-fill)
 3. **Fase 3**: UX Enhancements (Swipe gestures + Calendar WeekView)
 4. **Fase 4**: PWA Essentials (Installable + Offline Mode)
-5. **Fase 5** (2/7 tasks): Dark Mode ✅ + Performance Optimization ✅
+5. **Fase 5** (4/7 tasks): Dark Mode ✅ + Performance ✅ + Accessibility ✅ + Nome Field ✅
 
 ### Prossima Fase
-**Fase 5 (Continua)**: Accessibility Audit, Shared Lists, Final Polish
+**Fase 5 (Continua)**: Cross-browser Testing → Final Polish → Launch Prep
 
 ---
 
@@ -32,84 +32,95 @@ Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 Ciao! Sto continuando lo sviluppo del progetto "entro" (food expiry tracker).
 
 CONTESTO:
-- Ho completato 2/7 tasks della Fase 5 (Polish, Quality & Sharing)
-- Dark Mode implementato e funzionante su tutti i device
-- Performance optimization completata: bundle ridotto del 75% (da 2656 KB a 331 KB)
+- Ho completato 4/7 tasks della Fase 5 (Polish, Quality & Sharing)
+- Dark Mode funzionante (light/dark/system)
+- Performance optimization: bundle ridotto del 75% (331 KB)
+- Accessibility Audit WCAG AA: core implementation completata
+- Campo "Nome" utente implementato con greeting personalizzato
 - L'app è in produzione su https://entro-il.netlify.app
 
 COSA È STATO FATTO NELLA FASE 5:
 
 Task 1 - Dark Mode ✅ COMPLETATO:
-  - useTheme hook (light/dark/system + localStorage + system preference)
+  - useTheme hook (light/dark/system + localStorage)
   - ThemeToggle component con dropdown menu
   - Tutti i componenti aggiornati con semantic color tokens
-  - Smooth transitions tra temi
   - Testing su smartphone: funzionante
 
 Task 2 - Performance Optimization ✅ COMPLETATO:
   - Route-based lazy loading (LoginPage, SignUpPage, DashboardPage)
-  - Component-level lazy loading (BarcodeScanner 412KB, WeekView 3KB)
+  - Component-level lazy loading (BarcodeScanner, WeekView)
   - Manual chunk splitting per vendor libraries
   - Main bundle: 2656 KB → 331 KB (75% reduction!)
-  - Initial load: 100 KB gzipped (vs 712 KB before)
-  - Cache-friendly vendor chunks per long-term caching
+  - Initial load: 100 KB gzipped
+
+Task 3 - Accessibility Audit WCAG AA ✅ COMPLETATO (Core + Testing):
+  - Skip link "Vai al contenuto principale"
+  - Semantic HTML: nav landmark, role="group"
+  - Heading hierarchy fixed (single h1 per page)
+  - Keyboard navigation: all interactive elements accessible
+  - Stats cards converted to semantic buttons with aria-pressed
+  - ARIA labels for all buttons (Edit, Delete, Camera, Gallery)
+  - Form error messages with role="alert"
+  - Focus management: focus-visible:ring-2
+  - Manual testing completato (keyboard + screen reader + contrast)
+  - Documentazione completa: ACCESSIBILITY_AUDIT.md
+
+Task 5 - Add 'Nome' Field ✅ COMPLETATO:
+  - Campo "Nome" nel form di registrazione
+  - Salvataggio in user_metadata di Supabase Auth
+  - Dashboard: "Ciao, {nome}!" invece di "Ciao, {email}!"
+  - User menu: display nome completo
+  - Fallback graceful per utenti esistenti
+
+Bug Fixes Completati:
+  - Fixed nested <button> error in FoodFilters
+  - Improved error handling for missing images in storage
+  - Suppressed "Auth session missing" console errors
 
 COSA RESTA DA FARE NELLA FASE 5:
 
-Task 3 - Accessibility Audit WCAG AA ⏳ PROSSIMO:
-  - Keyboard navigation testing
-  - Screen reader compatibility
-  - Focus management
-  - ARIA labels e semantic HTML
-  - Color contrast verification
-  - Skip links e landmark regions
-  - Form accessibility
-  - Error messages accessibility
-
-Task 4 - Shared Lists Multi-User (opzionale):
+Task 4 - Shared Lists Multi-User (OPZIONALE, COMPLESSO):
   - Database schema per shared_lists
   - Permissions system (owner, editor, viewer)
   - Real-time updates con Supabase Realtime
+  - Nota: Feature complessa, può essere rimandata a Fase 6
 
-Task 5 - Add 'Nome' field for users:
-  - Aggiunta campo Nome per l'utente che si registra
-  - Modifica "Ciao, <username>!" in "Ciao <name>!" in cima alla pagina
-
-Task 6 - Cross-browser testing:
+Task 6 - Cross-browser Testing ⏳ PROSSIMO CONSIGLIATO:
   - Testing completo su Chrome, Safari, Firefox, Edge
-  - Mobile testing (iOS + Android)
+  - Mobile testing approfondito (iOS + Android)
+  - Verificare compatibilità features (PWA, dark mode, accessibility)
   - Bug fixes da testing
+  - Documentare eventuali limitazioni browser
 
-Task 7 - Final bug fixes and polish:
-  - Risoluzione bug critici
+Task 7 - Final Bug Fixes and Polish:
+  - Risoluzione bug critici trovati durante testing
   - Polish finale UX
-  - Testing pre-lancio
+  - Preparazione al lancio
+  - Update documentazione utente finale
 
 ROADMAP COMPLETA:
 - Fase 6: Launch & Iteration (beta testing, marketing, public release)
 - Desiderata: MonthView, notifiche, statistiche, offline-first enhancements
 
-PROSSIMO OBIETTIVO - Task 3: Accessibility Audit:
-Voglio rendere l'app accessibile a tutti seguendo le linee guida WCAG AA:
-1. Keyboard navigation completa
-2. Screen reader compatibility
-3. Focus management ottimale
-4. ARIA labels corretti
-5. Color contrast >4.5:1
-6. Skip links per navigazione rapida
-7. Semantic HTML
-8. Form accessibility con error messages chiari
+PROSSIMO OBIETTIVO - Task 6: Cross-browser Testing:
+Voglio verificare che l'app funzioni perfettamente su tutti i browser principali:
+1. Desktop: Chrome, Safari, Firefox, Edge
+2. Mobile: iOS Safari, Android Chrome
+3. Features da testare: PWA installation, offline mode, dark mode, accessibility
+4. Documentare problemi e fix necessari
 
 COSA VOGLIO FARE ORA:
-Iniziamo con l'Accessibility Audit (Task 3). Consulta docs/ROADMAP.md per i dettagli della Fase 5.
+Iniziamo con il Cross-browser Testing (Task 6). Consulta docs/ROADMAP.md per i dettagli della Fase 5.
 
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (roadmap completa con progress Fase 5)
-- docs/USER_GUIDE.md (guida utente PWA e funzionalita)
+- docs/ACCESSIBILITY_AUDIT.md (report accessibilità completo)
+- docs/USER_GUIDE.md (guida utente PWA e funzionalità)
 - docs/BARCODE_BUG.md (bug fix journey Fase 2)
 - README.md (setup e overview)
 
-Puoi aiutarmi a procedere con l'Accessibility Audit?
+Puoi aiutarmi a procedere con il Cross-browser Testing?
 ```
 
 ---
@@ -118,13 +129,14 @@ Puoi aiutarmi a procedere con l'Accessibility Audit?
 
 ### Per Capire il Progetto
 1. **README.md** - Overview, setup, features
-2. **docs/ROADMAP.md** - Fasi, progress, planning completo (AGGIORNATO)
-3. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalita offline
+2. **docs/ROADMAP.md** - Fasi, progress, planning completo (AGGIORNATO 16/01/2026)
+3. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalità offline
 4. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations
+5. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA (NUOVO)
 
 ### Per Debugging
-5. **docs/BARCODE_BUG.md** - Analisi completa bug ZXing callback spam
-6. **docs/DEPLOY_GUIDE.md** - Deploy Netlify configuration
+6. **docs/BARCODE_BUG.md** - Analisi completa bug ZXing callback spam
+7. **docs/DEPLOY_GUIDE.md** - Deploy Netlify configuration
 
 ### Struttura Codice
 ```
@@ -134,21 +146,23 @@ src/
 │   ├── foods/            # FoodCard, FoodForm, FoodFilters, SwipeableCard, WeekView
 │   ├── pwa/              # OfflineBanner
 │   ├── ui/               # shadcn/ui + AppIcon
-│   └── layout/           # AppLayout, ProtectedRoute, ThemeToggle (NEW)
+│   └── layout/           # AppLayout, ProtectedRoute, ThemeToggle
 ├── hooks/
 │   ├── useBarcodeScanner.ts  # ZXing scanner logic
 │   ├── useFoods.ts           # React Query hooks
-│   ├── useAuth.ts            # Auth state
+│   ├── useAuth.ts            # Auth state (updated with fullName)
 │   ├── useSwipeHint.ts       # Swipe animation
 │   ├── useOnlineStatus.ts    # Network detection
-│   └── useTheme.ts           # Theme management (NEW)
+│   ├── useTheme.ts           # Theme management
+│   └── useSignedUrl.ts       # Image signed URLs (improved error handling)
 ├── lib/
 │   ├── foods.ts          # CRUD operations
 │   ├── openfoodfacts.ts  # Barcode API client
-│   ├── storage.ts        # Image upload
+│   ├── storage.ts        # Image upload (improved error handling)
+│   ├── auth.ts           # Auth service (updated with fullName + error handling)
 │   └── supabase.ts       # Client setup
 ├── pages/
-│   ├── DashboardPage.tsx # Main app view (lazy loaded)
+│   ├── DashboardPage.tsx # Main app view (lazy loaded, shows user name)
 │   ├── LoginPage.tsx     # Login (lazy loaded)
 │   ├── SignUpPage.tsx    # Signup (lazy loaded)
 │   └── TestConnection.tsx # Test (lazy loaded)
@@ -165,7 +179,7 @@ public/
 │   └── favicon-*.png
 └── offline.html          # Offline fallback page
 
-vite.config.ts            # Vite config con manual chunks (NEW)
+vite.config.ts            # Vite config con manual chunks
 ```
 
 ---
@@ -173,7 +187,7 @@ vite.config.ts            # Vite config con manual chunks (NEW)
 ## Stato Attuale del Progetto
 
 ### Features Funzionanti
-- Autenticazione (signup, login, logout, session)
+- Autenticazione (signup con nome, login, logout, session)
 - CRUD alimenti completo con validazione
 - Upload immagini con HEIC support (iPhone)
 - Filtri avanzati (categoria, storage, status, search)
@@ -186,19 +200,21 @@ vite.config.ts            # Vite config con manual chunks (NEW)
 - **PWA installabile** (iOS, Android, Desktop)
 - **Service Worker** con cache strategy
 - **Offline mode** (UI cached, banner feedback)
-- **Dark mode** con theme toggle (light/dark/system) 🆕
-- **Performance ottimizzata** (bundle 75% più piccolo) 🆕
+- **Dark mode** con theme toggle (light/dark/system) ✅
+- **Performance ottimizzata** (bundle 75% più piccolo) ✅
+- **Accessibilità WCAG AA** (keyboard, ARIA, semantic HTML) ✅
+- **Nome utente personalizzato** ("Ciao, Mario!") ✅
 - Responsive design mobile-first
 - Deployed su Netlify con CI/CD
 
 ### Issues Noti
 Nessun issue critico. L'app è stabile e funzionante.
+Console warnings PWA (normali in development, minimizzati in production).
 
 ### Tech Debt / Miglioramenti Futuri
-- Accessibility audit da completare (Fase 5 Task 3)
-- Shared lists multi-user (Fase 5 Task 4 - opzionale)
-- Add 'Nome' field for users (Fase 5 Task 5)
-- Cross-browser testing completo (Fase 5 Task 6)
+- Cross-browser testing da completare (Fase 5 Task 6) - PROSSIMO
+- Shared lists multi-user (Fase 5 Task 4 - opzionale, complesso)
+- Final polish and bug fixes (Fase 5 Task 7)
 - Offline-first enhancements (IndexedDB, background sync) nella sezione Desiderata
 
 ---
@@ -226,37 +242,98 @@ Nessun issue critico. L'app è stabile e funzionante.
 
 ### Expected Lighthouse Scores
 - **Performance**: >90 (bundle ottimizzato, lazy loading)
-- **Accessibility**: TBD (da testare dopo audit)
+- **Accessibility**: >95 (WCAG AA compliant)
 - **Best Practices**: >90
 - **SEO**: >90
 - **PWA**: 100 (installabile, offline mode)
 
 ---
 
-## Dark Mode Implementation Details
+## Accessibility Implementation Details (Task 3)
 
-### useTheme Hook
-- **Themes**: light, dark, system
-- **Storage**: localStorage ('entro-theme')
-- **System sync**: prefers-color-scheme media query
-- **Auto-update**: listener per cambio preferenza sistema
+### Skip Link
+- "Vai al contenuto principale" visibile su keyboard focus
+- Links to #main-content in AppLayout
 
-### ThemeToggle Component
-- **Location**: Header, accanto al menu utente
-- **UI**: Dropdown menu con icone Sun/Moon/Monitor
-- **Options**: Chiaro, Scuro, Sistema (con checkmark)
-- **Smooth**: Transition tra temi
+### Semantic HTML
+- Nav landmark with aria-label="Menu principale"
+- Single h1 per page (Dashboard)
+- role="group" for button groups
+- role="alert" for error messages
+- role="status" for expiry badges
 
-### Color Tokens Migration
-- `text-slate-*` → `text-foreground` / `text-muted-foreground`
-- `bg-slate-*` → `bg-background` / `bg-card` / `bg-muted`
-- `border-slate-*` → `border-border`
+### Keyboard Navigation
+- All interactive elements keyboard accessible
+- Stats cards as semantic buttons with aria-pressed
+- View toggles with aria-label and aria-pressed
+- Focus indicators: focus-visible:ring-2
 
-### Components Updated
-- AppLayout, DashboardPage, FoodCard, FoodFilters
-- Calendar components (DayColumn, WeekView, CalendarFoodCard)
-- InstructionCard, SwipeableCard
-- All shadcn/ui components (built-in dark mode support)
+### ARIA Labels
+- User menu: aria-label="Menu utente"
+- Stats cards: descriptive labels with counts
+- All buttons: aria-label for Edit, Delete, Camera, Gallery
+- Toggle filtri: aria-expanded
+- All icons: aria-hidden="true"
+
+### Testing Completato
+- ✅ Keyboard navigation tested
+- ✅ Screen reader compatibility verified
+- ✅ Color contrast checked (light + dark mode)
+- ✅ Focus indicators working correctly
+
+**Documentazione**: `docs/ACCESSIBILITY_AUDIT.md` (comprehensive report)
+
+---
+
+## Nome Field Implementation Details (Task 5)
+
+### Signup Form
+- Campo "Nome" prima dell'email
+- Validation: required, min 2 chars, max 100 chars
+- AutoComplete="name" per browser autofill
+
+### User Metadata
+- Salvato in `user.user_metadata.full_name` (Supabase Auth)
+- No database migration needed
+- Persists across sessions
+
+### UI Display
+- Dashboard: "Ciao, {full_name}!" con fallback a email username
+- User menu: Nome completo come label
+- Backward compatible con utenti esistenti
+
+### Files Modified
+- `auth.schemas.ts`: signupSchema con full_name
+- `auth.ts`: signUp() accetta fullName parameter
+- `useAuth.ts`: hook aggiornato
+- `AuthForm.tsx`: campo Nome nel form
+- `DashboardPage.tsx`: display nome
+- `AppLayout.tsx`: display nome in menu
+
+---
+
+## Bug Fixes Completati (Sessione 16/01/2026)
+
+### 1. Nested Button Error
+**Problema**: `<button>` conteneva `<Button>` in FoodFilters
+**Soluzione**: Separato toggle button da "Cancella" button
+**Commit**: `583037a`
+
+### 2. Missing Images Console Spam
+**Problema**: Errori 400 per immagini cancellate da storage
+**Soluzione**:
+- Detect "Object not found" in storage.ts
+- Throw custom "IMAGE_NOT_FOUND" error
+- Silent handling in useSignedUrl hook
+**Commit**: `73358b3`
+
+### 3. Auth Session Missing Errors
+**Problema**: Console errors "Auth session missing!" dopo logout
+**Soluzione**:
+- Detect session missing errors in getCurrentUser()
+- Return null silently (expected state)
+- Only log unexpected errors
+**Commit**: `054a32b`
 
 ---
 
@@ -303,12 +380,26 @@ open dist/stats.html # Visualizza bundle composition
 - Vendor chunks: cache-friendly
 - Expected Lighthouse: >90
 
-### Task 3: Accessibility (TODO)
-- Keyboard navigation: TBD
-- Screen reader: TBD
-- WCAG AA compliance: TBD
-- Focus management: TBD
-- ARIA labels: TBD
+### Task 3: Accessibility ✅
+- Keyboard navigation: DONE
+- Screen reader: DONE
+- WCAG AA compliance: DONE
+- Focus management: DONE
+- ARIA labels: DONE
+- Manual testing: COMPLETED
+- Documentation: ACCESSIBILITY_AUDIT.md
+
+### Task 5: Nome Field ✅
+- Signup form: campo nome DONE
+- User metadata: saved in Supabase Auth DONE
+- Dashboard greeting: personalized DONE
+- Backward compatible: DONE
+
+### Task 6: Cross-browser Testing (TODO)
+- Desktop browsers: TBD
+- Mobile browsers: TBD
+- Feature compatibility: TBD
+- Bug fixes: TBD
 
 ---
 
@@ -318,11 +409,11 @@ open dist/stats.html # Visualizza bundle composition
 **Fase 2 Completata**: 12 Gennaio 2026
 **Fase 3 Completata**: 14 Gennaio 2026 (mattina)
 **Fase 4 Completata**: 14 Gennaio 2026 (pomeriggio)
-**Fase 5 (2/7 tasks)**: 16 Gennaio 2026
+**Fase 5 (4/7 tasks)**: 16 Gennaio 2026
 
-L'app ha ora dark mode + performance optimization! Prossimo step: rendere l'app accessibile a tutti con WCAG AA compliance.
+L'app è ora accessibile, performante, con dark mode e greeting personalizzato! Prossimo step: cross-browser testing per assicurarci che tutto funzioni su tutti i dispositivi.
 
 ---
 
-**Ultimo Update**: 16 Gennaio 2026
-**Next Session**: Fase 5 Task 3 - Accessibility Audit WCAG AA
+**Ultimo Update**: 16 Gennaio 2026 (sera)
+**Next Session**: Fase 5 Task 6 - Cross-browser Testing
