@@ -69,6 +69,7 @@ Preparare l'app per il lancio pubblico:
 2. Accessibility audit WCAG AA
 3. Performance optimization (bundle size, Lighthouse >90)
 4. Shared lists multi-user (opzionale)
+   - aggiunta campo Nome per l'utente che si registra; modifica Ciao, <username>! in Ciao <name>! in cima alla pagina
 5. Cross-browser testing completo
 
 COSA VOGLIO FARE ORA:

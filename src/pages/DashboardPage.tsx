@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -9,7 +9,9 @@ import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
-import { WeekView } from '../components/foods/WeekView'
+
+// Lazy load WeekView (calendar view)
+const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ default: m.WeekView })))
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
@@ -439,10 +441,16 @@ export function DashboardPage() {
 
           {/* Conditional View Rendering */}
           {viewMode === 'calendar' ? (
-            <WeekView
-              foods={foods}
-              onEdit={handleEditClick}
-            />
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary"></div>
+              </div>
+            }>
+              <WeekView
+                foods={foods}
+                onEdit={handleEditClick}
+              />
+            </Suspense>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {foods.map((food, index) => (
@@ -532,3 +540,4 @@ export function DashboardPage() {
     </div>
   )
 }
+export default DashboardPage

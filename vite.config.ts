@@ -96,4 +96,28 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // React Query
+          'react-query': ['@tanstack/react-query'],
+          // Supabase
+          'supabase': ['@supabase/supabase-js'],
+          // Date utilities
+          'date-fns': ['date-fns'],
+          // ZXing barcode scanner (heavy)
+          'zxing': ['@zxing/browser', '@zxing/library'],
+          // Form libraries
+          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // UI utilities
+          'ui-utils': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        },
+      },
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+  },
 })

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -9,10 +9,12 @@ import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { ImageUpload } from './ImageUpload'
-import { BarcodeScanner } from '../barcode/BarcodeScanner'
 import { fetchProductByBarcode, mapProductToFormData } from '@/lib/openfoodfacts'
 import type { Food } from '@/lib/foods'
 import { ScanLine, Loader2 } from 'lucide-react'
+
+// Lazy load BarcodeScanner (heavy: includes ZXing library)
+const BarcodeScanner = lazy(() => import('../barcode/BarcodeScanner').then(m => ({ default: m.BarcodeScanner })))
 
 interface FoodFormProps {
   mode: 'create' | 'edit'
@@ -134,12 +136,16 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
   return (
     <>
-      {/* Barcode Scanner Modal */}
-      <BarcodeScanner
-        open={scannerOpen}
-        onOpenChange={setScannerOpen}
-        onScanSuccess={handleBarcodeScanned}
-      />
+      {/* Barcode Scanner Modal - Lazy loaded */}
+      {scannerOpen && (
+        <Suspense fallback={<div>Caricamento scanner...</div>}>
+          <BarcodeScanner
+            open={scannerOpen}
+            onOpenChange={setScannerOpen}
+            onScanSuccess={handleBarcodeScanned}
+          />
+        </Suspense>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
