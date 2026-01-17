@@ -56,45 +56,13 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         throw new Error('API fotocamera non disponibile su questo browser')
       }
 
-      // Get available video devices (cameras)
-      let devices: MediaDeviceInfo[] = []
-      try {
-        devices = await BrowserMultiFormatReader.listVideoInputDevices()
-        console.log('Available cameras:', devices.length)
-      } catch (err) {
-        console.warn('Error listing cameras:', err)
-        // Continue with undefined deviceId to use default camera
-      }
-
-      // Try to find back camera on mobile
-      let selectedDeviceId: string | undefined
-
-      if (devices.length > 0) {
-        // Search for back camera with multiple patterns (iOS may use different labels)
-        const backCamera = devices.find(
-          (device: MediaDeviceInfo) =>
-            device.label.toLowerCase().includes('back') ||
-            device.label.toLowerCase().includes('rear') ||
-            device.label.toLowerCase().includes('environment') ||
-            device.label.toLowerCase().includes('posteriore') || // Italian
-            device.label.toLowerCase().includes('trasera') // Spanish (some devices)
-        )
-
-        if (backCamera) {
-          selectedDeviceId = backCamera.deviceId
-          console.log('Using back camera:', backCamera.label, selectedDeviceId)
-        } else {
-          // CRITICAL FIX: Don't use devices[0] as it may be front camera
-          // Instead, use undefined to let browser choose with implicit environment preference
-          selectedDeviceId = undefined
-          console.log('Back camera not found, using browser default (undefined)')
-          console.log('Available cameras:', devices.map(d => d.label).join(', '))
-        }
-      } else {
-        // Fallback: use undefined to let browser choose default camera
-        console.log('Using default camera (no devices listed)')
-        selectedDeviceId = undefined
-      }
+      // CRITICAL FIX for iOS: Always use undefined deviceId
+      // iOS doesn't provide descriptive labels for cameras until after first use,
+      // and manual deviceId selection can result in selecting the wrong camera.
+      // Using undefined lets the browser automatically select the appropriate camera,
+      // which works reliably on both iOS and Android.
+      const selectedDeviceId: string | undefined = undefined
+      console.log('Using browser default camera (undefined deviceId for best compatibility)')
 
       // Start continuous decoding from video device
       // CRITICAL: Save the controls object returned by decodeFromVideoDevice
