@@ -175,7 +175,7 @@ DOCUMENTI UTILI:
 - docs/BARCODE_BUG.md (bug fix journey Fase 2)
 - README.md (setup e overview)
 
-Sono pronto a iniziare l'implementazione delle Shared Lists seguendo il piano in SHARED_LISTS_PLAN.md, oppure preferisci completare il lancio prima?
+Sono pronto a iniziare l'implementazione delle Shared Lists seguendo il piano in SHARED_LISTS_PLAN.md
 ```
 
 ---
