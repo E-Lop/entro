@@ -185,28 +185,20 @@ CREATE INDEX idx_product_templates_barcode ON product_templates(barcode);
 CREATE INDEX idx_product_templates_name ON product_templates USING gin(to_tsvector('italian', name));
 ```
 
-### Table: `shared_lists` (Future Feature)
+### Tables: Shared Lists System (Future Feature)
 
-Condivisione liste tra utenti.
+**⚠️ NOTA: Questo schema è obsoleto. Per l'implementazione pianificata, vedi [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md)**
 
-```sql
-CREATE TABLE shared_lists (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
-  owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  shared_with_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  
-  permissions TEXT NOT NULL CHECK (permissions IN ('read', 'write')) DEFAULT 'read',
-  
-  accepted_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  
-  UNIQUE(owner_id, shared_with_user_id)
-);
+Il nuovo design prevede:
+- **Approach A (Backward Compatible)**: Aggiunge `list_id` nullable alla tabella `foods`
+- **3 nuove tabelle**: `lists`, `list_members`, `invites`
+- **Household sharing**: tutti i membri hanno pari accesso (no ruoli complessi)
+- **Single shared list**: ogni utente appartiene a una sola lista condivisa
+- **Invite flow**: email → signup → auto-join lista del mittente
+- **Edge Functions**: per gestione inviti (create, validate, accept)
+- **Feature flag**: `VITE_ENABLE_SHARED_LISTS` per rollout graduale
 
-CREATE INDEX idx_shared_lists_owner ON shared_lists(owner_id);
-CREATE INDEX idx_shared_lists_shared_with ON shared_lists(shared_with_user_id);
-```
+Per dettagli completi su schema, RLS policies, e implementazione, consulta il piano dettagliato.
 
 ### Table: `notifications_preferences`
 

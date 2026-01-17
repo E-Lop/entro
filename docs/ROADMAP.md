@@ -555,8 +555,15 @@ npm install -D @types/node
   - All color contrast checked (light + dark mode)
 
 #### Tasks (Giorno 5-6)
-- [ ] Database schema per shared_lists (opzionale, complesso - rimandato)
-- [ ] Permissions system (owner, editor, viewer) (opzionale - rimandato)
+- [ ] **Shared Lists Multi-User Implementation** (opzionale - piano dettagliato disponibile)
+  - ✅ Piano completo documentato in [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md)
+  - Database schema: `lists`, `list_members`, `invites` tables
+  - Backward compatible approach (Approach A)
+  - Edge Functions per invite flow (create, validate, accept)
+  - Frontend components: InviteButton, InviteDialog
+  - Signup/Login integration con invite tokens
+  - Feature flag per rollout graduale
+  - Stima: 6-8 giorni di implementazione
 - [x] ✅ Add 'Nome' field for users and update greeting (COMPLETATO)
   - Campo "Nome" nel form di registrazione con validation
   - Salvataggio in user_metadata di Supabase Auth (no DB migration needed)
@@ -565,7 +572,6 @@ npm install -D @types/node
   - Fallback graceful per utenti esistenti (username da email)
   - Backward compatible con tutti gli utenti
   - Files modified: auth.schemas.ts, auth.ts, useAuth.ts, AuthForm.tsx, DashboardPage.tsx, AppLayout.tsx
-- [ ] UI per invitare utenti (opzionale - rimandato)
 
 #### Tasks (Giorno 7)
 - [ ] Real-time updates con Supabase Realtime (opzionale)

@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
-**Ultima Sessione**: 16 Gennaio 2026
-**Status**: Fase 5 IN CORSO - Cross-browser Testing Completato! (5/7 tasks)
+**Ultima Sessione**: 17 Gennaio 2026
+**Status**: Fase 5 IN CORSO - Shared Lists Plan Documentato! (5/7 tasks)
 
 ---
 
@@ -106,62 +106,76 @@ ROADMAP COMPLETA:
 - Fase 6: Launch & Iteration (beta testing, marketing, public release)
 - Desiderata: MonthView, notifiche, statistiche, offline-first enhancements
 
-PROSSIMO OBIETTIVO - Task 4: Shared Lists Multi-User:
-Voglio implementare la funzionalità di condivisione liste tra utenti. Questa è una feature complessa che richiede:
+PROSSIMO OBIETTIVO - Shared Lists Multi-User:
 
-1. **Database Schema**:
-   - Tabella `shared_lists` per liste condivise
-   - Tabella `list_members` per gestire membri e permessi
-   - Junction table per alimenti condivisi
-   - RLS policies per sicurezza multi-tenant
+✅ **PIANO COMPLETO DOCUMENTATO!** Vedi `docs/SHARED_LISTS_PLAN.md`
 
-2. **Permission System**:
-   - Roles: owner, editor, viewer
-   - Owner: può aggiungere/rimuovere membri, modificare tutto, cancellare lista
-   - Editor: può aggiungere/modificare/eliminare alimenti
-   - Viewer: può solo visualizzare alimenti
-   - Permissions check su ogni operazione CRUD
+Ho completato la pianificazione dettagliata per la feature di condivisione liste. Il piano include:
 
-3. **UI Components**:
-   - ShareListDialog per invitare utenti via email
-   - ListMembersManager per gestire membri e permessi
-   - ListSelector per switch tra "La mia lista" e liste condivise
-   - Visual indicators per alimenti condivisi vs personali
+**Approccio Scelto**: Approach A (Backward Compatible)
+- Mantiene `user_id` per compatibilità
+- Aggiunge `list_id` nullable alla tabella `foods`
+- Zero breaking changes per utenti esistenti
+- Migrazione graduale e sicura
 
-4. **Real-time Updates** (Opzionale ma consigliato):
-   - Supabase Realtime subscriptions
-   - Live updates quando altri utenti modificano
-   - Conflict resolution strategy
-   - Visual feedback per modifiche altrui
+**Modello Semplificato - Household Sharing**:
+- ✅ Tutti i membri hanno pari accesso (no roles complessi)
+- ✅ Single shared list per utente
+- ✅ Invite flow: email → signup → auto-join
+- ✅ Chi accetta invito accede SOLO alla lista condivisa (no lista personale)
+- ✅ Feature flag `VITE_ENABLE_SHARED_LISTS` per rollout graduale
 
-5. **Testing**:
-   - Multi-user scenarios (2+ utenti sulla stessa lista)
-   - Permission boundaries (viewer non può editare)
-   - Real-time sync tra dispositivi
-   - Edge cases (inviti duplicati, owner leaving, etc.)
+**Database Schema** (3 nuove tabelle):
+1. `lists` - Liste condivise
+2. `list_members` - Chi appartiene a quali liste
+3. `invites` - Gestione inviti con token e scadenza
 
-NOTA IMPORTANTE:
-Questa è una feature complessa che richiede pianificazione attenta. Considera di usare EnterPlanMode per:
-- Esplorare pattern esistenti di Supabase RLS per shared resources
-- Progettare lo schema database ottimale
-- Pianificare l'architettura delle permissions
-- Decidere l'approccio real-time (polling vs subscriptions)
+**Backend** (Supabase Edge Functions):
+1. `create-invite` - Genera token e invia email
+2. `validate-invite` - Verifica token e scadenza
+3. `accept-invite` - Aggiunge utente alla lista
 
-ALTERNATIVA:
-Se preferisci completare il lancio prima, puoi saltare questo task e passare direttamente al Task 7 (Final Polish) → Fase 6 (Launch). Shared Lists può essere aggiunta come feature post-launch in base ai feedback utenti.
+**Frontend** (Service Layer + UI Components):
+- Service: `invites.ts` con funzioni CRUD
+- Components: `InviteButton`, `InviteDialog`
+- Pages: Modifiche a `SignUpPage` e `LoginPage` per gestire invite tokens
+
+**Sicurezza**:
+- RLS policies complete per tutte le tabelle
+- Storage policies aggiornate per immagini condivise
+- Token security con scadenza 7 giorni e single-use
+
+**Testing Strategy**: 6 test scenarios documentati
+
+**Stima Implementazione**: 6-8 giorni (7 fasi)
+
+**OPZIONI PER PROSSIMA SESSIONE**:
+
+Opzione A) **Implementare Shared Lists** (stima: 6-8 giorni)
+   - Segui il piano fase per fase in `SHARED_LISTS_PLAN.md`
+   - Inizia con Phase 1: Database Setup (migrations + RLS)
+   - Feature flag disabled di default per rollback sicuro
+   - Testing incrementale dopo ogni fase
+
+Opzione B) **Rimandare a Post-Launch** (consigliato per MVP)
+   - Passa a Task 7: Final Polish & Documentation
+   - Lancia l'app in beta testing (Fase 6)
+   - Implementa Shared Lists in base a feedback utenti
+   - Mantiene scope MVP più snello
 
 COSA VOGLIO FARE ORA:
-Voglio implementare Shared Lists Multi-User (Task 4). Usa EnterPlanMode per esplorare e pianificare l'implementazione, oppure suggeriscimi se è meglio rimandare a post-launch.
+Scegli una delle due opzioni sopra, oppure chiedi chiarimenti sul piano dettagliato.
 
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (roadmap completa con progress Fase 5)
+- docs/SHARED_LISTS_PLAN.md (piano dettagliato shared lists multi-user - NUOVO!)
 - docs/ACCESSIBILITY_AUDIT.md (report accessibilità completo)
-- docs/CROSS_BROWSER_TESTING.md (report testing 7 browser - NUOVO!)
+- docs/CROSS_BROWSER_TESTING.md (report testing 7 browser)
 - docs/USER_GUIDE.md (guida utente PWA e funzionalità)
 - docs/BARCODE_BUG.md (bug fix journey Fase 2)
 - README.md (setup e overview)
 
-Puoi aiutarmi a procedere con il Cross-browser Testing?
+Sono pronto a iniziare l'implementazione delle Shared Lists seguendo il piano in SHARED_LISTS_PLAN.md, oppure preferisci completare il lancio prima?
 ```
 
 ---
@@ -170,11 +184,12 @@ Puoi aiutarmi a procedere con il Cross-browser Testing?
 
 ### Per Capire il Progetto
 1. **README.md** - Overview, setup, features
-2. **docs/ROADMAP.md** - Fasi, progress, planning completo (AGGIORNATO 16/01/2026)
-3. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalità offline
-4. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations
-5. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA
-6. **docs/CROSS_BROWSER_TESTING.md** - Report cross-browser testing (NUOVO 16/01/2026)
+2. **docs/ROADMAP.md** - Fasi, progress, planning completo (AGGIORNATO 17/01/2026)
+3. **docs/SHARED_LISTS_PLAN.md** - Piano dettagliato implementazione shared lists (NUOVO 17/01/2026)
+4. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalità offline
+5. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations (riferimento a nuovo piano)
+6. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA
+7. **docs/CROSS_BROWSER_TESTING.md** - Report cross-browser testing
 
 ### Per Debugging
 7. **docs/BARCODE_BUG.md** - Analisi completa bug ZXing callback spam
@@ -461,5 +476,5 @@ Prossimo step: Final polish e preparazione al lancio (Fase 5 Task 7), poi Beta T
 
 ---
 
-**Ultimo Update**: 16 Gennaio 2026 (sera)
-**Next Session**: Fase 5 Task 7 - Final Polish & Launch Prep
+**Ultimo Update**: 17 Gennaio 2026
+**Next Session**: Opzione A) Implementare Shared Lists (Phase 1: Database Setup) OPPURE Opzione B) Final Polish & Launch Prep (Task 7)
