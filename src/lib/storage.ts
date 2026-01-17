@@ -76,7 +76,9 @@ export async function uploadFoodImage(file: File, userId: string): Promise<strin
   // Generate unique filename: timestamp-originalname
   const timestamp = Date.now()
   const fileExt = file.name.split('.').pop()
-  const fileName = `${timestamp}-${file.name.substring(0, 50)}.${fileExt}`
+  // Remove extension from original name to avoid double extension (e.g. image.jpg.jpg)
+  const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.'))
+  const fileName = `${timestamp}-${nameWithoutExt.substring(0, 50)}.${fileExt}`
 
   // Path structure: {user_id}/{filename}
   const filePath = `${userId}/${fileName}`

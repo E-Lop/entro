@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -34,6 +34,9 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   const [scannerOpen, setScannerOpen] = useState(false)
   const [isLoadingProduct, setIsLoadingProduct] = useState(false)
   const [productError, setProductError] = useState<string | null>(null)
+
+  // Prevent double submit (additional protection beyond isSubmitting)
+  const isSubmittingRef = useRef(false)
 
   // Setup form with validation
   const form = useForm<FoodFormData>({
@@ -122,16 +125,28 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   }
 
   const handleSubmit = async (data: FoodFormData) => {
-    // Convert date to ISO string for database
-    const submitData: FoodFormData = {
-      ...data,
-      expiry_date: new Date(data.expiry_date).toISOString(),
-      // Convert empty strings to null
-      quantity_unit: data.quantity_unit || null,
-      notes: data.notes?.trim() || null,
+    // Prevent double submit
+    if (isSubmittingRef.current) {
+      console.warn('Submit already in progress, ignoring duplicate submit')
+      return
     }
 
-    await onSubmit(submitData)
+    try {
+      isSubmittingRef.current = true
+
+      // Convert date to ISO string for database
+      const submitData: FoodFormData = {
+        ...data,
+        expiry_date: new Date(data.expiry_date).toISOString(),
+        // Convert empty strings to null
+        quantity_unit: data.quantity_unit || null,
+        notes: data.notes?.trim() || null,
+      }
+
+      await onSubmit(submitData)
+    } finally {
+      isSubmittingRef.current = false
+    }
   }
 
   return (
