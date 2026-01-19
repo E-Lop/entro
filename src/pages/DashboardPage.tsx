@@ -199,6 +199,7 @@ export function DashboardPage() {
       image_url: imagePath,
       status: 'active',
       user_id: user!.id,
+      list_id: null, // Will be set by createFood()
       barcode: null,
       consumed_at: null,
       deleted_at: null,
