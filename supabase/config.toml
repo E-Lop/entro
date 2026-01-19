@@ -1,7 +1,7 @@
 # Supabase Edge Functions Configuration
 
 [functions.create-invite]
-verify_jwt = true
+verify_jwt = false  # Temporarily disabled for debugging
 
 [functions.validate-invite]
 verify_jwt = false  # Public endpoint for signup validation

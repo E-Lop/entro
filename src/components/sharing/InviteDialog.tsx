@@ -57,15 +57,28 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
       }
 
       // Create invite
-      const { success, error } = await createInvite(data.email, list.id)
+      const result = await createInvite(data.email, list.id)
 
-      if (error || !success) {
-        toast.error(error?.message || 'Impossibile inviare l\'invito')
+      if (result.error || !result.success || !result.invite) {
+        toast.error(result.error?.message || 'Impossibile creare l\'invito')
         return
       }
 
-      // Success
-      toast.success(`Invito inviato a ${data.email}`)
+      // Success - generate and copy invite URL
+      const inviteUrl = `${window.location.origin}/signup?invite_token=${result.invite.token}`
+
+      try {
+        await navigator.clipboard.writeText(inviteUrl)
+        toast.success(
+          `Invito creato per ${data.email}! Link copiato negli appunti. Condividilo con l'utente.`,
+          { duration: 6000 }
+        )
+      } catch {
+        toast.success(
+          `Invito creato per ${data.email}! Copia questo link: ${inviteUrl}`,
+          { duration: 8000 }
+        )
+      }
 
       // Reset form and close dialog
       reset()
@@ -83,8 +96,8 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
         <DialogHeader>
           <DialogTitle>Invita membro</DialogTitle>
           <DialogDescription>
-            Invita qualcuno a condividere la tua lista di alimenti. Riceverà un'email con il link
-            per unirsi.
+            Invita qualcuno a condividere la tua lista di alimenti.
+            Il link di invito verrà copiato negli appunti per condividerlo.
           </DialogDescription>
         </DialogHeader>
 

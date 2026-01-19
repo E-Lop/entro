@@ -28,37 +28,7 @@ serve(async (req) => {
   }
 
   try {
-    // Create client for user authentication (with anon key)
-    const supabaseAuth = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    )
-
-    // Get authenticated user from JWT
-    const { data: userData, error: userError } = await supabaseAuth.auth.getUser()
-
-    if (userError || !userData.user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
-
-    const userId = userData.user.id
-
-    // Create service role client for admin operations
+    // Create Supabase client with service role key
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -69,6 +39,51 @@ serve(async (req) => {
         },
       }
     )
+
+    // Extract JWT token from Authorization header
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+
+    if (!token) {
+      console.error('No authorization token provided')
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization token' }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    console.log('Validating JWT token...')
+
+    // Get authenticated user from JWT token
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
+
+    if (userError) {
+      console.error('JWT validation error:', userError)
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized', details: userError.message }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    if (!user) {
+      console.error('No user found from token')
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    console.log('User authenticated:', user.id)
+
+    const userId = user.id
 
     // Parse request body
     const { email, listId }: InviteRequest = await req.json()
@@ -168,30 +183,16 @@ serve(async (req) => {
     const appUrl = Deno.env.get('APP_URL') || 'https://entro-il.netlify.app'
     const inviteUrl = `${appUrl}/signup?invite_token=${inviteToken}`
 
-    // Send invite email using Supabase Auth
-    // Note: This requires email templates to be configured in Supabase dashboard
-    const { error: emailError } = await supabaseClient.auth.admin.inviteUserByEmail(
-      email,
-      {
-        data: {
-          invite_token: inviteToken,
-          invite_url: inviteUrl,
-          list_name: listName,
-        },
-        redirectTo: inviteUrl,
-      }
-    )
-
-    if (emailError) {
-      console.error('Error sending invite email:', emailError)
-      // Don't fail the request if email fails - invite is still created
-    }
+    // TODO: Integrate email service (Resend, SendGrid, etc.)
+    // For now, return the invite URL for manual sharing
+    console.log('Invite created successfully. URL:', inviteUrl)
 
     return new Response(
       JSON.stringify({
         success: true,
         invite: inviteData,
-        message: `Invite sent to ${email}`,
+        inviteUrl: inviteUrl,
+        message: `Invite created for ${email}. Share this link: ${inviteUrl}`,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
