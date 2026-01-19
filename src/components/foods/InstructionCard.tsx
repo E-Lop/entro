@@ -1,6 +1,7 @@
 import { SwipeableCard } from './SwipeableCard'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { ArrowRight, ArrowLeft, Info } from 'lucide-react'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
+import { Button } from '../ui/button'
+import { ArrowRight, ArrowLeft, Info, X } from 'lucide-react'
 
 interface InstructionCardProps {
   onDismiss: () => void
@@ -33,6 +34,8 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
         <CardContent className="space-y-4 pb-4">
           {/* Instructions */}
           <div className="space-y-3 text-sm">
+            <p className="text-muted-foreground text-xs font-medium">Su smartphone</p>
+
             <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-blue-200">
               <ArrowRight className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
               <div>
@@ -60,6 +63,20 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
             </p>
           </div>
         </CardContent>
+
+        {/* Dismiss button - hidden on mobile (swipe gesture), visible on desktop */}
+        <CardFooter className="hidden sm:flex pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDismiss}
+            className="w-full"
+            aria-label="Elimina card informativa"
+          >
+            <X className="h-4 w-4 mr-2" aria-hidden="true" />
+            Chiudi
+          </Button>
+        </CardFooter>
       </Card>
     </SwipeableCard>
   )
