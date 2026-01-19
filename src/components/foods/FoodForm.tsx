@@ -223,7 +223,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
               <FormLabel>Categoria *</FormLabel>
               <FormControl>
                 <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   disabled={isSubmitting || categoriesLoading}
                   {...field}
                 >
@@ -249,7 +249,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
               <FormLabel>Posizione *</FormLabel>
               <FormControl>
                 <select
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   disabled={isSubmitting}
                   {...field}
                 >
@@ -317,7 +317,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                 <FormLabel>Unità</FormLabel>
                 <FormControl>
                   <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                     disabled={isSubmitting}
                     value={field.value || ''}
                     onChange={(e) => {
