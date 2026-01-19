@@ -1,0 +1,10 @@
+# Supabase Edge Functions Configuration
+
+[functions.create-invite]
+verify_jwt = true
+
+[functions.validate-invite]
+verify_jwt = false  # Public endpoint for signup validation
+
+[functions.accept-invite]
+verify_jwt = true

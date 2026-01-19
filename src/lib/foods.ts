@@ -174,11 +174,28 @@ export async function createFood(foodData: FoodInsert): Promise<FoodResponse> {
       throw new Error('Utente non autenticato')
     }
 
+    // Get user's list ID (for shared lists feature)
+    let listId: string | null = null
+    try {
+      const { data: listMemberData } = await supabase
+        .from('list_members')
+        .select('list_id')
+        .eq('user_id', user.id)
+        .single()
+
+      listId = listMemberData?.list_id || null
+    } catch (listError) {
+      // If user has no list yet (shouldn't happen with auto-creation trigger),
+      // continue with list_id = null (personal food)
+      console.warn('No list found for user, creating personal food')
+    }
+
     const { data, error } = await supabase
       .from('foods')
       .insert({
         ...foodData,
         user_id: user.id,
+        list_id: listId, // Added for shared lists support
       })
       .select()
       .single()

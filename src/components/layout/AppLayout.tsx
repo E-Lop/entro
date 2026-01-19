@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { AppIcon } from '../ui/AppIcon'
 import { ThemeToggle } from './ThemeToggle'
+import { InviteButton } from '../sharing/InviteButton'
+import { InviteDialog } from '../sharing/InviteDialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +23,7 @@ import { Button } from '../ui/button'
 export function AppLayout() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
 
   const handleLogout = async () => {
     const result = await signOut()
@@ -79,6 +83,10 @@ export function AppLayout() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <InviteButton onClick={() => setInviteDialogOpen(true)} />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="cursor-pointer text-red-600 focus:text-red-600"
@@ -91,6 +99,9 @@ export function AppLayout() {
           </nav>
         </div>
       </header>
+
+      {/* Invite Dialog */}
+      <InviteDialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen} />
 
       {/* Main Content */}
       <main id="main-content" className="container mx-auto px-4 py-8">

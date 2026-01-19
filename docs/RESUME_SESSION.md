@@ -149,23 +149,6 @@ Ho completato la pianificazione dettagliata per la feature di condivisione liste
 
 **Stima Implementazione**: 6-8 giorni (7 fasi)
 
-**OPZIONI PER PROSSIMA SESSIONE**:
-
-Opzione A) **Implementare Shared Lists** (stima: 6-8 giorni)
-   - Segui il piano fase per fase in `SHARED_LISTS_PLAN.md`
-   - Inizia con Phase 1: Database Setup (migrations + RLS)
-   - Feature flag disabled di default per rollback sicuro
-   - Testing incrementale dopo ogni fase
-
-Opzione B) **Rimandare a Post-Launch** (consigliato per MVP)
-   - Passa a Task 7: Final Polish & Documentation
-   - Lancia l'app in beta testing (Fase 6)
-   - Implementa Shared Lists in base a feedback utenti
-   - Mantiene scope MVP più snello
-
-COSA VOGLIO FARE ORA:
-Scegli una delle due opzioni sopra, oppure chiedi chiarimenti sul piano dettagliato.
-
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (roadmap completa con progress Fase 5)
 - docs/SHARED_LISTS_PLAN.md (piano dettagliato shared lists multi-user - NUOVO!)

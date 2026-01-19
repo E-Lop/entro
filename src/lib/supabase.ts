@@ -19,7 +19,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
-// Database types (will be generated later with Supabase CLI)
+// Database types (updated for shared lists feature)
 export type Database = {
   public: {
     Tables: {
@@ -27,6 +27,7 @@ export type Database = {
         Row: {
           id: string
           user_id: string
+          list_id: string | null // Added for shared lists
           name: string
           quantity: number | null
           quantity_unit: 'pz' | 'kg' | 'g' | 'l' | 'ml' | 'confezioni' | null
@@ -56,6 +57,42 @@ export type Database = {
           average_shelf_life_days: number
           created_at: string
         }
+      }
+      lists: {
+        Row: {
+          id: string
+          name: string
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['lists']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['lists']['Insert']>
+      }
+      list_members: {
+        Row: {
+          id: string
+          list_id: string
+          user_id: string
+          joined_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['list_members']['Row'], 'id' | 'joined_at'>
+        Update: Partial<Database['public']['Tables']['list_members']['Insert']>
+      }
+      invites: {
+        Row: {
+          id: string
+          list_id: string
+          email: string
+          token: string
+          created_by: string
+          status: 'pending' | 'accepted' | 'expired'
+          created_at: string
+          expires_at: string
+          accepted_at: string | null
+        }
+        Insert: Omit<Database['public']['Tables']['invites']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['invites']['Insert']>
       }
     }
   }
