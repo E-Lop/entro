@@ -9,6 +9,14 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  VITE_SUPABASE_URL = "https://rmbmmwcxtnanacxbkihc.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtYm1td2N4dG5hbmFjeGJraWhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4NTE3NzAsImV4cCI6MjA0OTQyNzc3MH0.PpXVrLDjGK8VfvD5Rf60SkMC8MlKE98jJqkSt1EXrm0"
+  VITE_APP_URL = "https://entro-il.netlify.app"
+  VITE_APP_NAME = "entro"
+  VITE_ENABLE_BARCODE_SCANNER = "true"
+  VITE_ENABLE_SWIPE_GESTURES = "true"
+  VITE_ENABLE_NOTIFICATIONS = "true"
+  VITE_ENABLE_SHARED_LISTS = "true"
 
 [[headers]]
   for = "/*"
