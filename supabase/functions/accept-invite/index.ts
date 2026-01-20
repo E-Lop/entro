@@ -10,7 +10,7 @@ const corsHeaders = {
 }
 
 interface AcceptRequest {
-  token: string
+  token?: string  // Optional - will accept by email if not provided
 }
 
 serve(async (req) => {
@@ -55,49 +55,69 @@ serve(async (req) => {
     // Parse request body
     const { token: inviteToken }: AcceptRequest = await req.json()
 
-    // Validate input
-    if (!inviteToken) {
-      return new Response(
-        JSON.stringify({ error: 'Invite token is required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
+    let inviteData
 
-    // Find invite by token
-    const { data: inviteData, error: inviteError } = await supabaseClient
-      .from('invites')
-      .select('*')
-      .eq('token', inviteToken)
-      .single()
+    if (inviteToken) {
+      // Accept by token - find invite by token
+      const { data, error: inviteError } = await supabaseClient
+        .from('invites')
+        .select('*')
+        .eq('token', inviteToken)
+        .single()
 
-    if (inviteError || !inviteData) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Invalid invite token',
-        }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
+      if (inviteError || !data) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Invalid invite token',
+          }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
 
-    // Verify email matches
-    if (inviteData.email !== userEmail) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'This invite was sent to a different email address',
-        }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
+      // Verify email matches
+      if (data.email !== userEmail) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'This invite was sent to a different email address',
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
+
+      inviteData = data
+    } else {
+      // Accept by email - find pending invite for this email
+      const { data, error: inviteError } = await supabaseClient
+        .from('invites')
+        .select('*')
+        .eq('email', userEmail)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (inviteError || !data) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'No pending invite found for your email',
+          }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
+
+      inviteData = data
     }
 
     // Check if invite is still pending

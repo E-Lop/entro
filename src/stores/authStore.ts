@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
 import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
+import { acceptInviteByEmail } from '../lib/invites'
 
 /**
  * Auth Store State
@@ -84,14 +85,47 @@ export const useAuthStore = create<AuthStore>((set) => ({
         loading: false,
       })
 
+      // Check for pending invites on initial load if user is authenticated
+      if (user) {
+        acceptInviteByEmail().then(({ success, listId }) => {
+          if (success && listId) {
+            console.log('Auto-accepted pending invite for list:', listId)
+            // Refresh the page to load the new list data
+            window.location.reload()
+          }
+        }).catch((error) => {
+          console.error('Error checking for pending invites:', error)
+        })
+      }
+
+      // Track previous auth state to detect login
+      let wasAuthenticated = user !== null
+
       // Setup auth state change listener
       const unsubscribe = onAuthStateChange((user, session) => {
+        const isNowAuthenticated = user !== null
+
         set({
           user,
           session,
-          isAuthenticated: user !== null,
+          isAuthenticated: isNowAuthenticated,
           loading: false,
         })
+
+        // Check for pending invites when user logs in (transitions from logged out to logged in)
+        if (!wasAuthenticated && isNowAuthenticated && user) {
+          acceptInviteByEmail().then(({ success, listId }) => {
+            if (success && listId) {
+              console.log('Auto-accepted pending invite for list:', listId)
+              // Refresh the page to load the new list data
+              window.location.reload()
+            }
+          }).catch((error) => {
+            console.error('Error checking for pending invites:', error)
+          })
+        }
+
+        wasAuthenticated = isNowAuthenticated
       })
 
       return unsubscribe

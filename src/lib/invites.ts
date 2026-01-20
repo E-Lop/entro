@@ -142,6 +142,57 @@ export async function acceptInvite(token: string): Promise<AcceptInviteResponse>
 }
 
 /**
+ * Accepts a pending invite by the authenticated user's email
+ * Used when user confirms email after signup with invite
+ * @returns Response with success status and list ID
+ */
+export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
+  try {
+    // Get current session for auth token
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData.session) {
+      throw new Error('Not authenticated')
+    }
+
+    // Call Edge Function without token (will use email)
+    const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/accept-invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionData.session.access_token}`,
+      },
+      body: JSON.stringify({}),  // No token - will accept by email
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      // If no invite found, that's okay - user wasn't invited
+      if (response.status === 404) {
+        return {
+          success: false,
+          listId: null,
+          error: null,  // Not an error, just no invite
+        }
+      }
+      throw new Error(data.error || 'Failed to accept invite')
+    }
+
+    return {
+      success: data.success,
+      listId: data.listId,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      listId: null,
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    }
+  }
+}
+
+/**
  * Gets the current user's list
  * @returns Response with list data
  */
