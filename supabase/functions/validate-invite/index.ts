@@ -66,17 +66,15 @@ serve(async (req) => {
       .eq('id', inviteData.list_id)
       .single()
 
-    // Get creator's profile
+    // Get creator's name from auth.users metadata
     let creatorName = 'Un utente'
     if (listData?.created_by) {
-      const { data: profileData } = await supabaseService
-        .from('profiles')
-        .select('full_name')
-        .eq('id', listData.created_by)
-        .single()
+      const { data: { user: creatorUser } } = await supabaseService.auth.admin.getUserById(
+        listData.created_by
+      )
 
-      if (profileData?.full_name) {
-        creatorName = profileData.full_name
+      if (creatorUser?.user_metadata?.full_name) {
+        creatorName = creatorUser.user_metadata.full_name
       }
     }
 

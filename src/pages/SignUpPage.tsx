@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { AuthForm } from '../components/auth/AuthForm'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
 import { useAuth } from '../hooks/useAuth'
-import { validateInvite, acceptInvite } from '../lib/invites'
+import { validateInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
 
 export function SignUpPage() {
@@ -56,16 +56,13 @@ export function SignUpPage() {
   const handleSuccess = async () => {
     try {
       if (inviteToken && inviteValid) {
-        // User signed up with invite - accept the invite
-        const { success, error } = await acceptInvite(inviteToken)
-
-        if (success) {
-          toast.success(`Ti sei unito con successo alla lista di ${inviteCreatorName}!`)
-        } else {
-          toast.warning(
-            error?.message || 'Impossibile accettare l\'invito, ma il tuo account è stato creato'
-          )
-        }
+        // User signed up with invite - show message to check email
+        toast.info(
+          'Registrazione completata! Controlla la tua email e clicca sul link di conferma per unirti alla lista condivisa.',
+          { duration: 12000 }
+        )
+        // Don't navigate - let user see the message and check email
+        // They'll be redirected after email confirmation via authStore
       } else {
         // User signed up without invite - create personal list
         const { createPersonalList } = await import('../lib/invites')
@@ -74,13 +71,17 @@ export function SignUpPage() {
         if (!success) {
           console.error('Failed to create personal list:', error)
           toast.warning('Account creato. Lista personale verrà creata al primo accesso.')
+        } else {
+          toast.success(
+            'Registrazione completata! Controlla la tua email per confermare l\'account.',
+            { duration: 10000 }
+          )
         }
+        // User needs to confirm email before accessing the app
       }
     } catch (error) {
       console.error('Post-signup error:', error)
     }
-
-    navigate('/', { replace: true })
   }
 
   // Show loading or nothing while checking auth status
