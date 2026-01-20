@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
-import { toast } from 'sonner'
 import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
 import { acceptInviteByEmail } from '../lib/invites'
 
