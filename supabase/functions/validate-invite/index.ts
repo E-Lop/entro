@@ -20,18 +20,6 @@ serve(async (req) => {
   }
 
   try {
-    // Get Supabase client with anon key (public access)
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    )
-
     // Parse request body
     const { token }: ValidateRequest = await req.json()
 
@@ -46,21 +34,15 @@ serve(async (req) => {
       )
     }
 
-    // Find invite by token
-    const { data: inviteData, error: inviteError } = await supabaseClient
+    // Find invite by token (use service role to bypass RLS for public endpoint)
+    const supabaseService = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    const { data: inviteData, error: inviteError } = await supabaseService
       .from('invites')
-      .select(`
-        id,
-        email,
-        token,
-        status,
-        expires_at,
-        list_id,
-        lists (
-          id,
-          name
-        )
-      `)
+      .select('id, email, token, status, expires_at, list_id')
       .eq('token', token)
       .single()
 
@@ -76,6 +58,13 @@ serve(async (req) => {
         }
       )
     }
+
+    // Get list details separately
+    const { data: listData } = await supabaseService
+      .from('lists')
+      .select('id, name')
+      .eq('id', inviteData.list_id)
+      .single()
 
     // Check if invite is still pending
     if (inviteData.status !== 'pending') {
@@ -97,7 +86,7 @@ serve(async (req) => {
 
     if (expiresAt < now) {
       // Update invite status to expired
-      await supabaseClient
+      await supabaseService
         .from('invites')
         .update({ status: 'expired' })
         .eq('id', inviteData.id)
@@ -120,7 +109,7 @@ serve(async (req) => {
         valid: true,
         invite: {
           email: inviteData.email,
-          listName: inviteData.lists?.name || 'Una lista condivisa',
+          listName: listData?.name || 'Una lista condivisa',
           expiresAt: inviteData.expires_at,
         },
       }),
