@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../../hooks/useAuth'
@@ -10,9 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 interface AuthFormProps {
   mode: 'login' | 'signup'
   onSuccess?: () => void
+  prefillEmail?: string | null
+  lockEmail?: boolean
 }
 
-export function AuthForm({ mode, onSuccess }: AuthFormProps) {
+export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail }: AuthFormProps) {
   const { signIn, signUp } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -22,11 +24,18 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
   const form = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: '',
+      email: prefillEmail || '',
       password: '',
       ...(mode === 'signup' && { full_name: '', confirmPassword: '' }),
     },
   })
+
+  // Update email field when prefillEmail changes
+  useEffect(() => {
+    if (prefillEmail) {
+      form.setValue('email', prefillEmail)
+    }
+  }, [prefillEmail, form])
 
   const handleSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsSubmitting(true)
@@ -89,10 +98,16 @@ export function AuthForm({ mode, onSuccess }: AuthFormProps) {
                   type="email"
                   placeholder="tua@email.com"
                   autoComplete="email"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || lockEmail}
+                  className={lockEmail ? 'bg-muted cursor-not-allowed' : ''}
                   {...field}
                 />
               </FormControl>
+              {lockEmail && (
+                <p className="text-xs text-muted-foreground">
+                  L'email è precompilata dall'invito e non può essere modificata
+                </p>
+              )}
               <FormMessage />
             </FormItem>
           )}

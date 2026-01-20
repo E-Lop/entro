@@ -16,6 +16,7 @@ export function SignUpPage() {
   const [inviteValid, setInviteValid] = useState<boolean>(false)
   const [inviteLoading, setInviteLoading] = useState<boolean>(false)
   const [inviteListName, setInviteListName] = useState<string>('')
+  const [inviteEmail, setInviteEmail] = useState<string | null>(null)
 
   // Validate invite token if present in URL
   useEffect(() => {
@@ -29,6 +30,7 @@ export function SignUpPage() {
           if (valid && invite) {
             setInviteValid(true)
             setInviteListName(invite.listName || 'una lista condivisa')
+            setInviteEmail(invite.email || null)
           } else {
             toast.error(
               error?.message || 'L\'invito potrebbe essere scaduto o già utilizzato'
@@ -116,7 +118,12 @@ export function SignUpPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <AuthForm mode="signup" onSuccess={handleSuccess} />
+          <AuthForm
+            mode="signup"
+            onSuccess={handleSuccess}
+            prefillEmail={inviteEmail}
+            lockEmail={!!inviteEmail}
+          />
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-slate-600">
