@@ -85,12 +85,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
         loading: false,
       })
 
-      // Check for pending invites on initial load if user is authenticated
-      if (user) {
+      // Track previous auth state to detect login
+      let wasAuthenticated = user !== null
+
+      // Check invite acceptance helper
+      const checkAndAcceptInvite = async (user: any) => {
+        // Check if we already accepted an invite in this session
+        const inviteAcceptedKey = `invite_accepted_${user.email}`
+        if (sessionStorage.getItem(inviteAcceptedKey)) {
+          console.log('Invite already processed in this session')
+          return
+        }
+
         console.log('Checking for pending invites for user:', user.email)
-        acceptInviteByEmail().then(({ success, listId, error }) => {
+
+        try {
+          const { success, listId, error } = await acceptInviteByEmail()
+
           if (success && listId) {
             console.log('Auto-accepted pending invite for list:', listId)
+            // Mark as processed to prevent re-checking
+            sessionStorage.setItem(inviteAcceptedKey, 'true')
             // Refresh the page to load the new list data
             window.location.reload()
           } else if (error) {
@@ -98,13 +113,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
           } else {
             console.log('No pending invite found for this email')
           }
-        }).catch((error) => {
+        } catch (error) {
           console.error('Error checking for pending invites:', error)
-        })
+        }
       }
-
-      // Track previous auth state to detect login
-      let wasAuthenticated = user !== null
 
       // Setup auth state change listener
       const unsubscribe = onAuthStateChange((user, session) => {
@@ -120,19 +132,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         // Check for pending invites when user logs in (transitions from logged out to logged in)
         if (!wasAuthenticated && isNowAuthenticated && user) {
           console.log('User just logged in, checking for pending invites:', user.email)
-          acceptInviteByEmail().then(({ success, listId, error }) => {
-            if (success && listId) {
-              console.log('Auto-accepted pending invite for list:', listId)
-              // Refresh the page to load the new list data
-              window.location.reload()
-            } else if (error) {
-              console.log('No pending invite or error accepting:', error.message)
-            } else {
-              console.log('No pending invite found for this email')
-            }
-          }).catch((error) => {
-            console.error('Error checking for pending invites:', error)
-          })
+          checkAndAcceptInvite(user)
         }
 
         wasAuthenticated = isNowAuthenticated
