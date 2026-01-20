@@ -44,6 +44,7 @@ export interface ValidateInviteResponse {
   invite: {
     email: string
     listName: string
+    creatorName: string
     expiresAt: string
   } | null
   error: Error | null

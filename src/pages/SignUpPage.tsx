@@ -15,7 +15,7 @@ export function SignUpPage() {
   const [inviteToken, setInviteToken] = useState<string | null>(null)
   const [inviteValid, setInviteValid] = useState<boolean>(false)
   const [inviteLoading, setInviteLoading] = useState<boolean>(false)
-  const [inviteListName, setInviteListName] = useState<string>('')
+  const [inviteCreatorName, setInviteCreatorName] = useState<string>('')
   const [inviteEmail, setInviteEmail] = useState<string | null>(null)
 
   // Validate invite token if present in URL
@@ -29,7 +29,7 @@ export function SignUpPage() {
         .then(({ valid, invite, error }) => {
           if (valid && invite) {
             setInviteValid(true)
-            setInviteListName(invite.listName || 'una lista condivisa')
+            setInviteCreatorName(invite.creatorName || 'un utente')
             setInviteEmail(invite.email || null)
           } else {
             toast.error(
@@ -60,7 +60,7 @@ export function SignUpPage() {
         const { success, error } = await acceptInvite(inviteToken)
 
         if (success) {
-          toast.success(`Ti sei unito con successo a "${inviteListName}"`)
+          toast.success(`Ti sei unito con successo alla lista di ${inviteCreatorName}!`)
         } else {
           toast.warning(
             error?.message || 'Impossibile accettare l\'invito, ma il tuo account è stato creato'
@@ -110,7 +110,7 @@ export function SignUpPage() {
               </span>
             ) : inviteValid ? (
               <span className="text-primary font-medium">
-                Sei stato invitato a "{inviteListName}"! Crea il tuo account per unirti.
+                {inviteCreatorName} ti ha invitato a condividere la sua lista! Crea il tuo account per unirti.
               </span>
             ) : (
               'Inizia a tracciare le scadenze dei tuoi alimenti'

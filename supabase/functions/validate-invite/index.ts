@@ -59,12 +59,26 @@ serve(async (req) => {
       )
     }
 
-    // Get list details separately
+    // Get list details and creator info separately
     const { data: listData } = await supabaseService
       .from('lists')
-      .select('id, name')
+      .select('id, name, created_by')
       .eq('id', inviteData.list_id)
       .single()
+
+    // Get creator's profile
+    let creatorName = 'Un utente'
+    if (listData?.created_by) {
+      const { data: profileData } = await supabaseService
+        .from('profiles')
+        .select('full_name')
+        .eq('id', listData.created_by)
+        .single()
+
+      if (profileData?.full_name) {
+        creatorName = profileData.full_name
+      }
+    }
 
     // Check if invite is still pending
     if (inviteData.status !== 'pending') {
@@ -110,6 +124,7 @@ serve(async (req) => {
         invite: {
           email: inviteData.email,
           listName: listData?.name || 'Una lista condivisa',
+          creatorName: creatorName,
           expiresAt: inviteData.expires_at,
         },
       }),
