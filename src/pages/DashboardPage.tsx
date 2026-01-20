@@ -1,5 +1,6 @@
-import { useState, useMemo, lazy, Suspense } from 'react'
+import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
@@ -47,6 +48,17 @@ export function DashboardPage() {
 
   // Show swipe hint on first load (mobile only)
   useSwipeHint()
+
+  // Show welcome toast if user just accepted an invite
+  useEffect(() => {
+    const showWelcome = localStorage.getItem('show_welcome_toast')
+    if (showWelcome === 'true') {
+      localStorage.removeItem('show_welcome_toast')
+      toast.success('Benvenuto! Ora puoi vedere la lista condivisa', {
+        duration: 5000,
+      })
+    }
+  }, [])
 
   // Track instruction card visibility
   const [showInstructionCard, setShowInstructionCard] = useState(() => {

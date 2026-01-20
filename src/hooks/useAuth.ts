@@ -24,7 +24,7 @@ export function useAuth() {
       }
 
       if (user) {
-        toast.success('Registrazione completata! Accesso effettuato.')
+        // Don't show generic success toast - let the page handle messaging
         return { success: true, error: null }
       }
 

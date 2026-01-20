@@ -104,14 +104,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
             console.log('Auto-accepted pending invite for list:', listId)
             // Mark as processed to prevent re-checking
             sessionStorage.setItem(inviteAcceptedKey, 'true')
-            // Show success toast before reload
-            toast.success('Benvenuto! Ora puoi vedere la lista condivisa', {
-              duration: 5000,
-            })
-            // Refresh the page to load the new list data after a short delay
-            setTimeout(() => {
-              window.location.reload()
-            }, 500)
+            // Store flag to show toast after reload
+            localStorage.setItem('show_welcome_toast', 'true')
+            // Refresh the page to load the new list data
+            window.location.reload()
           } else if (error) {
             console.log('No pending invite or error accepting:', error.message)
           } else {
