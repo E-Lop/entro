@@ -85,9 +85,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         loading: false,
       })
 
-      // Track previous auth state to detect login
-      let wasAuthenticated = user !== null
-
       // Check invite acceptance helper
       const checkAndAcceptInvite = async (user: any) => {
         // Check if we already accepted an invite in this session
@@ -117,6 +114,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
           console.error('Error checking for pending invites:', error)
         }
       }
+
+      // Check for pending invites on initial load if user is authenticated
+      // This handles the case where user confirms email and is redirected already logged in
+      if (user) {
+        checkAndAcceptInvite(user)
+      }
+
+      // Track previous auth state to detect login
+      let wasAuthenticated = user !== null
 
       // Setup auth state change listener
       const unsubscribe = onAuthStateChange((user, session) => {
