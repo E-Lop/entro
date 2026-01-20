@@ -90,17 +90,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
         // Check if we already accepted an invite in this session
         const inviteAcceptedKey = `invite_accepted_${user.email}`
         if (sessionStorage.getItem(inviteAcceptedKey)) {
-          console.log('Invite already processed in this session')
           return
         }
-
-        console.log('Checking for pending invites for user:', user.email)
 
         try {
           const { success, listId, error } = await acceptInviteByEmail()
 
           if (success && listId) {
-            console.log('Auto-accepted pending invite for list:', listId)
             // Mark as processed to prevent re-checking
             sessionStorage.setItem(inviteAcceptedKey, 'true')
             // Store flag to show toast after reload
@@ -108,9 +104,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
             // Refresh the page to load the new list data
             window.location.reload()
           } else if (error) {
-            console.log('No pending invite or error accepting:', error.message)
-          } else {
-            console.log('No pending invite found for this email')
+            console.error('Failed to accept invite:', error.message)
           }
         } catch (error) {
           console.error('Error checking for pending invites:', error)
@@ -139,7 +133,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         // Check for pending invites when user logs in (transitions from logged out to logged in)
         if (!wasAuthenticated && isNowAuthenticated && user) {
-          console.log('User just logged in, checking for pending invites:', user.email)
           checkAndAcceptInvite(user)
         }
 

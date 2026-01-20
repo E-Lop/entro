@@ -152,14 +152,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     // Get current user
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
-      console.log('acceptInviteByEmail: No user found')
       throw new Error('Not authenticated')
     }
 
     const userId = userData.user.id
     const userEmail = userData.user.email
-
-    console.log('acceptInviteByEmail: Looking for pending invite for:', userEmail)
 
     // Find pending invite for this email (using public read access from RLS)
     const { data: inviteData, error: inviteError } = await supabase
@@ -172,12 +169,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       .maybeSingle()
 
     if (inviteError) {
-      console.error('acceptInviteByEmail: Error querying invites:', inviteError)
+      console.error('Error querying invites:', inviteError)
       throw inviteError
     }
 
     if (!inviteData) {
-      console.log('acceptInviteByEmail: No pending invite found')
       return {
         success: false,
         listId: null,
@@ -185,14 +181,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       }
     }
 
-    console.log('acceptInviteByEmail: Found invite:', inviteData.id, 'for list:', inviteData.list_id)
-
     // Check if invite has expired
     const expiresAt = new Date(inviteData.expires_at)
     const now = new Date()
 
     if (expiresAt < now) {
-      console.log('acceptInviteByEmail: Invite has expired')
       // Update invite status to expired
       await supabase
         .from('invites')
@@ -215,7 +208,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       .maybeSingle()
 
     if (existingMember) {
-      console.log('acceptInviteByEmail: User is already a member')
       // User is already a member, just mark invite as accepted
       await supabase
         .from('invites')
@@ -233,7 +225,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     }
 
     // Add user to list_members
-    console.log('acceptInviteByEmail: Adding user to list_members')
     const { error: memberError } = await supabase
       .from('list_members')
       .insert({
@@ -242,7 +233,7 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       })
 
     if (memberError) {
-      console.error('acceptInviteByEmail: Error adding member:', memberError)
+      console.error('Error adding member to list:', memberError)
       throw memberError
     }
 
@@ -256,18 +247,17 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       .eq('id', inviteData.id)
 
     if (updateError) {
-      console.error('acceptInviteByEmail: Error updating invite status:', updateError)
+      console.error('Error updating invite status:', updateError)
       // Don't fail if we can't update the status - the member was added successfully
     }
 
-    console.log('acceptInviteByEmail: Successfully accepted invite for list:', inviteData.list_id)
     return {
       success: true,
       listId: inviteData.list_id,
       error: null,
     }
   } catch (error) {
-    console.error('acceptInviteByEmail: Exception caught:', error)
+    console.error('Failed to accept invite by email:', error)
     return {
       success: false,
       listId: null,
