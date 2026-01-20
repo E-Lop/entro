@@ -11,6 +11,7 @@
 - [Gestire gli Alimenti](#gestire-gli-alimenti)
 - [Filtri e Ricerca](#filtri-e-ricerca)
 - [Vista Calendario](#vista-calendario)
+- [Condividere la Lista](#condividere-la-lista)
 - [Scansione Barcode](#scansione-barcode)
 - [Installare l'App (PWA)](#installare-lapp-pwa)
 - [Utilizzo Offline](#utilizzo-offline)
@@ -135,6 +136,78 @@ Clicca sulle **card statistiche** in alto:
 
 ---
 
+## Condividere la Lista
+
+**entro** ti permette di condividere la tua lista con familiari, coinquilini o partner, così tutti possono vedere e gestire gli alimenti insieme.
+
+### Come Funziona
+
+Quando condividi la tua lista:
+- Gli altri utenti vedono **tutti i tuoi alimenti** in tempo reale
+- Possono **aggiungere, modificare ed eliminare** alimenti
+- Tutti condividono la **stessa lista** - non ci sono copie separate
+- Le modifiche sono **sincronizzate immediatamente** per tutti
+
+### Invitare Qualcuno
+
+1. Nella dashboard, clicca sul pulsante **"Invita"** (in alto a destra, accanto a "+ Alimento")
+2. Inserisci l'**indirizzo email** della persona che vuoi invitare
+3. Clicca **"Invia Invito"**
+4. La persona riceverà un'**email con un link di invito**
+
+### Accettare un Invito
+
+Se hai ricevuto un invito:
+
+1. **Se hai già un account**:
+   - Clicca il link nell'email
+   - Fai login con il tuo account
+   - Verrai automaticamente aggiunto alla lista condivisa
+
+2. **Se NON hai un account**:
+   - Clicca il link nell'email
+   - Verrai portato alla pagina di registrazione
+   - La tua **email sarà già precompilata** (non può essere modificata)
+   - Completa la registrazione con nome e password
+   - Controlla la tua email per il **link di conferma**
+   - Clicca il link di conferma
+   - Verrai automaticamente aggiunto alla lista condivisa
+
+### Cosa Succede Dopo
+
+Una volta che qualcuno accetta il tuo invito:
+- Vedrà tutti i tuoi alimenti nella dashboard
+- Potrà aggiungere nuovi alimenti
+- Potrà modificare ed eliminare alimenti esistenti
+- Le modifiche saranno visibili immediatamente a tutti i membri
+
+### Vedere i Membri della Lista
+
+Attualmente non c'è un'interfaccia per vedere l'elenco dei membri. Questa funzionalità sarà aggiunta in futuro.
+
+### Limitazioni Attuali
+
+- **Un utente può appartenere solo a una lista alla volta**
+- **Gli inviti scadono** dopo un certo periodo
+- **Non puoi lasciare una lista condivisa** o tornare a una lista personale (funzionalità futura)
+- **Non puoi rimuovere membri** dalla lista (funzionalità futura)
+
+### Domande Frequenti Condivisione
+
+**Posso invitare più persone?**
+Sì, puoi inviare più inviti alla stessa lista.
+
+**Cosa succede se invito qualcuno che ha già una lista?**
+Al momento, se una persona ha già una lista personale e accetta un invito, la sua lista precedente non sarà più accessibile. Pianificato per miglioramento futuro.
+
+**L'invito scade?**
+Sì, gli inviti hanno una scadenza. Se scade, dovrai inviare un nuovo invito.
+
+**Posso annullare un invito?**
+Attualmente non è possibile annullare un invito già inviato. Funzionalità pianificata per il futuro.
+
+---
+
 ## Scansione Barcode
 
 ### Come Funziona
@@ -229,7 +302,7 @@ Attualmente non è possibile cambiare la password dall'app. Contatta il supporto
 
 ### Posso condividere la mia lista con altri?
 
-Questa funzionalità è pianificata per una versione futura.
+Sì! Puoi invitare altre persone a condividere la tua lista. Vedi la sezione [Condividere la Lista](#condividere-la-lista) per maggiori dettagli.
 
 ### I miei dati sono al sicuro?
 
@@ -256,4 +329,4 @@ Per segnalare problemi o suggerire miglioramenti:
 
 ---
 
-*Ultimo aggiornamento: 14 gennaio 2026*
+*Ultimo aggiornamento: 20 gennaio 2026*
