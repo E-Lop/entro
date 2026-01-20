@@ -215,3 +215,52 @@ export async function getListMembers(
     }
   }
 }
+
+/**
+ * Creates a personal list for a new user (called after signup)
+ * @returns Response with success status
+ */
+export async function createPersonalList(): Promise<{ success: boolean; error: Error | null }> {
+  try {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) {
+      throw new Error('Not authenticated')
+    }
+
+    // Create new list
+    const { data: listData, error: listError } = await supabase
+      .from('lists')
+      .insert({
+        name: 'La mia lista',
+        created_by: userData.user.id,
+      })
+      .select()
+      .single()
+
+    if (listError || !listData) {
+      throw new Error(listError?.message || 'Failed to create list')
+    }
+
+    // Add user as member
+    const { error: memberError } = await supabase
+      .from('list_members')
+      .insert({
+        list_id: listData.id,
+        user_id: userData.user.id,
+      })
+
+    if (memberError) {
+      throw new Error(memberError.message)
+    }
+
+    return {
+      success: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    }
+  }
+}

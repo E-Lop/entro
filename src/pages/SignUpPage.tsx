@@ -52,17 +52,30 @@ export function SignUpPage() {
   }, [isAuthenticated, loading, navigate])
 
   const handleSuccess = async () => {
-    // If there's a valid invite token, accept it before navigating
-    if (inviteToken && inviteValid) {
-      const { success, error } = await acceptInvite(inviteToken)
+    try {
+      if (inviteToken && inviteValid) {
+        // User signed up with invite - accept the invite
+        const { success, error } = await acceptInvite(inviteToken)
 
-      if (success) {
-        toast.success(`Ti sei unito con successo a "${inviteListName}"`)
+        if (success) {
+          toast.success(`Ti sei unito con successo a "${inviteListName}"`)
+        } else {
+          toast.warning(
+            error?.message || 'Impossibile accettare l\'invito, ma il tuo account è stato creato'
+          )
+        }
       } else {
-        toast.warning(
-          error?.message || 'Impossibile accettare l\'invito, ma il tuo account è stato creato'
-        )
+        // User signed up without invite - create personal list
+        const { createPersonalList } = await import('../lib/invites')
+        const { success, error } = await createPersonalList()
+
+        if (!success) {
+          console.error('Failed to create personal list:', error)
+          toast.warning('Account creato. Lista personale verrà creata al primo accesso.')
+        }
       }
+    } catch (error) {
+      console.error('Post-signup error:', error)
     }
 
     navigate('/', { replace: true })
