@@ -87,11 +87,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // Check for pending invites on initial load if user is authenticated
       if (user) {
-        acceptInviteByEmail().then(({ success, listId }) => {
+        console.log('Checking for pending invites for user:', user.email)
+        acceptInviteByEmail().then(({ success, listId, error }) => {
           if (success && listId) {
             console.log('Auto-accepted pending invite for list:', listId)
             // Refresh the page to load the new list data
             window.location.reload()
+          } else if (error) {
+            console.log('No pending invite or error accepting:', error.message)
+          } else {
+            console.log('No pending invite found for this email')
           }
         }).catch((error) => {
           console.error('Error checking for pending invites:', error)
@@ -114,11 +119,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         // Check for pending invites when user logs in (transitions from logged out to logged in)
         if (!wasAuthenticated && isNowAuthenticated && user) {
-          acceptInviteByEmail().then(({ success, listId }) => {
+          console.log('User just logged in, checking for pending invites:', user.email)
+          acceptInviteByEmail().then(({ success, listId, error }) => {
             if (success && listId) {
               console.log('Auto-accepted pending invite for list:', listId)
               // Refresh the page to load the new list data
               window.location.reload()
+            } else if (error) {
+              console.log('No pending invite or error accepting:', error.message)
+            } else {
+              console.log('No pending invite found for this email')
             }
           }).catch((error) => {
             console.error('Error checking for pending invites:', error)

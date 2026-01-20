@@ -151,8 +151,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     // Get current session for auth token
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) {
+      console.log('acceptInviteByEmail: No session found')
       throw new Error('Not authenticated')
     }
+
+    console.log('acceptInviteByEmail: Calling Edge Function for user:', sessionData.session.user.email)
 
     // Call Edge Function without token (will use email)
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/accept-invite`, {
@@ -164,26 +167,33 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       body: JSON.stringify({}),  // No token - will accept by email
     })
 
+    console.log('acceptInviteByEmail: Response status:', response.status)
+
     const data = await response.json()
+    console.log('acceptInviteByEmail: Response data:', data)
 
     if (!response.ok) {
       // If no invite found, that's okay - user wasn't invited
       if (response.status === 404) {
+        console.log('acceptInviteByEmail: No pending invite found (404)')
         return {
           success: false,
           listId: null,
           error: null,  // Not an error, just no invite
         }
       }
+      console.error('acceptInviteByEmail: Error response:', response.status, data)
       throw new Error(data.error || 'Failed to accept invite')
     }
 
+    console.log('acceptInviteByEmail: Successfully accepted invite for list:', data.listId)
     return {
       success: data.success,
       listId: data.listId,
       error: null,
     }
   } catch (error) {
+    console.error('acceptInviteByEmail: Exception caught:', error)
     return {
       success: false,
       listId: null,
