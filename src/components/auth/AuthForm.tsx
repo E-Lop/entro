@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 
 interface AuthFormProps {
   mode: 'login' | 'signup'
-  onSuccess?: () => void
+  onSuccess?: (email?: string) => void
   prefillEmail?: string | null
   lockEmail?: boolean
 }
@@ -53,7 +53,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail }: AuthFormP
 
       if (result.success) {
         form.reset()
-        onSuccess?.()
+        onSuccess?.(data.email)
       }
     } finally {
       setIsSubmitting(false)
