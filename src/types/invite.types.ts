@@ -35,14 +35,13 @@ export interface ListMembersResponse {
 
 export interface CreateInviteResponse {
   success: boolean
-  invite: Invite | null
+  shortCode: string | null
   error: Error | null
 }
 
 export interface ValidateInviteResponse {
   valid: boolean
   invite: {
-    email: string
     listName: string
     creatorName: string
     expiresAt: string

@@ -1,5 +1,5 @@
 // Edge Function: accept-invite
-// Accepts invite and adds user to shared list (requires authentication)
+// Accepts invite by short code and adds user to shared list (requires authentication)
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -10,17 +10,15 @@ const corsHeaders = {
 }
 
 interface AcceptRequest {
-  token?: string  // Optional - will accept by email if not provided
+  shortCode: string
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Get Supabase client with service role key
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -32,141 +30,83 @@ serve(async (req) => {
       }
     )
 
-    // Get authenticated user from JWT
-    const authHeader = req.headers.get('Authorization')!
-    const token = authHeader.replace('Bearer ', '')
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(
-      token
-    )
+    // Get authenticated user
+    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
-    if (userError || !userData.user) {
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
+    if (userError || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const userId = userData.user.id
-    const userEmail = userData.user.email
+    const userId = user.id
 
-    // Parse request body
-    const { token: inviteToken }: AcceptRequest = await req.json()
+    // Parse request
+    const { shortCode }: AcceptRequest = await req.json()
 
-    let inviteData
-
-    if (inviteToken) {
-      // Accept by token - find invite by token
-      const { data, error: inviteError } = await supabaseClient
-        .from('invites')
-        .select('*')
-        .eq('token', inviteToken)
-        .single()
-
-      if (inviteError || !data) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: 'Invalid invite token',
-          }),
-          {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      // Verify email matches
-      if (data.email !== userEmail) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: 'This invite was sent to a different email address',
-          }),
-          {
-            status: 403,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      inviteData = data
-    } else {
-      // Accept by email - find pending invite for this email
-      const { data, error: inviteError } = await supabaseClient
-        .from('invites')
-        .select('*')
-        .eq('email', userEmail)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (inviteError || !data) {
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: 'No pending invite found for your email',
-          }),
-          {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        )
-      }
-
-      inviteData = data
+    if (!shortCode) {
+      return new Response(
+        JSON.stringify({ error: 'Short code required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    // Check if invite is still pending
+    // Lookup invite
+    const { data: inviteData, error: inviteError } = await supabaseClient
+      .from('invites')
+      .select('*')
+      .eq('short_code', shortCode.toUpperCase())
+      .single()
+
+    if (inviteError || !inviteData) {
+      return new Response(
+        JSON.stringify({ error: 'Invite not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Check status
     if (inviteData.status !== 'pending') {
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'This invite has already been used or expired',
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ error: 'Invite already used or expired' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Check if invite has expired
+    // Check expiry
     const expiresAt = new Date(inviteData.expires_at)
-    const now = new Date()
-
-    if (expiresAt < now) {
-      // Update invite status to expired
+    if (expiresAt < new Date()) {
       await supabaseClient
         .from('invites')
         .update({ status: 'expired' })
         .eq('id', inviteData.id)
 
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'This invite has expired',
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ error: 'Invite expired' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Check if user is already a member of this list
+    // NO EMAIL MATCH CHECK - anyone with code can use it!
+
+    // Check if already member
     const { data: existingMember } = await supabaseClient
       .from('list_members')
       .select('*')
       .eq('list_id', inviteData.list_id)
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     if (existingMember) {
-      // User is already a member, just mark invite as accepted
+      // Already a member, just mark invite as accepted
       await supabaseClient
         .from('invites')
         .update({
@@ -179,7 +119,6 @@ serve(async (req) => {
         JSON.stringify({
           success: true,
           listId: inviteData.list_id,
-          message: 'You are already a member of this list',
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -187,7 +126,7 @@ serve(async (req) => {
       )
     }
 
-    // Add user to list_members (atomic operation)
+    // Add to list_members
     const { error: memberError } = await supabaseClient
       .from('list_members')
       .insert({
@@ -196,21 +135,14 @@ serve(async (req) => {
       })
 
     if (memberError) {
-      console.error('Error adding user to list:', memberError)
+      console.error('Error adding member:', memberError)
       return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Failed to add you to the list',
-          details: memberError,
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ error: 'Failed to add member' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Update invite status to accepted
+    // Mark invite as accepted
     await supabaseClient
       .from('invites')
       .update({
@@ -223,7 +155,6 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         listId: inviteData.list_id,
-        message: 'Successfully joined the shared list!',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -232,11 +163,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useAuthStore } from './stores/authStore'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
@@ -22,6 +22,17 @@ function PageLoader() {
       </div>
     </div>
   )
+}
+
+// Join page - redirects to signup with invite code
+function JoinPage() {
+  const { code } = useParams<{ code: string }>()
+
+  if (!code) {
+    return <Navigate to="/signup" replace />
+  }
+
+  return <Navigate to={`/signup?code=${code.toUpperCase()}`} replace />
 }
 
 function App() {
@@ -52,6 +63,7 @@ function App() {
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/join/:code" element={<JoinPage />} />
 
             {/* Protected routes */}
             <Route element={<ProtectedRoute />}>

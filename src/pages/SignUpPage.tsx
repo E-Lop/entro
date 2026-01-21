@@ -3,8 +3,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthForm } from '../components/auth/AuthForm'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
 import { useAuth } from '../hooks/useAuth'
-import { validateInvite } from '../lib/invites'
+import { validateInvite, acceptInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
 
 export function SignUpPage() {
@@ -12,79 +15,95 @@ export function SignUpPage() {
   const [searchParams] = useSearchParams()
   const { isAuthenticated, loading } = useAuth()
 
-  const [inviteToken, setInviteToken] = useState<string | null>(null)
+  // Solo short code
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [inviteValid, setInviteValid] = useState<boolean>(false)
   const [inviteLoading, setInviteLoading] = useState<boolean>(false)
   const [inviteCreatorName, setInviteCreatorName] = useState<string>('')
-  const [inviteEmail, setInviteEmail] = useState<string | null>(null)
 
-  // Validate invite token if present in URL
+  // Input manuale
+  const [showCodeInput, setShowCodeInput] = useState(false)
+  const [manualCode, setManualCode] = useState('')
+
   useEffect(() => {
-    const token = searchParams.get('invite_token')
-    if (token) {
-      setInviteToken(token)
-      setInviteLoading(true)
+    const code = searchParams.get('code')
 
-      validateInvite(token)
+    if (code) {
+      setInviteCode(code.toUpperCase())
+      setInviteLoading(true)
+      validateInvite(code)
         .then(({ valid, invite, error }) => {
           if (valid && invite) {
             setInviteValid(true)
             setInviteCreatorName(invite.creatorName || 'un utente')
-            setInviteEmail(invite.email || null)
+            // NO email prefill
           } else {
-            toast.error(
-              error?.message || 'L\'invito potrebbe essere scaduto o già utilizzato'
-            )
+            toast.error(error?.message || 'Codice non valido')
           }
         })
-        .catch(() => {
-          toast.error('Impossibile verificare l\'invito')
-        })
-        .finally(() => {
-          setInviteLoading(false)
-        })
+        .finally(() => setInviteLoading(false))
     }
   }, [searchParams])
 
-  // Redirect to home if already authenticated
   useEffect(() => {
     if (!loading && isAuthenticated) {
       navigate('/', { replace: true })
     }
   }, [isAuthenticated, loading, navigate])
 
+  const handleManualCodeSubmit = async () => {
+    if (!manualCode || manualCode.length !== 6) {
+      toast.error('Inserisci un codice valido (6 caratteri)')
+      return
+    }
+
+    setInviteLoading(true)
+    const { valid, invite, error } = await validateInvite(manualCode)
+
+    if (valid && invite) {
+      setInviteCode(manualCode.toUpperCase())
+      setInviteValid(true)
+      setInviteCreatorName(invite.creatorName || 'un utente')
+      setShowCodeInput(false)
+    } else {
+      toast.error(error?.message || 'Codice non valido')
+    }
+    setInviteLoading(false)
+  }
+
   const handleSuccess = async () => {
     try {
-      if (inviteToken && inviteValid) {
-        // User signed up with invite - show message to check email
+      if (inviteCode && inviteValid) {
+        // Call acceptInvite con short code
+        const { success, error } = await acceptInvite(inviteCode)
+
+        if (!success) {
+          console.error('Failed to accept invite:', error)
+        }
+
         toast.info(
           'Registrazione completata! Controlla la tua email e clicca sul link di conferma per unirti alla lista condivisa.',
           { duration: 12000 }
         )
-        // Don't navigate - let user see the message and check email
-        // They'll be redirected after email confirmation via authStore
       } else {
-        // User signed up without invite - create personal list
+        // Signup senza invito - crea lista personale
         const { createPersonalList } = await import('../lib/invites')
         const { success, error } = await createPersonalList()
 
         if (!success) {
           console.error('Failed to create personal list:', error)
-          toast.warning('Account creato. Lista personale verrà creata al primo accesso.')
-        } else {
-          toast.success(
-            'Registrazione completata! Controlla la tua email per confermare l\'account.',
-            { duration: 10000 }
-          )
         }
-        // User needs to confirm email before accessing the app
+
+        toast.success(
+          'Registrazione completata! Controlla la tua email per confermare l\'account.',
+          { duration: 10000 }
+        )
       }
     } catch (error) {
       console.error('Post-signup error:', error)
     }
   }
 
-  // Show loading or nothing while checking auth status
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
@@ -111,21 +130,61 @@ export function SignUpPage() {
               </span>
             ) : inviteValid ? (
               <span className="text-primary font-medium">
-                {inviteCreatorName} ti ha invitato a condividere la sua lista! Crea il tuo account per unirti.
+                {inviteCreatorName} ti ha invitato a condividere la sua lista!
               </span>
             ) : (
               'Inizia a tracciare le scadenze dei tuoi alimenti'
             )}
           </CardDescription>
         </CardHeader>
+
         <CardContent>
+          {/* Input codice manuale */}
+          {!inviteValid && !inviteCode && (
+            <div className="mb-4">
+              {!showCodeInput ? (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowCodeInput(true)}
+                >
+                  Ho un codice invito
+                </Button>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Codice invito</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="ABC123"
+                      value={manualCode}
+                      onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                      maxLength={6}
+                      className="font-mono text-lg tracking-wider"
+                    />
+                    <Button onClick={handleManualCodeSubmit} disabled={inviteLoading}>
+                      {inviteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verifica'}
+                    </Button>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowCodeInput(false)}
+                    className="w-full"
+                  >
+                    Annulla
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
           <AuthForm
             mode="signup"
             onSuccess={handleSuccess}
-            prefillEmail={inviteEmail}
-            lockEmail={!!inviteEmail}
+            // NO prefillEmail, NO lockEmail
           />
         </CardContent>
+
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-slate-600">
             Hai già un account?{' '}
@@ -141,4 +200,5 @@ export function SignUpPage() {
     </div>
   )
 }
+
 export default SignUpPage

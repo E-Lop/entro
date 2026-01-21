@@ -1,5 +1,5 @@
 // Edge Function: validate-invite
-// Validates invite token before signup (public endpoint, no auth required)
+// Validates invite by short code (public endpoint, no auth required)
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -10,47 +10,48 @@ const corsHeaders = {
 }
 
 interface ValidateRequest {
-  token: string
+  shortCode: string
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Parse request body
-    const { token }: ValidateRequest = await req.json()
+    const supabaseService = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    )
 
-    // Validate input
-    if (!token) {
+    const { shortCode }: ValidateRequest = await req.json()
+
+    if (!shortCode) {
       return new Response(
-        JSON.stringify({ error: 'Token is required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ error: 'Short code required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Find invite by token (use service role to bypass RLS for public endpoint)
-    const supabaseService = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
+    // Lookup invite
     const { data: inviteData, error: inviteError } = await supabaseService
       .from('invites')
-      .select('id, email, token, status, expires_at, list_id')
-      .eq('token', token)
+      .select('*')
+      .eq('short_code', shortCode.toUpperCase())
       .single()
 
     if (inviteError || !inviteData) {
       return new Response(
         JSON.stringify({
           valid: false,
-          error: 'Invalid invite token',
+          invite: null,
+          error: 'Invite not found',
         }),
         {
           status: 404,
@@ -59,14 +60,53 @@ serve(async (req) => {
       )
     }
 
-    // Get list details and creator info separately
+    // Check status
+    if (inviteData.status !== 'pending') {
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          invite: null,
+          error: 'Invite already used or expired',
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    // Check expiry
+    const expiresAt = new Date(inviteData.expires_at)
+    const now = new Date()
+
+    if (expiresAt < now) {
+      // Mark as expired
+      await supabaseService
+        .from('invites')
+        .update({ status: 'expired' })
+        .eq('id', inviteData.id)
+
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          invite: null,
+          error: 'Invite expired',
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+
+    // Get list and creator info
     const { data: listData } = await supabaseService
       .from('lists')
-      .select('id, name, created_by')
+      .select('name, created_by')
       .eq('id', inviteData.list_id)
       .single()
 
-    // Get creator's name from auth.users metadata
+    const listName = listData?.name || 'Una lista condivisa'
+
+    // Get creator name
     let creatorName = 'Un utente'
     if (listData?.created_by) {
       const { data: { user: creatorUser } } = await supabaseService.auth.admin.getUserById(
@@ -78,50 +118,12 @@ serve(async (req) => {
       }
     }
 
-    // Check if invite is still pending
-    if (inviteData.status !== 'pending') {
-      return new Response(
-        JSON.stringify({
-          valid: false,
-          error: 'This invite has already been used',
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
-
-    // Check if invite has expired
-    const expiresAt = new Date(inviteData.expires_at)
-    const now = new Date()
-
-    if (expiresAt < now) {
-      // Update invite status to expired
-      await supabaseService
-        .from('invites')
-        .update({ status: 'expired' })
-        .eq('id', inviteData.id)
-
-      return new Response(
-        JSON.stringify({
-          valid: false,
-          error: 'This invite has expired',
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      )
-    }
-
-    // Invite is valid - return info (without exposing sensitive data)
+    // Return valid invite - NO email in response
     return new Response(
       JSON.stringify({
         valid: true,
         invite: {
-          email: inviteData.email,
-          listName: listData?.name || 'Una lista condivisa',
+          listName: listName,
           creatorName: creatorName,
           expiresAt: inviteData.expires_at,
         },
@@ -133,11 +135,8 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

@@ -14,30 +14,25 @@ import type {
 const SUPABASE_FUNCTIONS_URL = import.meta.env.VITE_SUPABASE_URL + '/functions/v1'
 
 /**
- * Creates an invite and sends email to the recipient
- * @param email - Email address to send invite to
- * @param listId - ID of the list to invite user to
- * @returns Response with success status and invite data
+ * Creates an invite and returns short code
+ * No email needed!
  */
 export async function createInvite(
-  email: string,
   listId: string
 ): Promise<CreateInviteResponse> {
   try {
-    // Get current session for auth token
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) {
       throw new Error('Not authenticated')
     }
 
-    // Call Edge Function
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-invite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${sessionData.session.access_token}`,
       },
-      body: JSON.stringify({ email, listId }),
+      body: JSON.stringify({ listId }),  // SOLO listId
     })
 
     const data = await response.json()
@@ -47,35 +42,32 @@ export async function createInvite(
     }
 
     return {
-      success: data.success,
-      invite: data.invite,
+      success: true,
+      shortCode: data.shortCode,
       error: null,
     }
   } catch (error) {
     return {
       success: false,
-      invite: null,
+      shortCode: null,
       error: error instanceof Error ? error : new Error('Unknown error'),
     }
   }
 }
 
 /**
- * Validates an invite token (public, no auth required)
- * @param token - Invite token to validate
- * @returns Response with validation status and invite details
+ * Validates an invite by short code
  */
 export async function validateInvite(
-  token: string
+  shortCode: string
 ): Promise<ValidateInviteResponse> {
   try {
-    // Call Edge Function (public endpoint)
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/validate-invite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ shortCode: shortCode.toUpperCase() }),
     })
 
     const data = await response.json()
@@ -99,26 +91,22 @@ export async function validateInvite(
 }
 
 /**
- * Accepts an invite and adds user to the shared list
- * @param token - Invite token to accept
- * @returns Response with success status and list ID
+ * Accepts an invite by short code
  */
-export async function acceptInvite(token: string): Promise<AcceptInviteResponse> {
+export async function acceptInvite(shortCode: string): Promise<AcceptInviteResponse> {
   try {
-    // Get current session for auth token
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) {
       throw new Error('Not authenticated')
     }
 
-    // Call Edge Function
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/accept-invite`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${sessionData.session.access_token}`,
       },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ shortCode: shortCode.toUpperCase() }),
     })
 
     const data = await response.json()
