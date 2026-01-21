@@ -1,6 +1,35 @@
 # Piano di Implementazione: Shared Lists Multi-User
 
-## Obiettivo
+---
+
+## ⚠️ NOTA IMPORTANTE - PIANO SUPERSEDED
+
+**Data:** 21 Gennaio 2026
+
+Questo piano descrive un approccio basato su **inviti via email** che è stato **sostituito** da un nuovo approccio più semplice e mobile-friendly.
+
+**Nuovo Piano Raccomandato:** [SHORT_CODE_INVITES_PLAN.md](SHORT_CODE_INVITES_PLAN.md)
+
+### Perché il Cambio?
+Il sistema email-based presentava problemi di UX su mobile:
+- ❌ Link lunghi (80+ caratteri) non copiabili facilmente da toast
+- ❌ Token 32 caratteri difficile da condividere manualmente
+- ❌ Dipendenza da servizio email esterno (Resend)
+
+### Nuovo Approccio (Short Code)
+Il nuovo piano introduce:
+- ✅ Codici brevi 6 caratteri (es: `ABC123`)
+- ✅ URL brevi: `/join/ABC123`
+- ✅ Web Share API per condivisione nativa mobile
+- ✅ Completamente anonimo (no email requirement)
+- ✅ Zero costi ricorrenti (no email service)
+- ✅ Stima: 5-6 ore implementazione (molto più veloce!)
+
+**Questo documento rimane come riferimento storico per l'architettura database (liste, list_members, invites), ma l'implementazione degli inviti segue il nuovo piano.**
+
+---
+
+## Obiettivo (Originale)
 Implementare un sistema semplificato di condivisione liste per permettere a più persone (es. famiglia) di gestire insieme la stessa lista di alimenti, con pari permessi e senza complessità di gestione ruoli.
 
 ## Modello Semplificato

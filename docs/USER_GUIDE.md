@@ -151,27 +151,40 @@ Quando condividi la tua lista:
 ### Invitare Qualcuno
 
 1. Nella dashboard, clicca sul pulsante **"Invita"** (in alto a destra, accanto a "+ Alimento")
-2. Inserisci l'**indirizzo email** della persona che vuoi invitare
-3. Clicca **"Invia Invito"**
-4. La persona riceverà un'**email con un link di invito**
+2. Clicca **"Genera codice invito"**
+3. Riceverai un **codice di 6 caratteri** (es: `ABC123`)
+4. **Condividi il codice** con la persona che vuoi invitare tramite:
+   - WhatsApp
+   - Telegram
+   - SMS
+   - Email
+   - Qualsiasi altra app di messaggistica
+
+**Suggerimento**: Usa il pulsante "Condividi" per condividere rapidamente il codice, oppure "Copia" per copiare il codice negli appunti.
 
 ### Accettare un Invito
 
-Se hai ricevuto un invito:
+Se hai ricevuto un codice invito, hai due modi per usarlo:
 
-1. **Se hai già un account**:
-   - Clicca il link nell'email
-   - Fai login con il tuo account
-   - Verrai automaticamente aggiunto alla lista condivisa
+**Opzione 1: Link diretto**
+- Se ti è stato inviato il link completo (es: `https://entro-il.netlify.app/join/ABC123`)
+- Clicca sul link e verrai portato alla pagina di registrazione
 
-2. **Se NON hai un account**:
-   - Clicca il link nell'email
-   - Verrai portato alla pagina di registrazione
-   - La tua **email sarà già precompilata** (non può essere modificata)
-   - Completa la registrazione con nome e password
-   - Controlla la tua email per il **link di conferma**
-   - Clicca il link di conferma
-   - Verrai automaticamente aggiunto alla lista condivisa
+**Opzione 2: Inserimento manuale**
+1. Vai su https://entro-il.netlify.app/signup
+2. Clicca su **"Ho un codice invito"**
+3. Inserisci il **codice di 6 caratteri** (es: `ABC123`)
+4. Clicca **"Verifica"**
+
+**Completamento Registrazione**:
+- Inserisci il tuo **nome** e **email**
+- Crea una **password** sicura
+- Clicca **"Crea Account"**
+- Controlla la tua email per il **link di conferma**
+- Clicca il link di conferma
+- Verrai automaticamente aggiunto alla lista condivisa!
+
+**Nota**: Il codice invito può essere usato da chiunque lo riceve. Non c'è vincolo di email specifica.
 
 ### Cosa Succede Dopo
 
@@ -188,23 +201,26 @@ Attualmente non c'è un'interfaccia per vedere l'elenco dei membri. Questa funzi
 ### Limitazioni Attuali
 
 - **Un utente può appartenere solo a una lista alla volta**
-- **Gli inviti scadono** dopo un certo periodo
+- **Gli inviti scadono dopo 7 giorni** dalla creazione
 - **Non puoi lasciare una lista condivisa** o tornare a una lista personale (funzionalità futura)
 - **Non puoi rimuovere membri** dalla lista (funzionalità futura)
 
 ### Domande Frequenti Condivisione
 
 **Posso invitare più persone?**
-Sì, puoi inviare più inviti alla stessa lista.
+Sì, puoi generare più codici invito per la stessa lista.
+
+**Il codice invito può essere usato da chiunque?**
+Sì, il codice è completamente anonimo. Chiunque abbia il codice può registrarsi e unirsi alla tua lista. Condividilo solo con persone di fiducia.
 
 **Cosa succede se invito qualcuno che ha già una lista?**
 Al momento, se una persona ha già una lista personale e accetta un invito, la sua lista precedente non sarà più accessibile. Pianificato per miglioramento futuro.
 
 **L'invito scade?**
-Sì, gli inviti hanno una scadenza. Se scade, dovrai inviare un nuovo invito.
+Sì, i codici invito scadono dopo 7 giorni dalla creazione. Dopo la scadenza, dovrai generare un nuovo codice.
 
 **Posso annullare un invito?**
-Attualmente non è possibile annullare un invito già inviato. Funzionalità pianificata per il futuro.
+Attualmente non è possibile annullare un codice già generato. Il codice scadrà automaticamente dopo 7 giorni.
 
 ---
 
@@ -329,4 +345,4 @@ Per segnalare problemi o suggerire miglioramenti:
 
 ---
 
-*Ultimo aggiornamento: 20 gennaio 2026*
+*Ultimo aggiornamento: 21 gennaio 2026*

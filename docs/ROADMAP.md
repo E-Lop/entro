@@ -556,7 +556,13 @@ npm install -D @types/node
 
 #### Tasks (Giorno 5-6)
 - [x] ✅ **Shared Lists Multi-User Implementation** (COMPLETATO - 2025-01-20)
-  - ✅ Piano completo documentato in [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md)
+  - ✅ Piano completo documentato in [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md) (email-based)
+  - ✅ **NUOVO: Piano ultra-semplificato in [SHORT_CODE_INVITES_PLAN.md](SHORT_CODE_INVITES_PLAN.md)** (21/01/2026)
+    - Sistema codice breve tipo Discord/Zoom (6 caratteri: `ABC123`)
+    - Completamente anonimo (no email requirement)
+    - Mobile-friendly con Web Share API
+    - URL breve: `/join/ABC123`
+    - Stima: 5-6 ore sviluppo (molto più veloce!)
   - ✅ Database schema: `lists`, `list_members`, `invites` tables con RLS policies
   - ✅ Backward compatible migration (Approach A) - tutti gli utenti esistenti migrati
   - ✅ Edge Functions complete: `create-invite`, `validate-invite`, `accept-invite`
@@ -571,6 +577,7 @@ npm install -D @types/node
   - Files modified: invites.ts, authStore.ts, SignUpPage.tsx, AuthForm.tsx, DashboardPage.tsx, LoginPage.tsx
   - Edge Functions: supabase/functions/{create,validate,accept}-invite/index.ts
   - Commits: e79cd7b, f5db5e4, 71d352b e altri
+  - **PROSSIMO**: Implementare versione short code (supersedes approccio email-based per UX mobile)
 - [x] ✅ Add 'Nome' field for users and update greeting (COMPLETATO)
   - Campo "Nome" nel form di registrazione con validation
   - Salvataggio in user_metadata di Supabase Auth (no DB migration needed)

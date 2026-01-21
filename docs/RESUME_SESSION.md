@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
-**Ultima Sessione**: 17 Gennaio 2026
-**Status**: Fase 5 IN CORSO - Shared Lists Plan Documentato! (5/7 tasks)
+**Ultima Sessione**: 21 Gennaio 2026
+**Status**: Fase 5 IN CORSO - Short Code Invites Plan Pronto! (5/7 tasks)
 
 ---
 
@@ -108,57 +108,67 @@ ROADMAP COMPLETA:
 
 PROSSIMO OBIETTIVO - Shared Lists Multi-User:
 
-✅ **PIANO COMPLETO DOCUMENTATO!** Vedi `docs/SHARED_LISTS_PLAN.md`
+✅ **NUOVO PIANO ULTRA-SEMPLIFICATO!** Vedi `docs/SHORT_CODE_INVITES_PLAN.md`
 
-Ho completato la pianificazione dettagliata per la feature di condivisione liste. Il piano include:
+Ho evoluto il piano originale (in `docs/SHARED_LISTS_PLAN.md`) verso un approccio **più semplice e mobile-friendly**:
 
-**Approccio Scelto**: Approach A (Backward Compatible)
-- Mantiene `user_id` per compatibilità
-- Aggiunge `list_id` nullable alla tabella `foods`
-- Zero breaking changes per utenti esistenti
-- Migrazione graduale e sicura
+**Problema Risolto**:
+- ❌ Link lungo (80+ caratteri) in toast non copiabile su mobile
+- ❌ Token 32 caratteri difficile da condividere manualmente
+- ❌ Dipendenza da email esterna (Resend)
+- ✅ Sistema codice breve tipo Discord/Zoom/Airbnb
 
-**Modello Semplificato - Household Sharing**:
-- ✅ Tutti i membri hanno pari accesso (no roles complessi)
-- ✅ Single shared list per utente
-- ✅ Invite flow: email → signup → auto-join
-- ✅ Chi accetta invito accede SOLO alla lista condivisa (no lista personale)
-- ✅ Feature flag `VITE_ENABLE_SHARED_LISTS` per rollout graduale
+**Soluzione: Codice Breve Anonimo**:
+- ✅ 6 caratteri alfanumerici maiuscoli (es: `ABC123`)
+- ✅ URL breve: `https://entro-il.netlify.app/join/ABC123`
+- ✅ Web Share API per condivisione nativa mobile
+- ✅ Completamente anonimo (no email requirement)
+- ✅ Zero costi ricorrenti (no email service)
 
-**Database Schema** (3 nuove tabelle):
+**Database Schema** (manteniamo base esistente + short_code):
 1. `lists` - Liste condivise
 2. `list_members` - Chi appartiene a quali liste
-3. `invites` - Gestione inviti con token e scadenza
+3. `invites` - Aggiunta colonna `short_code` (6 char), email nullable
 
-**Backend** (Supabase Edge Functions):
-1. `create-invite` - Genera token e invia email
-2. `validate-invite` - Verifica token e scadenza
-3. `accept-invite` - Aggiunge utente alla lista
+**Backend** (Edge Functions SEMPLIFICATI):
+1. `create-invite` - Genera short_code (NO email param)
+2. `validate-invite` - Verifica code + scadenza (NO email check)
+3. `accept-invite` - Aggiunge user alla lista (NO email match)
 
-**Frontend** (Service Layer + UI Components):
-- Service: `invites.ts` con funzioni CRUD
-- Components: `InviteButton`, `InviteDialog`
-- Pages: Modifiche a `SignUpPage` e `LoginPage` per gestire invite tokens
+**Frontend** (ULTRA-SEMPLIFICATO):
+- Service: `invites.ts` - NO email params
+- Component: `InviteDialog` - NO form email, solo "Genera codice"
+- SignUpPage: Input manuale codice, NO email prefill
+- Route: `/join/:code` → redirect a signup con code
+
+**UX Flow**:
+1. User clicca "Genera codice invito" → Riceve `ABC123`
+2. User clicca "Copia" o "Condividi" (Web Share API)
+3. Destinatario riceve codice via WhatsApp/SMS/Telegram
+4. Destinatario visita `/join/ABC123` o inserisce codice manualmente
+5. Signup → Conferma email → Auto-join alla lista condivisa
 
 **Sicurezza**:
-- RLS policies complete per tutte le tabelle
-- Storage policies aggiornate per immagini condivise
-- Token security con scadenza 7 giorni e single-use
+- Codice scade in 7 giorni
+- Entropy: 36^6 = 2.1 miliardi combinazioni
+- RLS policies mantenute
+- Uso case: liste della spesa familiari (non dati sensibili)
 
-**Testing Strategy**: 6 test scenarios documentati
+**Testing Strategy**: Mobile-first (Web Share API, iOS Safari, Android Chrome)
 
-**Stima Implementazione**: 6-8 giorni (7 fasi)
+**Stima Implementazione**: 5-6 ore sviluppo (molto più veloce!)
 
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (roadmap completa con progress Fase 5)
-- docs/SHARED_LISTS_PLAN.md (piano dettagliato shared lists multi-user - NUOVO!)
+- docs/SHORT_CODE_INVITES_PLAN.md (piano ultra-semplificato codici brevi - NUOVO 21/01/2026!)
+- docs/SHARED_LISTS_PLAN.md (piano originale email-based - superseded dal piano short code)
 - docs/ACCESSIBILITY_AUDIT.md (report accessibilità completo)
 - docs/CROSS_BROWSER_TESTING.md (report testing 7 browser)
 - docs/USER_GUIDE.md (guida utente PWA e funzionalità)
 - docs/BARCODE_BUG.md (bug fix journey Fase 2)
 - README.md (setup e overview)
 
-Sono pronto a iniziare l'implementazione delle Shared Lists seguendo il piano in SHARED_LISTS_PLAN.md
+Sono pronto a iniziare l'implementazione del sistema Short Code Invites seguendo il piano in SHORT_CODE_INVITES_PLAN.md
 ```
 
 ---
@@ -168,11 +178,12 @@ Sono pronto a iniziare l'implementazione delle Shared Lists seguendo il piano in
 ### Per Capire il Progetto
 1. **README.md** - Overview, setup, features
 2. **docs/ROADMAP.md** - Fasi, progress, planning completo (AGGIORNATO 17/01/2026)
-3. **docs/SHARED_LISTS_PLAN.md** - Piano dettagliato implementazione shared lists (NUOVO 17/01/2026)
-4. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalità offline
-5. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations (riferimento a nuovo piano)
-6. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA
-7. **docs/CROSS_BROWSER_TESTING.md** - Report cross-browser testing
+3. **docs/SHORT_CODE_INVITES_PLAN.md** - Piano ultra-semplificato codici brevi (NUOVO 21/01/2026)
+4. **docs/SHARED_LISTS_PLAN.md** - Piano originale email-based (superseded)
+5. **docs/USER_GUIDE.md** - Guida utente, installazione PWA, funzionalità offline
+6. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations
+7. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA
+8. **docs/CROSS_BROWSER_TESTING.md** - Report cross-browser testing
 
 ### Per Debugging
 7. **docs/BARCODE_BUG.md** - Analisi completa bug ZXing callback spam
@@ -459,5 +470,5 @@ Prossimo step: Final polish e preparazione al lancio (Fase 5 Task 7), poi Beta T
 
 ---
 
-**Ultimo Update**: 17 Gennaio 2026
-**Next Session**: Opzione A) Implementare Shared Lists (Phase 1: Database Setup) OPPURE Opzione B) Final Polish & Launch Prep (Task 7)
+**Ultimo Update**: 21 Gennaio 2026
+**Next Session**: Implementare Short Code Invites System seguendo piano in SHORT_CODE_INVITES_PLAN.md (stima: 5-6 ore)

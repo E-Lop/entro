@@ -561,28 +561,66 @@ const requestNotificationPermission = async () => {
 
 ---
 
-### F9: Condivisione Liste (Future)
+### F9: Condivisione Liste
 
-#### F9.1 - Invita Utente
+**⚠️ NOTA: Per dettagli implementativi completi, vedi [SHORT_CODE_INVITES_PLAN.md](../SHORT_CODE_INVITES_PLAN.md)**
 
-**User Story**: Come utente, voglio condividere la mia lista con mio marito/moglie/coinquilino.
+#### F9.1 - Invita Utente (Sistema Codici Brevi)
+
+**User Story**: Come utente, voglio condividere la mia lista con mio marito/moglie/coinquilino in modo facile e veloce, specialmente da mobile.
+
+**Approccio**: Codici brevi 6 caratteri (es: `ABC123`) tipo Discord/Zoom/Airbnb
 
 **Implementation**:
 ```typescript
-<ShareDialog>
-  <Input 
-    type="email" 
-    placeholder="Email persona da invitare"
-  />
-  <Select name="permission">
-    <Option value="read">Solo lettura</Option>
-    <Option value="write">Lettura e scrittura</Option>
-  </Select>
-  <Button onClick={sendInvite}>Invia Invito</Button>
-</ShareDialog>
+<InviteDialog>
+  {/* Step 1: Genera codice */}
+  <Button onClick={generateCode}>
+    Genera codice invito
+  </Button>
 
-// Backend: Invia email con link di invito
-// Link contiene token temporaneo
+  {/* Step 2: Mostra codice generato */}
+  {inviteCode && (
+    <>
+      <CodeDisplay>{inviteCode}</CodeDisplay>
+      <ButtonGroup>
+        <Button onClick={copyCode}>
+          <Copy /> Copia
+        </Button>
+        <Button onClick={shareCode}>
+          <Share2 /> Condividi
+        </Button>
+      </ButtonGroup>
+
+      {/* Istruzioni */}
+      <Instructions>
+        Condividi questo codice via WhatsApp, Telegram,
+        SMS o qualsiasi app. Il destinatario potrà usarlo
+        visitando: /join/{inviteCode}
+      </Instructions>
+    </>
+  )}
+</InviteDialog>
+
+// Features chiave:
+// - NO form email
+// - Codice 6 caratteri alfanumerici maiuscoli
+// - Web Share API per condivisione nativa mobile
+// - URL breve: /join/ABC123
+// - Scadenza: 7 giorni
+// - Completamente anonimo (chiunque con codice può usarlo)
+```
+
+**Backend - Edge Functions**:
+```typescript
+// create-invite: Genera short_code (6 char)
+// validate-invite: Verifica code + scadenza (NO email check)
+// accept-invite: Aggiunge user alla lista (NO email match)
+
+// Semplificazioni:
+// - NO email parameter
+// - NO email prefill in signup
+// - NO email sending (zero costi ricorrenti)
 ```
 
 #### F9.2 - Real-time Updates

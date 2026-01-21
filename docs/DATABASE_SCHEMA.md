@@ -187,18 +187,30 @@ CREATE INDEX idx_product_templates_name ON product_templates USING gin(to_tsvect
 
 ### Tables: Shared Lists System (Future Feature)
 
-**⚠️ NOTA: Questo schema è obsoleto. Per l'implementazione pianificata, vedi [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md)**
+**⚠️ NOTA IMPORTANTE: Per l'implementazione degli inviti, vedi [SHORT_CODE_INVITES_PLAN.md](SHORT_CODE_INVITES_PLAN.md)**
 
-Il nuovo design prevede:
+Il sistema di condivisione liste prevede:
 - **Approach A (Backward Compatible)**: Aggiunge `list_id` nullable alla tabella `foods`
 - **3 nuove tabelle**: `lists`, `list_members`, `invites`
 - **Household sharing**: tutti i membri hanno pari accesso (no ruoli complessi)
 - **Single shared list**: ogni utente appartiene a una sola lista condivisa
-- **Invite flow**: email → signup → auto-join lista del mittente
-- **Edge Functions**: per gestione inviti (create, validate, accept)
+
+**Sistema Inviti**:
+- **Codici brevi 6 caratteri** (es: `ABC123`) invece di email
+- **URL brevi**: `/join/ABC123` per condivisione mobile-friendly
+- **Anonimo**: chiunque abbia il codice può usarlo
+- **Web Share API**: condivisione nativa su mobile
+- **Scadenza**: 7 giorni dalla creazione
+
+**Implementazione Tecnica**:
+- **Edge Functions**: `create-invite`, `validate-invite`, `accept-invite`
+- **Frontend**: componente InviteDialog semplificato (no form email)
+- **SignUpPage**: input manuale codice + route `/join/:code`
 - **Feature flag**: `VITE_ENABLE_SHARED_LISTS` per rollout graduale
 
-Per dettagli completi su schema, RLS policies, e implementazione, consulta il piano dettagliato.
+Per dettagli completi su:
+- **Architettura inviti**: vedi [SHORT_CODE_INVITES_PLAN.md](SHORT_CODE_INVITES_PLAN.md)
+- **Schema database completo**: vedi [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md) (architettura DB ancora valida)
 
 ### Table: `notifications_preferences`
 
