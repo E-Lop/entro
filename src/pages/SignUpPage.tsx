@@ -7,8 +7,9 @@ import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { useAuth } from '../hooks/useAuth'
-import { validateInvite, acceptInvite } from '../lib/invites'
+import { validateInvite, registerPendingInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 export function SignUpPage() {
   const navigate = useNavigate()
@@ -74,11 +75,16 @@ export function SignUpPage() {
   const handleSuccess = async () => {
     try {
       if (inviteCode && inviteValid) {
-        // Call acceptInvite con short code
-        const { success, error } = await acceptInvite(inviteCode)
+        // Get user email to register pending invite
+        const { data: { user } } = await supabase.auth.getUser()
 
-        if (!success) {
-          console.error('Failed to accept invite:', error)
+        if (user?.email) {
+          // Register this email with the invite so it can be accepted after email confirmation
+          const { success, error } = await registerPendingInvite(inviteCode, user.email)
+
+          if (!success) {
+            console.error('Failed to register pending invite:', error)
+          }
         }
 
         toast.info(

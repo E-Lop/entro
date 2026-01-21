@@ -91,6 +91,39 @@ export async function validateInvite(
 }
 
 /**
+ * Registers user email with an invite during signup (before email confirmation)
+ * Saves the user's email to the invite so it can be accepted after login
+ */
+export async function registerPendingInvite(
+  shortCode: string,
+  userEmail: string
+): Promise<{ success: boolean; error: Error | null }> {
+  try {
+    // Update invite with pending user email
+    const { error } = await supabase
+      .from('invites')
+      .update({ pending_user_email: userEmail })
+      .eq('short_code', shortCode.toUpperCase())
+      .eq('status', 'pending')
+
+    if (error) {
+      console.error('Error registering pending invite:', error)
+      throw error
+    }
+
+    return {
+      success: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    }
+  }
+}
+
+/**
  * Accepts an invite by short code
  */
 export async function acceptInvite(shortCode: string): Promise<AcceptInviteResponse> {
@@ -146,11 +179,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     const userId = userData.user.id
     const userEmail = userData.user.email
 
-    // Find pending invite for this email (using public read access from RLS)
+    // Find pending invite for this email (using pending_user_email field)
     const { data: inviteData, error: inviteError } = await supabase
       .from('invites')
       .select('*')
-      .eq('email', userEmail)
+      .eq('pending_user_email', userEmail)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(1)
