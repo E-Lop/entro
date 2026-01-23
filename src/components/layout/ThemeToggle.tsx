@@ -18,11 +18,11 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
+        <Button variant="ghost" className="h-10 w-10 p-0">
           {effectiveTheme === 'dark' ? (
-            <Moon className="h-5 w-5" />
+            <Moon className="!h-7 !w-7" />
           ) : (
-            <Sun className="h-5 w-5" />
+            <Sun className="!h-7 !w-7" />
           )}
           <span className="sr-only">Cambia tema</span>
         </Button>

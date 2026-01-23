@@ -63,12 +63,10 @@ export function AppLayout() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative h-10 w-10 rounded-full"
+                  className="h-10 w-10 rounded-full p-0"
                   aria-label="Menu utente"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <User className="h-5 w-5" />
-                  </div>
+                  <User className="!h-7 !w-7 text-primary" />
                 </Button>
               </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
