@@ -4,14 +4,16 @@ Web app per gestire le date di scadenza degli alimenti con scansione barcode int
 
 ## 🎯 Caratteristiche Principali
 
-- ✅ Gestione completa scadenze alimentari
-- 📷 Scansione barcode (iOS + Android)
-- 🔄 Swipe gestures per interazioni rapide
-- 📊 Vista calendario settimanale/mensile
-- 🔍 Filtri avanzati e ricerca
-- 🔐 Autenticazione utenti
-- 🔔 Notifiche scadenze
-- 📱 Progressive Web App (PWA)
+- ✅ Gestione completa scadenze alimentari (CRUD, immagini, categorie)
+- 📷 Scansione barcode con Open Food Facts (iOS + Android)
+- 👥 Liste condivise multi-utente (codici invito anonimi)
+- 🔄 Swipe gestures per edit/delete rapido (mobile)
+- 📅 Vista calendario settimanale (rolling 7 giorni)
+- 🔍 Filtri avanzati e ricerca in tempo reale
+- 🔐 Autenticazione sicura con Supabase Auth
+- 🌓 Dark mode (light/dark/system)
+- ♿ WCAG AA accessibile
+- 📱 Progressive Web App installabile (iOS + Android)
 
 ## 🚀 Quick Start
 
@@ -60,7 +62,7 @@ Open Food Facts è gratuito e non richiede API key. L'integrazione è già confi
 - **Styling**: Tailwind CSS, shadcn/ui
 - **Backend**: Supabase (PostgreSQL, Auth, Storage)
 - **State Management**: Zustand
-- **Barcode**: html5-qrcode
+- **Barcode**: @zxing/browser
 - **Data Fetching**: TanStack Query (React Query)
 - **Date Management**: date-fns
 - **Deploy**: Netlify

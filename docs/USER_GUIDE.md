@@ -72,7 +72,6 @@
 
 **Su Mobile:**
 - Fai uno **swipe verso destra** sulla card dell'alimento
-- Oppure tocca la card e poi "Modifica"
 
 ### Eliminare un Alimento
 
@@ -112,7 +111,7 @@ Le card degli alimenti hanno un bordo colorato che indica l'urgenza:
 
 Clicca sulle **card statistiche** in alto:
 - **"Totali"**: mostra tutti gli alimenti
-- **"In scadenza"**: mostra solo quelli che scadono entro 3 giorni
+- **"In scadenza"**: mostra solo quelli che scadono entro 7 giorni
 - **"Scaduti"**: mostra solo quelli già scaduti
 
 ---
@@ -150,10 +149,11 @@ Quando condividi la tua lista:
 
 ### Invitare Qualcuno
 
-1. Nella dashboard, clicca sul pulsante **"Invita"** (in alto a destra, accanto a "+ Alimento")
-2. Clicca **"Genera codice invito"**
-3. Riceverai un **codice di 6 caratteri** (es: `ABC123`)
-4. **Condividi il codice** con la persona che vuoi invitare tramite:
+1. Clicca sul **menu utente** in alto a destra (con il tuo nome e email)
+2. Seleziona **"Invita membro"**
+3. Clicca **"Genera codice invito"**
+4. Riceverai un **codice di 6 caratteri** (es: `ABC123`)
+5. **Condividi il codice** con la persona che vuoi invitare tramite:
    - WhatsApp
    - Telegram
    - SMS
