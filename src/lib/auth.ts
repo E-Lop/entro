@@ -165,3 +165,49 @@ export function onAuthStateChange(
 
   return () => subscription.unsubscribe()
 }
+
+/**
+ * Send password reset email to user
+ */
+export async function resetPasswordRequest(
+  email: string
+): Promise<{ error: Error | null }> {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return { error: null }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error : new Error('Errore durante l\'invio dell\'email'),
+    }
+  }
+}
+
+/**
+ * Update user password with new password
+ */
+export async function updatePassword(
+  newPassword: string
+): Promise<{ error: Error | null }> {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+
+    if (error) {
+      throw new Error(error.message)
+    }
+
+    return { error: null }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error : new Error('Errore durante l\'aggiornamento della password'),
+    }
+  }
+}

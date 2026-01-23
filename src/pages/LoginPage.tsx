@@ -115,6 +115,14 @@ export function LoginPage() {
               Registrati
             </Link>
           </div>
+          <div className="text-sm text-center text-slate-600">
+            <Link
+              to="/forgot-password"
+              className="font-medium text-slate-600 hover:text-primary hover:underline"
+            >
+              Password dimenticata?
+            </Link>
+          </div>
         </CardFooter>
       </Card>
     </div>

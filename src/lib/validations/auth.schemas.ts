@@ -37,6 +37,32 @@ export const signupSchema = z
     path: ['confirmPassword'],
   })
 
+// Forgot password schema: only email
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email richiesta')
+    .email('Email non valida'),
+})
+
+// Reset password schema: new password + confirm password
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(6, 'La password deve contenere almeno 6 caratteri')
+      .max(72, 'La password non può superare 72 caratteri'),
+    confirmPassword: z
+      .string()
+      .min(1, 'Conferma password richiesta'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Le password non corrispondono',
+    path: ['confirmPassword'],
+  })
+
 // Export inferred TypeScript types
 export type LoginFormData = z.infer<typeof loginSchema>
 export type SignupFormData = z.infer<typeof signupSchema>
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
