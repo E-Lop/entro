@@ -35,6 +35,25 @@
 2. Inserisci email e password
 3. Clicca "Accedi"
 
+### Password Dimenticata
+
+Se hai dimenticato la password, puoi reimpostarla facilmente:
+
+1. Vai alla pagina di login: https://entro-il.netlify.app/login
+2. Clicca sul link **"Password dimenticata?"** sotto il form di login
+3. Inserisci la tua **email** registrata
+4. Clicca **"Invia link di reset"**
+5. Controlla la tua **casella email** (anche spam/posta indesiderata)
+6. Clicca sul **link nell'email** per reimpostare la password
+7. Inserisci la tua **nuova password** (minimo 6 caratteri)
+8. Clicca **"Aggiorna password"**
+9. Verrai automaticamente reindirizzato alla dashboard
+
+**Note**:
+- Il link di reset è valido solo per un tempo limitato
+- Puoi richiedere un nuovo link se quello precedente è scaduto
+- Dopo aver cambiato la password, usa la nuova per accedere
+
 ---
 
 ## Aggiungere Alimenti
@@ -314,7 +333,15 @@ Quando torni online, il banner scompare automaticamente e puoi usare tutte le fu
 
 ### Come cambio la mia password?
 
-Attualmente non è possibile cambiare la password dall'app. Contatta il supporto.
+Se hai dimenticato la password o vuoi cambiarla:
+
+1. Fai **logout** dall'app
+2. Vai alla pagina di login
+3. Clicca su **"Password dimenticata?"**
+4. Segui la procedura di reset password tramite email
+5. Imposta la tua nuova password
+
+Consulta la sezione [Password Dimenticata](#password-dimenticata) per maggiori dettagli.
 
 ### Posso condividere la mia lista con altri?
 
@@ -345,4 +372,4 @@ Per segnalare problemi o suggerire miglioramenti:
 
 ---
 
-*Ultimo aggiornamento: 21 gennaio 2026*
+*Ultimo aggiornamento: 23 gennaio 2026*
