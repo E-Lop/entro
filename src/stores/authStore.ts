@@ -121,7 +121,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       let wasAuthenticated = user !== null
 
       // Setup auth state change listener
-      const unsubscribe = onAuthStateChange((user, session) => {
+      const unsubscribe = onAuthStateChange((event, user, session) => {
         const isNowAuthenticated = user !== null
 
         set({
@@ -130,6 +130,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
           isAuthenticated: isNowAuthenticated,
           loading: false,
         })
+
+        // Skip invite checks and redirects during password recovery flow
+        if (event === 'PASSWORD_RECOVERY') {
+          console.log('Password recovery session detected - staying on reset page')
+          return
+        }
 
         // Check for pending invites when user logs in (transitions from logged out to logged in)
         if (!wasAuthenticated && isNowAuthenticated && user) {

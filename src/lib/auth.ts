@@ -155,11 +155,11 @@ export async function getSession(): Promise<Session | null> {
  * Returns an unsubscribe function
  */
 export function onAuthStateChange(
-  callback: (user: User | null, session: Session | null) => void
+  callback: (event: string, user: User | null, session: Session | null) => void
 ) {
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      callback(session?.user ?? null, session)
+    (event, session) => {
+      callback(event, session?.user ?? null, session)
     }
   )
 
