@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
 **Ultima Sessione**: 21 Gennaio 2026
-**Status**: Fase 5 IN CORSO - Short Code Invites Plan Pronto! (5/7 tasks)
+**Status**: Fase 5 QUASI COMPLETA - Short Code Invites IMPLEMENTATO! (6/7 tasks)
 
 ---
 
@@ -17,7 +17,7 @@
 2. **Fase 2**: Barcode Scanner (ZXing, Open Food Facts, Form Pre-fill)
 3. **Fase 3**: UX Enhancements (Swipe gestures + Calendar WeekView)
 4. **Fase 4**: PWA Essentials (Installable + Offline Mode)
-5. **Fase 5** (5/7 tasks): Dark Mode ✅ + Performance ✅ + Accessibility ✅ + Nome Field ✅ + Cross-browser Testing ✅
+5. **Fase 5** (6/7 tasks): Dark Mode ✅ + Performance ✅ + Accessibility ✅ + Short Code Invites ✅ + Nome Field ✅ + Cross-browser Testing ✅
 
 ### Prossima Fase
 **Fase 5 (Continua)**: Final Polish & Bug Fixes → Launch Prep (Fase 6)
@@ -32,10 +32,11 @@ Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 Ciao! Sto continuando lo sviluppo del progetto "entro" (food expiry tracker).
 
 CONTESTO:
-- Ho completato 5/7 tasks della Fase 5 (Polish, Quality & Sharing)
+- Ho completato 6/7 tasks della Fase 5 (Polish, Quality & Sharing)
 - Dark Mode funzionante (light/dark/system)
 - Performance optimization: bundle ridotto del 75% (331 KB)
 - Accessibility Audit WCAG AA: core implementation completata
+- Short Code Invites System: COMPLETATO E TESTATO ✅
 - Campo "Nome" utente implementato con greeting personalizzato
 - Cross-browser Testing: 7 browser testati, ZERO bug trovati! ✅
 - L'app è in produzione su https://entro-il.netlify.app
@@ -87,13 +88,20 @@ Bug Fixes Completati:
   - Improved error handling for missing images in storage
   - Suppressed "Auth session missing" console errors
 
-COSA RESTA DA FARE NELLA FASE 5:
+Task 4 - Short Code Invites System ✅ COMPLETATO (21/01/2026):
+  - Sistema codice breve tipo Discord/Zoom implementato (6 caratteri: ABC123)
+  - Migrations: 010_simplify_invites_short_code.sql, 011_add_pending_user_email_to_invites.sql
+  - Edge Functions aggiornate: create-invite, validate-invite, accept-invite
+  - Frontend: InviteDialog con Web Share API, SignUpPage con manual code input
+  - Pending user email strategy per email confirmation flow
+  - registerPendingInvite() + acceptInviteByEmail() implementati
+  - Testing completo: iPhone email share → signup → email confirm → auto-join ✅
+  - Debug logging cleanup completato
+  - Documentazione aggiornata: SHORT_CODE_INVITES_PLAN.md, ROADMAP.md, USER_GUIDE.md
+  - Commits: ad75eee, 9b3517d, 7507ad7, 71d352b
+  - Tempo implementazione: ~5 ore (come stimato!)
 
-Task 4 - Shared Lists Multi-User (OPZIONALE, COMPLESSO - RIMANDATO):
-  - Database schema per shared_lists
-  - Permissions system (owner, editor, viewer)
-  - Real-time updates con Supabase Realtime
-  - Nota: Feature complessa, rimandata a Fase 6
+COSA RESTA DA FARE NELLA FASE 5:
 
 Task 7 - Final Bug Fixes and Polish ⏳ PROSSIMO:
   - Polish finale UX (eventuali miglioramenti estetici)
@@ -106,57 +114,31 @@ ROADMAP COMPLETA:
 - Fase 6: Launch & Iteration (beta testing, marketing, public release)
 - Desiderata: MonthView, notifiche, statistiche, offline-first enhancements
 
-PROSSIMO OBIETTIVO - Shared Lists Multi-User:
+PROSSIMO OBIETTIVO - Final Polish & Launch Prep:
 
-✅ **NUOVO PIANO ULTRA-SEMPLIFICATO!** Vedi `docs/SHORT_CODE_INVITES_PLAN.md`
+✅ **SHORT CODE INVITES COMPLETATO!** Sistema funzionante e testato (vedi `docs/SHORT_CODE_INVITES_PLAN.md`)
 
-Ho evoluto il piano originale (in `docs/SHARED_LISTS_PLAN.md`) verso un approccio **più semplice e mobile-friendly**:
+**Cosa è Stato Implementato**:
+- ✅ Sistema codice breve (6 caratteri: ABC123) completamente funzionante
+- ✅ Web Share API per condivisione mobile nativa
+- ✅ Pending user email strategy per email confirmation flow
+- ✅ Testing completo: iPhone → WhatsApp → Signup → Email confirm → Auto-join
+- ✅ Debug logging cleanup e documentazione aggiornata
 
-**Problema Risolto**:
-- ❌ Link lungo (80+ caratteri) in toast non copiabile su mobile
-- ❌ Token 32 caratteri difficile da condividere manualmente
-- ❌ Dipendenza da email esterna (Resend)
-- ✅ Sistema codice breve tipo Discord/Zoom/Airbnb
+**Prossimi Step per Fase 5 Task 7**:
+1. Final UX polish (eventuali miglioramenti estetici minori)
+2. Preparazione materiali lancio (opzionale)
+3. Update USER_GUIDE.md con funzionalità shared lists (se necessario)
+4. Security review finale (opzionale)
 
-**Soluzione: Codice Breve Anonimo**:
-- ✅ 6 caratteri alfanumerici maiuscoli (es: `ABC123`)
-- ✅ URL breve: `https://entro-il.netlify.app/join/ABC123`
-- ✅ Web Share API per condivisione nativa mobile
-- ✅ Completamente anonimo (no email requirement)
-- ✅ Zero costi ricorrenti (no email service)
+**Nota**: Dopo cross-browser testing con ZERO bug, Task 7 è principalmente polish finale e preparazione al lancio. L'app è già production-ready!
 
-**Database Schema** (manteniamo base esistente + short_code):
-1. `lists` - Liste condivise
-2. `list_members` - Chi appartiene a quali liste
-3. `invites` - Aggiunta colonna `short_code` (6 char), email nullable
-
-**Backend** (Edge Functions SEMPLIFICATI):
-1. `create-invite` - Genera short_code (NO email param)
-2. `validate-invite` - Verifica code + scadenza (NO email check)
-3. `accept-invite` - Aggiunge user alla lista (NO email match)
-
-**Frontend** (ULTRA-SEMPLIFICATO):
-- Service: `invites.ts` - NO email params
-- Component: `InviteDialog` - NO form email, solo "Genera codice"
-- SignUpPage: Input manuale codice, NO email prefill
-- Route: `/join/:code` → redirect a signup con code
-
-**UX Flow**:
-1. User clicca "Genera codice invito" → Riceve `ABC123`
-2. User clicca "Copia" o "Condividi" (Web Share API)
-3. Destinatario riceve codice via WhatsApp/SMS/Telegram
-4. Destinatario visita `/join/ABC123` o inserisce codice manualmente
-5. Signup → Conferma email → Auto-join alla lista condivisa
-
-**Sicurezza**:
-- Codice scade in 7 giorni
-- Entropy: 36^6 = 2.1 miliardi combinazioni
-- RLS policies mantenute
-- Uso case: liste della spesa familiari (non dati sensibili)
-
-**Testing Strategy**: Mobile-first (Web Share API, iOS Safari, Android Chrome)
-
-**Stima Implementazione**: 5-6 ore sviluppo (molto più veloce!)
+**Fase 6 - Launch & Iteration**:
+- Beta testing con utenti reali (10-20 persone)
+- Feedback collection e iterazione
+- Marketing materials (demo video, landing page - opzionale)
+- Public release announcement
+- Analytics setup (Plausible/PostHog - opzionale)
 
 DOCUMENTI UTILI:
 - docs/ROADMAP.md (roadmap completa con progress Fase 5)
@@ -168,7 +150,7 @@ DOCUMENTI UTILI:
 - docs/BARCODE_BUG.md (bug fix journey Fase 2)
 - README.md (setup e overview)
 
-Sono pronto a iniziare l'implementazione del sistema Short Code Invites seguendo il piano in SHORT_CODE_INVITES_PLAN.md
+Sono pronto a completare la Fase 5 (Task 7 - Final Polish) o iniziare la Fase 6 (Beta Testing & Launch).
 ```
 
 ---
@@ -248,6 +230,8 @@ vite.config.ts            # Vite config con manual chunks
 - Swipe gestures (edit/delete) con visual feedback
 - Vista calendario settimanale (WeekView)
 - Toggle Lista/Calendario nella dashboard
+- **Shared Lists con Short Code Invites** (ABC123) ✅
+- **Web Share API** per condivisione mobile nativa ✅
 - **PWA installabile** (iOS, Android, Desktop)
 - **Service Worker** con cache strategy
 - **Offline mode** (UI cached, banner feedback)
@@ -264,8 +248,8 @@ Console warnings PWA (normali in development, minimizzati in production).
 
 ### Tech Debt / Miglioramenti Futuri
 - Final polish and launch prep (Fase 5 Task 7) - PROSSIMO
-- Shared lists multi-user (Fase 5 Task 4 - opzionale, complesso, rimandato)
 - Beta testing e feedback raccolta (Fase 6)
+- Real-time updates per shared lists con Supabase Realtime (opzionale)
 - Offline-first enhancements (IndexedDB, background sync) nella sezione Desiderata
 - MonthView calendar, notifiche push, statistiche (Features future)
 
@@ -441,6 +425,17 @@ open dist/stats.html # Visualizza bundle composition
 - Manual testing: COMPLETED
 - Documentation: ACCESSIBILITY_AUDIT.md
 
+### Task 4: Short Code Invites ✅
+- Database migrations: 2 migrations applied DONE
+- Edge Functions: 3 functions updated DONE
+- Frontend components: InviteDialog + SignUpPage DONE
+- Web Share API: Mobile sharing DONE
+- Pending email strategy: acceptInviteByEmail() DONE
+- End-to-end testing: iPhone → WhatsApp → Signup → Auto-join TESTED ✅
+- Debug cleanup: Console logs removed DONE
+- Documentation: SHORT_CODE_INVITES_PLAN.md + ROADMAP.md UPDATED
+- Time: ~5 hours (as estimated!)
+
 ### Task 5: Nome Field ✅
 - Signup form: campo nome DONE
 - User metadata: saved in Supabase Auth DONE
@@ -462,13 +457,13 @@ open dist/stats.html # Visualizza bundle composition
 **Fase 2 Completata**: 12 Gennaio 2026
 **Fase 3 Completata**: 14 Gennaio 2026 (mattina)
 **Fase 4 Completata**: 14 Gennaio 2026 (pomeriggio)
-**Fase 5 (5/7 tasks)**: 16 Gennaio 2026
+**Fase 5 (6/7 tasks)**: 21 Gennaio 2026
 
-L'app è ora accessibile, performante, con dark mode, greeting personalizzato, e pienamente compatibile cross-browser (7 browser testati, ZERO bug)! 🎉
+L'app è ora accessibile, performante, con dark mode, greeting personalizzato, shared lists con short code invites, e pienamente compatibile cross-browser (7 browser testati, ZERO bug)! 🎉
 
-Prossimo step: Final polish e preparazione al lancio (Fase 5 Task 7), poi Beta Testing (Fase 6)!
+Prossimo step: Final polish (Fase 5 Task 7 - opzionale), poi Beta Testing (Fase 6)!
 
 ---
 
 **Ultimo Update**: 21 Gennaio 2026
-**Next Session**: Implementare Short Code Invites System seguendo piano in SHORT_CODE_INVITES_PLAN.md (stima: 5-6 ore)
+**Next Session**: Final polish & launch prep (Fase 5 Task 7) o iniziare Beta Testing (Fase 6)

@@ -79,8 +79,6 @@ export function SignUpPage() {
 
         if (!success) {
           console.error('Failed to register pending invite:', error)
-        } else {
-          console.log('Successfully registered pending invite for:', email)
         }
 
         toast.info(

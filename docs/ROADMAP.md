@@ -555,29 +555,31 @@ npm install -D @types/node
   - All color contrast checked (light + dark mode)
 
 #### Tasks (Giorno 5-6)
-- [x] ✅ **Shared Lists Multi-User Implementation** (COMPLETATO - 2025-01-20)
+- [x] ✅ **Shared Lists Multi-User Implementation** (COMPLETATO - 21/01/2026)
   - ✅ Piano completo documentato in [SHARED_LISTS_PLAN.md](SHARED_LISTS_PLAN.md) (email-based)
-  - ✅ **NUOVO: Piano ultra-semplificato in [SHORT_CODE_INVITES_PLAN.md](SHORT_CODE_INVITES_PLAN.md)** (21/01/2026)
-    - Sistema codice breve tipo Discord/Zoom (6 caratteri: `ABC123`)
-    - Completamente anonimo (no email requirement)
-    - Mobile-friendly con Web Share API
-    - URL breve: `/join/ABC123`
-    - Stima: 5-6 ore sviluppo (molto più veloce!)
+  - ✅ **SHORT CODE INVITES SYSTEM - COMPLETATO** ✅ [SHORT_CODE_INVITES_PLAN.md](SHORT_CODE_INVITES_PLAN.md) (21/01/2026)
+    - ✅ Sistema codice breve tipo Discord/Zoom (6 caratteri: `ABC123`)
+    - ✅ Completamente anonimo (no email requirement)
+    - ✅ Mobile-friendly con Web Share API
+    - ✅ URL breve: `/join/ABC123`
+    - ✅ Pending user email strategy per email confirmation flow
+    - ✅ Implementazione completata e testata in ~5 ore
   - ✅ Database schema: `lists`, `list_members`, `invites` tables con RLS policies
+  - ✅ Migrations: `010_simplify_invites_short_code.sql`, `011_add_pending_user_email_to_invites.sql`
   - ✅ Backward compatible migration (Approach A) - tutti gli utenti esistenti migrati
-  - ✅ Edge Functions complete: `create-invite`, `validate-invite`, `accept-invite`
-  - ✅ Frontend components: InviteButton, InviteDialog con UI completa
-  - ✅ Signup/Login integration con invite tokens
-  - ✅ Email prefill e lock durante registrazione da invito
+  - ✅ Edge Functions complete: `create-invite`, `validate-invite`, `accept-invite` (short code based)
+  - ✅ Frontend components: InviteDialog con generazione short code + Web Share API
+  - ✅ Signup/Login integration con short code validation e manual input
+  - ✅ registerPendingInvite() per salvare email durante signup
+  - ✅ acceptInviteByEmail() per auto-acceptance dopo email confirmation
   - ✅ Creator name personalizzazione messaggi (da auth.users.user_metadata)
-  - ✅ Auto-acceptance dopo email confirmation (acceptInviteByEmail)
   - ✅ Welcome toast persistence attraverso page reload
-  - ✅ Duplicate toast elimination e UX polish
   - ✅ Debug logging cleanup per production readiness
-  - Files modified: invites.ts, authStore.ts, SignUpPage.tsx, AuthForm.tsx, DashboardPage.tsx, LoginPage.tsx
-  - Edge Functions: supabase/functions/{create,validate,accept}-invite/index.ts
-  - Commits: e79cd7b, f5db5e4, 71d352b e altri
-  - **PROSSIMO**: Implementare versione short code (supersedes approccio email-based per UX mobile)
+  - ✅ Testing completo: iPhone email share + recipient signup + email confirmation flow
+  - Files modified: invites.ts, authStore.ts, SignUpPage.tsx, AuthForm.tsx, DashboardPage.tsx, InviteDialog.tsx, App.tsx
+  - Edge Functions: supabase/functions/{create,validate,accept}-invite/index.ts (updated per short codes)
+  - Types: invite.types.ts (CreateInviteResponse now returns shortCode)
+  - Commits: ad75eee, 9b3517d, 7507ad7, 71d352b e altri
 - [x] ✅ Add 'Nome' field for users and update greeting (COMPLETATO)
   - Campo "Nome" nel form di registrazione con validation
   - Salvataggio in user_metadata di Supabase Auth (no DB migration needed)
