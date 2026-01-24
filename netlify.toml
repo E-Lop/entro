@@ -12,7 +12,7 @@
   NODE_VERSION = "20"
   VITE_SUPABASE_URL = "https://rmbmmwcxtnanacxbkihc.supabase.co"
   VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtYm1td2N4dG5hbmFjeGJraWhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzA0NDMsImV4cCI6MjA4MzUwNjQ0M30.tl3mozcbXBQPx1JAZYm4V4JqfxPoq1Qv-35_UgiJ3Ac"
-  VITE_APP_URL = "https://entro-il.netlify.app"
+  VITE_APP_URL = "https://entroapp.it"
   VITE_APP_NAME = "entro"
   VITE_ENABLE_BARCODE_SCANNER = "true"
   VITE_ENABLE_SWIPE_GESTURES = "true"
