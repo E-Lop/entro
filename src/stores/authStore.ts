@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
 import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
-import { acceptInviteByEmail } from '../lib/invites'
+import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
 
 /**
  * Auth Store State
@@ -85,29 +85,53 @@ export const useAuthStore = create<AuthStore>((set) => ({
         loading: false,
       })
 
-      // Check invite acceptance helper
+      // Check invite acceptance and list initialization helper
       const checkAndAcceptInvite = async (user: any) => {
-        // Check if we already accepted an invite in this session
-        const inviteAcceptedKey = `invite_accepted_${user.email}`
-        if (sessionStorage.getItem(inviteAcceptedKey)) {
+        // Check if we already processed this user in this session
+        const processedKey = `user_initialized_${user.email}`
+        if (sessionStorage.getItem(processedKey)) {
           return
         }
 
         try {
-          const { success, listId, error } = await acceptInviteByEmail()
+          // First, try to accept any pending invite
+          const { success: inviteAccepted, listId, error } = await acceptInviteByEmail()
 
-          if (success && listId) {
+          if (inviteAccepted && listId) {
             // Mark as processed to prevent re-checking
-            sessionStorage.setItem(inviteAcceptedKey, 'true')
+            sessionStorage.setItem(processedKey, 'true')
             // Store flag to show toast after reload
             localStorage.setItem('show_welcome_toast', 'true')
             // Refresh the page to load the new list data
             window.location.reload()
+            return
           } else if (error) {
             console.error('Failed to accept invite:', error.message)
+            return
+          }
+
+          // No pending invite, check if user already has a list
+          const { list, error: listError } = await getUserList()
+
+          if (listError || !list) {
+            // User doesn't have a list yet, create a personal one
+            console.log('Creating personal list for new user...')
+            const { success: listCreated, error: createError } = await createPersonalList()
+
+            if (listCreated) {
+              // Mark as processed
+              sessionStorage.setItem(processedKey, 'true')
+              // Refresh to load the new list
+              window.location.reload()
+            } else {
+              console.error('Failed to create personal list:', createError)
+            }
+          } else {
+            // User already has a list, just mark as processed
+            sessionStorage.setItem(processedKey, 'true')
           }
         } catch (error) {
-          console.error('Error checking for pending invites:', error)
+          console.error('Error initializing user:', error)
         }
       }
 

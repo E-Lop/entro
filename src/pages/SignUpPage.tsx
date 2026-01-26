@@ -86,14 +86,7 @@ export function SignUpPage() {
           { duration: 12000 }
         )
       } else {
-        // Signup senza invito - crea lista personale
-        const { createPersonalList } = await import('../lib/invites')
-        const { success, error } = await createPersonalList()
-
-        if (!success) {
-          console.error('Failed to create personal list:', error)
-        }
-
+        // Signup senza invito - la lista personale verrà creata automaticamente al primo login
         toast.success(
           'Registrazione completata! Controlla la tua email per confermare l\'account.',
           { duration: 10000 }
