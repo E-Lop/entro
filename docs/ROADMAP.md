@@ -628,19 +628,20 @@ npm install -D @types/node
 
 **Obiettivo**: Release pubblica e raccolta feedback
 
-### Lista Singola per Utente - UX Improvements
-- [ ] **Implementare approccio "una lista per utente"** (Piano: [SINGLE_LIST_IMPLEMENTATION_PLAN.md](SINGLE_LIST_IMPLEMENTATION_PLAN.md))
-  - [ ] Backend: `acceptInviteWithConfirmation()` con dialog conferma perdita dati
-  - [ ] Backend: `leaveSharedList()` per abbandonare lista condivisa
-  - [ ] UI: Menu "Inviti" centralizzato (Crea/Accetta/Abbandona)
-  - [ ] UI: AcceptInviteDialog con warning count cibi eliminati
-  - [ ] UI: InviteMenuDialog con 3 opzioni integrate
-  - [ ] UI: LeaveListDialog per creare nuova lista personale
-  - [ ] Route: `/join/:code` per link esterni
-  - [ ] Mobile-first: Input codice ottimizzato (text-xl, h-14)
-  - [ ] Testing: 8 test cases completi (TC1-TC8)
-  - [ ] Stima: 2 giorni (1.5 coding + 0.5 testing)
-  - Files: 5 nuovi, 5 modificati (10 totali)
+### Lista Singola per Utente - UX Improvements ✅ COMPLETATO
+- [x] **Implementare approccio "una lista per utente"** (Piano: [SINGLE_LIST_IMPLEMENTATION_PLAN.md](SINGLE_LIST_IMPLEMENTATION_PLAN.md))
+  - [x] Backend: `acceptInviteWithConfirmation()` con dialog conferma perdita dati
+  - [x] Backend: `leaveSharedList()` per abbandonare lista condivisa
+  - [x] UI: Menu "Inviti" centralizzato (Crea/Accetta/Abbandona)
+  - [x] UI: AcceptInviteDialog con warning count cibi eliminati
+  - [x] UI: InviteMenuDialog con 3 opzioni integrate
+  - [x] UI: LeaveListDialog per creare nuova lista personale
+  - [x] Route: `/join/:code` per link esterni
+  - [x] Mobile-first: Input codice ottimizzato (text-xl, h-14)
+  - [ ] Testing: 8 test cases completi (TC1-TC8) 🔄 PROSSIMO
+  - ✅ Completato in: 1.5 giorni (coding)
+  - Files: 7 nuovi, 5 modificati (12 totali)
+  - Build: SUCCESS (0 errori TypeScript/ESLint)
 
 ### Launch Checklist
 - [x] Supabase production project setup

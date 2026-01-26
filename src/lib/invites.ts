@@ -3,6 +3,7 @@ import type {
   CreateInviteResponse,
   ValidateInviteResponse,
   AcceptInviteResponse,
+  AcceptInviteConfirmationResponse,
   ListResponse,
   ListMembersResponse,
 } from '../types/invite.types'
@@ -397,6 +398,287 @@ export async function createPersonalList(): Promise<{ success: boolean; error: E
 
     if (memberError) {
       throw new Error(memberError.message)
+    }
+
+    return {
+      success: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    }
+  }
+}
+
+/**
+ * Accepts an invite with confirmation logic for "Single List" approach
+ * If user has an existing list, returns requiresConfirmation=true with food count
+ * If forceAccept=true, removes user from old list and adds to new one
+ * @param shortCode - The invite short code
+ * @param forceAccept - If true, bypasses confirmation and accepts invite
+ * @returns Response with confirmation requirement or success
+ */
+export async function acceptInviteWithConfirmation(
+  shortCode: string,
+  forceAccept: boolean = false
+): Promise<AcceptInviteConfirmationResponse> {
+  try {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) {
+      throw new Error('Not authenticated')
+    }
+
+    const userId = userData.user.id
+    const upperShortCode = shortCode.toUpperCase()
+
+    // Step 1: Validate invite
+    const { data: inviteData, error: inviteError } = await supabase
+      .from('invites')
+      .select('*')
+      .eq('short_code', upperShortCode)
+      .eq('status', 'pending')
+      .maybeSingle()
+
+    if (inviteError) {
+      throw inviteError
+    }
+
+    if (!inviteData) {
+      throw new Error('Invito non valido o scaduto')
+    }
+
+    // Check if invite has expired
+    const expiresAt = new Date(inviteData.expires_at)
+    const now = new Date()
+
+    if (expiresAt < now) {
+      // Update invite status to expired
+      await supabase
+        .from('invites')
+        .update({ status: 'expired' })
+        .eq('id', inviteData.id)
+
+      throw new Error('Questo invito è scaduto')
+    }
+
+    // Step 2: Check if user already has a list
+    const { data: currentMemberData, error: currentMemberError } = await supabase
+      .from('list_members')
+      .select('list_id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (currentMemberError) {
+      throw currentMemberError
+    }
+
+    // Step 3: If user has no list, just add them to the new list
+    if (!currentMemberData) {
+      // Add user to new list
+      const { error: memberError } = await supabase
+        .from('list_members')
+        .insert({
+          list_id: inviteData.list_id,
+          user_id: userId,
+        })
+
+      if (memberError) {
+        throw memberError
+      }
+
+      // Update invite status to accepted
+      await supabase
+        .from('invites')
+        .update({
+          status: 'accepted',
+          accepted_at: new Date().toISOString(),
+        })
+        .eq('id', inviteData.id)
+
+      return {
+        success: true,
+        listId: inviteData.list_id,
+        requiresConfirmation: false,
+        error: null,
+      }
+    }
+
+    // Step 4: User has a list - check if it's the same list
+    if (currentMemberData.list_id === inviteData.list_id) {
+      // User is already in this list
+      await supabase
+        .from('invites')
+        .update({
+          status: 'accepted',
+          accepted_at: new Date().toISOString(),
+        })
+        .eq('id', inviteData.id)
+
+      return {
+        success: true,
+        listId: inviteData.list_id,
+        requiresConfirmation: false,
+        error: null,
+      }
+    }
+
+    // Step 5: User has a different list - get food count
+    const { count: foodCount, error: foodCountError } = await supabase
+      .from('foods')
+      .select('*', { count: 'exact', head: true })
+      .eq('list_id', currentMemberData.list_id)
+
+    if (foodCountError) {
+      throw foodCountError
+    }
+
+    // Step 6: If not forcing, return confirmation required
+    if (!forceAccept) {
+      return {
+        success: false,
+        listId: null,
+        requiresConfirmation: true,
+        foodCount: foodCount || 0,
+        error: null,
+      }
+    }
+
+    // Step 7: Force accept - remove from old list and add to new one
+    const oldListId = currentMemberData.list_id
+
+    // Remove user from old list
+    const { error: removeError } = await supabase
+      .from('list_members')
+      .delete()
+      .eq('list_id', oldListId)
+      .eq('user_id', userId)
+
+    if (removeError) {
+      throw removeError
+    }
+
+    // Check if old list has any members left
+    const { count: remainingMembers, error: membersCountError } = await supabase
+      .from('list_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('list_id', oldListId)
+
+    if (membersCountError) {
+      throw membersCountError
+    }
+
+    // If old list has no members, delete it (CASCADE will delete foods)
+    if (remainingMembers === 0) {
+      const { error: deleteError } = await supabase
+        .from('lists')
+        .delete()
+        .eq('id', oldListId)
+
+      if (deleteError) {
+        console.error('Error deleting old list:', deleteError)
+        // Don't fail the whole operation if delete fails
+      }
+    }
+
+    // Add user to new list
+    const { error: newMemberError } = await supabase
+      .from('list_members')
+      .insert({
+        list_id: inviteData.list_id,
+        user_id: userId,
+      })
+
+    if (newMemberError) {
+      throw newMemberError
+    }
+
+    // Update invite status to accepted
+    await supabase
+      .from('invites')
+      .update({
+        status: 'accepted',
+        accepted_at: new Date().toISOString(),
+      })
+      .eq('id', inviteData.id)
+
+    return {
+      success: true,
+      listId: inviteData.list_id,
+      requiresConfirmation: false,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      listId: null,
+      requiresConfirmation: false,
+      error: error instanceof Error ? error : new Error('Unknown error'),
+    }
+  }
+}
+
+/**
+ * Leaves the current shared list and creates a new personal list
+ * Only works if current list is shared (>1 member)
+ * @returns Response with success status
+ */
+export async function leaveSharedList(): Promise<{ success: boolean; error: Error | null }> {
+  try {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) {
+      throw new Error('Not authenticated')
+    }
+
+    const userId = userData.user.id
+
+    // Step 1: Get user's current list
+    const { data: currentMemberData, error: currentMemberError } = await supabase
+      .from('list_members')
+      .select('list_id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (currentMemberError) {
+      throw currentMemberError
+    }
+
+    if (!currentMemberData) {
+      throw new Error('Non sei membro di alcuna lista')
+    }
+
+    const currentListId = currentMemberData.list_id
+
+    // Step 2: Check if list is shared (>1 member)
+    const { count: memberCount, error: memberCountError } = await supabase
+      .from('list_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('list_id', currentListId)
+
+    if (memberCountError) {
+      throw memberCountError
+    }
+
+    if (memberCount === null || memberCount <= 1) {
+      throw new Error('Non puoi abbandonare una lista personale')
+    }
+
+    // Step 3: Remove user from current list
+    const { error: removeError } = await supabase
+      .from('list_members')
+      .delete()
+      .eq('list_id', currentListId)
+      .eq('user_id', userId)
+
+    if (removeError) {
+      throw removeError
+    }
+
+    // Step 4: Create new personal list
+    const createResult = await createPersonalList()
+    if (!createResult.success) {
+      throw createResult.error || new Error('Failed to create personal list')
     }
 
     return {

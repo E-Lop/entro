@@ -54,3 +54,11 @@ export interface AcceptInviteResponse {
   listId: string | null
   error: Error | null
 }
+
+export interface AcceptInviteConfirmationResponse {
+  success: boolean
+  listId: string | null
+  requiresConfirmation: boolean
+  foodCount?: number
+  error: Error | null
+}

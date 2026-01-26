@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useAuthStore } from './stores/authStore'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
@@ -13,6 +13,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const TestConnection = lazy(() => import('./pages/TestConnection'))
+const JoinPage = lazy(() => import('./pages/JoinPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -24,17 +25,6 @@ function PageLoader() {
       </div>
     </div>
   )
-}
-
-// Join page - redirects to signup with invite code
-function JoinPage() {
-  const { code } = useParams<{ code: string }>()
-
-  if (!code) {
-    return <Navigate to="/signup" replace />
-  }
-
-  return <Navigate to={`/signup?code=${code.toUpperCase()}`} replace />
 }
 
 function App() {

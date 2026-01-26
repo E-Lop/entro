@@ -6,7 +6,8 @@ Web app per gestire le date di scadenza degli alimenti con scansione barcode int
 
 - ✅ Gestione completa scadenze alimentari (CRUD, immagini, categorie)
 - 📷 Scansione barcode con Open Food Facts (iOS + Android)
-- 👥 Liste condivise multi-utente (codici invito anonimi)
+- 👥 Liste condivise "Una lista per utente" (codici invito ABC123)
+- 🔗 Link invito veloci via Web Share API (/join/ABC123)
 - 🔄 Swipe gestures per edit/delete rapido (mobile)
 - 📅 Vista calendario settimanale (rolling 7 giorni)
 - 🔍 Filtri avanzati e ricerca in tempo reale

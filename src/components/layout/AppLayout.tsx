@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut, User } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
@@ -6,6 +6,10 @@ import { AppIcon } from '../ui/AppIcon'
 import { ThemeToggle } from './ThemeToggle'
 import { InviteButton } from '../sharing/InviteButton'
 import { InviteDialog } from '../sharing/InviteDialog'
+import { InviteMenuDialog } from '../sharing/InviteMenuDialog'
+import { AcceptInviteFlowDialog } from '../sharing/AcceptInviteFlowDialog'
+import { LeaveListDialog } from '../sharing/LeaveListDialog'
+import { getUserList, getListMembers } from '../../lib/invites'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +27,30 @@ import { Button } from '../ui/button'
 export function AppLayout() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  const [inviteMenuOpen, setInviteMenuOpen] = useState(false)
+  const [createInviteOpen, setCreateInviteOpen] = useState(false)
+  const [acceptInviteOpen, setAcceptInviteOpen] = useState(false)
+  const [leaveListOpen, setLeaveListOpen] = useState(false)
+  const [isInSharedList, setIsInSharedList] = useState(false)
+
+  // Check if user is in a shared list (>1 member)
+  useEffect(() => {
+    const checkSharedList = async () => {
+      try {
+        const { list } = await getUserList()
+        if (!list) return
+
+        const { members } = await getListMembers(list.id)
+        setIsInSharedList(members.length > 1)
+      } catch (error) {
+        console.error('Error checking shared list:', error)
+      }
+    }
+
+    if (user) {
+      checkSharedList()
+    }
+  }, [user])
 
   const handleLogout = async () => {
     const result = await signOut()
@@ -82,7 +109,7 @@ export function AppLayout() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <InviteButton onClick={() => setInviteDialogOpen(true)} />
+                <InviteButton onClick={() => setInviteMenuOpen(true)} />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -98,8 +125,24 @@ export function AppLayout() {
         </div>
       </header>
 
-      {/* Invite Dialog */}
-      <InviteDialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen} />
+      {/* Invite Menu Dialog */}
+      <InviteMenuDialog
+        open={inviteMenuOpen}
+        onOpenChange={setInviteMenuOpen}
+        isInSharedList={isInSharedList}
+        onCreateInvite={() => setCreateInviteOpen(true)}
+        onAcceptInvite={() => setAcceptInviteOpen(true)}
+        onLeaveList={() => setLeaveListOpen(true)}
+      />
+
+      {/* Create Invite Dialog */}
+      <InviteDialog open={createInviteOpen} onOpenChange={setCreateInviteOpen} />
+
+      {/* Accept Invite Flow Dialog */}
+      <AcceptInviteFlowDialog open={acceptInviteOpen} onOpenChange={setAcceptInviteOpen} />
+
+      {/* Leave List Dialog */}
+      <LeaveListDialog open={leaveListOpen} onOpenChange={setLeaveListOpen} />
 
       {/* Main Content */}
       <main id="main-content" className="container mx-auto px-4 py-8">

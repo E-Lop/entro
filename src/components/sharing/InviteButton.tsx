@@ -1,4 +1,4 @@
-import { UserPlus } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import { Button } from '../ui/button'
 
 interface InviteButtonProps {
@@ -20,8 +20,8 @@ export function InviteButton({ onClick }: InviteButtonProps) {
       className="w-full justify-start"
       onClick={onClick}
     >
-      <UserPlus className="mr-2 h-4 w-4" />
-      Invita membro
+      <Mail className="mr-2 h-4 w-4" />
+      Inviti
     </Button>
   )
 }
