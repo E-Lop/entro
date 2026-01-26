@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
-**Ultima Sessione**: 23 Gennaio 2026
-**Status**: 🎉 FASE 5 COMPLETATA AL 100%! (7/7 tasks) - PRODUCTION-READY! 🚀
+**Ultima Sessione**: 26 Gennaio 2026
+**Status**: 🚀 FASE 6 - PREPARAZIONE IMPLEMENTAZIONE LISTA SINGOLA
 
 ---
 
@@ -9,7 +9,8 @@
 
 **Progetto**: Entro - Food Expiry Tracker Web App
 **Tech Stack**: React + TypeScript + Vite + Supabase + Tailwind + shadcn/ui
-**Production URL**: https://entro-il.netlify.app
+**Production URL**: https://entroapp.it
+**Legacy URL**: https://entro-il.netlify.app
 **Repository**: https://github.com/E-Lop/entro
 **Status**: Production-Ready ✅
 
@@ -21,7 +22,9 @@
 5. ✅ **Fase 5** (7/7 tasks): Dark Mode + Performance + Accessibility + Short Code Invites + Nome Field + Cross-browser Testing + Final Polish
 
 ### Prossima Fase
-**Fase 6**: Launch & Iteration (Beta Testing → Public Release)
+**Fase 6**: Launch & Iteration
+- 🔄 **PROSSIMO STEP**: Implementare approccio "Lista Singola per Utente" (2 giorni)
+- Successivamente: Beta Testing → Public Release
 
 ---
 
@@ -30,106 +33,136 @@
 Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 
 ```
-Ciao! Pronto per iniziare la Fase 6 di "entro" (food expiry tracker).
+Ciao! Pronto per implementare il sistema "Lista Singola per Utente" per entro.
 
-STATO PROGETTO:
+CONTESTO PROGETTO:
 - ✅ FASE 5 COMPLETATA AL 100% (7/7 tasks)
-- ✅ App PRODUCTION-READY su https://entro-il.netlify.app
-- ✅ Cross-browser testing: 7 browser, ZERO bug
-- ✅ Performance: -75% bundle size (331 KB)
-- ✅ Accessibility: WCAG AA compliant
-- ✅ Short Code Invites funzionanti
-- ✅ Documentation completa e accurata
+- ✅ App PRODUCTION-READY su https://entroapp.it
+- ✅ Short Code Invites già funzionanti (ABC123)
+- ✅ Database già supporta liste multiple
+- 🎯 OBIETTIVO: Implementare UX "una lista per utente"
 
-FASE 5 - TASKS COMPLETATI:
-1. ✅ Dark Mode (light/dark/system + theme toggle)
-2. ✅ Performance Optimization (75% bundle reduction, lazy loading)
-3. ✅ Accessibility Audit WCAG AA (keyboard, ARIA, semantic HTML)
-4. ✅ Short Code Invites System (6-char codes, Web Share API)
-5. ✅ Add 'Nome' Field (personalized greeting)
-6. ✅ Cross-browser Testing (7 browsers, 0 bugs)
-7. ✅ Final Polish & Launch Prep (docs, security, pre-launch checklist)
+DECISIONE ARCHITETTURALE PRESA:
+Approccio "Lista Singola" - Un utente può appartenere a UNA SOLA lista alla volta.
+- Caso d'uso: Famiglia/coppia con 1 lista condivisa
+- Perdita dati accettabile con avviso chiaro
+- Priorità: Launch veloce (2 giorni vs 1 settimana)
 
-FASE 6 - BETA TESTING & LAUNCH:
+PIANO DETTAGLIATO:
+Leggi il piano completo in: docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md
 
-Obiettivo: Lanciare l'app pubblicamente e raccogliere feedback da utenti reali.
+IMPLEMENTAZIONE RICHIESTA:
 
-Step 1 - Beta Testing (1-2 settimane):
-  - Reclutare 10-20 beta tester (amici, famiglia, colleghi)
-  - Creare form feedback (Google Forms/Typeform)
-  - Setup analytics opzionale (Plausible/PostHog)
-  - Monitorare metriche: registrazioni, alimenti aggiunti, liste condivise
-  - Raccogliere feedback strutturato
+**FASE 1: Backend Logic (2 ore)**
+File: src/lib/invites.ts
+- Funzione acceptInviteWithConfirmation(shortCode, forceAccept)
+  - Valida invito (status, expiry)
+  - Se utente ha già lista E !forceAccept → return requiresConfirmation + foodCount
+  - Se forceAccept → rimuovi da lista vecchia, aggiungi a nuova
+  - DELETE lista vecchia se 0 membri (CASCADE foods)
+- Funzione leaveSharedList()
+  - Check se lista è condivisa (>1 membro)
+  - Rimuovi utente da lista corrente
+  - Crea nuova lista personale con createPersonalList()
 
-Step 2 - Iterate su Feedback (3-5 giorni):
-  - Analizzare feedback ricevuto
-  - Prioritizzare bug fixes critici
-  - Implementare quick wins
-  - Aggiornare documentazione se necessario
+**FASE 2: UI AcceptInviteDialog (2 ore)**
+File NUOVO: src/components/sharing/AcceptInviteDialog.tsx
+- Due stati: initial (Unisciti) e confirmation (Attenzione Perdita Dati)
+- State confirmationData con foodCount
+- handleAccept(force) → chiama acceptInviteWithConfirmation()
+- Se requiresConfirmation → mostra Alert destructive con count cibi
+- Buttons: Annulla / Conferma e Unisciti (destructive)
 
-Step 3 - Marketing Materials (Opzionale):
-  - Landing page semplice (opzionale)
-  - Screenshot per social media
-  - Video demo breve (30-60s) o GIF
-  - Social media post templates
+**FASE 3: Menu Inviti Centralizzato (3 ore)**
+Files:
+- src/components/sharing/InviteButton.tsx: cambia testo "Invita membro" → "Inviti", icona Mail
+- src/components/sharing/InviteMenuDialog.tsx (NUOVO): 3 opzioni
+  1. Crea invito (UserPlus icon)
+  2. Accetta invito (LogIn icon)
+  3. Abbandona lista condivisa (LogOut icon, solo se isInSharedList)
+- src/components/sharing/AcceptInviteFlowDialog.tsx (NUOVO): input codice + flow
+- src/components/sharing/LeaveListDialog.tsx (NUOVO): conferma abbandono
+- src/components/layout/AppLayout.tsx:
+  - Import InviteMenuDialog
+  - State isInSharedList (useEffect check membri lista)
+  - Usa InviteMenuDialog invece di InviteDialog
 
-Step 4 - Public Release:
-  - Launch su canali: Reddit (r/SideProject, r/webdev, r/italy)
-  - LinkedIn post
-  - Product Hunt (opzionale)
-  - Twitter/X thread
+**FASE 4: Route /join/:code (1 ora)**
+File NUOVO: src/pages/JoinPage.tsx
+- useParams per code
+- Se !user → navigate('/signup?code=' + code)
+- Se user → mostra AcceptInviteDialog
 
-Step 5 - Post-Launch Monitoring (1 settimana):
-  - Monitorare errori in produzione
-  - Rispondere a feedback entro 24h
-  - Fix bug critici entro 48h
+**FASE 5: Types (15 min)**
+File: src/types/invite.types.ts
+- Interface AcceptInviteConfirmationResponse
 
-DOCUMENTI UTILI:
-- docs/PHASE_6_LAUNCH_CHECKLIST.md (guida completa lancio, beta testing plan)
-- docs/TASK_7_SUMMARY.md (summary Task 7 completato)
-- docs/ROADMAP.md (roadmap completa, Fase 5 100% completata)
-- docs/USER_GUIDE.md (guida utente completa)
-- docs/SHORT_CODE_INVITES_PLAN.md (sistema inviti)
-- docs/ACCESSIBILITY_AUDIT.md (report accessibilità)
-- docs/CROSS_BROWSER_TESTING.md (report testing)
+**MOBILE-FIRST REQUIREMENTS** ⚠️ IMPORTANTE:
+- Input codice: className="text-center text-xl tracking-widest font-mono h-14"
+- Input: autoFocus, autoComplete="off", inputMode="text"
+- Dialog: className="sm:max-w-md"
+- Bottoni menu: p-4, h-auto, gap-2
+- Touch targets: min 44px height
+- Icone: h-5 w-5 (20px)
 
-METRICHE SUCCESS FASE 6:
-Beta Testing:
-  - Target: 10-20 beta tester
-  - Target: 80%+ soddisfazione generale
-  - Target: <5 bug critici trovati
-  - Target: 50%+ consiglierebbe ad amici
+TESTING NECESSARIO (TC1-TC8):
+1. Nuovo utente senza invito → crea lista personale
+2. Nuovo utente con invito → NO lista personale
+3. Utente esistente lista vuota → conferma con "0 alimenti"
+4. Utente esistente 10 cibi → conferma con "10 alimenti"
+5. Link /join/ABC123 → redirect signup o dialog
+6. Riusa stesso codice → no duplicate error
+7. Codice scaduto → errore
+8. Mobile UX: DevTools iPhone SE, tap con pollice
 
-Public Launch:
-  - Target: 50+ utenti registrati primo mese
-  - Target: 200+ alimenti aggiunti totali
-  - Target: 10+ liste condivise create
-  - Target: 20%+ retention dopo 1 settimana
+FILES DA MODIFICARE (10 totali):
+Nuovi (5):
+- src/components/sharing/AcceptInviteDialog.tsx
+- src/components/sharing/InviteMenuDialog.tsx
+- src/components/sharing/AcceptInviteFlowDialog.tsx
+- src/components/sharing/LeaveListDialog.tsx
+- src/pages/JoinPage.tsx
 
-PROSSIMO OBIETTIVO: Iniziare Beta Testing!
+Modificati (5):
+- src/lib/invites.ts (+120 righe)
+- src/components/sharing/InviteButton.tsx (~5 righe)
+- src/components/layout/AppLayout.tsx (+15 righe)
+- src/types/invite.types.ts (+10 righe)
+- src/router.tsx (+4 righe)
 
-Sono pronto per iniziare la Fase 6. Da dove vogliamo partire?
+STIMA: 2 giorni (1.5 coding + 0.5 testing)
+
+PRINCIPI DA SEGUIRE:
+1. YAGNI - implementa solo ciò che serve
+2. Mobile-First - PWA usata principalmente su smartphone
+3. Sicurezza - dialog conferma previene perdita dati accidentale
+4. Scalabilità - database già pronto per evoluzione futura
+
+Iniziamo con FASE 1: Backend Logic in src/lib/invites.ts
 ```
 
 ---
 
 ## Documenti Chiave
 
+### Per Implementazione Lista Singola (PROSSIMO)
+1. **docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md** - Piano completo implementazione (NUOVO ⭐)
+2. **docs/SHORT_CODE_INVITES_PLAN.md** - Sistema inviti esistente (codici 6 caratteri)
+3. **docs/DATABASE_SCHEMA.md** - Schema già pronto per liste multiple
+
 ### Per Fase 6 - Launch
-1. **docs/PHASE_6_LAUNCH_CHECKLIST.md** - Guida completa beta testing e lancio
-2. **docs/TASK_7_SUMMARY.md** - Summary finale Fase 5
-3. **docs/ROADMAP.md** - Roadmap completa (Fase 5 ✅, Fase 6 in arrivo)
-4. **docs/USER_GUIDE.md** - Guida utente per beta tester
+4. **docs/PHASE_6_LAUNCH_CHECKLIST.md** - Guida completa beta testing e lancio
+5. **docs/TASK_7_SUMMARY.md** - Summary finale Fase 5
+6. **docs/ROADMAP.md** - Roadmap completa (aggiornato con piano lista singola)
+7. **docs/USER_GUIDE.md** - Guida utente per beta tester
 
 ### Per Capire il Progetto
-5. **README.md** - Overview, setup, features (aggiornato 23/01/2026)
-6. **docs/SHORT_CODE_INVITES_PLAN.md** - Sistema inviti codici brevi
-7. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA
-8. **docs/CROSS_BROWSER_TESTING.md** - Report cross-browser (7 browser)
-9. **docs/DATABASE_SCHEMA.md** - Schema Supabase con migrations
+8. **README.md** - Overview, setup, features (aggiornato 23/01/2026)
+9. **docs/ACCESSIBILITY_AUDIT.md** - Report accessibilità WCAG AA
+10. **docs/CROSS_BROWSER_TESTING.md** - Report cross-browser (7 browser)
 
 ### Per Debugging
-10. **docs/BARCODE_BUG.md** - Analisi bug ZXing callback spam (risolto)
+11. **docs/BARCODE_BUG.md** - Analisi bug ZXing callback spam (risolto)
 
 ---
 
@@ -159,10 +192,14 @@ Sono pronto per iniziare la Fase 6. Da dove vogliamo partire?
 - ✅ Deployed su Netlify con CI/CD
 
 ### Issues Noti
-✅ Nessun issue critico. App stabile e production-ready.
+⚠️ **BUG ATTUALE**: Utente con lista personale che accetta invito finisce con 2 liste
+- Codice usa `.single()` che assume una sola lista
+- App può rompersi con liste multiple
+- **SOLUZIONE**: Implementare piano "Lista Singola" (PROSSIMO STEP)
 
 ### Tech Debt / Prossimi Step
-- 🚀 Beta testing (Fase 6 - PROSSIMO)
+- 🚀 **PROSSIMO**: Implementare "Lista Singola per Utente" (2 giorni) ⭐
+- Successivamente: Beta testing (Fase 6)
 - Future features in Desiderata: MonthView, notifiche push, statistiche
 
 ---
@@ -183,51 +220,44 @@ Sono pronto per iniziare la Fase 6. Da dove vogliamo partire?
 
 ---
 
-## Fase 5 - Summary Completo
+## Piano Lista Singola - Overview
 
-### Task 1: Dark Mode ✅
-- Theme toggle (light/dark/system)
-- localStorage persistence
-- System preference sync
-- Testing: iOS + Android OK
+### Decisione Architetturale
+**Approccio**: Un utente può appartenere a UNA SOLA lista alla volta
 
-### Task 2: Performance ✅
-- Bundle size: 75% reduction
-- Initial load: 100 KB gzipped
-- Lazy loading implementato
-- Vendor chunks separati
+### Comportamento Sistema
 
-### Task 3: Accessibility ✅
-- WCAG AA compliance
-- Keyboard navigation completa
-- Screen reader compatible
-- ARIA labels implementati
-- Manual testing completato
+**Scenario 1: Nuovo Utente SENZA Invito**
+- Primo login → crea "La mia lista" personale
 
-### Task 4: Short Code Invites ✅
-- Sistema codici 6 caratteri (ABC123)
-- Web Share API mobile
-- Pending email strategy
-- Testing iPhone → WhatsApp → Auto-join
-- Documentation completa
+**Scenario 2: Nuovo Utente CON Invito**
+- Signup con codice → conferma email → auto-join lista condivisa
+- NON crea lista personale
 
-### Task 5: Nome Field ✅
-- Signup form con campo nome
-- User metadata (Supabase Auth)
-- Dashboard greeting personalizzato
-- Backward compatible
+**Scenario 3: Utente Esistente Accetta Invito (CRITICO)**
+- Ha lista personale con N cibi
+- Inserisce codice invito
+- Dialog: "Accettando perderai la tua lista personale. Tutti i tuoi N alimenti saranno eliminati. Vuoi continuare?"
+- Se conferma → elimina lista personale + cibi, unisciti a lista condivisa
+- Se annulla → mantiene lista personale
 
-### Task 6: Cross-browser Testing ✅
-- 7 browsers testati
-- ZERO bugs trovati
-- 100% compatibility
-- Documentation completa
+**Scenario 4: Utente Abbandona Lista Condivisa**
+- Menu Inviti → Abbandona lista condivisa
+- Dialog: "Lasciando la lista condivisa verrà creata una nuova lista personale vuota"
+- Se conferma → lascia lista condivisa, crea nuova lista personale
 
-### Task 7: Final Polish ✅
-- Documentation review (USER_GUIDE, ROADMAP, README)
-- UX polish (error messages, copy consistency)
-- Pre-launch checklist (security, config, links)
-- Fase 6 launch plan preparato
+### Menu "Inviti" Centralizzato
+Nel dropdown avatar, bottone "Inviti" apre dialog con 3 opzioni:
+1. **Crea invito** - Genera codice per condividere lista
+2. **Accetta invito** - Inserisci codice per unirti a lista
+3. **Abbandona lista condivisa** - Lascia lista e crea nuova personale (solo se in lista condivisa)
+
+### Mobile-First UX
+- Input codice: font-size XL (24px), height 56px, spacing wide
+- Dialog responsive: sm:max-w-md
+- Touch targets: min 44px
+- Icone: 20px per visibilità
+- inputMode="text" per tastiera alfabetica mobile
 
 ---
 
@@ -253,41 +283,46 @@ open dist/stats.html # Visualizza bundle
 
 ---
 
-## Fase 6 - Launch Checklist Preview
+## Fase 6 - Launch Roadmap
 
-### Beta Testing Phase
+### Step 1: Lista Singola UX (2 giorni) 🔄 PROSSIMO
+- [ ] Implementare backend logic (acceptInviteWithConfirmation, leaveSharedList)
+- [ ] Creare UI components (AcceptInviteDialog, InviteMenuDialog, etc.)
+- [ ] Integrare menu "Inviti" centralizzato
+- [ ] Route /join/:code per link esterni
+- [ ] Testing completo (TC1-TC8)
+- [ ] Deploy e validazione mobile
+
+### Step 2: Beta Testing Phase (1-2 settimane)
 - [ ] Reclutare 10-20 beta tester
 - [ ] Creare feedback form (Google Forms/Typeform)
-- [ ] Preparare email/messaggio invito
 - [ ] Setup analytics opzionale (Plausible/PostHog)
 - [ ] Monitorare metriche (registrazioni, alimenti, liste)
 - [ ] Raccogliere feedback strutturato
 
-### Iterate & Improve
+### Step 3: Iterate & Improve (3-5 giorni)
 - [ ] Analizzare feedback
 - [ ] Fix bug critici (<48h)
 - [ ] Implementare quick wins
 - [ ] Aggiornare docs se necessario
 
-### Marketing Materials (Opzionale)
+### Step 4: Marketing Materials (Opzionale)
 - [ ] Screenshot per social
 - [ ] Demo video (30-60s) o GIF
 - [ ] Social media post templates
 - [ ] Landing page semplice (opzionale)
 
-### Public Release
+### Step 5: Public Release
 - [ ] Launch Reddit (r/SideProject, r/webdev, r/italy)
 - [ ] LinkedIn post
 - [ ] Product Hunt (opzionale)
 - [ ] Twitter/X thread
 
-### Post-Launch
+### Step 6: Post-Launch (1 settimana)
 - [ ] Monitor production errors
 - [ ] Rispondere a feedback (24h)
 - [ ] Fix bug critici (48h)
 - [ ] Ringraziare beta tester
-
-**Guida completa**: `docs/PHASE_6_LAUNCH_CHECKLIST.md`
 
 ---
 
@@ -298,11 +333,13 @@ open dist/stats.html # Visualizza bundle
 - **Fase 3 Completata**: 14 Gennaio 2026 (mattina)
 - **Fase 4 Completata**: 14 Gennaio 2026 (pomeriggio)
 - **Fase 5 Completata**: 23 Gennaio 2026 (7/7 tasks) 🎉
+- **Piano Lista Singola Creato**: 26 Gennaio 2026 📋
 
-**L'app è PRODUCTION-READY al 100%!** 🚀
+**L'app è PRODUCTION-READY!** 🚀
+**Prossimo milestone**: Implementazione Lista Singola UX (2 giorni)
 
 ---
 
-**Ultimo Update**: 23 Gennaio 2026
-**Next Session**: Iniziare Fase 6 - Beta Testing & Public Launch
-**Production URL**: https://entro-il.netlify.app ✅
+**Ultimo Update**: 26 Gennaio 2026
+**Next Session**: Implementare "Lista Singola per Utente" (docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md)
+**Production URL**: https://entroapp.it ✅
