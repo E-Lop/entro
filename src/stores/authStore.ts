@@ -94,6 +94,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
         }
 
         try {
+          // Small delay to ensure session is fully propagated to RLS
+          // This helps avoid race conditions with session initialization
+          await new Promise(resolve => setTimeout(resolve, 500))
+
           // First, try to accept any pending invite
           const { success: inviteAccepted, listId, error } = await acceptInviteByEmail()
 

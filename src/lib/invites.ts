@@ -365,50 +365,103 @@ export async function getListMembers(
 
 /**
  * Creates a personal list for a new user (called after signup)
+ * Includes retry logic to handle race conditions with session initialization
  * @returns Response with success status
  */
 export async function createPersonalList(): Promise<{ success: boolean; error: Error | null }> {
-  try {
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) {
-      throw new Error('Not authenticated')
-    }
+  // Retry configuration
+  const MAX_RETRIES = 3
+  const RETRY_DELAY_MS = 1000 // 1 second
 
-    // Create new list
-    const { data: listData, error: listError } = await supabase
-      .from('lists')
-      .insert({
-        name: 'La mia lista',
-        created_by: userData.user.id,
-      })
-      .select()
-      .single()
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // Verify we have a valid session first
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!sessionData.session) {
+        throw new Error('No active session found')
+      }
 
-    if (listError || !listData) {
-      throw new Error(listError?.message || 'Failed to create list')
-    }
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) {
+        throw new Error('Not authenticated')
+      }
 
-    // Add user as member
-    const { error: memberError } = await supabase
-      .from('list_members')
-      .insert({
-        list_id: listData.id,
-        user_id: userData.user.id,
-      })
+      // Create new list
+      const { data: listData, error: listError } = await supabase
+        .from('lists')
+        .insert({
+          name: 'La mia lista',
+          created_by: userData.user.id,
+        })
+        .select()
+        .single()
 
-    if (memberError) {
-      throw new Error(memberError.message)
-    }
+      if (listError) {
+        // If it's an RLS error and we have retries left, wait and retry
+        if (listError.message.includes('row-level security') && attempt < MAX_RETRIES) {
+          console.log(`RLS policy check failed (attempt ${attempt}/${MAX_RETRIES}), retrying in ${RETRY_DELAY_MS}ms...`)
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS))
+          continue
+        }
+        throw new Error(listError.message || 'Failed to create list')
+      }
 
-    return {
-      success: true,
-      error: null,
+      if (!listData) {
+        throw new Error('Failed to create list')
+      }
+
+      // Add user as member
+      const { error: memberError } = await supabase
+        .from('list_members')
+        .insert({
+          list_id: listData.id,
+          user_id: userData.user.id,
+        })
+
+      if (memberError) {
+        // If it's an RLS error and we have retries left, wait and retry
+        if (memberError.message.includes('row-level security') && attempt < MAX_RETRIES) {
+          console.log(`RLS policy check failed on list_members (attempt ${attempt}/${MAX_RETRIES}), retrying in ${RETRY_DELAY_MS}ms...`)
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS))
+          continue
+        }
+        throw new Error(memberError.message)
+      }
+
+      // Success!
+      return {
+        success: true,
+        error: null,
+      }
+    } catch (error) {
+      // If we've exhausted retries, return the error
+      if (attempt === MAX_RETRIES) {
+        console.error('Failed to create personal list after all retries:', error)
+        return {
+          success: false,
+          error: error instanceof Error ? error : new Error('Unknown error'),
+        }
+      }
+
+      // For non-RLS errors, fail immediately
+      const errorMessage = error instanceof Error ? error.message : ''
+      if (!errorMessage.includes('row-level security') && !errorMessage.includes('session')) {
+        return {
+          success: false,
+          error: error instanceof Error ? error : new Error('Unknown error'),
+        }
+      }
+
+      // Wait before retrying
+      console.log(`Error creating personal list (attempt ${attempt}/${MAX_RETRIES}):`, errorMessage)
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS))
     }
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error : new Error('Unknown error'),
-    }
+  }
+
+  // Should never reach here, but just in case
+  return {
+    success: false,
+    error: new Error('Failed to create personal list after retries'),
   }
 }
 
