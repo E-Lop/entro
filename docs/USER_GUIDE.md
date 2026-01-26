@@ -23,15 +23,15 @@
 
 ### Creare un Account
 
-1. Vai su https://entro-il.netlify.app
+1. Vai su https://entroapp.it
 2. Clicca su "Crea account"
 3. Inserisci la tua email e una password (minimo 6 caratteri)
-4. Controlla la tua email per il link di conferma
+4. Controlla la tua email per il link di conferma (arriva da `noreply@entroapp.it`)
 5. Clicca il link per attivare l'account
 
 ### Accedere
 
-1. Vai su https://entro-il.netlify.app/login
+1. Vai su https://entroapp.it/login
 2. Inserisci email e password
 3. Clicca "Accedi"
 
@@ -39,11 +39,11 @@
 
 Se hai dimenticato la password, puoi reimpostarla facilmente:
 
-1. Vai alla pagina di login: https://entro-il.netlify.app/login
+1. Vai alla pagina di login: https://entroapp.it/login
 2. Clicca sul link **"Password dimenticata?"** sotto il form di login
 3. Inserisci la tua **email** registrata
 4. Clicca **"Invia link di reset"**
-5. Controlla la tua **casella email** (anche spam/posta indesiderata)
+5. Controlla la tua **casella email** (anche spam/posta indesiderata) - l'email arriva da `noreply@entroapp.it`
 6. Clicca sul **link nell'email** per reimpostare la password
 7. Inserisci la tua **nuova password** (minimo 6 caratteri)
 8. Clicca **"Aggiorna password"**
@@ -53,6 +53,7 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 - Il link di reset è valido solo per un tempo limitato
 - Puoi richiedere un nuovo link se quello precedente è scaduto
 - Dopo aver cambiato la password, usa la nuova per accedere
+- Se non ricevi l'email, controlla la cartella spam e verifica che il mittente `noreply@entroapp.it` non sia bloccato
 
 ---
 
@@ -186,11 +187,11 @@ Quando condividi la tua lista:
 Se hai ricevuto un codice invito, hai due modi per usarlo:
 
 **Opzione 1: Link diretto**
-- Se ti è stato inviato il link completo (es: `https://entro-il.netlify.app/join/ABC123`)
+- Se ti è stato inviato il link completo (es: `https://entroapp.it/join/ABC123`)
 - Clicca sul link e verrai portato alla pagina di registrazione
 
 **Opzione 2: Inserimento manuale**
-1. Vai su https://entro-il.netlify.app/signup
+1. Vai su https://entroapp.it/signup
 2. Clicca su **"Ho un codice invito"**
 3. Inserisci il **codice di 6 caratteri** (es: `ABC123`)
 4. Clicca **"Verifica"**
@@ -199,7 +200,7 @@ Se hai ricevuto un codice invito, hai due modi per usarlo:
 - Inserisci il tuo **nome** e **email**
 - Crea una **password** sicura
 - Clicca **"Crea Account"**
-- Controlla la tua email per il **link di conferma**
+- Controlla la tua email per il **link di conferma** (arriva da `noreply@entroapp.it`)
 - Clicca il link di conferma
 - Verrai automaticamente aggiunto alla lista condivisa!
 
@@ -270,14 +271,14 @@ Attualmente non è possibile annullare un codice già generato. Il codice scadr�
 
 ### Su iPhone (Safari)
 
-1. Apri https://entro-il.netlify.app in **Safari**
+1. Apri https://entroapp.it in **Safari**
 2. Tocca l'icona **Condividi** (quadrato con freccia verso l'alto)
 3. Scorri e seleziona **"Aggiungi alla schermata Home"**
 4. Dai un nome all'app e tocca **"Aggiungi"**
 
 ### Su Android (Chrome)
 
-1. Apri https://entro-il.netlify.app in **Chrome**
+1. Apri https://entroapp.it in **Chrome**
 2. Tocca i **tre puntini** (⋮) in alto a destra
 3. Seleziona **"Installa app"** o **"Aggiungi a schermata Home"**
 4. Conferma l'installazione
@@ -372,4 +373,4 @@ Per segnalare problemi o suggerire miglioramenti:
 
 ---
 
-*Ultimo aggiornamento: 23 gennaio 2026*
+*Ultimo aggiornamento: 26 gennaio 2026*

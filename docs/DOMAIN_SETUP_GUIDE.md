@@ -1,18 +1,21 @@
 # Guida Configurazione Dominio entroapp.it
 
 **Data creazione**: 24 Gennaio 2026
+**Ultimo aggiornamento**: 26 Gennaio 2026
 **Dominio**: entroapp.it (acquistato su Aruba)
 **Hosting**: Netlify
-**Email provider**: Resend
+**Email provider**: Resend (SMTP custom configurato)
+**Status**: ✅ Configurato e in produzione
 
 ---
 
 ## 📋 Panoramica
 
-Questa guida ti aiuta a configurare:
-1. Dominio personalizzato su Netlify
-2. Record DNS su Aruba
-3. Servizio email con Resend
+Questa guida documenta la configurazione completa di:
+1. ✅ Dominio personalizzato su Netlify
+2. ✅ Record DNS su Aruba
+3. ✅ Servizio email con Resend (SMTP custom)
+4. ✅ Integrazione Supabase Auth con SMTP Resend
 
 ---
 
@@ -163,6 +166,13 @@ TTL: 3600
 5. **COPIA SUBITO LA CHIAVE** (inizia con `re_...`)
 6. Salvala in un posto sicuro (non potrai rivederla dopo)
 
+> ⚠️ **IMPORTANTE - Sicurezza API Key**:
+> - **NON committare mai** l'API key nel codice sorgente o su Git
+> - Usa solo variabili d'ambiente su Netlify per produzione
+> - **NON esporre** l'API key nel frontend (solo backend/Netlify Functions)
+> - Se la chiave viene compromessa, revocala immediatamente e creane una nuova
+> - La chiave con permesso `Sending access` può inviare email illimitate dal tuo dominio
+
 ---
 
 ## 4️⃣ CONFIGURAZIONE PROGETTO
@@ -204,7 +214,117 @@ Dopo il deploy, verifica:
 
 ---
 
-## 5️⃣ PROSSIMI STEP - Integrazione Email
+## 5️⃣ CONFIGURAZIONE SMTP CUSTOM CON RESEND
+
+### Panoramica
+
+Resend è stato configurato come SMTP server custom per gestire **tutte le email** dell'applicazione, incluse quelle inviate da Supabase Auth (registrazione, reset password, conferma email, ecc.).
+
+### Vantaggi dell'SMTP Custom
+
+1. **Deliverability migliorata**: Email inviate dal dominio `entroapp.it` invece di `supabase.co`
+2. **Branding professionale**: Mittente personalizzato (es: `noreply@entroapp.it`)
+3. **Tracking e analytics**: Dashboard Resend per monitorare tutte le email inviate
+4. **Rate limits maggiori**: Piano Resend più generoso rispetto al default Supabase
+5. **Controllo completo**: Personalizzazione template e gestione email centralizzata
+
+### Step 1: Configurazione SMTP Resend
+
+Dopo aver verificato il dominio `entroapp.it` su Resend (vedi sezione 3), ottieni le credenziali SMTP:
+
+1. Nel dashboard Resend, vai su **SMTP Settings** o **Settings → SMTP**
+2. Troverai le seguenti informazioni:
+
+```
+SMTP Server: smtp.resend.com
+Port: 587 (STARTTLS) o 465 (SSL)
+Username: resend
+Password: [tua API Key che inizia con re_...]
+```
+
+**IMPORTANTE**: La password SMTP è la stessa API Key che hai creato in precedenza.
+
+### Step 2: Configurazione Supabase Custom SMTP
+
+1. Vai sul [Supabase Dashboard](https://supabase.com/dashboard)
+2. Seleziona il tuo progetto **Entro**
+3. Vai su **Settings → Auth → SMTP Settings** (o **Project Settings → Auth**)
+4. Abilita **Enable Custom SMTP**
+5. Inserisci le credenziali SMTP di Resend:
+
+```
+Sender email: noreply@entroapp.it
+Sender name: Entro
+Host: smtp.resend.com
+Port: 587
+Username: resend
+Password: [la tua API Key Resend - re_...]
+```
+
+6. **Salva le modificazioni**
+
+> 💡 **Note**:
+> - Una volta salvato, Supabase testerà la connessione SMTP
+> - Se vedi un errore, verifica le credenziali e che il dominio sia verificato su Resend
+> - Tutte le email future (signup, reset password, ecc.) verranno inviate tramite Resend
+> - Le email precedentemente inviate dal default SMTP di Supabase non saranno più disponibili
+
+### Step 3: Configura il Mittente nelle Email Template
+
+1. Sempre nelle impostazioni Auth di Supabase
+2. Vai su **Email Templates**
+3. Per ogni template (Confirm signup, Magic Link, Reset Password, ecc.):
+   - Verifica che il mittente sia `noreply@entroapp.it`
+   - Opzionalmente personalizza il template HTML/testo
+
+### Step 4: Test dell'Integrazione
+
+Dopo aver configurato l'SMTP custom, testa l'invio email:
+
+1. **Test Password Reset**:
+   - Vai su https://entroapp.it
+   - Clicca "Forgot password?"
+   - Inserisci una tua email di test
+   - Verifica che l'email arrivi con mittente `noreply@entroapp.it`
+
+2. **Test Signup**:
+   - Crea un nuovo account con email diversa
+   - Verifica l'email di conferma arrivi correttamente
+
+3. **Controlla Resend Dashboard**:
+   - Vai su Resend → **Logs** o **Emails**
+   - Dovresti vedere le email inviate da Supabase
+   - Verifica status: ✅ Delivered
+
+### Troubleshooting SMTP
+
+#### Problema: Email non arrivano dopo aver configurato SMTP
+
+**Soluzione**:
+1. Verifica che il dominio `entroapp.it` sia verificato su Resend (badge verde)
+2. Controlla che i record SPF e DKIM siano configurati correttamente su Aruba
+3. Verifica le credenziali SMTP su Supabase (username: `resend`, password: API Key)
+4. Controlla i log su Resend per errori di invio
+5. Verifica che la porta 587 sia aperta (alcuni network la bloccano)
+
+#### Problema: Email finiscono in spam
+
+**Soluzione**:
+1. Configura il record DMARC su Aruba (vedi sezione 3)
+2. Riscalda il dominio inviando poche email inizialmente
+3. Evita parole spam nei subject/contenuto
+4. Usa il nome mittente professionale: `Entro <noreply@entroapp.it>`
+
+#### Problema: Rate limit exceeded
+
+**Soluzione**:
+1. Verifica il piano Resend (Free: 100 email/giorno, 3000/mese)
+2. Se necessario, upgrade a piano Pro (maggiori limiti)
+3. Monitora l'uso su Resend Dashboard
+
+---
+
+## 6️⃣ PROSSIMI STEP - Email Personalizzate
 
 ### Caso d'uso Email in Entro
 
@@ -294,10 +414,12 @@ export async function sendEmail(to: string, subject: string, html: string) {
 - [ ] DNS propagato (verificato con whatsmydns.net)
 
 ### Resend
-- [ ] Account creato
-- [ ] Dominio `entroapp.it` aggiunto
-- [ ] Record DNS verificati ✅
-- [ ] API Key creata e salvata
+- [x] Account creato
+- [x] Dominio `entroapp.it` aggiunto
+- [x] Record DNS verificati ✅
+- [x] API Key creata e salvata
+- [x] SMTP configurato (smtp.resend.com:587)
+- [x] Supabase Custom SMTP configurato
 - [ ] Test email inviata con successo
 
 ### Verifica Finale
@@ -306,6 +428,9 @@ export async function sendEmail(to: string, subject: string, html: string) {
 - [ ] Certificato HTTPS valido
 - [ ] App funziona correttamente sul nuovo dominio
 - [ ] Supabase Auth funziona (login/signup)
+- [ ] Email inviate da `noreply@entroapp.it` (verifica mittente)
+- [ ] Email non finiscono in spam
+- [ ] Email tracking visibile su Resend Dashboard
 
 ---
 
@@ -350,6 +475,33 @@ export async function sendEmail(to: string, subject: string, html: string) {
 2. Su Netlify, aggiungi `www.entroapp.it` come domain alias
 3. Abilita l'opzione **Redirect www to main domain**
 
+### Problema: Le email di Supabase non vengono inviate dopo configurazione SMTP
+
+**Causa**: Credenziali SMTP errate o dominio Resend non verificato
+
+**Soluzione**:
+1. Verifica che il dominio sia verificato su Resend (badge verde ✅)
+2. Controlla le credenziali SMTP su Supabase:
+   - Host: `smtp.resend.com`
+   - Port: `587`
+   - Username: `resend`
+   - Password: la tua API Key Resend (inizia con `re_`)
+3. Verifica che l'API Key Resend abbia permessi di invio (`Sending access`)
+4. Controlla i log su Resend Dashboard per errori specifici
+5. Prova a disabilitare e riabilitare Custom SMTP su Supabase
+
+### Problema: Le email arrivano in spam
+
+**Causa**: Record DNS email non configurati correttamente o dominio nuovo
+
+**Soluzione**:
+1. Verifica record SPF su Aruba: `v=spf1 include:_spf.resend.com ~all`
+2. Verifica record DKIM configurato (valore esatto da Resend)
+3. Aggiungi record DMARC se non presente: `v=DMARC1; p=none; rua=mailto:dmarc@entroapp.it`
+4. Attendi qualche giorno per il "warming" del dominio
+5. Evita linguaggio spam nei template email di Supabase
+6. Usa strumenti come [Mail-Tester](https://www.mail-tester.com/) per verificare lo spam score
+
 ---
 
 ## 📚 RISORSE UTILI
@@ -359,11 +511,16 @@ export async function sendEmail(to: string, subject: string, html: string) {
 - [Netlify DNS Records](https://docs.netlify.com/domains-https/netlify-dns/)
 - [Resend Quickstart](https://resend.com/docs/send-with-nodejs)
 - [Resend Domain Verification](https://resend.com/docs/dashboard/domains/introduction)
+- [Resend SMTP Configuration](https://resend.com/docs/send-with-smtp)
+- [Supabase Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
+- [Email Deliverability Best Practices](https://resend.com/docs/knowledge-base/deliverability)
 
 ### Tools
 - [DNS Propagation Checker](https://www.whatsmydns.net/)
 - [SSL Checker](https://www.sslshopper.com/ssl-checker.html)
 - [MX Toolbox (DNS/Email)](https://mxtoolbox.com/)
+- [Mail Tester (Spam Score)](https://www.mail-tester.com/)
+- [SPF/DKIM Validator](https://mxtoolbox.com/SuperTool.aspx)
 
 ### Supporto
 - [Netlify Community](https://answers.netlify.com/)
@@ -372,5 +529,28 @@ export async function sendEmail(to: string, subject: string, html: string) {
 
 ---
 
-**Ultimo aggiornamento**: 24 Gennaio 2026
-**Status**: 🚀 Pronto per la configurazione
+## 📝 RIEPILOGO CONFIGURAZIONE
+
+### Cosa è stato configurato
+
+✅ **Dominio**: `entroapp.it` acquistato su Aruba e configurato su Netlify
+✅ **DNS**: Record A, AAAA, CNAME configurati su Aruba
+✅ **HTTPS**: Certificato SSL Let's Encrypt attivo
+✅ **Email DNS**: Record SPF, DKIM, DMARC configurati per Resend
+✅ **SMTP Custom**: Resend configurato come SMTP server per tutte le email
+✅ **Supabase Auth**: Integrato con SMTP Resend per email di autenticazione
+
+### Informazioni Rapide
+
+- **URL Produzione**: https://entroapp.it
+- **Email Mittente**: noreply@entroapp.it
+- **SMTP Server**: smtp.resend.com:587
+- **DNS Provider**: Aruba
+- **Hosting**: Netlify
+- **Email Service**: Resend
+
+---
+
+**Creato**: 24 Gennaio 2026
+**Ultimo aggiornamento**: 26 Gennaio 2026
+**Status**: ✅ Configurato e in produzione

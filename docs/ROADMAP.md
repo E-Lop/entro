@@ -629,9 +629,9 @@ npm install -D @types/node
 **Obiettivo**: Release pubblica e raccolta feedback
 
 ### Launch Checklist
-- [ ] Supabase production project setup
-- [ ] Environment variables production
-- [ ] Domain custom (opzionale)
+- [x] Supabase production project setup
+- [x] Environment variables production
+- [x] Domain custom (entroapp.it configurato con Netlify + Resend SMTP)
 - [ ] Analytics setup (Plausible/PostHog)
 - [ ] Error tracking (Sentry - opzionale)
 - [ ] Backup strategy database
@@ -877,7 +877,8 @@ Week 2: Polish & Validation
 **🎉 FASE 5 COMPLETATA! 7/7 TASKS COMPLETATI 🎉**
 
 **Fase Attuale**: Fase 6 - Launch & Iteration (Beta Testing & Public Release)
-**Production URL**: https://entro-il.netlify.app 🚀
+**Production URL**: https://entroapp.it 🚀
+**Legacy URL**: https://entro-il.netlify.app (still active)
 **Status**: Production-Ready al 100% ✅
 **Next Milestone**: Beta testing con 10-20 utenti
 

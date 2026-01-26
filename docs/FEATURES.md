@@ -741,7 +741,7 @@ const requestNotificationPermission = async () => {
       <Instructions>
         Condividi questo codice via WhatsApp, Telegram,
         SMS o qualsiasi app. Il destinatario potrà usarlo
-        visitando: /join/{inviteCode}
+        visitando: https://entroapp.it/join/{inviteCode}
       </Instructions>
     </>
   )}
