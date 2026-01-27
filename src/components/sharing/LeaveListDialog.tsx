@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
 import { Button } from '../ui/button'
 import { Alert, AlertDescription } from '../ui/alert'
 import { leaveSharedList } from '../../lib/invites'
+import { foodsKeys } from '../../hooks/useFoods'
 
 interface LeaveListDialogProps {
   open: boolean
@@ -22,6 +24,7 @@ export function LeaveListDialog({
   open,
   onOpenChange,
 }: LeaveListDialogProps) {
+  const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLeave = async () => {
@@ -39,10 +42,13 @@ export function LeaveListDialog({
         toast.success('Hai abbandonato la lista condivisa')
         onOpenChange(false)
 
+        // Invalida TUTTA la cache dei foods per forzare il reload della nuova lista personale
+        await queryClient.invalidateQueries({ queryKey: foodsKeys.all })
+
         // Reload page to show new personal list
         setTimeout(() => {
           window.location.reload()
-        }, 500)
+        }, 100)
       }
     } catch {
       toast.error('Si è verificato un errore. Riprova.')

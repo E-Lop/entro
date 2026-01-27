@@ -60,17 +60,18 @@ export function AcceptInviteDialog({
         toast.success('Ti sei unito alla lista condivisa!')
         onOpenChange(false)
 
-        // Invalida la cache dei foods per forzare il reload dei dati
-        queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
+        // Invalida TUTTA la cache dei foods per forzare il reload completo dei dati
+        // Usa foodsKeys.all per invalidare anche le query con filtri specifici
+        await queryClient.invalidateQueries({ queryKey: foodsKeys.all })
 
         // Callback per reload della pagina
         if (onSuccess) {
           onSuccess()
         } else {
-          // Fallback: reload automatico dopo 500ms
+          // Fallback: reload automatico dopo un breve delay per permettere l'invalidazione
           setTimeout(() => {
             window.location.reload()
-          }, 500)
+          }, 100)
         }
       }
     } catch {
