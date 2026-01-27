@@ -300,9 +300,26 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                     disabled={isSubmitting}
                     {...field}
                     value={field.value ?? ''}
+                    onKeyDown={(e) => {
+                      // Prevent minus sign and 'e' (scientific notation)
+                      if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                        e.preventDefault()
+                      }
+                    }}
                     onChange={(e) => {
                       const value = e.target.value
-                      field.onChange(value === '' ? null : parseFloat(value))
+                      if (value === '') {
+                        field.onChange(null)
+                        return
+                      }
+                      const numValue = parseFloat(value)
+                      // Prevent negative values from arrows or paste
+                      if (!isNaN(numValue) && numValue >= 0) {
+                        field.onChange(numValue)
+                      } else if (numValue < 0) {
+                        // Reset to 0 if negative
+                        field.onChange(0)
+                      }
                     }}
                   />
                 </FormControl>
