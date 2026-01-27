@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,7 @@ import {
 import { Button } from '../ui/button'
 import { Alert, AlertDescription } from '../ui/alert'
 import { acceptInviteWithConfirmation } from '../../lib/invites'
+import { foodsKeys } from '../../hooks/useFoods'
 
 interface AcceptInviteDialogProps {
   open: boolean
@@ -30,6 +32,7 @@ export function AcceptInviteDialog({
   shortCode,
   onSuccess,
 }: AcceptInviteDialogProps) {
+  const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
   const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null)
 
@@ -56,6 +59,9 @@ export function AcceptInviteDialog({
       if (result.success) {
         toast.success('Ti sei unito alla lista condivisa!')
         onOpenChange(false)
+
+        // Invalida la cache dei foods per forzare il reload dei dati
+        queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
 
         // Callback per reload della pagina
         if (onSuccess) {
