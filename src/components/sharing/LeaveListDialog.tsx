@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -71,18 +71,22 @@ export function LeaveListDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-4">
+        <div className="space-y-4 py-4">
           <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <span className="font-semibold">Attenzione:</span> Abbandonando questa lista condivisa,
-              verrà creata una nuova lista personale vuota. Non potrai più vedere gli alimenti
-              condivisi con gli altri membri.
+              <div className="space-y-1">
+                <p>
+                  Abbandonando questa lista condivisa, verrà creata una nuova lista personale vuota.
+                </p>
+                <p>
+                  Non potrai più vedere gli alimenti condivisi con gli altri membri.
+                </p>
+              </div>
             </AlertDescription>
           </Alert>
 
-          <div className="mt-4 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-lg bg-muted p-4">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               Gli altri membri della lista continueranno a vedere e gestire gli alimenti condivisi.
               Potrai sempre unirti di nuovo alla lista se ricevi un nuovo invito.
             </p>

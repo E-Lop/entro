@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertTriangle, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useQueryClient } from '@tanstack/react-query'
 import {
@@ -142,20 +142,25 @@ export function AcceptInviteDialog({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="py-4">
+            <div className="space-y-4 py-4">
               <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  La tua lista personale contiene{' '}
-                  <span className="font-semibold">
-                    {confirmationData.foodCount} {confirmationData.foodCount === 1 ? 'alimento' : 'alimenti'}
-                  </span>
-                  . Tutti questi dati saranno eliminati definitivamente.
+                  <div className="space-y-1">
+                    <p>
+                      La tua lista personale contiene{' '}
+                      <span className="font-semibold">
+                        {confirmationData.foodCount} {confirmationData.foodCount === 1 ? 'alimento' : 'alimenti'}
+                      </span>.
+                    </p>
+                    <p>
+                      Tutti questi dati saranno eliminati definitivamente.
+                    </p>
+                  </div>
                 </AlertDescription>
               </Alert>
 
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">
+              <div className="rounded-lg bg-muted p-4">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   Una volta unito alla nuova lista, vedrai solo gli alimenti condivisi
                   con gli altri membri. Questa azione non può essere annullata.
                 </p>
