@@ -746,12 +746,16 @@ export async function acceptInviteWithConfirmation(
  */
 export async function leaveSharedList(): Promise<{ success: boolean; error: Error | null }> {
   try {
+    console.log('[leaveSharedList] Starting leave list flow')
+
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
+      console.error('[leaveSharedList] User not authenticated')
       throw new Error('Not authenticated')
     }
 
     const userId = userData.user.id
+    console.log('[leaveSharedList] User ID:', userId)
 
     // Step 1: Get user's current list
     const { data: currentMemberData, error: currentMemberError } = await supabase
@@ -761,14 +765,17 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       .maybeSingle()
 
     if (currentMemberError) {
+      console.error('[leaveSharedList] Error getting current list:', currentMemberError)
       throw currentMemberError
     }
 
     if (!currentMemberData) {
+      console.warn('[leaveSharedList] User is not a member of any list')
       throw new Error('Non sei membro di alcuna lista')
     }
 
     const currentListId = currentMemberData.list_id
+    console.log('[leaveSharedList] Current list ID:', currentListId)
 
     // Step 2: Check if list is shared (>1 member)
     const { count: memberCount, error: memberCountError } = await supabase
@@ -777,14 +784,19 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       .eq('list_id', currentListId)
 
     if (memberCountError) {
+      console.error('[leaveSharedList] Error counting members:', memberCountError)
       throw memberCountError
     }
 
+    console.log('[leaveSharedList] Member count:', memberCount)
+
     if (memberCount === null || memberCount <= 1) {
+      console.warn('[leaveSharedList] Cannot leave personal list')
       throw new Error('Non puoi abbandonare una lista personale')
     }
 
     // Step 3: Remove user from current list
+    console.log('[leaveSharedList] Removing user from list:', currentListId)
     const { error: removeError } = await supabase
       .from('list_members')
       .delete()
@@ -792,20 +804,33 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       .eq('user_id', userId)
 
     if (removeError) {
+      console.error('[leaveSharedList] Error removing user from list:', {
+        error: removeError,
+        code: removeError.code,
+        message: removeError.message,
+        details: removeError.details,
+      })
       throw removeError
     }
 
+    console.log('[leaveSharedList] Successfully removed user from list')
+
     // Step 4: Create new personal list
+    console.log('[leaveSharedList] Creating new personal list')
     const createResult = await createPersonalList()
     if (!createResult.success) {
+      console.error('[leaveSharedList] Failed to create personal list:', createResult.error)
       throw createResult.error || new Error('Failed to create personal list')
     }
+
+    console.log('[leaveSharedList] Successfully created new personal list:', createResult.listId)
 
     return {
       success: true,
       error: null,
     }
   } catch (error) {
+    console.error('[leaveSharedList] Leave list flow failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
