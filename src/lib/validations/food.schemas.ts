@@ -37,7 +37,7 @@ export const foodFormSchema = z.object({
   storage_location: storageLocationEnum,
   quantity: z
     .number()
-    .positive('La quantità deve essere positiva')
+    .min(0, 'La quantità non può essere negativa')
     .nullable()
     .optional(),
   quantity_unit: quantityUnitEnum.nullable().optional(),

@@ -295,6 +295,8 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   <Input
                     type="number"
                     placeholder="1"
+                    min="0"
+                    step="0.01"
                     disabled={isSubmitting}
                     {...field}
                     value={field.value ?? ''}
