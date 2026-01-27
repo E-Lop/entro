@@ -87,17 +87,33 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // Check invite acceptance and list initialization helper
       const checkAndAcceptInvite = async (user: any) => {
+        console.log('[authStore] checkAndAcceptInvite starting for user:', {
+          userId: user.id,
+          email: user.email,
+          emailVerified: user.email_confirmed_at,
+        })
+
         // Check if we already processed this user in this session
         const processedKey = `user_initialized_${user.email}`
         if (sessionStorage.getItem(processedKey)) {
+          console.log('[authStore] User already processed in this session, skipping')
           return
         }
 
         try {
+          console.log('[authStore] Attempting to accept pending invite by email')
+
           // First, try to accept any pending invite
           const { success: inviteAccepted, listId, error } = await acceptInviteByEmail()
 
+          console.log('[authStore] acceptInviteByEmail result:', {
+            success: inviteAccepted,
+            listId,
+            error: error?.message,
+          })
+
           if (inviteAccepted && listId) {
+            console.log('[authStore] Invite accepted successfully, reloading to show new list')
             // Mark as processed to prevent re-checking
             sessionStorage.setItem(processedKey, 'true')
             // Store flag to show toast after reload
@@ -106,32 +122,46 @@ export const useAuthStore = create<AuthStore>((set) => ({
             window.location.reload()
             return
           } else if (error) {
-            console.error('Failed to accept invite:', error.message)
+            console.error('[authStore] Failed to accept invite:', error.message)
             return
           }
+
+          console.log('[authStore] No pending invite found, checking if user has existing list')
 
           // No pending invite, check if user already has a list
           const { list, error: listError } = await getUserList()
 
+          console.log('[authStore] getUserList result:', {
+            hasListId: list?.id,
+            error: listError?.message,
+          })
+
           if (listError || !list) {
             // User doesn't have a list yet, create a personal one
-            console.log('Creating personal list for new user...')
+            console.log('[authStore] Creating personal list for new user...')
             const { success: listCreated, error: createError } = await createPersonalList()
 
+            console.log('[authStore] createPersonalList result:', {
+              success: listCreated,
+              error: createError?.message,
+            })
+
             if (listCreated) {
+              console.log('[authStore] Personal list created successfully, reloading')
               // Mark as processed
               sessionStorage.setItem(processedKey, 'true')
               // Refresh to load the new list
               window.location.reload()
             } else {
-              console.error('Failed to create personal list:', createError)
+              console.error('[authStore] Failed to create personal list:', createError)
             }
           } else {
             // User already has a list, just mark as processed
+            console.log('[authStore] User already has a list, marking as processed')
             sessionStorage.setItem(processedKey, 'true')
           }
         } catch (error) {
-          console.error('Error initializing user:', error)
+          console.error('[authStore] Error initializing user:', error)
         }
       }
 

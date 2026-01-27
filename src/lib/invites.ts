@@ -100,23 +100,35 @@ export async function registerPendingInvite(
   userEmail: string
 ): Promise<{ success: boolean; error: Error | null }> {
   try {
+    // Normalize email to lowercase for consistent matching
+    const normalizedEmail = userEmail.toLowerCase().trim()
+
+    console.log('[registerPendingInvite] Starting registration:', {
+      shortCode: shortCode.toUpperCase(),
+      originalEmail: userEmail,
+      normalizedEmail,
+    })
+
     // Update invite with pending user email
     const { error } = await supabase
       .from('invites')
-      .update({ pending_user_email: userEmail })
+      .update({ pending_user_email: normalizedEmail })
       .eq('short_code', shortCode.toUpperCase())
       .eq('status', 'pending')
 
     if (error) {
-      console.error('Error registering pending invite:', error)
+      console.error('[registerPendingInvite] Error registering pending invite:', error)
       throw error
     }
+
+    console.log('[registerPendingInvite] Successfully registered pending invite')
 
     return {
       success: true,
       error: null,
     }
   } catch (error) {
+    console.error('[registerPendingInvite] Failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
@@ -171,31 +183,57 @@ export async function acceptInvite(shortCode: string): Promise<AcceptInviteRespo
  */
 export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
   try {
+    console.log('[acceptInviteByEmail] Starting invite acceptance flow')
+
     // Get current user
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
+      console.error('[acceptInviteByEmail] User not authenticated')
       throw new Error('Not authenticated')
     }
 
     const userId = userData.user.id
     const userEmail = userData.user.email
 
+    console.log('[acceptInviteByEmail] User details:', {
+      userId,
+      userEmail,
+      emailVerified: userData.user.email_confirmed_at,
+    })
+
+    // Check if user has an email
+    if (!userEmail) {
+      console.warn('[acceptInviteByEmail] User has no email address')
+      return {
+        success: false,
+        listId: null,
+        error: null,
+      }
+    }
+
+    // Normalize email for matching
+    const normalizedEmail = userEmail.toLowerCase().trim()
+
+    console.log('[acceptInviteByEmail] Looking for pending invite with email:', normalizedEmail)
+
     // Find pending invite for this email (using pending_user_email field)
+    // Use ilike for case-insensitive email matching
     const { data: inviteData, error: inviteError } = await supabase
       .from('invites')
       .select('*')
-      .eq('pending_user_email', userEmail)
+      .ilike('pending_user_email', normalizedEmail)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
 
     if (inviteError) {
-      console.error('Error querying invites:', inviteError)
+      console.error('[acceptInviteByEmail] Error querying invites:', inviteError)
       throw inviteError
     }
 
     if (!inviteData) {
+      console.log('[acceptInviteByEmail] No pending invite found for this email')
       return {
         success: false,
         listId: null,
@@ -203,11 +241,23 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       }
     }
 
+    console.log('[acceptInviteByEmail] Found pending invite:', {
+      inviteId: inviteData.id,
+      listId: inviteData.list_id,
+      shortCode: inviteData.short_code,
+      expiresAt: inviteData.expires_at,
+    })
+
     // Check if invite has expired
     const expiresAt = new Date(inviteData.expires_at)
     const now = new Date()
 
     if (expiresAt < now) {
+      console.warn('[acceptInviteByEmail] Invite has expired:', {
+        expiresAt: expiresAt.toISOString(),
+        now: now.toISOString(),
+      })
+
       // Update invite status to expired
       await supabase
         .from('invites')
@@ -221,15 +271,23 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       }
     }
 
+    console.log('[acceptInviteByEmail] Invite is valid, checking existing membership')
+
     // Check if user is already a member of this list
-    const { data: existingMember } = await supabase
+    const { data: existingMember, error: memberCheckError } = await supabase
       .from('list_members')
       .select('*')
       .eq('list_id', inviteData.list_id)
       .eq('user_id', userId)
       .maybeSingle()
 
+    if (memberCheckError) {
+      console.error('[acceptInviteByEmail] Error checking existing membership:', memberCheckError)
+    }
+
     if (existingMember) {
+      console.log('[acceptInviteByEmail] User is already a member, marking invite as accepted')
+
       // User is already a member, just mark invite as accepted
       await supabase
         .from('invites')
@@ -246,6 +304,8 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       }
     }
 
+    console.log('[acceptInviteByEmail] Adding user to list_members')
+
     // Add user to list_members
     const { error: memberError } = await supabase
       .from('list_members')
@@ -255,9 +315,17 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       })
 
     if (memberError) {
-      console.error('Error adding member to list:', memberError)
+      console.error('[acceptInviteByEmail] Error adding member to list:', {
+        error: memberError,
+        code: memberError.code,
+        message: memberError.message,
+        details: memberError.details,
+        hint: memberError.hint,
+      })
       throw memberError
     }
+
+    console.log('[acceptInviteByEmail] Successfully added user to list, updating invite status')
 
     // Update invite status to accepted
     const { error: updateError } = await supabase
@@ -269,9 +337,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       .eq('id', inviteData.id)
 
     if (updateError) {
-      console.error('Error updating invite status:', updateError)
+      console.error('[acceptInviteByEmail] Error updating invite status:', updateError)
       // Don't fail if we can't update the status - the member was added successfully
     }
+
+    console.log('[acceptInviteByEmail] Successfully accepted invite and added user to list:', inviteData.list_id)
 
     return {
       success: true,
@@ -279,7 +349,7 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       error: null,
     }
   } catch (error) {
-    console.error('Failed to accept invite by email:', error)
+    console.error('[acceptInviteByEmail] Failed to accept invite by email:', error)
     return {
       success: false,
       listId: null,
@@ -294,10 +364,15 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
  */
 export async function getUserList(): Promise<ListResponse> {
   try {
+    console.log('[getUserList] Getting user list')
+
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
+      console.error('[getUserList] User not authenticated')
       throw new Error('Not authenticated')
     }
+
+    console.log('[getUserList] Querying list_members for user:', userData.user.id)
 
     // First, get the list_member record for this user
     const { data: memberData, error: memberError } = await supabase
@@ -306,9 +381,21 @@ export async function getUserList(): Promise<ListResponse> {
       .eq('user_id', userData.user.id)
       .single()
 
+    if (memberError) {
+      console.error('[getUserList] Error querying list_members:', {
+        code: memberError.code,
+        message: memberError.message,
+        details: memberError.details,
+        hint: memberError.hint,
+      })
+    }
+
     if (memberError || !memberData) {
+      console.warn('[getUserList] User is not a member of any list')
       throw new Error(memberError?.message || 'User is not a member of any list')
     }
+
+    console.log('[getUserList] Found list membership, list_id:', memberData.list_id)
 
     // Then, get the list details
     const { data: listData, error: listError } = await supabase
@@ -317,15 +404,26 @@ export async function getUserList(): Promise<ListResponse> {
       .eq('id', memberData.list_id)
       .single()
 
+    if (listError) {
+      console.error('[getUserList] Error querying lists:', listError)
+    }
+
     if (listError || !listData) {
+      console.error('[getUserList] List not found for id:', memberData.list_id)
       throw new Error(listError?.message || 'List not found')
     }
+
+    console.log('[getUserList] Successfully retrieved list:', {
+      listId: listData.id,
+      listName: listData.name,
+    })
 
     return {
       list: listData,
       error: null,
     }
   } catch (error) {
+    console.error('[getUserList] Failed to get user list:', error)
     return {
       list: null,
       error: error instanceof Error ? error : new Error('Unknown error'),
@@ -384,6 +482,8 @@ export async function createPersonalList(): Promise<{
   error: Error | null
 }> {
   try {
+    console.log('[createPersonalList] Starting personal list creation')
+
     // Call the PostgreSQL function
     // This runs server-side and bypasses client-side RLS issues
     const { data, error } = await supabase
@@ -391,21 +491,31 @@ export async function createPersonalList(): Promise<{
       .single()
 
     if (error) {
-      console.error('Error calling create_personal_list():', error)
+      console.error('[createPersonalList] Error calling create_personal_list():', error)
       throw new Error(error.message)
     }
 
     if (!data) {
+      console.error('[createPersonalList] No data returned from create_personal_list()')
       throw new Error('No data returned from create_personal_list()')
     }
 
     // Type assertion for the RPC response
     const result = data as CreatePersonalListRpcResponse
 
+    console.log('[createPersonalList] RPC result:', {
+      success: result.success,
+      listId: result.list_id,
+      errorMessage: result.error_message,
+    })
+
     // Check the result from the function
     if (!result.success) {
+      console.error('[createPersonalList] Function returned error:', result.error_message)
       throw new Error(result.error_message || 'Failed to create personal list')
     }
+
+    console.log('[createPersonalList] Successfully created personal list:', result.list_id)
 
     return {
       success: true,
@@ -413,7 +523,7 @@ export async function createPersonalList(): Promise<{
       error: null,
     }
   } catch (error) {
-    console.error('Failed to create personal list:', error)
+    console.error('[createPersonalList] Failed to create personal list:', error)
     return {
       success: false,
       listId: null,
