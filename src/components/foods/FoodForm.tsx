@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, lazy, Suspense } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import { foodFormSchema, type FoodFormData } from '@/lib/validations/food.schemas'
 import { useCategories } from '@/hooks/useFoods'
 import { Button } from '../ui/button'
@@ -11,7 +12,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { ImageUpload } from './ImageUpload'
 import { fetchProductByBarcode, mapProductToFormData } from '@/lib/openfoodfacts'
 import type { Food } from '@/lib/foods'
-import { ScanLine, Loader2 } from 'lucide-react'
+import { ScanLine, Loader2, AlertTriangle } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 // Lazy load BarcodeScanner (heavy: includes ZXing library)
 const BarcodeScanner = lazy(() => import('../barcode/BarcodeScanner').then(m => ({ default: m.BarcodeScanner })))
@@ -34,6 +37,9 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   const [scannerOpen, setScannerOpen] = useState(false)
   const [isLoadingProduct, setIsLoadingProduct] = useState(false)
   const [productError, setProductError] = useState<string | null>(null)
+
+  // Conflict detection state
+  const [hasRemoteUpdate, setHasRemoteUpdate] = useState(false)
 
   // Prevent double submit (additional protection beyond isSubmitting)
   const isSubmittingRef = useRef(false)
@@ -68,6 +74,96 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       })
     }
   }, [mode, initialData, form])
+
+  // Conflict detection: subscribe to this food's updates during edit
+  useEffect(() => {
+    if (mode !== 'edit' || !initialData?.id) {
+      return
+    }
+
+    const foodId = initialData.id // Capture in closure
+    let channel: RealtimeChannel | null = null
+    let mounted = true
+
+    async function setupConflictDetection() {
+      try {
+        // Create a unique channel for this specific food
+        const channelName = `food-edit-${foodId}`
+
+        // Remove any existing channel with this name
+        const existingChannel = supabase.getChannels().find((ch) => ch.topic === channelName)
+        if (existingChannel) {
+          await existingChannel.unsubscribe()
+          supabase.removeChannel(existingChannel)
+        }
+
+        channel = supabase.channel(channelName)
+
+        channel
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'foods',
+              filter: `id=eq.${foodId}`,
+            },
+            (payload) => {
+              if (!mounted) return
+
+              console.log('[FoodForm] Detected UPDATE event for food:', payload)
+
+              // Check if this is a very recent update (likely from this form submission)
+              // If commit_timestamp is within last 2 seconds, it's probably our own update
+              const commitTime = new Date(payload.commit_timestamp).getTime()
+              const now = Date.now()
+              const ageMs = now - commitTime
+
+              if (ageMs < 2000) {
+                console.log('[FoodForm] Ignoring recent UPDATE (likely our own):', ageMs, 'ms old')
+                return
+              }
+
+              console.log('[FoodForm] Remote update detected from another user')
+
+              // Show warning toast
+              setHasRemoteUpdate(true)
+              toast.warning(
+                'Questo alimento è stato modificato da un altro utente',
+                {
+                  duration: Infinity, // Keep until dismissed
+                  action: {
+                    label: 'Ricarica',
+                    onClick: () => {
+                      // Close dialog to force refetch
+                      if (onCancel) {
+                        onCancel()
+                      }
+                    },
+                  },
+                },
+              )
+            },
+          )
+          .subscribe((status) => {
+            if (!mounted) return
+            console.log('[FoodForm] Conflict detection channel status:', status)
+          })
+      } catch (err) {
+        console.error('[FoodForm] Error setting up conflict detection:', err)
+      }
+    }
+
+    setupConflictDetection()
+
+    return () => {
+      mounted = false
+      if (channel) {
+        channel.unsubscribe()
+        supabase.removeChannel(channel)
+      }
+    }
+  }, [mode, initialData?.id, onCancel])
 
   // Handle barcode scan success
   const handleBarcodeScanned = async (barcode: string) => {
@@ -164,6 +260,22 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          {/* Conflict Warning Banner */}
+          {hasRemoteUpdate && (
+            <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800">
+              <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-orange-900 dark:text-orange-200">
+                  Alimento modificato remotamente
+                </p>
+                <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                  Questo alimento è stato modificato da un altro utente mentre lo stavi modificando.
+                  Puoi continuare a modificarlo (last-write-wins) o ricaricare per vedere le ultime modifiche.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Barcode Scanner Button - Only in create mode */}
           {mode === 'create' && (
             <div className="pb-2">

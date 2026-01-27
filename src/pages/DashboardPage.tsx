@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
+import { useRealtimeFoods } from '../hooks/useRealtimeFoods'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
@@ -48,6 +49,9 @@ export function DashboardPage() {
 
   // Show swipe hint on first load (mobile only)
   useSwipeHint()
+
+  // Setup real-time synchronization for foods
+  useRealtimeFoods()
 
   // Show welcome toast if user just accepted an invite
   useEffect(() => {

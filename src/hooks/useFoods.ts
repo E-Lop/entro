@@ -13,6 +13,7 @@ import {
   type FoodUpdate,
   type FilterParams,
 } from '@/lib/foods'
+import { mutationTracker } from './useRealtimeFoods'
 
 /**
  * Query keys for React Query cache management
@@ -87,7 +88,11 @@ export function useCreateFood() {
       if (!food) throw new Error('Nessun dato restituito')
       return food
     },
-    onSuccess: () => {
+    onSuccess: (newFood) => {
+      // Track mutation for deduplication
+      console.log('[useFoods] Tracking local INSERT mutation for:', newFood.id, newFood.name)
+      mutationTracker.track(newFood.id, 'INSERT')
+
       // Invalidate and refetch foods list
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
       toast.success('Alimento aggiunto con successo')
@@ -112,6 +117,9 @@ export function useUpdateFood() {
       return food
     },
     onSuccess: (updatedFood) => {
+      // Track mutation for deduplication
+      mutationTracker.track(updatedFood.id, 'UPDATE')
+
       // Invalidate foods list and specific food detail
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
       queryClient.invalidateQueries({ queryKey: foodsKeys.detail(updatedFood.id) })
@@ -135,6 +143,9 @@ export function useDeleteFood() {
       if (error) throw error
     },
     onMutate: async (deletedId) => {
+      // Track mutation for deduplication
+      mutationTracker.track(deletedId, 'DELETE')
+
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
 
@@ -182,6 +193,9 @@ export function useUpdateFoodStatus() {
       return food
     },
     onSuccess: (updatedFood) => {
+      // Track mutation for deduplication
+      mutationTracker.track(updatedFood.id, 'UPDATE')
+
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
       queryClient.invalidateQueries({ queryKey: foodsKeys.detail(updatedFood.id) })
       toast.success('Stato aggiornato con successo')

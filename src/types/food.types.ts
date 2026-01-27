@@ -8,6 +8,7 @@ export type QuantityUnit = 'pz' | 'kg' | 'g' | 'l' | 'ml' | 'confezioni'
 export interface Food {
   id: string
   user_id: string
+  list_id: string | null // Added for shared lists
   name: string
   quantity: number | null
   quantity_unit: QuantityUnit | null
@@ -63,4 +64,10 @@ export type ExpiryStatus = 'expired' | 'expires_today' | 'expires_soon' | 'expir
 export interface FoodWithExpiry extends Food {
   days_until_expiry: number
   expiry_status: ExpiryStatus
+}
+
+// Client-side metadata for realtime updates
+export interface FoodWithRealtimeMetadata extends Food {
+  isRemoteUpdate?: boolean
+  remoteUpdateTimestamp?: number
 }

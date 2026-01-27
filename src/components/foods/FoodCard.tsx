@@ -4,12 +4,13 @@ import { Calendar, Package, Trash2, Edit, MapPin, ImageIcon, Loader2 } from 'luc
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import type { Food, Category } from '@/lib/foods'
+import type { FoodWithRealtimeMetadata } from '@/types/food.types'
 import { cn } from '@/lib/utils'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
 import { SwipeableCard } from './SwipeableCard'
 
 interface FoodCardProps {
-  food: Food
+  food: Food | FoodWithRealtimeMetadata
   category?: Category
   onEdit?: (food: Food) => void
   onDelete?: (food: Food) => void
@@ -81,13 +82,23 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
   // Generate signed URL for private image
   const { signedUrl, isLoading: imageLoading, error: imageError } = useSignedUrl(food.image_url)
 
+  // Check if this is a remote update
+  const foodWithMetadata = food as FoodWithRealtimeMetadata
+  const isRemoteUpdate = foodWithMetadata.isRemoteUpdate || false
+
   return (
     <SwipeableCard
       onEdit={onEdit ? () => onEdit(food) : undefined}
       onDelete={onDelete ? () => onDelete(food) : undefined}
       showHintAnimation={showHintAnimation}
     >
-      <Card className={cn('hover:shadow-md transition-shadow', daysUntilExpiry <= 3 && 'border-orange-300')}>
+      <Card
+        className={cn(
+          'hover:shadow-md transition-shadow',
+          daysUntilExpiry <= 3 && 'border-orange-300',
+          isRemoteUpdate && 'ring-2 ring-blue-500 animate-pulse'
+        )}
+      >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
