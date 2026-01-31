@@ -170,6 +170,39 @@ interface OpenFoodFactsConfig {
 - Nessuna autenticazione richiesta
 - Rate limits: nessuno (pubblico)
 
+#### Ko-fi (Support/Donations)
+```typescript
+interface KofiButtonConfig {
+  url: string // From VITE_KOFI_URL env variable
+  imageURL: 'https://storage.ko-fi.com/cdn/kofi6.png?v=6'
+  target: '_blank'
+  rel: 'noopener noreferrer'
+}
+```
+
+**Component**: `src/components/ui/KofiButton.tsx`
+
+**Features:**
+- Conditional rendering (hidden if `VITE_KOFI_URL` not set)
+- Mobile-friendly (44px touch target, responsive sizing)
+- External link with security attributes (`noopener noreferrer`)
+- CDN image from Ko-fi (storage.ko-fi.com)
+- Zero privacy impact (no cookies, no tracking from entro side)
+
+**Environment Variable:**
+```bash
+# .env.local (not committed)
+VITE_KOFI_URL=https://ko-fi.com/G2G61TCD8H
+
+# .env.example (committed)
+VITE_KOFI_URL=  # Leave empty to hide Ko-fi button (for forks)
+```
+
+**Integration:**
+- Displayed at bottom of `DashboardPage` component
+- Styled with Tailwind CSS
+- Localized text: "Ti piace questo progetto?" (Italian)
+
 ### Build & Deploy
 
 #### Build Tool

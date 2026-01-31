@@ -111,7 +111,7 @@ Setup servizio Aruba
    - Descrizione: PWA food expiry tracker con Supabase backend
    - Dati raccolti: email, password, nome, foods, immagini, shared lists
    - Cookie/storage: localStorage (theme, hints), Service Worker cache
-   - Terze parti: Supabase, Open Food Facts API
+   - Terze parti: Supabase, Open Food Facts API, Ko-fi (link donazioni + CDN immagine)
 4. Invia richiesta documenti
 
 **Deliverables**:
@@ -498,63 +498,56 @@ Prima del lancio pubblico:
 
 ---
 
-## ☕ Feature Futura: Donazioni Ko-fi (Opzionale)
+## ☕ Donazioni Ko-fi - Implementato ✅
 
-### Implementazione Raccomandata: Link Esterno
+### Implementazione Attuale: Link Esterno
 
-Se in futuro decidi di aggiungere un sistema di donazioni volontarie, ecco come farlo senza impatto GDPR:
+Sistema di donazioni volontarie attivo su entroapp.it senza impatto GDPR.
 
 **Privacy Impact**: ✅ **Zero**
 - entro NON raccoglie dati di pagamento
-- Ko-fi/PayPal gestiscono tutto
-- Nessun cookie terze parti
+- Ko-fi gestisce tutto esternamente
+- Nessun cookie terze parti (solo link, non widget embedded)
 - Nessun consent necessario
+- Risorsa esterna: immagine caricata da `storage.ko-fi.com` (CDN Ko-fi)
 
-### Implementazione Tecnica
+### Implementazione Tecnica (Completata)
 
-**1. Crea Account Ko-fi/PayPal**:
-- Ko-fi: https://ko-fi.com/signup
-- Ottieni URL: `https://ko-fi.com/entroapp`
+**1. ✅ Account Ko-fi Creato**:
+- URL: `https://ko-fi.com/G2G61TCD8H`
+- Configurato in variabile ambiente `VITE_KOFI_URL`
 
-**2. Aggiungi Link in Footer** (`src/components/layout/Footer.tsx`):
-```tsx
-import { Coffee } from 'lucide-react';
+**2. ✅ Componente React Creato** (`src/components/ui/KofiButton.tsx`):
+- Componente riutilizzabile con conditional rendering
+- Mobile-friendly (touch target 44px, responsive sizing)
+- Si nasconde automaticamente se `VITE_KOFI_URL` non configurata (per fork)
+- Integrato in `DashboardPage.tsx` (fondo pagina)
 
-<a
-  href="https://ko-fi.com/entroapp"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
->
-  <Coffee className="h-4 w-4" />
-  Offrimi un caffè
-</a>
-```
+**3. ✅ Variabile Ambiente**:
+- `.env.local`: `VITE_KOFI_URL=https://ko-fi.com/G2G61TCD8H`
+- `.env.example`: Placeholder per fork del progetto
+- Netlify: Variabile configurata in production
 
-**3. Update Privacy Policy via Aruba**:
+**4. Aruba LegalBlink - Form Audit Iniziale**:
 
-Quando attivi le donazioni, apri ticket Aruba Support:
+Quando compili il form audit per attivare LegalBlink, includi Ko-fi nella sezione **Terze Parti**:
 
 ```
-Oggetto: Aggiornamento Privacy Policy - Link Ko-fi
+Terze parti utilizzate:
+- Supabase (backend, auth, storage)
+- Open Food Facts API (database prodotti alimentari)
+- Ko-fi (link esterno per donazioni volontarie - storage.ko-fi.com per immagine bottone)
 
-Testo:
-Ciao,
-ho aggiunto un link a Ko-fi per donazioni volontarie.
-Serve aggiungere questa clausola nella Privacy Policy:
-
-"7.5 Link a Servizi Esterni per Donazioni
-
-Il sito contiene link a servizi di terze parti (Ko-fi/PayPal)
-per donazioni volontarie. Quando l'utente clicca su questi link,
-lascia entro e accede a piattaforme esterne con proprie privacy
-policy. entro non raccoglie né processa dati di pagamento."
-
-Grazie!
+Note aggiuntive:
+Il sito include un link a Ko-fi (ko-fi.com/G2G61TCD8H) per donazioni
+volontarie. È solo un link esterno, nessun widget embedded, nessun
+cookie terze parti. L'immagine del bottone è caricata dal CDN Ko-fi
+(storage.ko-fi.com).
 ```
 
-**Tempo risposta Aruba**: 1-3 giorni lavorativi
-**Costo**: €0 (incluso in Advanced)
+Aruba includerà Ko-fi direttamente nella Privacy Policy generata.
+**Tempo consegna**: 3 giorni lavorativi
+**Costo**: €0 (incluso nei €47 di LegalBlink Advanced)
 
 ### Alternative Future (NON Raccomandate per Side Project)
 

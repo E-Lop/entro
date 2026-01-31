@@ -156,7 +156,7 @@ Implementare compliance GDPR completa per il lancio pubblico di entro in Italia/
    - Descrizione: PWA food expiry tracker con Supabase backend
    - Dati raccolti: email, password, nome, foods, immagini, shared lists
    - Cookie/storage: localStorage (theme, hints), Service Worker cache
-   - Terze parti: Supabase, Open Food Facts API
+   - Terze parti: Supabase, Open Food Facts API, Ko-fi (link donazioni + CDN immagine)
 4. Invia richiesta documenti
 5. **Attesa**: 3 giorni lavorativi per documenti
 
@@ -291,6 +291,36 @@ Assicurati che le RLS policies permettano:
   - `Footer`: 3.76 kB
 
 **Impact**: +20 kB totali (minimo, buono!)
+
+---
+
+## ☕ Ko-fi Support Button (Implementato - Zero GDPR Impact)
+
+**Data implementazione**: 31 Gennaio 2026
+**Privacy Impact**: ✅ **Zero** - Solo link esterno, nessun cookie terze parti
+
+### Implementazione
+- **Component**: `src/components/ui/KofiButton.tsx`
+- **Integrazione**: DashboardPage (fondo pagina)
+- **Config**: Variabile ambiente `VITE_KOFI_URL`
+- **CDN esterno**: Immagine caricata da `storage.ko-fi.com`
+- **Link esterno**: `https://ko-fi.com/G2G61TCD8H`
+
+### Caratteristiche Privacy-First
+- ✅ Nessun widget embedded (solo link)
+- ✅ Nessun cookie terze parti
+- ✅ Nessun tracking da parte di entro
+- ✅ Nessun consent necessario
+- ✅ Conditional rendering (nascosto se env var vuota per fork)
+- ✅ Mobile-friendly (44px touch target, responsive sizing)
+
+### Note per Aruba LegalBlink
+Quando compili il form audit Aruba, includi Ko-fi nelle terze parti:
+- **Servizio**: Ko-fi (donazioni volontarie)
+- **CDN**: storage.ko-fi.com (immagine bottone)
+- **Tipo**: Link esterno, zero impatto privacy
+
+**Documentazione completa**: Vedi `docs/privacy.md` sezione "Donazioni Ko-fi"
 
 ---
 
