@@ -1,7 +1,7 @@
 # Resume Session Guide - Entro Food Expiry Tracker
 
-**Ultima Sessione**: 26 Gennaio 2026
-**Status**: ✅ LISTA SINGOLA IMPLEMENTATA - PRONTO PER TESTING
+**Ultima Sessione**: 31 Gennaio 2026
+**Status**: ✅ REAL-TIME MOBILE FIX COMPLETATO - PRONTO PER TESTING
 
 ---
 
@@ -33,77 +33,28 @@
 Quando riprendi il lavoro dopo `/clear`, usa questo prompt:
 
 ```
-Ciao! Pronto per implementare il sistema "Lista Singola per Utente" per entro.
+Ciao! Pronto per continuare il lavoro su Entro.
 
 CONTESTO PROGETTO:
-- ✅ FASE 5 COMPLETATA AL 100% (7/7 tasks)
+- ✅ FASE 5 COMPLETATA AL 100% (7/7 tasks + Real-Time Mobile Fix)
 - ✅ App PRODUCTION-READY su https://entroapp.it
-- ✅ Short Code Invites già funzionanti (ABC123)
-- ✅ Database già supporta liste multiple
-- 🎯 OBIETTIVO: Implementare UX "una lista per utente"
+- ✅ Short Code Invites funzionanti (ABC123)
+- ✅ Lista Singola per Utente implementata
+- ✅ Real-Time Sync funzionante su Desktop + iOS + Android
+- 🎯 OBIETTIVO: Testing manuale (TC1-TC8) → Beta Testing
 
-DECISIONE ARCHITETTURALE PRESA:
-Approccio "Lista Singola" - Un utente può appartenere a UNA SOLA lista alla volta.
-- Caso d'uso: Famiglia/coppia con 1 lista condivisa
-- Perdita dati accettabile con avviso chiaro
-- Priorità: Launch veloce (2 giorni vs 1 settimana)
+IMPLEMENTAZIONI RECENTI:
+1. **Lista Singola per Utente** (26/01/2026)
+   - acceptInviteWithConfirmation, leaveSharedList
+   - Menu "Inviti" centralizzato
+   - Route /join/:code
 
-PIANO DETTAGLIATO:
-Leggi il piano completo in: docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md
-
-IMPLEMENTAZIONE RICHIESTA:
-
-**FASE 1: Backend Logic (2 ore)**
-File: src/lib/invites.ts
-- Funzione acceptInviteWithConfirmation(shortCode, forceAccept)
-  - Valida invito (status, expiry)
-  - Se utente ha già lista E !forceAccept → return requiresConfirmation + foodCount
-  - Se forceAccept → rimuovi da lista vecchia, aggiungi a nuova
-  - DELETE lista vecchia se 0 membri (CASCADE foods)
-- Funzione leaveSharedList()
-  - Check se lista è condivisa (>1 membro)
-  - Rimuovi utente da lista corrente
-  - Crea nuova lista personale con createPersonalList()
-
-**FASE 2: UI AcceptInviteDialog (2 ore)**
-File NUOVO: src/components/sharing/AcceptInviteDialog.tsx
-- Due stati: initial (Unisciti) e confirmation (Attenzione Perdita Dati)
-- State confirmationData con foodCount
-- handleAccept(force) → chiama acceptInviteWithConfirmation()
-- Se requiresConfirmation → mostra Alert destructive con count cibi
-- Buttons: Annulla / Conferma e Unisciti (destructive)
-
-**FASE 3: Menu Inviti Centralizzato (3 ore)**
-Files:
-- src/components/sharing/InviteButton.tsx: cambia testo "Invita membro" → "Inviti", icona Mail
-- src/components/sharing/InviteMenuDialog.tsx (NUOVO): 3 opzioni
-  1. Crea invito (UserPlus icon)
-  2. Accetta invito (LogIn icon)
-  3. Abbandona lista condivisa (LogOut icon, solo se isInSharedList)
-- src/components/sharing/AcceptInviteFlowDialog.tsx (NUOVO): input codice + flow
-- src/components/sharing/LeaveListDialog.tsx (NUOVO): conferma abbandono
-- src/components/layout/AppLayout.tsx:
-  - Import InviteMenuDialog
-  - State isInSharedList (useEffect check membri lista)
-  - Usa InviteMenuDialog invece di InviteDialog
-
-**FASE 4: Route /join/:code (1 ora)**
-File NUOVO: src/pages/JoinPage.tsx
-- useParams per code
-- Se !user → navigate('/signup?code=' + code)
-- Se user → mostra AcceptInviteDialog
-
-**FASE 5: Types (15 min)**
-File: src/types/invite.types.ts
-- Interface AcceptInviteConfirmationResponse
-
-**MOBILE-FIRST REQUIREMENTS** ⚠️ IMPORTANTE:
-- Input codice: className="text-center text-xl tracking-widest font-mono h-14"
-- Input: autoFocus, autoComplete="off", inputMode="text"
-- Dialog: className="sm:max-w-md"
-- Bottoni menu: p-4, h-auto, gap-2
-- Touch targets: min 44px height
-- Icone: h-5 w-5 (20px)
+2. **Real-Time Mobile Fix** (31/01/2026)
+   - Heartbeat 15s per mobile
+   - useNetworkStatus + useRealtimeFoods hooks
+   - Page Visibility API per screen unlock
+   - Manual reconnect con exponential backoff
+   - Documentazione: docs/REALTIME_MOBILE_FIX.md
 
 TESTING NECESSARIO (TC1-TC8):
 1. Nuovo utente senza invito → crea lista personale
@@ -115,40 +66,27 @@ TESTING NECESSARIO (TC1-TC8):
 7. Codice scaduto → errore
 8. Mobile UX: DevTools iPhone SE, tap con pollice
 
-FILES DA MODIFICARE (10 totali):
-Nuovi (5):
-- src/components/sharing/AcceptInviteDialog.tsx
-- src/components/sharing/InviteMenuDialog.tsx
-- src/components/sharing/AcceptInviteFlowDialog.tsx
-- src/components/sharing/LeaveListDialog.tsx
-- src/pages/JoinPage.tsx
+PROSSIMI STEP:
+1. Eseguire test manuali TC1-TC8
+2. Deploy e validazione mobile
+3. Avviare Beta Testing (Fase 6)
 
-Modificati (5):
-- src/lib/invites.ts (+120 righe)
-- src/components/sharing/InviteButton.tsx (~5 righe)
-- src/components/layout/AppLayout.tsx (+15 righe)
-- src/types/invite.types.ts (+10 righe)
-- src/router.tsx (+4 righe)
-
-STIMA: 2 giorni (1.5 coding + 0.5 testing)
-
-PRINCIPI DA SEGUIRE:
-1. YAGNI - implementa solo ciò che serve
-2. Mobile-First - PWA usata principalmente su smartphone
-3. Sicurezza - dialog conferma previene perdita dati accidentale
-4. Scalabilità - database già pronto per evoluzione futura
-
-Iniziamo con FASE 1: Backend Logic in src/lib/invites.ts
+DOCUMENTI CHIAVE:
+- docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md
+- docs/REALTIME_MOBILE_FIX.md
+- docs/ROADMAP.md
+- docs/USER_GUIDE.md
 ```
 
 ---
 
 ## Documenti Chiave
 
-### Per Implementazione Lista Singola (PROSSIMO)
-1. **docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md** - Piano completo implementazione (NUOVO ⭐)
-2. **docs/SHORT_CODE_INVITES_PLAN.md** - Sistema inviti esistente (codici 6 caratteri)
-3. **docs/DATABASE_SCHEMA.md** - Schema già pronto per liste multiple
+### Per Features Recenti
+1. **docs/REALTIME_MOBILE_FIX.md** - Fix real-time per iOS Safari e Android Chrome (31/01/2026) ⭐
+2. **docs/SINGLE_LIST_IMPLEMENTATION_PLAN.md** - Piano implementazione lista singola
+3. **docs/SHORT_CODE_INVITES_PLAN.md** - Sistema inviti esistente (codici 6 caratteri)
+4. **docs/DATABASE_SCHEMA.md** - Schema database
 
 ### Per Fase 6 - Launch
 4. **docs/PHASE_6_LAUNCH_CHECKLIST.md** - Guida completa beta testing e lancio
@@ -188,6 +126,7 @@ Iniziamo con FASE 1: Backend Logic in src/lib/invites.ts
 - ✅ **Performance ottimizzata** (75% bundle reduction)
 - ✅ **Accessibilità WCAG AA** compliant
 - ✅ **Nome utente personalizzato** ("Ciao, Mario!")
+- ✅ **Real-time sync multi-device** (Desktop + iOS + Android)
 - ✅ Responsive design mobile-first
 - ✅ Deployed su Netlify con CI/CD
 
@@ -337,13 +276,14 @@ open dist/stats.html # Visualizza bundle
 - **Fase 5 Completata**: 23 Gennaio 2026 (7/7 tasks) 🎉
 - **Piano Lista Singola Creato**: 26 Gennaio 2026 (mattina) 📋
 - **Lista Singola Implementata**: 26 Gennaio 2026 (pomeriggio) 🎊
+- **Real-Time Mobile Fix**: 31 Gennaio 2026 🔄
 
-**L'app è PRODUCTION-READY con UX Lista Singola!** 🚀
+**L'app è PRODUCTION-READY con Real-Time Sync su tutti i dispositivi!** 🚀
 **Prossimo milestone**: Testing manuale (TC1-TC8) → Beta Testing
 
 ---
 
-**Ultimo Update**: 26 Gennaio 2026 (pomeriggio)
+**Ultimo Update**: 31 Gennaio 2026
 **Next Session**: Testing manuale TC1-TC8 + Deploy → Beta Testing
 **Production URL**: https://entroapp.it ✅
 
@@ -382,3 +322,49 @@ open dist/stats.html # Visualizza bundle
 6. **TC6**: Riusa stesso codice → no duplicate error
 7. **TC7**: Codice scaduto → errore
 8. **TC8**: Mobile UX: DevTools iPhone SE, tap targets, input leggibile
+
+---
+
+## Real-Time Mobile Fix - Completato ✅ (31/01/2026)
+
+### Problema Risolto
+Gli aggiornamenti real-time funzionavano su desktop ma **non su mobile** (iOS Safari, Android Chrome).
+
+### Causa Root
+- iOS Safari sospende WebSocket quando schermo bloccato o app in background
+- Il socket appare aperto ma è non responsivo al ritorno
+- Nessun evento `close` dal browser → no reconnessione automatica
+
+### Soluzione Implementata
+1. **Heartbeat ridotto** (15s invece di 25s) in `supabase.ts`
+2. **useNetworkStatus hook** per online/offline detection
+3. **useRealtimeFoods hook** con mobile recovery:
+   - Page Visibility API → invalidate queries allo sblocco
+   - Network status handler con 2s delay per DNS
+   - Manual reconnect con exponential backoff
+   - Session refresh dopo network restore
+
+### Files Modificati
+- `src/lib/supabase.ts` - heartbeat config
+- `src/hooks/useNetworkStatus.ts` - nuovo hook
+- `src/hooks/useRealtimeFoods.ts` - mobile recovery logic
+- `src/lib/realtime.ts` - cleanup logs
+- `src/components/foods/FoodForm.tsx` - conflict detection fix
+- `docs/REALTIME_MOBILE_FIX.md` - documentazione + Lessons Learned
+
+### Testing Verificato
+- ✅ Desktop: sync immediato tra browser
+- ✅ iPhone: screen lock, background, airplane mode, WiFi↔5G
+- ✅ Android: background, battery saver mode
+
+### Lessons Learned (9 punti chiave)
+Documentati in `docs/REALTIME_MOBILE_FIX.md`:
+1. Heartbeat aggressivo (15s) per mobile
+2. Evitare dipendenze circolari
+3. reconnectTrigger per forzare effect re-run
+4. Visibility handler incondizionato
+5. mutationTracker per deduplicazione
+6. Network restore con 2s delay
+7. Refresh sessione auth dopo network restore
+8. hasEverConnected flag
+9. Test su dispositivi reali (non simulatori)

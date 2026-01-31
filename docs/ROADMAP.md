@@ -589,10 +589,40 @@ npm install -D @types/node
   - Backward compatible con tutti gli utenti
   - Files modified: auth.schemas.ts, auth.ts, useAuth.ts, AuthForm.tsx, DashboardPage.tsx, AppLayout.tsx
 
-#### Tasks (Giorno 7)
-- [ ] Real-time updates con Supabase Realtime (opzionale)
-- [ ] Visual feedback per modifiche altrui (opzionale)
-- [ ] Testing multi-user scenarios (opzionale)
+#### Tasks (Giorno 7) ✅ COMPLETATO
+- [x] ✅ Real-time updates con Supabase Realtime
+- [x] ✅ Mobile recovery logic per iOS Safari e Android Chrome
+- [x] ✅ Visual feedback per modifiche altrui (toast notifications)
+- [x] ✅ Testing multi-user scenarios (Desktop + iPhone + Android)
+
+**Implementazione Completa** (Sessione 31/01/2026):
+- ✅ Supabase Realtime con heartbeat ridotto (15s) per mobile
+- ✅ useNetworkStatus hook per online/offline detection
+- ✅ useRealtimeFoods hook con mobile recovery logic:
+  - Page Visibility API per invalidare queries allo sblocco schermo
+  - Network status handler con 2s delay per iOS DNS
+  - Manual reconnect con exponential backoff (max 5 tentativi)
+  - Session refresh dopo network restore
+- ✅ FoodForm conflict detection durante editing
+- ✅ mutationTracker per deduplicazione eventi locali/remoti
+- ✅ Toast notifications per DELETE remoti
+- ✅ Documentazione completa: docs/REALTIME_MOBILE_FIX.md
+
+**Bug Fixes Risolti**:
+1. ✅ Circular dependency tra useRealtimeFoods e useFoods
+2. ✅ Deduplicazione eventi con mutationTracker invece di timestamp
+3. ✅ Reconnection loop su iOS dopo SUBSCRIBED
+4. ✅ Visibility handler sempre invalida queries (non solo se connected)
+5. ✅ reconnectTrigger state per forzare re-setup subscription
+6. ✅ DNS delay 2s dopo network restore su iOS Safari
+
+**Testing Completo**:
+- ✅ Desktop Chrome: sync immediato tra 2 browser
+- ✅ iPhone Safari: screen lock, background app, airplane mode, WiFi/5G switch
+- ✅ Android Chrome: background app, battery saver mode
+
+**Commit**: 9942034 - feat: implement real-time synchronization for foods (Phase 1)
+**Data Completamento**: 31/01/2026
 
 ### Week 7: Final Polish
 
@@ -621,6 +651,7 @@ npm install -D @types/node
 - ✅ Documentazione completa e accurata
 - ✅ Security review completato
 - ✅ Pre-launch checklist verificata
+- ✅ **Real-time sync multi-device** (Desktop + iOS + Android)
 
 ---
 
@@ -905,6 +936,7 @@ Week 2: Polish & Validation
 - ✅ Add 'Nome' field for users (registration + personalized greeting)
 - ✅ Cross-browser testing (7 browsers tested, 0 issues found)
 - ✅ Final bug fixes and polish (docs review, UX polish, pre-launch checklist)
+- ✅ **Real-time updates per iOS Safari e Android Chrome** (31/01/2026)
 
 ---
 
@@ -1314,6 +1346,53 @@ Week 2: Polish & Validation
 
 ### **Risultato Sessione**:
 🎉 **Fase 5 Task 6 COMPLETATO!** Cross-browser testing passed con 100% compatibility!
+
+---
+
+## 📅 Sessione 31/01/2026 - Real-Time Mobile Fix
+
+### **Real-Time Sync per Mobile** (Completato):
+
+**Problema Iniziale**:
+- Real-time updates funzionavano su desktop (2 browser testati)
+- **Non funzionavano** su iOS Safari e Android Chrome
+- Root cause: Safari sospende WebSocket quando schermo bloccato/app in background
+
+**Soluzione Implementata**:
+1. ✅ Heartbeat ridotto a 15s (default 25s) in `supabase.ts`
+2. ✅ `useNetworkStatus` hook per online/offline detection
+3. ✅ `useRealtimeFoods` hook con mobile recovery:
+   - Page Visibility API → invalidate queries allo sblocco
+   - Window focus handler → fallback per browser con poor visibility support
+   - Network status handler con 2s delay per iOS DNS resolution
+   - Manual reconnect con exponential backoff (max 5 tentativi)
+   - `reconnectTrigger` state per forzare re-setup subscription
+   - `hasEverConnectedRef` per evitare reconnect al primo mount
+4. ✅ FoodForm conflict detection durante editing
+5. ✅ `mutationTracker` per deduplicazione eventi locali/remoti
+6. ✅ Session refresh dopo network restore
+
+**Bug Fixes Iterativi**:
+1. ❌→✅ Circular dependency: usare query key letterali `['foods', 'list']`
+2. ❌→✅ Eventi ignorati: usare mutationTracker invece di timestamp
+3. ❌→✅ Reconnection loop: cancellare timeout quando subscription ha successo
+4. ❌→✅ Visibility handler: invalidare SEMPRE, non solo se connected
+5. ❌→✅ manualReconnect: aggiungere reconnectTrigger per forzare effect re-run
+6. ❌→✅ DNS iOS: attendere 2s dopo network restore + refresh session
+
+**Testing Finale** (3 dispositivi):
+- ✅ Desktop Chrome: sync immediato tra 2 browser
+- ✅ iPhone Safari: screen lock 30s, background 1-5 min, airplane mode, WiFi↔5G
+- ✅ Android Chrome: background, battery saver mode
+
+**Documentazione**:
+- ✅ `docs/REALTIME_MOBILE_FIX.md` con piano, criteri di accettazione, e **Lessons Learned** (9 punti chiave)
+
+**Commits**:
+- `9942034` - feat: implement real-time synchronization for foods (Phase 1)
+
+### **Risultato**:
+🎉 **Real-Time Mobile Fix COMPLETATO!** Sync funzionante su iOS Safari e Android Chrome.
 
 ---
 
