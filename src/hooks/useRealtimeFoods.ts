@@ -238,12 +238,15 @@ export function useRealtimeFoods() {
   }, [queryClient, manualReconnect]); // Added dependencies
 
   // Page Visibility Handler - invalidate queries when returning to foreground
+  // Always invalidate when becoming visible to catch updates missed during background
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isVisible = !document.hidden;
       console.log('[Realtime] Page visibility changed:', isVisible ? 'visible' : 'hidden');
 
-      if (isVisible && isConnected) {
+      if (isVisible) {
+        // Always invalidate when becoming visible, regardless of connection status
+        // This ensures we fetch fresh data even if WebSocket is reconnecting
         console.log('[Realtime] Page became visible, invalidating queries');
         queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
       }
@@ -254,15 +257,14 @@ export function useRealtimeFoods() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isConnected, queryClient]);
+  }, [queryClient]);
 
   // Window Focus Handler - fallback for browsers with poor visibilitychange support
+  // Always invalidate to ensure fresh data
   useEffect(() => {
     const handleFocus = () => {
-      console.log('[Realtime] Window focus gained');
-      if (isConnected) {
-        queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
-      }
+      console.log('[Realtime] Window focus gained, invalidating queries');
+      queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
     };
 
     window.addEventListener('focus', handleFocus);
@@ -270,7 +272,7 @@ export function useRealtimeFoods() {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [isConnected, queryClient]);
+  }, [queryClient]);
 
   // Network Status Handler - reconnect when network is restored
   // Only trigger if we've been connected before (not on initial mount)
