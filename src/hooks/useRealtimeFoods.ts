@@ -35,6 +35,7 @@ export function useRealtimeFoods() {
   const maxReconnectAttempts = 5;
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const hasEverConnectedRef = useRef(false); // Track if we've ever successfully connected
 
   // Network status monitoring
   const isOnline = useNetworkStatus();
@@ -180,6 +181,14 @@ export function useRealtimeFoods() {
               setIsConnected(true);
               setError(null);
               reconnectAttemptsRef.current = 0; // Reset on success
+
+              // Cancel any pending reconnect timeout
+              if (reconnectTimeoutRef.current !== null) {
+                clearTimeout(reconnectTimeoutRef.current);
+                reconnectTimeoutRef.current = null;
+              }
+
+              hasEverConnectedRef.current = true;
               console.log('[useRealtimeFoods] ✅ Successfully subscribed to foods realtime channel');
 
               // Invalidate queries to catch up on any missed updates
@@ -264,8 +273,9 @@ export function useRealtimeFoods() {
   }, [isConnected, queryClient]);
 
   // Network Status Handler - reconnect when network is restored
+  // Only trigger if we've been connected before (not on initial mount)
   useEffect(() => {
-    if (isOnline && !isConnected && listId) {
+    if (isOnline && !isConnected && listId && hasEverConnectedRef.current) {
       console.log('[Realtime] Network restored, forcing reconnect');
       manualReconnect();
     }
