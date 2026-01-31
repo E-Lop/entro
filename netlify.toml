@@ -27,6 +27,13 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
+# Don't cache index.html to avoid chunk loading errors after deploy
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Cache assets forever (they have content hash in filename)
 [[headers]]
   for = "/assets/*"
   [headers.values]
