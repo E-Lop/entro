@@ -15,6 +15,7 @@ import type { Food } from '@/lib/foods'
 import { ScanLine, Loader2, AlertTriangle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { mutationTracker } from '@/lib/realtime'
 
 // Lazy load BarcodeScanner (heavy: includes ZXing library)
 const BarcodeScanner = lazy(() => import('../barcode/BarcodeScanner').then(m => ({ default: m.BarcodeScanner })))
@@ -113,14 +114,10 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
               console.log('[FoodForm] Detected UPDATE event for food:', payload)
 
-              // Check if this is a very recent update (likely from this form submission)
-              // If commit_timestamp is within last 2 seconds, it's probably our own update
-              const commitTime = new Date(payload.commit_timestamp).getTime()
-              const now = Date.now()
-              const ageMs = now - commitTime
-
-              if (ageMs < 2000) {
-                console.log('[FoodForm] Ignoring recent UPDATE (likely our own):', ageMs, 'ms old')
+              // Check if this was a local mutation (tracked by mutationTracker)
+              // This properly identifies our own updates vs remote updates
+              if (mutationTracker.wasRecentlyMutated(foodId, 'UPDATE')) {
+                console.log('[FoodForm] Ignoring UPDATE (local mutation tracked)')
                 return
               }
 
