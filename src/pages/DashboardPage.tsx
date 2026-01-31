@@ -1,5 +1,5 @@
 import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -45,7 +45,6 @@ const INSTRUCTION_CARD_KEY = 'entro_hasSeenInstructionCard'
 
 export function DashboardPage() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Show swipe hint on first load (mobile only)
