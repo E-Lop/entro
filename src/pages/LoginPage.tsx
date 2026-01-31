@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthForm } from '../components/auth/AuthForm'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
+import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { validateInvite, acceptInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
@@ -125,6 +126,7 @@ export function LoginPage() {
           </div>
         </CardFooter>
       </Card>
+      <Footer />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User, Settings } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { AppIcon } from '../ui/AppIcon'
 import { ThemeToggle } from './ThemeToggle'
@@ -110,6 +110,14 @@ export function AppLayout() {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <InviteButton onClick={() => setInviteMenuOpen(true)} />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => navigate('/settings')}
+                className="cursor-pointer"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Impostazioni</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

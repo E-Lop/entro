@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
+import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { validateInvite, registerPendingInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
@@ -24,6 +25,9 @@ export function SignUpPage() {
   // Input manuale
   const [showCodeInput, setShowCodeInput] = useState(false)
   const [manualCode, setManualCode] = useState('')
+
+  // Terms acceptance
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   useEffect(() => {
     const code = searchParams.get('code')
@@ -174,8 +178,30 @@ export function SignUpPage() {
           <AuthForm
             mode="signup"
             onSuccess={handleSuccess}
+            disableSubmit={!termsAccepted}
             // NO prefillEmail, NO lockEmail
           />
+
+          {/* Terms & Privacy Acceptance */}
+          <div className="flex items-start gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <label htmlFor="terms" className="text-sm text-slate-600">
+              Accetto i{' '}
+              <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                Termini e Condizioni
+              </Link>{' '}
+              e la{' '}
+              <Link to="/privacy" className="text-primary hover:underline" target="_blank">
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-2">
@@ -190,6 +216,7 @@ export function SignUpPage() {
           </div>
         </CardFooter>
       </Card>
+      <Footer />
     </div>
   )
 }

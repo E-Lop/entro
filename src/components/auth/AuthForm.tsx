@@ -13,9 +13,10 @@ interface AuthFormProps {
   onSuccess?: (email?: string) => void
   prefillEmail?: string | null
   lockEmail?: boolean
+  disableSubmit?: boolean
 }
 
-export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail }: AuthFormProps) {
+export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubmit }: AuthFormProps) {
   const { signIn, signUp } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -194,7 +195,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail }: AuthFormP
         <Button
           type="submit"
           className="w-full"
-          disabled={isSubmitting}
+          disabled={isSubmitting || disableSubmit}
         >
           {isSubmitting
             ? mode === 'login'

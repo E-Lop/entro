@@ -14,6 +14,9 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const TestConnection = lazy(() => import('./pages/TestConnection'))
 const JoinPage = lazy(() => import('./pages/JoinPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'))
+const TermsPage = lazy(() => import('./pages/TermsPage'))
 
 // Loading fallback component
 function PageLoader() {
@@ -58,11 +61,14 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/join/:code" element={<JoinPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
 
             {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DashboardPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/test-connection" element={<TestConnection />} />
               </Route>
             </Route>
