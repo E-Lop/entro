@@ -29,6 +29,7 @@ export function useRealtimeFoods() {
   const [isConnected, setIsConnected] = useState(false);
   const [listId, setListId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [reconnectTrigger, setReconnectTrigger] = useState(0); // Increment to force effect re-run
 
   // Mobile reconnection tracking
   const reconnectAttemptsRef = useRef(0);
@@ -66,7 +67,8 @@ export function useRealtimeFoods() {
       }
 
       setIsConnected(false);
-      // The main useEffect will re-run and create a new subscription
+      // Increment trigger to force useEffect to re-run and create new subscription
+      setReconnectTrigger(prev => prev + 1);
     }, delay);
   }, []);
 
@@ -235,7 +237,7 @@ export function useRealtimeFoods() {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [queryClient, manualReconnect]); // Added dependencies
+  }, [queryClient, manualReconnect, reconnectTrigger]); // reconnectTrigger forces re-run on reconnect
 
   // Page Visibility Handler - invalidate queries when returning to foreground
   // Always invalidate when becoming visible to catch updates missed during background
@@ -274,14 +276,21 @@ export function useRealtimeFoods() {
     };
   }, [queryClient]);
 
-  // Network Status Handler - reconnect when network is restored
+  // Network Status Handler - reconnect and refresh when network is restored
   // Only trigger if we've been connected before (not on initial mount)
   useEffect(() => {
-    if (isOnline && !isConnected && listId && hasEverConnectedRef.current) {
-      console.log('[Realtime] Network restored, forcing reconnect');
-      manualReconnect();
+    if (isOnline && listId && hasEverConnectedRef.current) {
+      // Always invalidate queries when coming back online to get fresh data
+      console.log('[Realtime] Network back online, invalidating queries');
+      queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
+
+      // Also attempt to reconnect WebSocket if not connected
+      if (!isConnected) {
+        console.log('[Realtime] Network restored, forcing reconnect');
+        manualReconnect();
+      }
     }
-  }, [isOnline, isConnected, listId, manualReconnect]);
+  }, [isOnline, isConnected, listId, manualReconnect, queryClient]);
 
   return {
     isConnected,
