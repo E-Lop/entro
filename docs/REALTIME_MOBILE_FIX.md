@@ -286,6 +286,50 @@ git reset --hard HEAD
 
 ---
 
+## Lessons Learned
+
+Elenco sintetico degli accorgimenti specifici implementati per far funzionare Supabase Realtime su mobile, utile come riferimento per progetti futuri.
+
+### 1. Heartbeat Aggressivo
+- Ridurre `heartbeatIntervalMs` a 15s (default 25s) per rilevare disconnessioni più rapidamente su mobile
+- Impostare `timeout: 20000` per evitare attese troppo lunghe
+
+### 2. Evitare Dipendenze Circolari
+- Non importare `foodsKeys` da `useFoods.ts` in `useRealtimeFoods.ts` se `useFoods.ts` importa da `useRealtimeFoods.ts`
+- Usare query key letterali (`['foods', 'list']`) invece di riferimenti importati
+
+### 3. Reconnection Trigger Esplicito
+- `manualReconnect()` che rimuove il canale e imposta `isConnected = false` **non basta** per riattivare l'useEffect
+- Serve un `reconnectTrigger` state da incrementare per forzare il re-run dell'effect
+- Cancellare sempre i timeout pendenti quando la subscription ha successo
+
+### 4. Visibility Handler Incondizionato
+- Invalidare le queries **sempre** quando la pagina torna visibile, non solo se `isConnected === true`
+- Il WebSocket potrebbe essere in stato CLOSED/reconnecting quando l'utente sblocca lo schermo
+
+### 5. Deduplicazione con MutationTracker
+- Non usare `commit_timestamp` per filtrare eventi "propri" - è recente per TUTTI gli eventi
+- Usare un `mutationTracker` che traccia solo le mutazioni locali per ID
+
+### 6. Network Restore con Delay
+- Attendere 2 secondi dopo `navigator.onLine = true` prima di fare richieste
+- iOS Safari ha bisogno di tempo per la risoluzione DNS dopo switch di rete o airplane mode
+
+### 7. Refresh Sessione Auth su Network Restore
+- Chiamare `supabase.auth.getSession()` dopo network restore
+- La sessione auth può risultare "persa" se le richieste falliscono durante il cambio di rete
+
+### 8. Flag hasEverConnected
+- Non tentare reconnect al primo mount (quando `isConnected` è false per default)
+- Usare un ref `hasEverConnectedRef` per sapere se siamo mai stati connessi prima di tentare reconnect
+
+### 9. Test su Dispositivi Reali
+- I simulatori/emulatori non replicano il comportamento reale di screen lock e background
+- Testare sempre su iPhone fisico con Safari e Android fisico con Chrome
+- Usare Remote Debugging per vedere i log in tempo reale
+
+---
+
 ## Fonti Documentazione
 
 - [Reconnect doesn't work after Safari drops WebSocket connection when the user locks the screen on a mobile device - graphql-ws Discussion #290](https://github.com/enisdenjo/graphql-ws/discussions/290)
