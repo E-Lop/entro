@@ -19,7 +19,6 @@ import {
 import type { FoodRealtimePayload } from '../lib/realtime.types';
 import { getChannelName } from '../utils/realtimeHelpers';
 import { useNetworkStatus } from './useNetworkStatus';
-import { foodsKeys } from './useFoods';
 
 /**
  * Hook for subscribing to real-time foods updates
@@ -184,7 +183,7 @@ export function useRealtimeFoods() {
               console.log('[useRealtimeFoods] ✅ Successfully subscribed to foods realtime channel');
 
               // Invalidate queries to catch up on any missed updates
-              queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
+              queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
             } else if (status === 'CHANNEL_ERROR') {
               setIsConnected(false);
               // In development with React Strict Mode, channel errors are expected
@@ -237,7 +236,7 @@ export function useRealtimeFoods() {
 
       if (isVisible && isConnected) {
         console.log('[Realtime] Page became visible, invalidating queries');
-        queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
       }
     };
 
@@ -253,7 +252,7 @@ export function useRealtimeFoods() {
     const handleFocus = () => {
       console.log('[Realtime] Window focus gained');
       if (isConnected) {
-        queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
       }
     };
 
