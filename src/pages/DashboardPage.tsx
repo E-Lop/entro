@@ -11,6 +11,7 @@ import { FoodCard } from '../components/foods/FoodCard'
 import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
+import { KofiButton } from '../components/ui/KofiButton'
 
 // Lazy load WeekView (calendar view)
 const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ default: m.WeekView })))
@@ -558,6 +559,9 @@ export function DashboardPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Ko-fi Support Button */}
+      <KofiButton />
 
       {/* Floating Action Button (FAB) - Mobile Only */}
       <button
