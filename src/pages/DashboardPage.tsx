@@ -1,7 +1,7 @@
 import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
+import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar, Settings } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
 import { useDebounce } from '../hooks/useDebounce'
@@ -45,6 +45,7 @@ const INSTRUCTION_CARD_KEY = 'entro_hasSeenInstructionCard'
 
 export function DashboardPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // Show swipe hint on first load (mobile only)
@@ -293,14 +294,33 @@ export function DashboardPage() {
             Gestisci le scadenze e riduci gli sprechi.
           </p>
         </div>
-        {/* Desktop Button */}
+        {/* Desktop Buttons */}
+        <div className="hidden sm:flex gap-2">
+          <Button
+            onClick={() => navigate('/settings')}
+            size="lg"
+            variant="outline"
+          >
+            <Settings className="h-5 w-5 mr-2" />
+            Impostazioni
+          </Button>
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            size="lg"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Alimento
+          </Button>
+        </div>
+        {/* Mobile Icon Button for Settings */}
         <Button
-          onClick={() => setIsAddDialogOpen(true)}
-          size="lg"
-          className="hidden sm:flex"
+          onClick={() => navigate('/settings')}
+          size="icon"
+          variant="outline"
+          className="sm:hidden"
+          aria-label="Impostazioni"
         >
-          <Plus className="h-5 w-5 mr-2" />
-          Alimento
+          <Settings className="h-5 w-5" />
         </Button>
       </div>
 
