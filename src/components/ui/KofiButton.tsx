@@ -14,7 +14,7 @@ export function KofiButton() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 py-8 px-4">
+    <div className="flex flex-col items-center gap-3 py-6 px-4">
       <p className="text-sm text-muted-foreground text-center">
         Ti piace questo progetto?
       </p>

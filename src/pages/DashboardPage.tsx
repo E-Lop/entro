@@ -283,7 +283,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 sm:pb-6">
       {/* Welcome Section - Compact on Mobile */}
       <div className="flex items-center justify-between">
         <div>
