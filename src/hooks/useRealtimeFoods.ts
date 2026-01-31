@@ -29,14 +29,14 @@ export function useRealtimeFoods() {
   const [isConnected, setIsConnected] = useState(false);
   const [listId, setListId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [reconnectTrigger, setReconnectTrigger] = useState(0); // Increment to force effect re-run
+  const [reconnectTrigger, setReconnectTrigger] = useState(0);
 
   // Mobile reconnection tracking
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttempts = 5;
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const hasEverConnectedRef = useRef(false); // Track if we've ever successfully connected
+  const hasEverConnectedRef = useRef(false);
 
   // Network status monitoring
   const isOnline = useNetworkStatus();
@@ -55,19 +55,13 @@ export function useRealtimeFoods() {
     reconnectAttemptsRef.current += 1;
     const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 10000);
 
-    console.log(`[Realtime] Attempting reconnect #${reconnectAttemptsRef.current} in ${delay}ms`);
-
     reconnectTimeoutRef.current = setTimeout(() => {
-      console.log('[Realtime] Executing reconnect attempt');
-
-      // Unsubscribe completely and trigger re-setup
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }
 
       setIsConnected(false);
-      // Increment trigger to force useEffect to re-run and create new subscription
       setReconnectTrigger(prev => prev + 1);
     }, delay);
   }, []);
@@ -75,23 +69,11 @@ export function useRealtimeFoods() {
   useEffect(() => {
     let mounted = true;
 
-    // Mobile debug logging
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    console.log('[Realtime Mobile Debug]', {
-      isMobile,
-      isPageVisible: !document.hidden,
-      isOnline: navigator.onLine,
-      userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Async function to setup subscription
     async function setupSubscription() {
       try {
-        // Get user's list ID
         const { list, error: listError } = await getUserList();
 
-        if (!mounted) return; // Component unmounted during async call
+        if (!mounted) return;
 
         if (listError || !list) {
           console.warn('[useRealtimeFoods] No list found for user:', listError);
@@ -101,23 +83,19 @@ export function useRealtimeFoods() {
 
         setListId(list.id);
         setError(null);
-        console.log('[useRealtimeFoods] Setting up subscription for list:', list.id);
 
-        // Create channel with unique name
         const channelName = getChannelName('foods', list.id);
 
-        // Remove any existing channel with this name (important for React Strict Mode)
+        // Remove any existing channel (important for React Strict Mode)
         const existingChannel = supabase.getChannels().find((ch) => ch.topic === channelName);
         if (existingChannel) {
-          console.log('[useRealtimeFoods] Removing existing channel:', channelName);
           await existingChannel.unsubscribe();
           supabase.removeChannel(existingChannel);
         }
 
-        // Create new channel
         channelRef.current = supabase.channel(channelName);
 
-        // Subscribe to INSERT events with filter
+        // Subscribe to INSERT events
         channelRef.current.on(
           'postgres_changes',
           {
@@ -127,7 +105,6 @@ export function useRealtimeFoods() {
             filter: `list_id=eq.${list.id}`,
           },
           (payload) => {
-            console.log('[useRealtimeFoods] Received INSERT event:', payload);
             handleFoodRealtimeEvent(
               payload as unknown as FoodRealtimePayload,
               queryClient,
@@ -136,7 +113,7 @@ export function useRealtimeFoods() {
           },
         )
 
-        // Subscribe to UPDATE events with filter
+        // Subscribe to UPDATE events
         channelRef.current.on(
           'postgres_changes',
           {
@@ -146,7 +123,6 @@ export function useRealtimeFoods() {
             filter: `list_id=eq.${list.id}`,
           },
           (payload) => {
-            console.log('[useRealtimeFoods] Received UPDATE event:', payload);
             handleFoodRealtimeEvent(
               payload as unknown as FoodRealtimePayload,
               queryClient,
@@ -156,17 +132,14 @@ export function useRealtimeFoods() {
         )
 
         // Subscribe to DELETE events (no filter - not supported by Supabase)
-        // We filter manually in handleFoodDelete
         channelRef.current.on(
           'postgres_changes',
           {
             event: 'DELETE',
             schema: 'public',
             table: 'foods',
-            // No filter - DELETE events don't support filters
           },
           (payload) => {
-            console.log('[useRealtimeFoods] Received DELETE event:', payload);
             handleFoodRealtimeEvent(
               payload as unknown as FoodRealtimePayload,
               queryClient,
@@ -177,41 +150,31 @@ export function useRealtimeFoods() {
           .subscribe((status) => {
             if (!mounted) return;
 
-            console.log('[useRealtimeFoods] Subscription status:', status);
-
             if (status === 'SUBSCRIBED') {
               setIsConnected(true);
               setError(null);
-              reconnectAttemptsRef.current = 0; // Reset on success
+              reconnectAttemptsRef.current = 0;
 
-              // Cancel any pending reconnect timeout
               if (reconnectTimeoutRef.current !== null) {
                 clearTimeout(reconnectTimeoutRef.current);
                 reconnectTimeoutRef.current = null;
               }
 
               hasEverConnectedRef.current = true;
-              console.log('[useRealtimeFoods] ✅ Successfully subscribed to foods realtime channel');
-
-              // Invalidate queries to catch up on any missed updates
               queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
             } else if (status === 'CHANNEL_ERROR') {
               setIsConnected(false);
-              // In development with React Strict Mode, channel errors are expected
               if (!import.meta.env.DEV) {
-                console.error('[useRealtimeFoods] ⚠️ Channel error in production, attempting reconnect');
+                console.error('[useRealtimeFoods] Channel error in production');
                 manualReconnect();
-              } else {
-                console.warn('[useRealtimeFoods] ⚠️ Channel error (expected in dev mode with Strict Mode)');
               }
             } else if (status === 'TIMED_OUT') {
               setIsConnected(false);
               setError('Timeout connessione realtime');
-              console.error('[useRealtimeFoods] ❌ Channel timed out, attempting reconnect');
+              console.error('[useRealtimeFoods] Channel timed out');
               manualReconnect();
             } else if (status === 'CLOSED') {
               setIsConnected(false);
-              console.log('[useRealtimeFoods] Channel closed');
             }
           });
       } catch (err) {
@@ -223,11 +186,9 @@ export function useRealtimeFoods() {
 
     setupSubscription();
 
-    // Cleanup function
     return () => {
       mounted = false;
       if (channelRef.current) {
-        console.log('[useRealtimeFoods] Cleaning up subscription');
         channelRef.current.unsubscribe();
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
@@ -237,77 +198,52 @@ export function useRealtimeFoods() {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [queryClient, manualReconnect, reconnectTrigger]); // reconnectTrigger forces re-run on reconnect
+  }, [queryClient, manualReconnect, reconnectTrigger]);
 
   // Page Visibility Handler - invalidate queries when returning to foreground
-  // Always invalidate when becoming visible to catch updates missed during background
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const isVisible = !document.hidden;
-      console.log('[Realtime] Page visibility changed:', isVisible ? 'visible' : 'hidden');
-
-      if (isVisible) {
-        // Always invalidate when becoming visible, regardless of connection status
-        // This ensures we fetch fresh data even if WebSocket is reconnecting
-        console.log('[Realtime] Page became visible, invalidating queries');
+      if (!document.hidden) {
         queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [queryClient]);
 
   // Window Focus Handler - fallback for browsers with poor visibilitychange support
-  // Always invalidate to ensure fresh data
   useEffect(() => {
     const handleFocus = () => {
-      console.log('[Realtime] Window focus gained, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
     };
 
     window.addEventListener('focus', handleFocus);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
+    return () => window.removeEventListener('focus', handleFocus);
   }, [queryClient]);
 
   // Network Status Handler - reconnect and refresh when network is restored
-  // Only trigger if we've been connected before (not on initial mount)
   useEffect(() => {
     if (isOnline && listId && hasEverConnectedRef.current) {
-      // Wait for network to stabilize before making requests
-      // iOS Safari needs time for DNS resolution after network switch
+      // Wait for network to stabilize (iOS Safari needs time for DNS resolution)
       const networkRestoreTimeout = setTimeout(async () => {
-        console.log('[Realtime] Network stabilized, refreshing session and data');
-
-        // Refresh auth session first (it may have been lost during network switch)
         try {
           const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           if (sessionError || !session) {
-            console.warn('[Realtime] Session refresh failed, user may need to re-login');
+            console.warn('[Realtime] Session refresh failed after network restore');
             return;
           }
-          console.log('[Realtime] Session refreshed successfully');
         } catch (err) {
           console.error('[Realtime] Error refreshing session:', err);
           return;
         }
 
-        // Now invalidate queries to get fresh data
-        console.log('[Realtime] Invalidating queries after network restore');
         queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
 
-        // Also attempt to reconnect WebSocket if not connected
         if (!isConnected) {
-          console.log('[Realtime] Forcing WebSocket reconnect');
           manualReconnect();
         }
-      }, 2000); // Wait 2 seconds for network to stabilize
+      }, 2000);
 
       return () => clearTimeout(networkRestoreTimeout);
     }

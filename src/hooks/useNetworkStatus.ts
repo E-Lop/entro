@@ -8,15 +8,8 @@ export function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine)
 
   useEffect(() => {
-    const handleOnline = () => {
-      console.log('[Network] Back online')
-      setIsOnline(true)
-    }
-
-    const handleOffline = () => {
-      console.log('[Network] Gone offline')
-      setIsOnline(false)
-    }
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
 
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)

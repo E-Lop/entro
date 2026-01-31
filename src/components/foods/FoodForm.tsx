@@ -109,21 +109,15 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
               table: 'foods',
               filter: `id=eq.${foodId}`,
             },
-            (payload) => {
+            () => {
               if (!mounted) return
 
-              console.log('[FoodForm] Detected UPDATE event for food:', payload)
-
-              // Check if this was a local mutation (tracked by mutationTracker)
-              // This properly identifies our own updates vs remote updates
+              // Skip if this was a local mutation
               if (mutationTracker.wasRecentlyMutated(foodId, 'UPDATE')) {
-                console.log('[FoodForm] Ignoring UPDATE (local mutation tracked)')
                 return
               }
 
-              console.log('[FoodForm] Remote update detected from another user')
-
-              // Show warning toast
+              // Remote update detected - show warning
               setHasRemoteUpdate(true)
               toast.warning(
                 'Questo alimento è stato modificato da un altro utente',
@@ -142,9 +136,8 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
               )
             },
           )
-          .subscribe((status) => {
-            if (!mounted) return
-            console.log('[FoodForm] Conflict detection channel status:', status)
+          .subscribe(() => {
+            // Channel subscribed for conflict detection
           })
       } catch (err) {
         console.error('[FoodForm] Error setting up conflict detection:', err)

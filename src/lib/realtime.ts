@@ -21,26 +21,11 @@ export const mutationTracker = new RecentMutationsTracker();
  * Handle realtime INSERT event for foods
  */
 export function handleFoodInsert(
-  payload: FoodRealtimePayload,
+  _payload: FoodRealtimePayload,
   queryClient: QueryClient,
 ): void {
-  const newFood = payload.new;
-
-  // TEMPORARY: Disable deduplication for INSERT to debug issue
-  // TODO: Re-enable after finding root cause
-  // const wasRecentMutation = mutationTracker.wasRecentlyMutated(newFood.id, 'INSERT');
-  // if (wasRecentMutation) {
-  //   console.log('[Realtime] Skipping duplicate INSERT for', newFood.id, '(was tracked as local mutation)');
-  //   return;
-  // }
-
-  console.log('[Realtime] Processing INSERT event for food:', newFood.name, 'id:', newFood.id);
-
   // Force refetch to ensure UI updates
-  // Using invalidateQueries is more reliable than setQueriesData for triggering re-renders
   queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
-
-  // NO toast for INSERT (per user preferences - only visual highlight)
 }
 
 /**
@@ -54,17 +39,12 @@ export function handleFoodUpdate(
 
   // Skip if this was a recent local mutation (deduplication)
   if (mutationTracker.wasRecentlyMutated(updatedFood.id, 'UPDATE')) {
-    console.log('[Realtime] Skipping duplicate UPDATE for', updatedFood.id);
     return;
   }
-
-  console.log('[Realtime] Received UPDATE event for food:', updatedFood.name);
 
   // Force refetch to ensure UI updates
   queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
   queryClient.invalidateQueries({ queryKey: foodsKeys.detail(updatedFood.id) });
-
-  // NO toast for UPDATE (per user preferences - only visual highlight)
 }
 
 /**
@@ -77,28 +57,15 @@ export function handleFoodDelete(
 ): void {
   const deletedFood = payload.old;
 
-  console.log('[Realtime] Received DELETE event:', {
-    foodId: deletedFood.id,
-    foodName: deletedFood.name,
-    foodListId: deletedFood.list_id,
-    currentListId: currentListId,
-  });
-
-  // IMPORTANT: DELETE events don't support filters in Supabase Realtime
-  // We must filter manually on the client side
-  // Skip if from different list
+  // DELETE events don't support filters in Supabase Realtime - filter manually
   if (deletedFood.list_id && currentListId && deletedFood.list_id !== currentListId) {
-    console.log('[Realtime] Ignoring DELETE event from different list');
     return;
   }
 
   // Skip if this was a recent local mutation (deduplication)
   if (deletedFood.id && mutationTracker.wasRecentlyMutated(deletedFood.id, 'DELETE')) {
-    console.log('[Realtime] Skipping duplicate DELETE for', deletedFood.id);
     return;
   }
-
-  console.log('[Realtime] Processing DELETE event for food:', deletedFood.name);
 
   // Force refetch to ensure UI updates
   queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
@@ -108,7 +75,7 @@ export function handleFoodDelete(
     queryClient.removeQueries({ queryKey: foodsKeys.detail(deletedFood.id) });
   }
 
-  // Show toast for DELETE (per user preferences - critical action)
+  // Show toast for DELETE (critical action)
   const foodName = deletedFood.name || 'Un alimento';
   toast.info(`${foodName} è stato eliminato da un altro utente`);
 }
@@ -131,8 +98,6 @@ export function handleFoodRealtimeEvent(
     case 'DELETE':
       handleFoodDelete(payload, queryClient, currentListId);
       break;
-    default:
-      console.warn('[Realtime] Unknown event type:', payload.eventType);
   }
 }
 
@@ -151,13 +116,10 @@ export function handleListMemberInsert(
     return;
   }
 
-  console.log('[Realtime] New member joined list:', newMember.user_id);
-
-  // Force refetch of list members and foods (new member might affect data)
+  // Force refetch of list members and foods
   queryClient.invalidateQueries({ queryKey: ['list_members'] });
   queryClient.invalidateQueries({ queryKey: foodsKeys.lists() });
 
-  // Show toast notification
   toast.info('Un nuovo membro si è unito alla lista');
 }
 
@@ -171,16 +133,10 @@ export function handleListMemberDelete(
 ): void {
   const removedMember = payload.old;
 
-  console.log('[Realtime] Member left list:', removedMember.user_id);
-
   // If current user was removed, show message and redirect
   if (removedMember.user_id === currentUserId) {
     toast.error('Sei stato rimosso da questa lista');
-
-    // Clear all cache
     queryClient.clear();
-
-    // Redirect to dashboard (will show "create list" screen)
     setTimeout(() => {
       window.location.href = '/';
     }, 2000);
@@ -210,9 +166,7 @@ export function handleListMemberEvent(
       handleListMemberDelete(payload, queryClient, currentUserId);
       break;
     case 'UPDATE':
-      // list_members table doesn't have UPDATE events (only INSERT/DELETE)
+      // list_members table doesn't have UPDATE events
       break;
-    default:
-      console.warn('[Realtime] Unknown event type:', payload.eventType);
   }
 }
