@@ -17,6 +17,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
   },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+    heartbeatIntervalMs: 15000, // 15s instead of default 25s for better mobile detection
+    timeout: 20000, // Connection timeout
+  },
 })
 
 // Database types (updated for shared lists feature)
