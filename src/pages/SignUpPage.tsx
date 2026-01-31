@@ -113,109 +113,111 @@ export function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Crea il tuo account
-          </CardTitle>
-          <CardDescription className="text-center">
-            {inviteLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Verifica invito...
-              </span>
-            ) : inviteValid ? (
-              <span className="text-primary font-medium">
-                {inviteCreatorName} ti ha invitato a condividere la sua lista!
-              </span>
-            ) : (
-              'Inizia a tracciare le scadenze dei tuoi alimenti'
-            )}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {/* Input codice manuale */}
-          {!inviteValid && !inviteCode && (
-            <div className="mb-4">
-              {!showCodeInput ? (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setShowCodeInput(true)}
-                >
-                  Ho un codice invito
-                </Button>
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              Crea il tuo account
+            </CardTitle>
+            <CardDescription className="text-center">
+              {inviteLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verifica invito...
+                </span>
+              ) : inviteValid ? (
+                <span className="text-primary font-medium">
+                  {inviteCreatorName} ti ha invitato a condividere la sua lista!
+                </span>
               ) : (
-                <div className="space-y-2">
-                  <Label>Codice invito</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="ABC123"
-                      value={manualCode}
-                      onChange={(e) => setManualCode(e.target.value.toUpperCase())}
-                      maxLength={6}
-                      className="font-mono text-lg tracking-wider"
-                    />
-                    <Button onClick={handleManualCodeSubmit} disabled={inviteLoading}>
-                      {inviteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verifica'}
+                'Inizia a tracciare le scadenze dei tuoi alimenti'
+              )}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            {/* Input codice manuale */}
+            {!inviteValid && !inviteCode && (
+              <div className="mb-4">
+                {!showCodeInput ? (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setShowCodeInput(true)}
+                  >
+                    Ho un codice invito
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <Label>Codice invito</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="ABC123"
+                        value={manualCode}
+                        onChange={(e) => setManualCode(e.target.value.toUpperCase())}
+                        maxLength={6}
+                        className="font-mono text-lg tracking-wider"
+                      />
+                      <Button onClick={handleManualCodeSubmit} disabled={inviteLoading}>
+                        {inviteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verifica'}
+                      </Button>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowCodeInput(false)}
+                      className="w-full"
+                    >
+                      Annulla
                     </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowCodeInput(false)}
-                    className="w-full"
-                  >
-                    Annulla
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
 
-          <AuthForm
-            mode="signup"
-            onSuccess={handleSuccess}
-            disableSubmit={!termsAccepted}
-            // NO prefillEmail, NO lockEmail
-          />
-
-          {/* Terms & Privacy Acceptance */}
-          <div className="flex items-start gap-2 mt-4">
-            <input
-              type="checkbox"
-              id="terms"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            <AuthForm
+              mode="signup"
+              onSuccess={handleSuccess}
+              disableSubmit={!termsAccepted}
+              // NO prefillEmail, NO lockEmail
             />
-            <label htmlFor="terms" className="text-sm text-slate-600">
-              Accetto i{' '}
-              <Link to="/terms" className="text-primary hover:underline" target="_blank">
-                Termini e Condizioni
-              </Link>{' '}
-              e la{' '}
-              <Link to="/privacy" className="text-primary hover:underline" target="_blank">
-                Privacy Policy
-              </Link>
-            </label>
-          </div>
-        </CardContent>
 
-        <CardFooter className="flex flex-col space-y-2">
-          <div className="text-sm text-center text-slate-600">
-            Hai già un account?{' '}
-            <Link
-              to="/login"
-              className="font-medium text-primary hover:underline"
-            >
-              Accedi
-            </Link>
-          </div>
-        </CardFooter>
-      </Card>
+            {/* Terms & Privacy Acceptance */}
+            <div className="flex items-start gap-2 mt-4">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="terms" className="text-sm text-slate-600">
+                Accetto i{' '}
+                <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                  Termini e Condizioni
+                </Link>{' '}
+                e la{' '}
+                <Link to="/privacy" className="text-primary hover:underline" target="_blank">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex flex-col space-y-2">
+            <div className="text-sm text-center text-slate-600">
+              Hai già un account?{' '}
+              <Link
+                to="/login"
+                className="font-medium text-primary hover:underline"
+              >
+                Accedi
+              </Link>
+            </div>
+          </CardFooter>
+        </Card>
+      </div>
       <Footer />
     </div>
   )
