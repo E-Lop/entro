@@ -1,7 +1,7 @@
 import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar, Settings } from 'lucide-react'
+import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
 import { useDebounce } from '../hooks/useDebounce'
@@ -294,33 +294,14 @@ export function DashboardPage() {
             Gestisci le scadenze e riduci gli sprechi.
           </p>
         </div>
-        {/* Desktop Buttons */}
-        <div className="hidden sm:flex gap-2">
-          <Button
-            onClick={() => navigate('/settings')}
-            size="lg"
-            variant="outline"
-          >
-            <Settings className="h-5 w-5 mr-2" />
-            Impostazioni
-          </Button>
-          <Button
-            onClick={() => setIsAddDialogOpen(true)}
-            size="lg"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Alimento
-          </Button>
-        </div>
-        {/* Mobile Icon Button for Settings */}
+        {/* Add Food Button */}
         <Button
-          onClick={() => navigate('/settings')}
-          size="icon"
-          variant="outline"
-          className="sm:hidden"
-          aria-label="Impostazioni"
+          onClick={() => setIsAddDialogOpen(true)}
+          size="lg"
+          className="hidden sm:flex"
         >
-          <Settings className="h-5 w-5" />
+          <Plus className="h-5 w-5 mr-2" />
+          Alimento
         </Button>
       </div>
 

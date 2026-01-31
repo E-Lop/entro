@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate, Link } from 'react-router-dom'
 import { LogOut, User, Settings } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { AppIcon } from '../ui/AppIcon'
@@ -73,13 +73,13 @@ export function AppLayout() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo / Brand */}
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <AppIcon size={40} className="rounded-lg" aria-label="Logo entro" />
             <div>
               <div className="text-lg font-bold text-foreground">entro</div>
               <p className="text-xs text-muted-foreground">Food Expiry Tracker</p>
             </div>
-          </div>
+          </Link>
 
           {/* Actions - Navigation landmark */}
           <nav aria-label="Menu principale" className="flex items-center gap-2">
