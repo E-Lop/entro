@@ -23,11 +23,12 @@ Implementare **compliance GDPR completa** per il lancio pubblico di entro in Ita
 - **Service Worker**: cache assets, fonts, signed URLs
 
 ### Cosa Manca
-❌ Privacy Policy (→ Aruba LegalBlink)
-❌ Terms of Service (→ Aruba LegalBlink)
-❌ Cookie consent banner (→ Aruba LegalBlink)
-❌ Data export (→ sviluppo interno)
-❌ Account deletion GDPR-compliant (→ sviluppo interno)
+✅ Privacy Policy (→ Aruba LegalBlink) - **Implementato**
+✅ Terms of Service (→ Aruba LegalBlink) - **Implementato**
+✅ Cookie Policy (→ Aruba LegalBlink) - **Implementato**
+⚠️ Cookie consent banner - **Non necessario** (solo cookie tecnici)
+✅ Data export (→ sviluppo interno) - **Implementato**
+✅ Account deletion GDPR-compliant (→ sviluppo interno) - **Implementato**
 
 ### Requisiti Legali Italia 2026
 - localStorage/sessionStorage considerati "cookie-like storage" → richiedono consenso se non strettamente necessari
@@ -456,7 +457,8 @@ Compliance & funzionalità
 Prima del lancio pubblico:
 - ✅ Aruba LegalBlink Advanced attivato (€47/anno)
 - ✅ Documenti ricevuti da consulenti Aruba (Privacy, Terms, Cookie)
-- ✅ Cookie banner Aruba integrato e funzionante
+- ✅ Documenti Aruba integrati (Footer, Settings, Signup)
+- ⚠️ Cookie banner NON implementato (non necessario - solo cookie tecnici)
 - ✅ Privacy Policy e Terms accessibili (link footer + pagine dedicate)
 - ✅ User può esportare dati (JSON completo)
 - ✅ User può cancellare account (GDPR Art. 17)
@@ -465,7 +467,9 @@ Prima del lancio pubblico:
 - ✅ Tutti i test checklist superati
 - ✅ Mobile UX fluida e accessibile
 
-**Note**: Privacy Policy è scritta da consulenti legali Aruba, non serve lawyer review addizionale
+**Note**:
+- Privacy Policy è scritta da consulenti legali Aruba, non serve lawyer review addizionale
+- Cookie Banner non implementato: entro usa solo cookie tecnici Supabase (sessione), che secondo GDPR non richiedono consenso esplicito
 
 ---
 

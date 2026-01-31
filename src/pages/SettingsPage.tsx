@@ -53,12 +53,12 @@ export function SettingsPage() {
 
           <div className="border-t my-4" />
 
-          {/* Privacy Policy & Cookie Policy Links (placeholder for Aruba) */}
+          {/* Privacy Policy & Cookie Policy Links (Aruba LegalBlink) */}
           <div className="space-y-2">
             <h3 className="font-medium">Documenti Legali</h3>
             <div className="flex flex-col gap-2 text-sm">
               <a
-                href="/privacy"
+                href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/privacy-policy-per-siti-web-o-e-commerce-it"
                 className="text-primary hover:underline"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -66,17 +66,22 @@ export function SettingsPage() {
                 Privacy Policy
               </a>
               <a
-                href="/terms"
+                href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/condizioni-d'uso-del-sito-it"
                 className="text-primary hover:underline"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 Termini e Condizioni
               </a>
+              <a
+                href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/cookie-policy-it"
+                className="text-primary hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Cookie Policy
+              </a>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              I documenti saranno disponibili dopo l'integrazione con Aruba LegalBlink
-            </p>
           </div>
         </CardContent>
       </Card>

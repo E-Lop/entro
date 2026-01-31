@@ -194,13 +194,23 @@ export function SignUpPage() {
               />
               <label htmlFor="terms" className="text-sm text-slate-600">
                 Accetto i{' '}
-                <Link to="/terms" className="text-primary hover:underline" target="_blank">
+                <a
+                  href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/condizioni-d'uso-del-sito-it"
+                  className="text-primary hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Termini e Condizioni
-                </Link>{' '}
+                </a>{' '}
                 e la{' '}
-                <Link to="/privacy" className="text-primary hover:underline" target="_blank">
+                <a
+                  href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/privacy-policy-per-siti-web-o-e-commerce-it"
+                  className="text-primary hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Privacy Policy
-                </Link>
+                </a>
               </label>
             </div>
           </CardContent>
