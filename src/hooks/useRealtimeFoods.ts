@@ -280,15 +280,36 @@ export function useRealtimeFoods() {
   // Only trigger if we've been connected before (not on initial mount)
   useEffect(() => {
     if (isOnline && listId && hasEverConnectedRef.current) {
-      // Always invalidate queries when coming back online to get fresh data
-      console.log('[Realtime] Network back online, invalidating queries');
-      queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
+      // Wait for network to stabilize before making requests
+      // iOS Safari needs time for DNS resolution after network switch
+      const networkRestoreTimeout = setTimeout(async () => {
+        console.log('[Realtime] Network stabilized, refreshing session and data');
 
-      // Also attempt to reconnect WebSocket if not connected
-      if (!isConnected) {
-        console.log('[Realtime] Network restored, forcing reconnect');
-        manualReconnect();
-      }
+        // Refresh auth session first (it may have been lost during network switch)
+        try {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError || !session) {
+            console.warn('[Realtime] Session refresh failed, user may need to re-login');
+            return;
+          }
+          console.log('[Realtime] Session refreshed successfully');
+        } catch (err) {
+          console.error('[Realtime] Error refreshing session:', err);
+          return;
+        }
+
+        // Now invalidate queries to get fresh data
+        console.log('[Realtime] Invalidating queries after network restore');
+        queryClient.invalidateQueries({ queryKey: ['foods', 'list'] });
+
+        // Also attempt to reconnect WebSocket if not connected
+        if (!isConnected) {
+          console.log('[Realtime] Forcing WebSocket reconnect');
+          manualReconnect();
+        }
+      }, 2000); // Wait 2 seconds for network to stabilize
+
+      return () => clearTimeout(networkRestoreTimeout);
     }
   }, [isOnline, isConnected, listId, manualReconnect, queryClient]);
 
