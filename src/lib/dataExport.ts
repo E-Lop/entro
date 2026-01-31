@@ -1,6 +1,7 @@
 import { getCurrentUser } from './auth'
 import { getFoods } from './foods'
 import { getUserList, getListMembers } from './invites'
+import { getSignedImageUrls } from './storage'
 import type { Food } from './foods'
 
 /**
@@ -53,7 +54,34 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
       throw new Error(`Errore nel recupero alimenti: ${foodsError.message}`)
     }
 
-    // 3. Fetch lists and memberships
+    // 3. Generate signed URLs for all images (valid for 24 hours)
+    const imagePaths = foods
+      .filter((food) => food.image_url)
+      .map((food) => food.image_url as string)
+
+    let imageUrlMap = new Map<string, string>()
+    if (imagePaths.length > 0) {
+      try {
+        // Generate signed URLs valid for 24 hours (86400 seconds)
+        imageUrlMap = await getSignedImageUrls(imagePaths, 86400)
+      } catch (error) {
+        console.warn('Failed to generate some signed URLs:', error)
+        // Continue with export even if some images fail
+      }
+    }
+
+    // 4. Replace image paths with signed URLs in foods array
+    const foodsWithSignedUrls = foods.map((food) => {
+      if (food.image_url && imageUrlMap.has(food.image_url)) {
+        return {
+          ...food,
+          image_url: imageUrlMap.get(food.image_url) || food.image_url,
+        }
+      }
+      return food
+    })
+
+    // 5. Fetch lists and memberships
     let listData = {
       listId: null as string | null,
       listName: null as string | null,
@@ -80,7 +108,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
       console.warn('No list found for user:', listError)
     }
 
-    // 4. Build export data object
+    // 6. Build export data object
     const exportData: ExportData = {
       exportDate: new Date().toISOString(),
       user: {
@@ -89,12 +117,12 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
         fullName: user.user_metadata?.full_name || 'N/A',
         createdAt: user.created_at || 'N/A',
       },
-      foods: foods,
+      foods: foodsWithSignedUrls,
       lists: listData,
-      note: 'Image signed URLs expire in 1 hour. Download images separately if needed.',
+      note: 'Image signed URLs are valid for 24 hours. Download images before they expire if needed.',
     }
 
-    // 5. Download JSON file
+    // 7. Download JSON file
     downloadJSON(exportData, `entro-export-${Date.now()}.json`)
 
     return { success: true, error: null }
