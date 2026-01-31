@@ -58,6 +58,16 @@ npm run dev
 
 Open Food Facts è gratuito e non richiede API key. L'integrazione è già configurata.
 
+### Configurazione Ko-fi (Opzionale)
+
+Se fai un fork del progetto e vuoi mostrare il tuo bottone Ko-fi:
+
+1. Apri `.env.local`
+2. Aggiungi: `VITE_KOFI_URL=https://ko-fi.com/YOUR_KOFI_ID`
+3. Se lasci la variabile vuota, il bottone non verrà mostrato
+
+Il bottone Ko-fi appare in fondo alla Dashboard con design mobile-friendly.
+
 ## 🛠️ Stack Tecnologico
 
 - **Frontend**: React 19, TypeScript, Vite
@@ -142,6 +152,16 @@ npm run deploy
 3. Commit changes (`git commit -m 'Add AmazingFeature'`)
 4. Push al branch (`git push origin feature/AmazingFeature`)
 5. Apri una Pull Request
+
+## 💝 Support
+
+Se trovi utile questo progetto, puoi supportarmi su Ko-fi:
+
+[![ko-fi](https://storage.ko-fi.com/cdn/kofi6.png?v=6)](https://ko-fi.com/G2G61TCD8H)
+
+Il supporto aiuta a mantenere il progetto attivo e a sviluppare nuove funzionalità!
+
+**Per fork del progetto**: Il bottone Ko-fi è completamente opzionale e configurabile tramite la variabile d'ambiente `VITE_KOFI_URL`. Lasciandola vuota nel tuo `.env.local`, il bottone non apparirà nella tua versione.
 
 ## 📝 License
 
