@@ -53,3 +53,6 @@ Desktop.ini
 # PWA
 sw.js
 workbox-*.js
+
+# Private documentation
+docs/private/
