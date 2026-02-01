@@ -36,8 +36,13 @@ BEGIN
   -- This will also cascade delete to related storage images via app logic
   DELETE FROM public.foods WHERE user_id = current_user_id;
 
-  -- 2. Delete all invites created by the user
-  DELETE FROM public.invites WHERE created_by = current_user_id;
+  -- 2. Delete all invites created by OR sent to the user
+  -- This prevents re-registration from auto-joining old shared lists (GDPR compliance)
+  DELETE FROM public.invites
+  WHERE created_by = current_user_id
+     OR pending_user_email = (
+       SELECT email FROM auth.users WHERE id = current_user_id
+     );
 
   -- 3. Delete user's memberships in lists
   -- This will cascade delete to lists if user is the only member (handled by trigger)
