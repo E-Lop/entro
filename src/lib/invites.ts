@@ -379,7 +379,7 @@ export async function getUserList(): Promise<ListResponse> {
       .from('list_members')
       .select('list_id')
       .eq('user_id', userData.user.id)
-      .single()
+      .maybeSingle()
 
     if (memberError) {
       console.error('[getUserList] Error querying list_members:', {
@@ -402,7 +402,7 @@ export async function getUserList(): Promise<ListResponse> {
       .from('lists')
       .select('*')
       .eq('id', memberData.list_id)
-      .single()
+      .maybeSingle()
 
     if (listError) {
       console.error('[getUserList] Error querying lists:', listError)
