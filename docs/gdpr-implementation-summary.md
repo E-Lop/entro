@@ -1,7 +1,7 @@
 # GDPR Implementation Summary - entro PWA
 
-**Data completamento**: 31 Gennaio 2026
-**Status**: ✅ **Fasi 1-5 Completate** | 🎉 **GDPR Compliance Completa**
+**Data completamento**: 1 Febbraio 2026
+**Status**: ✅ **Tutte le Fasi Completate** | 🎉 **GDPR Compliance Completa + Bug Fix Critici**
 
 ---
 
@@ -212,44 +212,109 @@ Implementare compliance GDPR completa per il lancio pubblico di entro in Italia/
 
 ---
 
-## 🚧 Implementazioni Mancanti Supabase
+## ✅ Implementazione RPC Function `delete_user` (COMPLETATA - 1 Feb 2026)
 
-### 1. RPC Function `delete_user` (CRITICO)
+### Implementazione Finale
 
-La funzione `delete_user()` chiamata in `DeleteAccountDialog.tsx` **non esiste ancora** in Supabase.
+**SQL Function** con hard delete completo implementata in `migrations/016_create_delete_user_function.sql`:
 
-**Implementazione necessaria**:
-
-Opzione A - **SQL Function** (raccomandato per semplicità):
 ```sql
-CREATE OR REPLACE FUNCTION delete_user()
+CREATE OR REPLACE FUNCTION public.delete_user()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
+DECLARE
+  current_user_id uuid;
 BEGIN
-  -- Delete user account from auth.users
-  DELETE FROM auth.users WHERE id = auth.uid();
+  current_user_id := auth.uid();
+
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  -- 1. Delete all foods
+  DELETE FROM public.foods WHERE user_id = current_user_id;
+
+  -- 2. Delete invites created by OR sent to user (CRITICAL for GDPR)
+  DELETE FROM public.invites
+  WHERE created_by = current_user_id
+     OR pending_user_email = (SELECT email FROM auth.users WHERE id = current_user_id);
+
+  -- 3. Delete list memberships
+  DELETE FROM public.list_members WHERE user_id = current_user_id;
+
+  -- 4. Delete orphaned lists
+  DELETE FROM public.lists
+  WHERE created_by = current_user_id
+  AND NOT EXISTS (SELECT 1 FROM public.list_members WHERE list_id = lists.id);
+
+  -- 5. Delete auth user
+  DELETE FROM auth.users WHERE id = current_user_id;
 END;
 $$;
 ```
 
-Opzione B - **Edge Function** (se serve logica complessa):
-- Crea Edge Function in `supabase/functions/delete-user/`
-- Usa Admin API per `supabase.auth.admin.deleteUser()`
+### Caratteristiche Implementate
 
-**Cascade Deletes (via RLS policies)**:
-- `foods` table: `ON DELETE CASCADE` per `user_id`
-- `list_members` table: `ON DELETE CASCADE` per `user_id`
-- `invites` table: `ON DELETE CASCADE` per `created_by`
-- `lists` table: gestione se creator è l'unico membro
+- ✅ **Hard Delete**: Eliminazione permanente (no soft delete)
+- ✅ **Cascade Manual**: Eliminazione esplicita di tutti i dati utente
+- ✅ **GDPR Art. 17**: Completa conformità diritto all'oblio
+- ✅ **Security**: `SECURITY DEFINER` per accesso auth schema
+- ✅ **Prevention**: Impedisce re-registrazione da ereditare vecchie liste
 
-### 2. Verifica RLS Policies
+### 🐛 Bug Critici Risolti (1 Feb 2026)
 
-Assicurati che le RLS policies permettano:
-- User può eliminare le proprie foods
-- User può eliminare le proprie memberships
-- User può eliminare i propri invites creati
+#### Bug #1: Inviti Destinati all'Utente Non Eliminati
+
+**Problema Trovato**:
+- `delete_user` eliminava solo inviti creati dall'utente (`created_by`)
+- NON eliminava inviti destinati all'utente (`pending_user_email`)
+- Violazione GDPR: re-registrazione auto-join a vecchie liste condivise
+
+**Impact**:
+- 🔴 Security: CRITICAL
+- 🔴 GDPR: Violazione Art. 17 (Right to Erasure)
+- 🔴 Privacy: Dati persistevano dopo cancellazione
+
+**Fix Implementato**:
+```sql
+-- PRIMA (bug):
+DELETE FROM invites WHERE created_by = current_user_id;
+
+-- DOPO (fix):
+DELETE FROM invites
+WHERE created_by = current_user_id
+   OR pending_user_email = (SELECT email FROM auth.users WHERE id = current_user_id);
+```
+
+**Test Eseguiti**:
+1. ✅ Eliminato account con lista condivisa
+2. ✅ Verificato eliminazione inviti destinati all'utente
+3. ✅ Re-registrazione con stessa email crea nuova lista personale
+4. ✅ NO auto-join a vecchie liste (comportamento corretto)
+
+#### Bug #2: getUserList() Crash su Liste Eliminate
+
+**Problema Trovato**:
+- `getUserList()` usava `.single()` che genera errore 406 se lista non esiste
+- Dopo eliminazione lista condivisa, altri utenti vedevano errori in console
+
+**Fix Implementato**:
+- Cambiato `.single()` → `.maybeSingle()` in `src/lib/invites.ts`
+- Gestione graceful di liste eliminate
+
+**Commit**: `65944ca - fix: handle deleted lists gracefully in getUserList`
+
+### Database Schema Verificato
+
+**Foreign Keys** (verificato che NON esistono da public → auth.users):
+- ❌ `foods.user_id` → NO FK verso `auth.users`
+- ❌ `list_members.user_id` → NO FK verso `auth.users`
+- ❌ `invites.created_by` → NO FK verso `auth.users`
+
+**Quindi**: Cascade delete manuale in `delete_user()` è NECESSARIO
 
 ---
 
@@ -261,11 +326,17 @@ Assicurati che le RLS policies permettano:
 - **Icone**: lucide-react (Shield, Download, AlertTriangle)
 - **Danger Zone**: Card con border-destructive
 
-### Delete Account Dialog
+### Delete Account Dialog (Aggiornato 1 Feb 2026)
 - **Conferma**: Password input required
 - **Warning**: AlertTriangle icon + testo rosso
 - **Count alimenti**: Mostra numero totale
 - **Button**: Testo esplicito "Capisco, elimina il mio account"
+- ✅ **Dettagli Tecnici** (NEW): Collapsible con progressive disclosure
+  - Button discreto "ⓘ Dettagli tecnici ▼"
+  - Nascosto di default (mobile-friendly, no muro di testo)
+  - Espandibile con tap/click
+  - Mostra: hard delete, backup 6 mesi, GDPR Art. 17
+  - Icone: Info, ChevronDown, ChevronUp
 
 ### Footer
 - **Posizione**: Bottom di Login/Signup pages
@@ -361,9 +432,10 @@ Quando compili il form audit Aruba, includi Ko-fi nelle terze parti:
 - [x] Cookie Banner: NON implementato (non necessario per cookie solo tecnici)
 
 ### Database Setup
-- [ ] Crea RPC function `delete_user()` in Supabase
-- [ ] Verifica RLS policies cascade delete
-- [ ] Test delete account in staging
+- [x] Crea RPC function `delete_user()` in Supabase ✅ (1 Feb 2026)
+- [x] Fix bug inviti destinati all'utente ✅ (1 Feb 2026)
+- [x] Verifica RLS policies cascade delete ✅ (1 Feb 2026)
+- [x] Test delete account in production ✅ (1 Feb 2026)
 
 ### Fase 6 - Testing
 - [ ] Test completo cookie banner
@@ -467,17 +539,75 @@ Pending: Aruba LegalBlink integration for cookie banner and legal docs"
 - [x] Routes `/settings`, `/privacy`, `/terms`
 - [x] Build production successful
 
-### ⏳ Da Completare
-- [ ] Aruba LegalBlink attivato
-- [ ] Privacy Policy da Aruba
-- [ ] Terms & Conditions da Aruba
-- [ ] Cookie banner integrato
-- [ ] RPC `delete_user` in Supabase
-- [ ] Test completo GDPR flow
-- [ ] Launch production ready
+### ✅ Completati (1 Feb 2026)
+- [x] Aruba LegalBlink attivato
+- [x] Privacy Policy da Aruba (link esterno)
+- [x] Terms & Conditions da Aruba (link esterno)
+- [x] Cookie Policy da Aruba (link esterno)
+- [x] RPC `delete_user` in Supabase (con fix bug inviti)
+- [x] Test completo GDPR flow (delete + re-registration)
+- [x] Dettagli tecnici UI (collapsible mobile-friendly)
+- [x] Fix getUserList() per liste eliminate
+- [x] **Launch production ready** ✅
+
+---
+
+## 🎯 Post-Implementation Testing (1 Feb 2026)
+
+### Test Eseguiti in Produzione
+
+**Test 1: Account Deletion con Lista Condivisa**
+- ✅ Eliminato account `edmondolopez@proton.me` (membro lista condivisa)
+- ✅ Verificato eliminazione completa dati:
+  - Foods eliminati
+  - List_members eliminato
+  - Inviti creati dall'utente eliminati
+  - ✅ **NEW**: Inviti destinati all'utente eliminati (fix bug)
+- ✅ Storage immagini eliminato
+- ✅ Toast successo + redirect login
+
+**Test 2: Re-Registration dello Stesso Utente**
+- ✅ Registrato nuovo account `edmondolopez@proton.me` (stessa email)
+- ✅ Confermata email
+- ✅ Login effettuato
+- ✅ **Verifica CRITICA**: Creata nuova lista personale (NO auto-join vecchia lista)
+- ✅ Comportamento corretto: account completamente "dimenticato"
+
+**Test 3: getUserList() con Liste Eliminate**
+- ✅ Account `edmondolopez@gmail.com` non vede più errori console
+- ✅ `.maybeSingle()` gestisce gracefully liste eliminate
+- ✅ No crash, no errori 406
+
+**Test 4: UI/UX Mobile**
+- ✅ Collapsible "Dettagli tecnici" funziona su mobile
+- ✅ No muro di testo, design pulito
+- ✅ Progressive disclosure efficace
+
+### Conformità GDPR Finale
+
+| Requisito GDPR | Status | Note |
+|----------------|--------|------|
+| Art. 17 - Right to Erasure | ✅ CONFORME | Hard delete completo |
+| Art. 20 - Data Portability | ✅ CONFORME | Export JSON implementato |
+| Hard Delete (no soft) | ✅ CONFORME | DELETE permanente dal DB |
+| Backup Retention | ✅ CONFORME | Max 6 mesi (policy Supabase) |
+| Re-registration Isolation | ✅ CONFORME | Fix bug inviti destinatari |
+| Trasparenza Utente | ✅ CONFORME | Dettagli tecnici in UI |
+| Privacy Policy | ✅ CONFORME | Aruba LegalBlink attivo |
+
+---
+
+## 📊 Summary Commits (1 Feb 2026)
+
+```bash
+b36a9e7 - fix: delete invites sent to user on account deletion (CRITICAL GDPR)
+b7befc7 - feat: add collapsible technical details to delete account dialog
+65944ca - fix: handle deleted lists gracefully in getUserList
+6fe3880 - fix: implement manual cascade delete in delete_user function
+```
 
 ---
 
 **Documento creato**: 31 Gennaio 2026
-**Ultima modifica**: 31 Gennaio 2026
-**Status**: Development Phase Complete | Awaiting Aruba & Supabase Setup
+**Ultima modifica**: 1 Febbraio 2026
+**Status**: ✅ **Production Ready** | 🎉 **GDPR Fully Compliant** | 🔒 **Security Bugs Fixed**
