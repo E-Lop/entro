@@ -234,7 +234,7 @@ export function DeleteAccountDialog() {
               handleDelete()
             }}
             disabled={isDeleting || !password.trim()}
-            className="bg-destructive hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isDeleting ? 'Eliminazione...' : 'Capisco, elimina il mio account'}
           </AlertDialogAction>

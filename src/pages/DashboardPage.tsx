@@ -551,7 +551,7 @@ export function DashboardPage() {
             <AlertDialogCancel>Annulla</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteFood}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina'}
