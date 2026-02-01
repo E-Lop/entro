@@ -29,18 +29,33 @@ BEGIN
     RAISE EXCEPTION 'Not authenticated';
   END IF;
 
-  -- Delete user from auth.users
-  -- This will cascade delete to related tables via foreign keys
+  -- IMPORTANT: Since there are no foreign key constraints from public tables to auth.users,
+  -- we must manually delete all user data before deleting the auth account.
+
+  -- 1. Delete all foods owned by the user
+  -- This will also cascade delete to related storage images via app logic
+  DELETE FROM public.foods WHERE user_id = current_user_id;
+
+  -- 2. Delete all invites created by the user
+  DELETE FROM public.invites WHERE created_by = current_user_id;
+
+  -- 3. Delete user's memberships in lists
+  -- This will cascade delete to lists if user is the only member (handled by trigger)
+  DELETE FROM public.list_members WHERE user_id = current_user_id;
+
+  -- 4. Delete any orphaned lists where user was the creator
+  -- Lists without members should have been deleted by the trigger above
+  DELETE FROM public.lists
+  WHERE created_by = current_user_id
+  AND NOT EXISTS (
+    SELECT 1 FROM public.list_members WHERE list_id = lists.id
+  );
+
+  -- 5. Finally, delete user from auth.users
   DELETE FROM auth.users WHERE id = current_user_id;
 
-  -- Note: The following are handled automatically:
-  -- - foods: ON DELETE CASCADE via user_id foreign key
-  -- - list_members: ON DELETE CASCADE via user_id foreign key
-  -- - invites: ON DELETE CASCADE via created_by foreign key
-  -- - lists: Handled by trigger if user is last member
-
   -- Log for debugging (optional, remove in production if not needed)
-  RAISE NOTICE 'User % deleted successfully', current_user_id;
+  RAISE NOTICE 'User % and all related data deleted successfully', current_user_id;
 END;
 $$;
 
