@@ -173,7 +173,7 @@ export function DeleteAccountDialog() {
               Attenzione: questa azione è irreversibile.
             </p>
             <p>Tutti i tuoi dati saranno eliminati permanentemente:</p>
-            <ul className="list-disc list-inside space-y-1 text-sm">
+            <ul className="list-disc pl-5 space-y-1 text-sm text-left">
               <li>Profilo utente</li>
               <li>
                 Tutti gli alimenti{' '}
