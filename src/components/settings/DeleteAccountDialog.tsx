@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, AlertTriangle } from 'lucide-react'
+import { Trash2, AlertTriangle, Info, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
@@ -39,6 +39,7 @@ export function DeleteAccountDialog() {
   const [password, setPassword] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [foodCount, setFoodCount] = useState<number | null>(null)
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
 
   // Fetch food count when dialog opens
   const handleOpenChange = async (isOpen: boolean) => {
@@ -184,6 +185,32 @@ export function DeleteAccountDialog() {
               <li>Liste condivise e appartenenze</li>
               <li>Inviti pendenti</li>
             </ul>
+
+            {/* Technical details collapsible */}
+            <button
+              type="button"
+              onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mt-3"
+            >
+              <Info className="h-3.5 w-3.5" />
+              <span>Dettagli tecnici</span>
+              {showTechnicalDetails ? (
+                <ChevronUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
+            </button>
+
+            {showTechnicalDetails && (
+              <div className="text-xs bg-muted/50 p-2.5 rounded-md space-y-1 border border-border/50">
+                <p className="font-medium">Modalità cancellazione:</p>
+                <ul className="space-y-0.5 pl-2">
+                  <li>• Eliminazione permanente dal database</li>
+                  <li>• Backup conservati max 6 mesi (policy provider)</li>
+                  <li>• Conforme GDPR Art. 17</li>
+                </ul>
+              </div>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
