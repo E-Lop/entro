@@ -106,7 +106,7 @@ export function AcceptInviteDialog({
               </p>
             </div>
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
@@ -167,7 +167,7 @@ export function AcceptInviteDialog({
               </div>
             </div>
 
-            <DialogFooter className="gap-2 sm:gap-0">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
