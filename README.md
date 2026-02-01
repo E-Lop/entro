@@ -13,6 +13,9 @@ Web app per gestire le date di scadenza degli alimenti con scansione barcode int
 - 📅 Vista calendario settimanale (rolling 7 giorni)
 - 🔍 Filtri avanzati e ricerca in tempo reale
 - 🔐 Autenticazione sicura con Supabase Auth
+- 🔒 GDPR compliant (data export, account deletion, Privacy Policy)
+- ⚙️ Settings page con gestione privacy e dati personali
+- 📄 Privacy Policy e Terms & Conditions (Aruba LegalBlink)
 - 🌓 Dark mode (light/dark/system)
 - ♿ WCAG AA accessibile
 - 📱 Progressive Web App installabile (iOS + Android)

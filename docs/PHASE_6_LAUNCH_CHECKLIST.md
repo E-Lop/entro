@@ -36,6 +36,25 @@ Release pubblica e raccolta feedback da utenti reali.
 - ✅ Cache headers per static assets (1 year immutable)
 - ✅ RLS policies documentate (vedi DATABASE_SCHEMA.md)
 
+### GDPR Compliance (Completato 1 Feb 2026)
+- ✅ Privacy Policy attivata (Aruba LegalBlink Advanced €47/anno)
+- ✅ Terms & Conditions integrati (link esterni nel footer)
+- ✅ Cookie Policy disponibile (Aruba LegalBlink)
+- ✅ Data export implementato (GDPR Art. 20 - Right to Data Portability)
+  - JSON completo con user, foods, lists
+  - Download con timestamp
+- ✅ Account deletion implementato (GDPR Art. 17 - Right to Erasure)
+  - Hard delete permanente (no soft delete)
+  - Conferma con password
+  - Eliminazione completa dati: foods, images, lists, invites
+  - Dettagli tecnici UI (collapsible mobile-friendly)
+- ✅ Supabase RPC `delete_user()` function creata
+  - Cascade delete manuale di tutti i dati utente
+  - Fix bug inviti destinatari (CRITICAL GDPR)
+- ✅ Settings page con sezioni Account, Privacy & Data, Danger Zone
+- ✅ Testing completo: delete + re-registration isolation verificato
+- ✅ Documentazione completa in `docs/gdpr-implementation-summary.md`
+
 ### Testing
 - ✅ Cross-browser testing completato (7 browsers, 0 bugs)
 - ✅ Accessibility WCAG AA compliant

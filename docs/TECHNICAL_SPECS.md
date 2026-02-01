@@ -607,6 +607,101 @@ export const logger = {
 
 Vedi [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) per dettagli completi sullo schema e migrations.
 
+---
+
+## 🔧 Supabase RPC Functions
+
+### delete_user() - GDPR Account Deletion
+
+**Purpose**: Permanently delete user account and all associated data (GDPR Art. 17).
+
+**Function Signature**:
+```sql
+CREATE FUNCTION public.delete_user()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+```
+
+**Security**:
+- `SECURITY DEFINER` allows function to access `auth.users` table
+- Only authenticated user can delete their own account (`auth.uid()` check)
+- Granted to `authenticated` role, revoked from `anon`
+
+**Deletion Order** (Critical for data integrity):
+```sql
+1. DELETE FROM foods WHERE user_id = current_user_id;
+2. DELETE FROM invites
+   WHERE created_by = current_user_id
+      OR pending_user_email = user.email;  -- CRITICAL: prevents re-registration issues
+3. DELETE FROM list_members WHERE user_id = current_user_id;
+4. DELETE FROM lists WHERE created_by = current_user_id AND no members;
+5. DELETE FROM auth.users WHERE id = current_user_id;
+```
+
+**Why Manual Cascade?**
+- No foreign key constraints from `public.*` tables to `auth.users`
+- Supabase doesn't support FK from public schema to auth schema
+- Manual DELETE ensures complete data removal
+
+**CRITICAL BUG FIX (1 Feb 2026)**:
+```sql
+-- BUG: Only deleted invites created BY user
+DELETE FROM invites WHERE created_by = current_user_id;
+
+-- FIX: Also delete invites sent TO user
+DELETE FROM invites
+WHERE created_by = current_user_id
+   OR pending_user_email = (SELECT email FROM auth.users WHERE id = current_user_id);
+```
+
+**Bug Impact**:
+- 🔴 Security: HIGH - User could re-register and auto-join old shared lists
+- 🔴 GDPR: CRITICAL - Violation of "right to be forgotten" (Art. 17)
+- ✅ Fix verified: Re-registration creates new personal list (isolation confirmed)
+
+**Data Deletion Scope**:
+| Data Type | Deletion Method | Notes |
+|-----------|-----------------|-------|
+| User profile | `DELETE FROM auth.users` | Permanent |
+| Foods | `DELETE FROM foods` | All user's food items |
+| Storage images | App logic (before RPC) | Via `supabase.storage.remove()` |
+| Invites (created) | `DELETE FROM invites` | Where `created_by = user` |
+| Invites (received) | `DELETE FROM invites` | Where `pending_user_email = email` |
+| List memberships | `DELETE FROM list_members` | All memberships |
+| Orphaned lists | `DELETE FROM lists` | If user was creator and only member |
+| localStorage | App logic (after RPC) | `localStorage.clear()` |
+
+**Hard Delete vs Soft Delete**:
+- ✅ **Hard Delete**: Permanent removal from database
+- ❌ **Soft Delete**: NOT used (GDPR requires complete erasure)
+- ℹ️ **Backups**: May persist in Supabase backups for max 6 months (GDPR compliant)
+
+**Usage in Frontend**:
+```typescript
+// DeleteAccountDialog.tsx
+const handleDelete = async () => {
+  // 1. Re-authenticate with password
+  await supabase.auth.signInWithPassword({ email, password });
+
+  // 2. Delete storage images
+  await supabase.storage.from('food-images').remove(imagePaths);
+
+  // 3. Call RPC to delete user account
+  await supabase.rpc('delete_user');
+
+  // 4. Clear local data
+  localStorage.clear();
+  sessionStorage.clear();
+
+  // 5. Logout + redirect
+  await signOut();
+  navigate('/login');
+};
+```
+
+---
+
 ## 🚀 Deployment Pipeline
 
 ```

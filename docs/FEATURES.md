@@ -896,6 +896,170 @@ const animation = prefersReducedMotion
 
 ---
 
+## 🔒 F8: Settings & Privacy (GDPR Compliance) ✅
+
+### F8.1 - Settings Page
+
+**User Story**: Come utente, voglio gestire il mio account e le impostazioni privacy per avere controllo sui miei dati personali.
+
+**Route**: `/settings` (protected)
+
+**Sezioni**:
+
+```typescript
+<SettingsPage>
+  {/* Account Section */}
+  <AccountSection>
+    <UserProfile
+      email={user.email}
+      fullName={user.user_metadata.full_name}
+    />
+  </AccountSection>
+
+  {/* Privacy & Data Section */}
+  <PrivacyDataSection>
+    <DataExportButton />
+    <LegalLinks>
+      <Link to="privacy">Privacy Policy</Link>
+      <Link to="terms">Terms & Conditions</Link>
+      <Link to="cookie">Cookie Policy</Link>
+    </LegalLinks>
+
+    {/* Technical Details (Collapsible) */}
+    <TechnicalDetails>
+      - Eliminazione permanente dal database (hard delete)
+      - Backup conservati max 6 mesi (policy provider)
+      - Conforme GDPR Art. 17
+    </TechnicalDetails>
+  </PrivacyDataSection>
+
+  {/* Danger Zone */}
+  <DangerZone>
+    <DeleteAccountDialog />
+  </DangerZone>
+</SettingsPage>
+```
+
+### F8.2 - Data Export (GDPR Art. 20)
+
+**User Story**: Come utente, voglio esportare tutti i miei dati in formato leggibile per portabilità.
+
+**Acceptance Criteria**:
+- ✅ Export completo di tutti i dati personali
+- ✅ Formato JSON machine-readable
+- ✅ Include: user profile, foods, lists, memberships
+- ✅ File scaricabile con timestamp
+- ✅ Nota su signed URLs immagini (scadenza 1 ora)
+
+**Export Schema**:
+```typescript
+{
+  exportDate: "2026-02-01T10:30:45.123Z",
+  user: {
+    id: "uuid",
+    email: "user@example.com",
+    fullName: "Mario Rossi",
+    createdAt: "2026-01-15T..."
+  },
+  foods: [/* tutti gli alimenti */],
+  lists: {
+    listId: "uuid",
+    listName: "La mia lista",
+    members: [/* array membri */]
+  },
+  note: "Image signed URLs expire in 1 hour"
+}
+```
+
+### F8.3 - Account Deletion (GDPR Art. 17)
+
+**User Story**: Come utente, voglio eliminare permanentemente il mio account e tutti i miei dati.
+
+**Acceptance Criteria**:
+- ✅ Richiede conferma password per sicurezza
+- ✅ Mostra warning chiaro con count alimenti
+- ✅ Hard delete permanente (no soft delete)
+- ✅ Elimina: profilo, foods, images, lists, invites
+- ✅ Clear localStorage/sessionStorage
+- ✅ Logout automatico + redirect login
+- ✅ Toast conferma eliminazione
+
+**Security Flow**:
+```typescript
+1. User apre DeleteAccountDialog
+2. Dialog mostra:
+   - Warning irreversibile
+   - Count alimenti da eliminare
+   - Lista dati eliminati
+   - [Opzionale] Dettagli tecnici collapsible
+3. User inserisce password
+4. Backend:
+   - Re-auth con password
+   - Delete images da Supabase Storage
+   - Call supabase.rpc('delete_user')
+   - Cascade deletes:
+     * foods (user_id = user)
+     * invites created by user
+     * invites sent to user (pending_user_email)
+     * list_members
+     * orphaned lists
+5. Clear local storage
+6. Logout + redirect
+```
+
+**Supabase RPC Function**:
+```sql
+CREATE FUNCTION public.delete_user()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE current_user_id uuid;
+BEGIN
+  current_user_id := auth.uid();
+
+  -- Manual cascade delete (no FK to auth.users)
+  DELETE FROM foods WHERE user_id = current_user_id;
+  DELETE FROM invites
+    WHERE created_by = current_user_id
+       OR pending_user_email = (SELECT email FROM auth.users WHERE id = current_user_id);
+  DELETE FROM list_members WHERE user_id = current_user_id;
+  DELETE FROM lists
+    WHERE created_by = current_user_id
+    AND NOT EXISTS (SELECT 1 FROM list_members WHERE list_id = lists.id);
+  DELETE FROM auth.users WHERE id = current_user_id;
+END;
+$$;
+```
+
+**CRITICAL BUG FIX (1 Feb 2026)**:
+- ⚠️ Bug: Inviti destinati all'utente non eliminati (solo created_by)
+- 🔴 Impact: Re-registration auto-join vecchie liste (violazione GDPR)
+- ✅ Fix: DELETE invites WHERE pending_user_email = user.email
+- ✅ Test: Re-registration crea nuova lista personale (isolation confermato)
+
+### F8.4 - Privacy Policy & Terms
+
+**Integration**: Aruba LegalBlink Advanced (€47/anno)
+
+**Documents**:
+- Privacy Policy per siti web (GDPR compliant)
+- Terms & Conditions
+- Cookie Policy
+
+**UI Integration**:
+- Footer links in Login/Signup pages
+- Settings page "Documenti Legali" section
+- Signup checkbox: "Accetto i [Termini] e la [Privacy Policy]"
+- Links open in new tab (target="_blank")
+
+**Backup Policy Transparency**:
+- Hard delete dal database operativo
+- Backup Supabase: max 6 mesi retention
+- Conforme GDPR (autorità EU: backup OK se temporanei)
+
+---
+
 ## 🔮 Future Ideas
 
 ### Advanced Features (Fase 5+)
