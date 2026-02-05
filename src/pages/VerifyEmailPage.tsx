@@ -37,13 +37,39 @@ export function VerifyEmailPage() {
   const [resendSuccess, setResendSuccess] = useState(false)
 
   useEffect(() => {
-    const emailParam = searchParams.get('email')
-    if (emailParam) {
-      setEmail(emailParam)
-    } else {
-      // If no email in URL, redirect to signup
+    async function loadEmail() {
+      // Try to get email from sessionStorage first (secure, not in URL)
+      const sessionEmail = sessionStorage.getItem('verify_email')
+      if (sessionEmail) {
+        setEmail(sessionEmail)
+        // Clear it after use for security
+        sessionStorage.removeItem('verify_email')
+        return
+      }
+
+      // Fallback: check URL param (legacy support)
+      const emailParam = searchParams.get('email')
+      if (emailParam) {
+        setEmail(emailParam)
+        return
+      }
+
+      // Last fallback: try to get from Supabase session
+      try {
+        const { data } = await supabase.auth.getUser()
+        if (data.user?.email) {
+          setEmail(data.user.email)
+          return
+        }
+      } catch (error) {
+        console.error('Error getting user email:', error)
+      }
+
+      // If no email found anywhere, redirect to signup
       navigate('/signup', { replace: true })
     }
+
+    loadEmail()
   }, [searchParams, navigate])
 
   // Redirect to home if already authenticated

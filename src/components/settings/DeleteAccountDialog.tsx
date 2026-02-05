@@ -126,11 +126,7 @@ export function DeleteAccountDialog() {
         )
       }
 
-      // Step 4: Clear local storage
-      localStorage.clear()
-      sessionStorage.clear()
-
-      // Step 5: Sign out
+      // Step 4: Sign out and clear all storage
       await signOut()
 
       // Step 6: Show success message and redirect

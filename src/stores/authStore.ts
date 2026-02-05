@@ -78,6 +78,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const session = await getSession()
       const user = await getCurrentUser()
 
+      // Enhanced logging for security debugging
+      console.log('[authStore] Initializing with session:', {
+        hasSession: !!session,
+        hasUser: !!user,
+        userId: user?.id,
+        email: user?.email,
+        url: window.location.href,
+        hasUrlToken: window.location.hash.includes('access_token'),
+        localStorage: !!localStorage.getItem('sb-' + import.meta.env.VITE_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token'),
+      })
+
       set({
         user,
         session,
@@ -175,12 +186,62 @@ export const useAuthStore = create<AuthStore>((set) => ({
         checkAndAcceptInvite(user)
       }
 
+      // Security: Remove auth tokens from URL after they've been processed
+      // This prevents accidental sharing of URLs with active tokens
+      if (window.location.hash.includes('access_token') || window.location.hash.includes('refresh_token')) {
+        console.log('[authStore] Removing auth tokens from URL for security')
+        // Use replaceState to avoid adding to browser history
+        const cleanUrl = window.location.pathname + window.location.search
+        window.history.replaceState({}, document.title, cleanUrl)
+      }
+
       // Track previous auth state to detect login
       let wasAuthenticated = user !== null
 
       // Setup auth state change listener
       const unsubscribe = onAuthStateChange((event, user, session) => {
         const isNowAuthenticated = user !== null
+
+        // Check if this is an explicit user action or auto-login
+        const hasExplicitAuthFlag = sessionStorage.getItem('explicit_auth')
+        const isAutoLogin = !wasAuthenticated && isNowAuthenticated && !hasExplicitAuthFlag
+
+        // List of auth events that are considered safe and expected
+        const authorizedAutoLoginEvents = [
+          'PASSWORD_RECOVERY',  // User clicked password reset link
+          'SIGNED_IN',          // User signed in (could be via magic link)
+          'TOKEN_REFRESHED',    // Existing session refreshed
+          'USER_UPDATED',       // User data updated
+        ]
+
+        // Enhanced logging for security debugging
+        console.log('[authStore] Auth state changed:', {
+          event,
+          isAuthenticated: isNowAuthenticated,
+          userId: user?.id,
+          email: user?.email,
+          sessionId: session?.access_token?.substring(0, 10) + '...',
+          url: window.location.href,
+          hasUrlToken: window.location.hash.includes('access_token'),
+          isAutoLogin,
+          hasExplicitAuthFlag: !!hasExplicitAuthFlag,
+          isAuthorized: authorizedAutoLoginEvents.includes(event),
+        })
+
+        // Security check: warn about unexpected auto-login
+        if (isAutoLogin && !authorizedAutoLoginEvents.includes(event)) {
+          console.warn('[authStore] ⚠️  SECURITY: Unexpected auto-login detected!', {
+            event,
+            url: window.location.href,
+            email: user?.email,
+            suggestion: 'This could be from a shared URL with auth token. User should logout if this was not intentional.',
+          })
+        }
+
+        // Mark auto-login from authorized events as explicit for future checks
+        if (isAutoLogin && authorizedAutoLoginEvents.includes(event)) {
+          sessionStorage.setItem('explicit_auth', Date.now().toString())
+        }
 
         set({
           user,
@@ -191,7 +252,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         // Skip invite checks and redirects during password recovery flow
         if (event === 'PASSWORD_RECOVERY') {
-          console.log('Password recovery session detected - staying on reset page')
+          console.log('[authStore] Password recovery session detected - staying on reset page')
           return
         }
 

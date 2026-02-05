@@ -34,6 +34,11 @@ export async function signUp(
       throw new Error(error.message)
     }
 
+    // Mark this as an explicit user action (not auto-login from URL)
+    if (data.session) {
+      sessionStorage.setItem('explicit_auth', Date.now().toString())
+    }
+
     return {
       user: data.user,
       session: data.session,
@@ -65,6 +70,11 @@ export async function signIn(
       throw new Error(error.message)
     }
 
+    // Mark this as an explicit user action (not auto-login from URL)
+    if (data.session) {
+      sessionStorage.setItem('explicit_auth', Date.now().toString())
+    }
+
     return {
       user: data.user,
       session: data.session,
@@ -81,14 +91,21 @@ export async function signIn(
 
 /**
  * Sign out the current user and clear session
+ * Also clears all local and session storage to prevent session persistence
  */
 export async function signOut(): Promise<{ error: Error | null }> {
   try {
+    // Sign out from Supabase
     const { error } = await supabase.auth.signOut()
 
     if (error) {
       throw new Error(error.message)
     }
+
+    // Clear all storage to prevent any session persistence
+    // This is critical for security in incognito mode
+    localStorage.clear()
+    sessionStorage.clear()
 
     return { error: null }
   } catch (error) {

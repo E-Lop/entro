@@ -10,12 +10,33 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Create Supabase client
+/**
+ * Create Supabase client with auth configuration
+ *
+ * SECURITY NOTE - detectSessionInUrl: true
+ * This setting allows Supabase to automatically extract authentication tokens from URLs.
+ * It is REQUIRED for:
+ * - Password reset flows (user clicks email link with #access_token=...)
+ * - Magic link authentication (passwordless login)
+ * - OAuth provider redirects
+ *
+ * IMPORTANT: This means users can be automatically logged in if they:
+ * - Click a password reset link (even in incognito mode)
+ * - Access a URL with an active auth token in the fragment
+ * - Are redirected from an OAuth provider
+ *
+ * This is NORMAL and EXPECTED behavior. If you see unexpected auto-login:
+ * 1. Check if there's a #access_token= in the URL
+ * 2. Check browser DevTools → Application → Local Storage for auth tokens
+ * 3. Verify the auth event type in authStore logging
+ *
+ * DO NOT disable this unless you want to break password reset functionality.
+ */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true,
+    detectSessionInUrl: true, // Required for password reset and magic links
   },
   realtime: {
     params: {

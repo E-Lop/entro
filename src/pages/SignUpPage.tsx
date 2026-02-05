@@ -109,9 +109,11 @@ export function SignUpPage() {
         }
       }
 
-      // Redirect to verify email page
+      // Save email in sessionStorage (secure, not exposed in URL)
+      // and redirect to verify email page
       if (email) {
-        navigate(`/verify-email?email=${encodeURIComponent(email)}`)
+        sessionStorage.setItem('verify_email', email)
+        navigate('/verify-email')
       }
     } catch (error) {
       console.error('Post-signup error:', error)
