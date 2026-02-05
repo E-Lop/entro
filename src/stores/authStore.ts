@@ -86,7 +86,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
         email: user?.email,
         url: window.location.href,
         hasUrlToken: window.location.hash.includes('access_token'),
-        localStorage: !!localStorage.getItem('sb-' + import.meta.env.VITE_SUPABASE_URL?.split('//')[1]?.split('.')[0] + '-auth-token'),
       })
 
       set({
