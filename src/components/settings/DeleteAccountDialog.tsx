@@ -34,7 +34,7 @@ import { Label } from '../ui/label'
  */
 export function DeleteAccountDialog() {
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -126,10 +126,38 @@ export function DeleteAccountDialog() {
         )
       }
 
-      // Step 4: Sign out and clear all storage
-      await signOut()
+      // Step 4: Clear local session only (account already deleted from server)
+      // Use scope: 'local' to avoid 400 error when trying to invalidate deleted account
+      await supabase.auth.signOut({ scope: 'local' })
 
-      // Step 6: Show success message and redirect
+      // Clear auth-related storage manually (since we're not using our signOut() function)
+      const localStorageKeysToRemove: string[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key && (
+          key.startsWith('sb-') ||
+          key === 'supabase.auth.token' ||
+          key === 'show_welcome_toast'
+        )) {
+          localStorageKeysToRemove.push(key)
+        }
+      }
+      localStorageKeysToRemove.forEach(key => localStorage.removeItem(key))
+
+      const sessionStorageKeysToRemove: string[] = []
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i)
+        if (key && (
+          key.startsWith('user_initialized_') ||
+          key === 'explicit_auth' ||
+          key === 'verify_email'
+        )) {
+          sessionStorageKeysToRemove.push(key)
+        }
+      }
+      sessionStorageKeysToRemove.forEach(key => sessionStorage.removeItem(key))
+
+      // Step 5: Show success message and redirect
       toast.success('Account eliminato con successo', {
         description: 'Tutti i tuoi dati sono stati rimossi.',
       })
