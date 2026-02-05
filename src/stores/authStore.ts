@@ -78,16 +78,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const session = await getSession()
       const user = await getCurrentUser()
 
-      // Enhanced logging for security debugging
-      console.log('[authStore] Initializing with session:', {
-        hasSession: !!session,
-        hasUser: !!user,
-        userId: user?.id,
-        email: user?.email,
-        url: window.location.href,
-        hasUrlToken: window.location.hash.includes('access_token'),
-      })
-
       set({
         user,
         session,
@@ -97,51 +87,28 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // Check invite acceptance and list initialization helper
       const checkAndAcceptInvite = async (user: User) => {
-        console.log('[authStore] checkAndAcceptInvite starting for user:', {
-          userId: user.id,
-          email: user.email,
-          emailVerified: user.email_confirmed_at,
-        })
-
         const processedKey = `user_initialized_${user.email}`
 
         try {
           // FIRST: Check if user already has a list (most common case after initial setup)
-          console.log('[authStore] Checking if user has existing list')
-          const { list, error: listError } = await getUserList()
-
-          console.log('[authStore] getUserList result:', {
-            hasListId: list?.id,
-            error: listError?.message,
-          })
+          const { list } = await getUserList()
 
           if (list) {
             // User has a list, mark as processed and we're done
-            console.log('[authStore] User already has a list, marking as processed')
             sessionStorage.setItem(processedKey, 'true')
             return
           }
 
           // SECOND: User doesn't have a list, check if already processed this session
           if (sessionStorage.getItem(processedKey)) {
-            console.log('[authStore] User has no list but already processed in this session')
-            console.warn('[authStore] This might indicate a previous operation failed')
             // Clear the flag to allow retry
             sessionStorage.removeItem(processedKey)
           }
 
           // THIRD: Try to accept any pending invite
-          console.log('[authStore] User has no list, attempting to accept pending invite')
           const { success: inviteAccepted, listId, error } = await acceptInviteByEmail()
 
-          console.log('[authStore] acceptInviteByEmail result:', {
-            success: inviteAccepted,
-            listId,
-            error: error?.message,
-          })
-
           if (inviteAccepted && listId) {
-            console.log('[authStore] Invite accepted successfully, reloading to show new list')
             // Store flag to show toast after reload
             localStorage.setItem('show_welcome_toast', 'true')
             // Refresh the page to load the new list data
@@ -154,16 +121,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
           }
 
           // FOURTH: No pending invite (or invite failed), create a personal list
-          console.log('[authStore] Creating personal list for new user...')
           const { success: listCreated, error: createError } = await createPersonalList()
 
-          console.log('[authStore] createPersonalList result:', {
-            success: listCreated,
-            error: createError?.message,
-          })
-
           if (listCreated) {
-            console.log('[authStore] Personal list created successfully, reloading')
             // Refresh to load the new list
             // Note: We DON'T set the processed flag here - we'll check again after reload
             window.location.reload()
@@ -188,7 +148,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       // Security: Remove auth tokens from URL after they've been processed
       // This prevents accidental sharing of URLs with active tokens
       if (window.location.hash.includes('access_token') || window.location.hash.includes('refresh_token')) {
-        console.log('[authStore] Removing auth tokens from URL for security')
         // Use replaceState to avoid adding to browser history
         const cleanUrl = window.location.pathname + window.location.search
         window.history.replaceState({}, document.title, cleanUrl)
@@ -212,20 +171,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
           'TOKEN_REFRESHED',    // Existing session refreshed
           'USER_UPDATED',       // User data updated
         ]
-
-        // Enhanced logging for security debugging
-        console.log('[authStore] Auth state changed:', {
-          event,
-          isAuthenticated: isNowAuthenticated,
-          userId: user?.id,
-          email: user?.email,
-          sessionId: session?.access_token?.substring(0, 10) + '...',
-          url: window.location.href,
-          hasUrlToken: window.location.hash.includes('access_token'),
-          isAutoLogin,
-          hasExplicitAuthFlag: !!hasExplicitAuthFlag,
-          isAuthorized: authorizedAutoLoginEvents.includes(event),
-        })
 
         // Security check: warn about unexpected auto-login
         if (isAutoLogin && !authorizedAutoLoginEvents.includes(event)) {
@@ -251,7 +196,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         // Skip invite checks and redirects during password recovery flow
         if (event === 'PASSWORD_RECOVERY') {
-          console.log('[authStore] Password recovery session detected - staying on reset page')
           return
         }
 
