@@ -91,7 +91,8 @@ export async function signIn(
 
 /**
  * Sign out the current user and clear session
- * Also clears all local and session storage to prevent session persistence
+ * Selectively clears auth-related storage to prevent session persistence
+ * while preserving app settings and service worker data
  */
 export async function signOut(): Promise<{ error: Error | null }> {
   try {
@@ -102,10 +103,34 @@ export async function signOut(): Promise<{ error: Error | null }> {
       throw new Error(error.message)
     }
 
-    // Clear all storage to prevent any session persistence
-    // This is critical for security in incognito mode
-    localStorage.clear()
-    sessionStorage.clear()
+    // Selectively clear only auth-related data from localStorage
+    // This preserves service worker cache, theme, and other app settings
+    const localStorageKeysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (
+        key.startsWith('sb-') ||           // Supabase auth keys
+        key === 'supabase.auth.token' ||   // Legacy Supabase key
+        key === 'show_welcome_toast'       // User-specific flag
+      )) {
+        localStorageKeysToRemove.push(key)
+      }
+    }
+    localStorageKeysToRemove.forEach(key => localStorage.removeItem(key))
+
+    // Clear auth-related sessionStorage
+    const sessionStorageKeysToRemove: string[] = []
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i)
+      if (key && (
+        key.startsWith('user_initialized_') || // User initialization flags
+        key === 'explicit_auth' ||             // Explicit auth tracking
+        key === 'verify_email'                 // Email verification
+      )) {
+        sessionStorageKeysToRemove.push(key)
+      }
+    }
+    sessionStorageKeysToRemove.forEach(key => sessionStorage.removeItem(key))
 
     return { error: null }
   } catch (error) {
