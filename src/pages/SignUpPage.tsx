@@ -84,17 +84,11 @@ export function SignUpPage() {
         if (!success) {
           console.error('Failed to register pending invite:', error)
         }
+      }
 
-        toast.info(
-          'Registrazione completata! Controlla la tua email e clicca sul link di conferma per unirti alla lista condivisa.',
-          { duration: 12000 }
-        )
-      } else {
-        // Signup senza invito - la lista personale verrà creata automaticamente al primo login
-        toast.success(
-          'Registrazione completata! Controlla la tua email per confermare l\'account.',
-          { duration: 10000 }
-        )
+      // Redirect to verify email page
+      if (email) {
+        navigate(`/verify-email?email=${encodeURIComponent(email)}`)
       }
     } catch (error) {
       console.error('Post-signup error:', error)

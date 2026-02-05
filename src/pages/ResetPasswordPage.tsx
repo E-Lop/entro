@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { updatePassword } from '../lib/auth'
 import { resetPasswordSchema, type ResetPasswordFormData } from '../lib/validations/auth.schemas'
 import { Button } from '../components/ui/button'
@@ -91,6 +91,16 @@ export default function ResetPasswordPage() {
                       </div>
                     </FormControl>
                     <FormMessage />
+                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      <p className="font-medium">La password deve contenere:</p>
+                      <ul className="space-y-0.5 ml-1">
+                        <li>• Almeno 8 caratteri</li>
+                        <li>• Una lettera maiuscola (A-Z)</li>
+                        <li>• Una lettera minuscola (a-z)</li>
+                        <li>• Un numero (0-9)</li>
+                        <li>• Un carattere speciale (!@#$%...)</li>
+                      </ul>
+                    </div>
                   </FormItem>
                 )}
               />
@@ -131,6 +141,7 @@ export default function ResetPasswordPage() {
               />
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSubmitting ? 'Aggiornamento in corso...' : 'Aggiorna password'}
               </Button>
             </form>

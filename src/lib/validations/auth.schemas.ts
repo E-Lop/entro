@@ -1,6 +1,30 @@
 import { z } from 'zod'
 
-// Login schema: email + password (min 6 chars per Supabase requirement)
+// Password validation regex patterns
+const hasUpperCase = /[A-Z]/
+const hasLowerCase = /[a-z]/
+const hasNumber = /[0-9]/
+const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/
+
+// Strong password validation
+const strongPasswordSchema = z
+  .string()
+  .min(8, 'La password deve contenere almeno 8 caratteri')
+  .max(72, 'La password non può superare 72 caratteri')
+  .refine((password) => hasUpperCase.test(password), {
+    message: 'La password deve contenere almeno una lettera maiuscola',
+  })
+  .refine((password) => hasLowerCase.test(password), {
+    message: 'La password deve contenere almeno una lettera minuscola',
+  })
+  .refine((password) => hasNumber.test(password), {
+    message: 'La password deve contenere almeno un numero',
+  })
+  .refine((password) => hasSpecialChar.test(password), {
+    message: 'La password deve contenere almeno un carattere speciale (!@#$%^&*...)',
+  })
+
+// Login schema: email + password (less strict for login)
 export const loginSchema = z.object({
   email: z
     .string()
@@ -8,7 +32,7 @@ export const loginSchema = z.object({
     .email('Email non valida'),
   password: z
     .string()
-    .min(6, 'La password deve contenere almeno 6 caratteri'),
+    .min(1, 'Password richiesta'),
 })
 
 // Signup schema: full_name + email + password + confirmPassword (passwords must match)
@@ -24,10 +48,7 @@ export const signupSchema = z
       .string()
       .min(1, 'Email richiesta')
       .email('Email non valida'),
-    password: z
-      .string()
-      .min(6, 'La password deve contenere almeno 6 caratteri')
-      .max(72, 'La password non può superare 72 caratteri'),
+    password: strongPasswordSchema,
     confirmPassword: z
       .string()
       .min(1, 'Conferma password richiesta'),
@@ -48,10 +69,7 @@ export const forgotPasswordSchema = z.object({
 // Reset password schema: new password + confirm password
 export const resetPasswordSchema = z
   .object({
-    password: z
-      .string()
-      .min(6, 'La password deve contenere almeno 6 caratteri')
-      .max(72, 'La password non può superare 72 caratteri'),
+    password: strongPasswordSchema,
     confirmPassword: z
       .string()
       .min(1, 'Conferma password richiesta'),

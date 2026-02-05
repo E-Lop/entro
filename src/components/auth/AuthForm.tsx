@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { loginSchema, signupSchema, type LoginFormData, type SignupFormData } from '../../lib/validations/auth.schemas'
 import { Button } from '../ui/button'
@@ -149,6 +149,18 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
                 </div>
               </FormControl>
               <FormMessage />
+              {mode === 'signup' && (
+                <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                  <p className="font-medium">La password deve contenere:</p>
+                  <ul className="space-y-0.5 ml-1">
+                    <li>• Almeno 8 caratteri</li>
+                    <li>• Una lettera maiuscola (A-Z)</li>
+                    <li>• Una lettera minuscola (a-z)</li>
+                    <li>• Un numero (0-9)</li>
+                    <li>• Un carattere speciale (!@#$%...)</li>
+                  </ul>
+                </div>
+              )}
             </FormItem>
           )}
         />
@@ -197,6 +209,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
           className="w-full"
           disabled={isSubmitting || disableSubmit}
         >
+          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isSubmitting
             ? mode === 'login'
               ? 'Accesso in corso...'
