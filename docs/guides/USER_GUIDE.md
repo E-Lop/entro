@@ -25,7 +25,12 @@
 
 1. Vai su https://entroapp.it
 2. Clicca su "Crea account"
-3. Inserisci la tua email e una password (minimo 6 caratteri)
+3. Inserisci la tua email e una password sicura che contenga:
+   - Minimo 8 caratteri
+   - Almeno una lettera maiuscola (A-Z)
+   - Almeno una lettera minuscola (a-z)
+   - Almeno un numero (0-9)
+   - Almeno un carattere speciale (!@#$%^&*...)
 4. Controlla la tua email per il link di conferma (arriva da `noreply@entroapp.it`)
 5. Clicca il link per attivare l'account
 
@@ -45,7 +50,12 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 4. Clicca **"Invia link di reset"**
 5. Controlla la tua **casella email** (anche spam/posta indesiderata) - l'email arriva da `noreply@entroapp.it`
 6. Clicca sul **link nell'email** per reimpostare la password
-7. Inserisci la tua **nuova password** (minimo 6 caratteri)
+7. Inserisci la tua **nuova password sicura** che contenga:
+   - Minimo 8 caratteri
+   - Almeno una lettera maiuscola (A-Z)
+   - Almeno una lettera minuscola (a-z)
+   - Almeno un numero (0-9)
+   - Almeno un carattere speciale (!@#$%^&*...)
 8. Clicca **"Aggiorna password"**
 9. Verrai automaticamente reindirizzato alla dashboard
 
@@ -198,8 +208,9 @@ Se hai ricevuto un codice invito, hai due modi per usarlo:
 
 **Completamento Registrazione**:
 - Inserisci il tuo **nome** e **email**
-- Crea una **password** sicura
+- Crea una **password sicura** (minimo 8 caratteri con maiuscola, minuscola, numero e simbolo)
 - Clicca **"Crea Account"**
+- Verrai reindirizzato a una pagina di conferma
 - Controlla la tua email per il **link di conferma** (arriva da `noreply@entroapp.it`)
 - Clicca il link di conferma
 - Verrai automaticamente aggiunto alla lista condivisa!
@@ -373,4 +384,4 @@ Per segnalare problemi o suggerire miglioramenti:
 
 ---
 
-*Ultimo aggiornamento: 26 gennaio 2026*
+*Ultimo aggiornamento: 5 febbraio 2026*
