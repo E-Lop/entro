@@ -117,7 +117,7 @@ serve(async (req) => {
     expiresAt.setDate(expiresAt.getDate() + 7)
 
     // Create invite - SEMPLIFICATO
-    const { data: inviteData, error: inviteError } = await supabaseClient
+    const { error: inviteError } = await supabaseClient
       .from('invites')
       .insert({
         list_id: listId,

@@ -43,7 +43,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
       // Success - mostra codice
       setInviteCode(result.shortCode)
 
-    } catch (error) {
+    } catch {
       toast.error('Si è verificato un errore. Riprova.')
     } finally {
       setIsLoading(false)
@@ -75,7 +75,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
     if (navigator.share) {
       try {
         await navigator.share(shareData)
-      } catch (err) {
+      } catch {
         // User cancelled, ignore
       }
     } else {

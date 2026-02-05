@@ -49,6 +49,33 @@ cp .env.example .env.local
 npm run dev
 ```
 
+### Environment Variables
+
+Il file `.env.example` contiene tutte le variabili configurabili. Copia in `.env.local` e personalizza:
+
+#### Obbligatorie:
+```bash
+VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key-here
+VITE_APP_URL=http://localhost:5173  # o https://your-domain.com in produzione
+```
+
+#### Opzionali (Feature Flags):
+```bash
+VITE_ENABLE_BARCODE_SCANNER=true
+VITE_ENABLE_SWIPE_GESTURES=true
+VITE_ENABLE_SHARED_LISTS=true
+```
+
+#### Opzionali (Support & Analytics):
+```bash
+VITE_KOFI_URL=  # lascia vuoto per nascondere il bottone Ko-fi
+# VITE_ANALYTICS_ENABLED=false
+# VITE_PLAUSIBLE_DOMAIN=your-domain.com
+```
+
+Vedi `.env.example` per l'elenco completo con descrizioni dettagliate.
+
 ### Configurazione Supabase
 
 1. Crea un progetto su [supabase.com](https://supabase.com)

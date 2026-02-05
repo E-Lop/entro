@@ -97,6 +97,7 @@ From [ROADMAP.md](docs/ROADMAP.md), Phase 1, Week 1:
 2. [ ] Setup Supabase client in app
 3. [ ] Create TypeScript types for database
 4. [ ] Implement auth flow (signup/login/logout)
+   - **Password requirements**: Min 8 chars, uppercase, lowercase, number, special char (!@#$%^&*...)
 
 **Day 3-4: Core Components**
 5. [ ] Create layout with navigation

@@ -82,7 +82,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
     })
 
     // 5. Fetch lists and memberships
-    let listData = {
+    const listData = {
       listId: null as string | null,
       listName: null as string | null,
       createdBy: null as string | null,

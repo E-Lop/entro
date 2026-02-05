@@ -44,6 +44,21 @@ import { cn } from '@/lib/utils'
  */
 const INSTRUCTION_CARD_KEY = 'entro_hasSeenInstructionCard'
 
+/**
+ * Determine which empty state to show when there are no foods
+ */
+type EmptyStateType = 'filtered' | 'instruction' | 'no-foods'
+
+function getEmptyStateType(activeFiltersCount: number, showInstructionCard: boolean): EmptyStateType {
+  if (activeFiltersCount > 0) {
+    return 'filtered'
+  }
+  if (showInstructionCard) {
+    return 'instruction'
+  }
+  return 'no-foods'
+}
+
 export function DashboardPage() {
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -246,7 +261,8 @@ export function DashboardPage() {
     }
 
     // Exclude image_url from spread since we handle it separately
-    const { image_url: _, ...dataWithoutImage } = data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { image_url: _imageUrl, ...dataWithoutImage } = data
 
     const foodData: FoodUpdate = {
       ...dataWithoutImage,
@@ -376,58 +392,69 @@ export function DashboardPage() {
           </div>
         </div>
       ) : foods.length === 0 ? (
-        activeFiltersCount > 0 ? (
-          // Empty state for filtered results
-          <Card>
-            <CardContent className="py-12">
-              <div className="flex flex-col items-center justify-center text-center">
-                <ShoppingBasket className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Nessun risultato trovato
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-sm mb-6">
-                  Non ci sono alimenti che corrispondono ai filtri selezionati.
-                  Prova a modificare i criteri di ricerca o cancella i filtri.
-                </p>
-                <Button onClick={handleClearFilters} variant="outline">
-                  <X className="h-4 w-4 mr-2" />
-                  Cancella tutti i filtri
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ) : showInstructionCard ? (
-          // Instruction card for first-time users (mobile swipe demo)
-          <div className="max-w-md mx-auto">
-            <InstructionCard onDismiss={handleDismissInstructionCard} />
-          </div>
-        ) : (
-          // Empty state for no foods at all (after instruction card dismissed)
-          <Card>
-            <CardHeader>
-              <CardTitle>I Tuoi Alimenti</CardTitle>
-              <CardDescription>
-                Qui appariranno tutti gli alimenti che aggiungerai
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <ShoppingBasket className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  Nessun alimento ancora
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-sm mb-6">
-                  Inizia ad aggiungere gli alimenti dalla tua dispensa, frigo o freezer
-                  per tenere traccia delle scadenze.
-                </p>
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Aggiungi il primo alimento
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )
+        // Render appropriate empty state based on context
+        (() => {
+          const emptyStateType = getEmptyStateType(activeFiltersCount, showInstructionCard)
+
+          switch (emptyStateType) {
+            case 'filtered':
+              return (
+                <Card>
+                  <CardContent className="py-12">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <ShoppingBasket className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        Nessun risultato trovato
+                      </h3>
+                      <p className="text-sm text-muted-foreground max-w-sm mb-6">
+                        Non ci sono alimenti che corrispondono ai filtri selezionati.
+                        Prova a modificare i criteri di ricerca o cancella i filtri.
+                      </p>
+                      <Button onClick={handleClearFilters} variant="outline">
+                        <X className="h-4 w-4 mr-2" />
+                        Cancella tutti i filtri
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+
+            case 'instruction':
+              return (
+                <div className="max-w-md mx-auto">
+                  <InstructionCard onDismiss={handleDismissInstructionCard} />
+                </div>
+              )
+
+            case 'no-foods':
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>I Tuoi Alimenti</CardTitle>
+                    <CardDescription>
+                      Qui appariranno tutti gli alimenti che aggiungerai
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <ShoppingBasket className="h-16 w-16 text-muted-foreground/50 mb-4" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        Nessun alimento ancora
+                      </h3>
+                      <p className="text-sm text-muted-foreground max-w-sm mb-6">
+                        Inizia ad aggiungere gli alimenti dalla tua dispensa, frigo o freezer
+                        per tenere traccia delle scadenze.
+                      </p>
+                      <Button onClick={() => setIsAddDialogOpen(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Aggiungi il primo alimento
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+          }
+        })()
       ) : (
         <div>
           {/* View Mode Toggle */}

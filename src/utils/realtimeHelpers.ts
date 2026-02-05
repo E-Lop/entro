@@ -92,6 +92,7 @@ export function getChannelName(table: string, listId: string): string {
 /**
  * Throttle function - execute at most once per interval
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function throttle<T extends (...args: any[]) => void>(
   func: T,
   limitMs: number,
@@ -99,6 +100,7 @@ export function throttle<T extends (...args: any[]) => void>(
   let lastRan = 0;
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function (this: any, ...args: Parameters<T>) {
     const now = Date.now();
 
@@ -122,12 +124,14 @@ export function throttle<T extends (...args: any[]) => void>(
 /**
  * Debounce function - execute after delay of inactivity
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => void>(
   func: T,
   delayMs: number,
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function (this: any, ...args: Parameters<T>) {
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {

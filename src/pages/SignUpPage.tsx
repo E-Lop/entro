@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthForm } from '../components/auth/AuthForm'
@@ -10,6 +10,29 @@ import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { validateInvite, registerPendingInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
+
+function getSignUpDescription(
+  inviteLoading: boolean,
+  inviteValid: boolean,
+  inviteCreatorName: string
+): ReactNode {
+  if (inviteLoading) {
+    return (
+      <span className="flex items-center justify-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Verifica invito...
+      </span>
+    )
+  }
+  if (inviteValid) {
+    return (
+      <span className="text-primary font-medium">
+        {inviteCreatorName} ti ha invitato a condividere la sua lista!
+      </span>
+    )
+  }
+  return 'Inizia a tracciare le scadenze dei tuoi alimenti'
+}
 
 export function SignUpPage() {
   const navigate = useNavigate()
@@ -115,18 +138,7 @@ export function SignUpPage() {
               Crea il tuo account
             </CardTitle>
             <CardDescription className="text-center">
-              {inviteLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Verifica invito...
-                </span>
-              ) : inviteValid ? (
-                <span className="text-primary font-medium">
-                  {inviteCreatorName} ti ha invitato a condividere la sua lista!
-                </span>
-              ) : (
-                'Inizia a tracciare le scadenze dei tuoi alimenti'
-              )}
+              {getSignUpDescription(inviteLoading, inviteValid, inviteCreatorName)}
             </CardDescription>
           </CardHeader>
 

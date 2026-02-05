@@ -184,7 +184,7 @@ export async function createFood(foodData: FoodInsert): Promise<FoodResponse> {
         .single()
 
       listId = listMemberData?.list_id || null
-    } catch (listError) {
+    } catch {
       // If user has no list yet (shouldn't happen with auto-creation trigger),
       // continue with list_id = null (personal food)
       console.warn('No list found for user, creating personal food')

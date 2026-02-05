@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
@@ -7,6 +7,26 @@ import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import { Mail, CheckCircle2, Loader2 } from 'lucide-react'
+
+function getResendButtonContent(isResending: boolean, resendSuccess: boolean): ReactNode {
+  if (isResending) {
+    return (
+      <>
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Invio in corso...
+      </>
+    )
+  }
+  if (resendSuccess) {
+    return (
+      <>
+        <CheckCircle2 className="mr-2 h-4 w-4" />
+        Email inviata!
+      </>
+    )
+  }
+  return "Invia nuovamente l'email"
+}
 
 export function VerifyEmailPage() {
   const navigate = useNavigate()
@@ -54,7 +74,7 @@ export function VerifyEmailPage() {
         setResendSuccess(true)
         toast.success('Email di conferma inviata nuovamente!')
       }
-    } catch (error) {
+    } catch {
       toast.error('Errore durante l\'invio dell\'email')
     } finally {
       setIsResending(false)
@@ -134,19 +154,7 @@ export function VerifyEmailPage() {
                   onClick={handleResendEmail}
                   disabled={isResending || resendSuccess}
                 >
-                  {isResending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Invio in corso...
-                    </>
-                  ) : resendSuccess ? (
-                    <>
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Email inviata!
-                    </>
-                  ) : (
-                    'Invia nuovamente l\'email'
-                  )}
+                  {getResendButtonContent(isResending, resendSuccess)}
                 </Button>
               </div>
             </div>

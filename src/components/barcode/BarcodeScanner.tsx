@@ -18,7 +18,7 @@ interface BarcodeScannerProps {
 
 /**
  * BarcodeScanner Component - Modal dialog for scanning barcodes
- * Uses html5-qrcode library to access device camera and scan EAN/UPC barcodes
+ * Uses @zxing/browser library to access device camera and scan EAN/UPC/QR barcodes
  */
 export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeScannerProps) {
   const isClosingRef = useRef(false)

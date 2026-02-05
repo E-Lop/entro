@@ -20,6 +20,16 @@ import { mutationTracker } from '@/lib/realtime'
 // Lazy load BarcodeScanner (heavy: includes ZXing library)
 const BarcodeScanner = lazy(() => import('../barcode/BarcodeScanner').then(m => ({ default: m.BarcodeScanner })))
 
+/**
+ * Get submit button text based on form mode and submission state
+ */
+function getSubmitButtonText(mode: 'create' | 'edit', isSubmitting: boolean): string {
+  if (isSubmitting) {
+    return mode === 'create' ? 'Creazione in corso...' : 'Salvataggio in corso...'
+  }
+  return mode === 'create' ? 'Aggiungi alimento' : 'Salva modifiche'
+}
+
 interface FoodFormProps {
   mode: 'create' | 'edit'
   initialData?: Food
@@ -519,13 +529,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             disabled={isSubmitting}
             className="flex-1"
           >
-            {isSubmitting
-              ? mode === 'create'
-                ? 'Creazione in corso...'
-                : 'Salvataggio in corso...'
-              : mode === 'create'
-              ? 'Aggiungi alimento'
-              : 'Salva modifiche'}
+            {getSubmitButtonText(mode, isSubmitting)}
           </Button>
         </div>
       </form>

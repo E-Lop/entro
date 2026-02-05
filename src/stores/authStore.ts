@@ -86,7 +86,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       })
 
       // Check invite acceptance and list initialization helper
-      const checkAndAcceptInvite = async (user: any) => {
+      const checkAndAcceptInvite = async (user: User) => {
         console.log('[authStore] checkAndAcceptInvite starting for user:', {
           userId: user.id,
           email: user.email,

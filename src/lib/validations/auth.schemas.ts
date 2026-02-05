@@ -4,7 +4,7 @@ import { z } from 'zod'
 const hasUpperCase = /[A-Z]/
 const hasLowerCase = /[a-z]/
 const hasNumber = /[0-9]/
-const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/
+const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/
 
 // Strong password validation
 const strongPasswordSchema = z

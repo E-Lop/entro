@@ -16,6 +16,13 @@ interface AuthFormProps {
   disableSubmit?: boolean
 }
 
+function getSubmitButtonText(mode: 'login' | 'signup', isSubmitting: boolean): string {
+  if (mode === 'login') {
+    return isSubmitting ? 'Accesso in corso...' : 'Accedi'
+  }
+  return isSubmitting ? 'Registrazione in corso...' : 'Registrati'
+}
+
 export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubmit }: AuthFormProps) {
   const { signIn, signUp } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -210,13 +217,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
           disabled={isSubmitting || disableSubmit}
         >
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSubmitting
-            ? mode === 'login'
-              ? 'Accesso in corso...'
-              : 'Registrazione in corso...'
-            : mode === 'login'
-            ? 'Accedi'
-            : 'Registrati'}
+          {getSubmitButtonText(mode, isSubmitting)}
         </Button>
       </form>
     </Form>

@@ -73,6 +73,29 @@ function getStorageLabel(location: Food['storage_location']): string {
 }
 
 /**
+ * Determine which image state to render
+ */
+type ImageState = 'loading' | 'error' | 'loaded' | 'none'
+
+function getImageState(
+  hasImageUrl: boolean,
+  isLoading: boolean,
+  hasError: boolean,
+  signedUrl: string | null
+): ImageState {
+  if (!hasImageUrl) {
+    return 'none'
+  }
+  if (isLoading) {
+    return 'loading'
+  }
+  if (hasError || !signedUrl) {
+    return 'error'
+  }
+  return 'loaded'
+}
+
+/**
  * FoodCard Component - Displays a single food item with expiry status
  */
 export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation = false }: FoodCardProps) {
@@ -123,30 +146,48 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
 
       <CardContent className="pb-3 space-y-2">
         {/* Food Image */}
-        {food.image_url ? (
-          <div className="w-full h-40 rounded-lg overflow-hidden bg-muted/20 mb-3 relative">
-            {imageLoading ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-muted-foreground/70 animate-spin" />
-              </div>
-            ) : imageError || !signedUrl ? (
-              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/70">
-                <ImageIcon className="w-12 h-12 mb-2" />
-                <span className="text-xs">Errore caricamento</span>
-              </div>
-            ) : (
-              <img
-                src={signedUrl}
-                alt={food.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
-        ) : (
-          <div className="w-full h-40 rounded-lg bg-muted/20 flex items-center justify-center mb-3 border-2 border-dashed border-border">
-            <ImageIcon className="w-12 h-12 text-muted-foreground/50" />
-          </div>
-        )}
+        {(() => {
+          const imageState = getImageState(!!food.image_url, imageLoading, !!imageError, signedUrl)
+
+          switch (imageState) {
+            case 'loading':
+              return (
+                <div className="w-full h-40 rounded-lg overflow-hidden bg-muted/20 mb-3 relative">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-muted-foreground/70 animate-spin" />
+                  </div>
+                </div>
+              )
+
+            case 'error':
+              return (
+                <div className="w-full h-40 rounded-lg overflow-hidden bg-muted/20 mb-3 relative">
+                  <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/70">
+                    <ImageIcon className="w-12 h-12 mb-2" />
+                    <span className="text-xs">Errore caricamento</span>
+                  </div>
+                </div>
+              )
+
+            case 'loaded':
+              return (
+                <div className="w-full h-40 rounded-lg overflow-hidden bg-muted/20 mb-3 relative">
+                  <img
+                    src={signedUrl!}
+                    alt={food.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )
+
+            case 'none':
+              return (
+                <div className="w-full h-40 rounded-lg bg-muted/20 flex items-center justify-center mb-3 border-2 border-dashed border-border">
+                  <ImageIcon className="w-12 h-12 text-muted-foreground/50" />
+                </div>
+              )
+          }
+        })()}
 
         {/* Category + Storage Location (same row with space between) */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">

@@ -5,6 +5,16 @@ type Theme = 'light' | 'dark' | 'system'
 const THEME_STORAGE_KEY = 'entro-theme'
 
 /**
+ * Get the effective theme based on user preference and system settings
+ */
+function getEffectiveTheme(theme: Theme): 'light' | 'dark' {
+  if (theme === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  return theme
+}
+
+/**
  * Custom hook for managing theme (light/dark/system)
  * - Persists preference to localStorage
  * - Respects system preference when theme is 'system'
@@ -23,19 +33,8 @@ export function useTheme() {
     // Remove existing theme classes
     root.classList.remove('light', 'dark')
 
-    // Determine effective theme
-    let effectiveTheme: 'light' | 'dark' = 'light'
-
-    if (theme === 'system') {
-      // Use system preference
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      effectiveTheme = systemPrefersDark ? 'dark' : 'light'
-    } else {
-      effectiveTheme = theme
-    }
-
-    // Apply theme class
-    root.classList.add(effectiveTheme)
+    // Apply effective theme class
+    root.classList.add(getEffectiveTheme(theme))
 
     // Persist to localStorage
     localStorage.setItem(THEME_STORAGE_KEY, theme)
@@ -60,8 +59,6 @@ export function useTheme() {
   return {
     theme,
     setTheme,
-    effectiveTheme: theme === 'system'
-      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : theme,
+    effectiveTheme: getEffectiveTheme(theme),
   }
 }
