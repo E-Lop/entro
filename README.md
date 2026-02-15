@@ -17,7 +17,13 @@ Una Progressive Web App completa per il tracciamento delle scadenze alimentari, 
 
 ## Screenshot
 
-<!-- TODO: aggiungere screenshot -->
+| Dashboard (dark mode) | Filtri e ricerca (light mode) |
+|:---:|:---:|
+| ![Dashboard](docs/screenshots/homepage.png) | ![Filtri](docs/screenshots/filtri-di-ricerca.png) |
+
+| Aggiunta alimento | Vista mobile |
+|:---:|:---:|
+| ![Inserimento](docs/screenshots/inserimento.png) | ![Mobile](docs/screenshots/mobile.png) |
 
 ---
 
