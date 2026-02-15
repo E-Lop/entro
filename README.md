@@ -1,208 +1,202 @@
-# entro 🥗📅
+# entro
 
-Web app per gestire le date di scadenza degli alimenti con scansione barcode integrata.
+[![Netlify Status](https://api.netlify.com/api/v1/badges/8439a7e9-1a8a-4401-83f1-37f349082a9b/deploy-status)](https://app.netlify.com/projects/entro-il/deploys)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)](https://entroapp.it)
 
-## 🎯 Caratteristiche Principali
+**Gestisci le scadenze alimentari, riduci gli sprechi. Installabile su qualsiasi dispositivo.**
 
-- ✅ Gestione completa scadenze alimentari (CRUD, immagini, categorie)
-- 📷 Scansione barcode con Open Food Facts (iOS + Android)
-- 👥 Liste condivise "Una lista per utente" (codici invito ABC123)
-- 🔗 Link invito veloci via Web Share API (/join/ABC123)
-- ⚡ Sync real-time multi-device (Desktop + iOS + Android)
-- 🔄 Swipe gestures per edit/delete rapido (mobile)
-- 📅 Vista calendario settimanale (rolling 7 giorni)
-- 🔍 Filtri avanzati e ricerca in tempo reale
-- 🔐 Autenticazione sicura con Supabase Auth
-- 🔒 GDPR compliant (data export, account deletion, Privacy Policy)
-- ⚙️ Settings page con gestione privacy e dati personali
-- 📄 Privacy Policy e Terms & Conditions (Aruba LegalBlink)
-- 🌓 Dark mode (light/dark/system)
-- ♿ WCAG AA accessibile
-- 📱 Progressive Web App installabile (iOS + Android)
+Una Progressive Web App completa per il tracciamento delle scadenze alimentari, con scansione barcode, liste condivise in tempo reale e conformità GDPR. Pensata per famiglie e coinquilini che vogliono sprecare meno cibo.
 
-## 🚀 Quick Start
+**[Prova l'app live &rarr;](https://entroapp.it)**
+
+---
+
+## Screenshot
+
+<!-- TODO: aggiungere screenshot -->
+
+---
+
+## Perché questo progetto
+
+Ho sviluppato entro per risolvere un problema concreto: gestire le scadenze alimentari in modo collaborativo. Volevo esplorare un'architettura full-stack moderna con autenticazione, database relazionale, sync real-time e distribuzione come PWA — tutto partendo da un singolo repository.
+
+Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del database alla compliance GDPR, dalla CI/CD alla gestione di un dominio personalizzato in produzione.
+
+---
+
+## Funzionalità principali
+
+- **CRUD completo** — Aggiungi, modifica, elimina alimenti con immagini, categorie, luogo di conservazione e note
+- **Scansione barcode** — Riconosce EAN-13, UPC e QR Code tramite la fotocamera; auto-compila i dati da Open Food Facts
+- **Liste condivise** — Un codice invito a 6 caratteri (es. `ABC123`) permette a più utenti di condividere una lista in tempo reale
+- **Sync multi-device** — Aggiornamenti istantanei su desktop, iOS e Android tramite Supabase Realtime
+- **Vista calendario** — Rolling 7 giorni con gli alimenti in scadenza, organizzati per giorno
+- **Swipe gestures** — Swipe destro per modificare, sinistro per eliminare (mobile)
+- **Dark mode** — Light, dark e automatico (segue il sistema)
+- **PWA installabile** — Funziona offline, installabile da browser su iOS e Android
+- **GDPR compliant** — Export dati personali (Art. 20), cancellazione account (Art. 17), Privacy Policy e T&C integrati
+- **Feature flags** — Barcode scanner, swipe gestures e liste condivise attivabili via variabili d'ambiente
+
+---
+
+## Tech Stack
+
+| Categoria | Tecnologia |
+|---|---|
+| **Frontend** | React 19, TypeScript 5.6 |
+| **Build Tool** | Vite 6 (SWC) |
+| **Styling** | Tailwind CSS 3, shadcn/ui |
+| **State Management** | Zustand (client), TanStack Query (server) |
+| **Backend** | Supabase (PostgreSQL, Auth, Storage, Realtime, Edge Functions) |
+| **Forms** | React Hook Form + Zod |
+| **Barcode** | @zxing/browser + Open Food Facts API |
+| **Date** | date-fns |
+| **PWA** | vite-plugin-pwa (Workbox) |
+| **Deploy** | Netlify |
+
+---
+
+## Architettura
+
+```
+src/
+├── components/
+│   ├── auth/           # Login, signup, route protection
+│   ├── barcode/        # Scanner modale con ZXing
+│   ├── calendar/       # Vista calendario settimanale
+│   ├── foods/          # Card, form, lista, swipe gestures
+│   ├── layout/         # Header, navigation, app shell
+│   ├── settings/       # Account, export dati, eliminazione
+│   ├── sharing/        # Inviti, codici, accettazione
+│   ├── pwa/            # Banner offline
+│   └── ui/             # Primitivi shadcn/ui
+├── hooks/              # Custom hooks (auth, foods, theme, network)
+├── stores/             # Zustand stores (auth, session)
+├── types/              # TypeScript types
+├── utils/              # Utility functions
+├── pages/              # Route pages (11 pagine)
+└── lib/                # Config Supabase, utility classi
+```
+
+### Scelte tecniche
+
+- **Zustand + TanStack Query** — Zustand per lo stato UI globale (auth, sessione), React Query per lo stato server (foods, categorie) con cache e invalidazione automatica
+- **Supabase Realtime** — LISTEN/NOTIFY di PostgreSQL per sync multi-device, con deduplicazione per evitare flash di aggiornamenti locali
+- **Code splitting** — Pagine lazy-loaded, chunk separati per React, Supabase, ZXing e form libraries
+- **RLS (Row Level Security)** — Policy multi-livello per isolare i dati tra utenti e gestire l'accesso alle liste condivise
+- **Workbox caching** — CacheFirst per font e asset, NetworkFirst per API, signed URL delle immagini con cache di 1 ora
+
+### Schema database
+
+Il database PostgreSQL su Supabase include tabelle per utenti, alimenti, categorie, liste, membri e inviti, con 16+ migration incrementali. Le policy RLS garantiscono l'isolamento dei dati. La cancellazione account usa una funzione RPC con cascade delete manuale.
+
+---
+
+## Avvio rapido
 
 ### Prerequisiti
 
-- Node.js 18+ (consigliato via nvm)
-- npm o yarn
-- Account Supabase (gratuito)
-- Account Netlify (opzionale, per deploy)
+- Node.js 18+
+- Account [Supabase](https://supabase.com) (gratuito)
 
 ### Installazione
 
 ```bash
-# Clone repository
-git clone [your-repo-url]
-cd food-expiry-tracker
-
-# Installa dipendenze
+git clone https://github.com/E-Lop/entro.git
+cd entro
 npm install
-
-# Copia file ambiente
 cp .env.example .env.local
-
-# Configura variabili in .env.local
-# (vedi sezione Configurazione sotto)
-
-# Avvia development server
-npm run dev
 ```
 
-### Environment Variables
+### Configurazione
 
-Il file `.env.example` contiene tutte le variabili configurabili. Copia in `.env.local` e personalizza:
+1. Crea un progetto su [supabase.com](https://supabase.com)
+2. Vai in **Settings → API** e copia `Project URL` e `anon/public key`
+3. Incollali in `.env.local`:
 
-#### Obbligatorie:
 ```bash
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-public-key-here
-VITE_APP_URL=http://localhost:5173  # o https://your-domain.com in produzione
+VITE_APP_URL=http://localhost:5173
 ```
 
-#### Opzionali (Feature Flags):
+4. Esegui le migration del database (vedi [`docs/private/DATABASE_SCHEMA.md`](docs/private/DATABASE_SCHEMA.md))
+
+5. Avvia il server di sviluppo:
+
+```bash
+npm run dev
+```
+
+L'app sarà disponibile su `http://localhost:5173`
+
+### Feature flags
+
+Nel file `.env.local` puoi attivare o disattivare le funzionalità opzionali:
+
 ```bash
 VITE_ENABLE_BARCODE_SCANNER=true
 VITE_ENABLE_SWIPE_GESTURES=true
 VITE_ENABLE_SHARED_LISTS=true
 ```
 
-#### Opzionali (Support & Analytics):
-```bash
-VITE_KOFI_URL=  # lascia vuoto per nascondere il bottone Ko-fi
-# VITE_ANALYTICS_ENABLED=false
-# VITE_PLAUSIBLE_DOMAIN=your-domain.com
-```
+L'integrazione con Open Food Facts è gratuita e non richiede API key.
 
-Vedi `.env.example` per l'elenco completo con descrizioni dettagliate.
+---
 
-### Configurazione Supabase
-
-1. Crea un progetto su [supabase.com](https://supabase.com)
-2. Vai in Settings → API
-3. Copia `Project URL` e `anon/public key`
-4. Incollali in `.env.local`
-5. Esegui le migrations: vedi `docs/DATABASE_SCHEMA.md`
-
-### Configurazione Open Food Facts
-
-Open Food Facts è gratuito e non richiede API key. L'integrazione è già configurata.
-
-### Configurazione Ko-fi (Opzionale)
-
-Se fai un fork del progetto e vuoi mostrare il tuo bottone Ko-fi:
-
-1. Apri `.env.local`
-2. Aggiungi: `VITE_KOFI_URL=https://ko-fi.com/YOUR_KOFI_ID`
-3. Se lasci la variabile vuota, il bottone non verrà mostrato
-
-Il bottone Ko-fi appare in fondo alla Dashboard con design mobile-friendly.
-
-## 🛠️ Stack Tecnologico
-
-- **Frontend**: React 19, TypeScript, Vite
-- **Styling**: Tailwind CSS, shadcn/ui
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **State Management**: Zustand
-- **Barcode**: @zxing/browser
-- **Data Fetching**: TanStack Query (React Query)
-- **Date Management**: date-fns
-- **Deploy**: Netlify
-
-## 📁 Struttura Progetto
-
-```
-/
-├── docs/                      # Documentazione completa
-│   ├── PROJECT_OVERVIEW.md    # Visione e obiettivi
-│   ├── TECHNICAL_SPECS.md     # Architettura dettagliata
-│   ├── FEATURES.md            # Specifiche funzionalità
-│   ├── BARCODE_INTEGRATION.md # Guida barcode scanning
-│   ├── DATABASE_SCHEMA.md     # Schema DB + migrations
-│   └── ROADMAP.md             # Timeline sviluppo
-├── src/
-│   ├── components/            # Componenti React
-│   ├── hooks/                 # Custom hooks
-│   ├── lib/                   # Utility e configurazioni
-│   ├── stores/                # Zustand stores
-│   ├── types/                 # TypeScript types
-│   └── pages/                 # Route pages
-├── public/                    # Asset statici
-└── supabase/                  # Migrations e funzioni
-```
-
-## 📚 Documentazione Completa
-
-Per informazioni dettagliate, consulta:
-
-- [📋 Project Overview](docs/PROJECT_OVERVIEW.md) - Visione generale del progetto
-- [🏗️ Technical Specs](docs/TECHNICAL_SPECS.md) - Architettura e decisioni tecniche
-- [✨ Features](docs/FEATURES.md) - Dettaglio funzionalità
-- [📷 Barcode Integration](docs/BARCODE_INTEGRATION.md) - Implementazione barcode scanning
-- [🗄️ Database Schema](docs/DATABASE_SCHEMA.md) - Struttura database
-- [🗺️ Roadmap](docs/ROADMAP.md) - Piano di sviluppo
-
-## 🧪 Testing
+## Build e deploy
 
 ```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Coverage
-npm run test:coverage
+npm run build      # TypeScript check + Vite build → dist/
+npm run preview    # Anteprima locale della build
 ```
 
-## 📦 Build & Deploy
+Il deploy avviene su **Netlify** con build automatica ad ogni push su `main`:
+- Build command: `npm run build`
+- Publish directory: `dist`
+- Variabili d'ambiente configurate nella dashboard Netlify
 
-```bash
-# Build production
-npm run build
+---
 
-# Preview build
-npm run preview
+## Documentazione
 
-# Deploy su Netlify (se configurato)
-npm run deploy
-```
+| Documento | Contenuto |
+|---|---|
+| [Project Overview](docs/private/PROJECT_OVERVIEW.md) | Visione e obiettivi del progetto |
+| [Technical Specs](docs/private/TECHNICAL_SPECS.md) | Architettura e decisioni tecniche |
+| [Features](docs/private/FEATURES.md) | Specifiche funzionalità |
+| [Barcode Integration](docs/private/BARCODE_INTEGRATION.md) | Implementazione barcode scanning |
+| [Database Schema](docs/private/DATABASE_SCHEMA.md) | Struttura DB e migration |
+| [Roadmap](docs/private/ROADMAP.md) | Piano di sviluppo |
+| [User Guide](docs/guides/USER_GUIDE.md) | Guida utente |
 
-### Deploy Netlify
+---
 
-1. Connetti repository GitHub a Netlify
-2. Configura build command: `npm run build`
-3. Imposta publish directory: `dist`
-4. Aggiungi environment variables in Netlify dashboard
+## Contributing
 
-## 🤝 Contributing
-
-1. Fork il progetto
-2. Crea un branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push al branch (`git push origin feature/AmazingFeature`)
+1. Fai un fork del progetto
+2. Crea un branch (`git checkout -b feature/NuovaFunzionalita`)
+3. Committa le modifiche (`git commit -m 'feat: aggiungi nuova funzionalita'`)
+4. Pusha il branch (`git push origin feature/NuovaFunzionalita`)
 5. Apri una Pull Request
 
-## 💝 Support
+---
 
-Se trovi utile questo progetto, puoi supportarmi su Ko-fi:
+## Licenza
 
-[![ko-fi](https://storage.ko-fi.com/cdn/kofi6.png?v=6)](https://ko-fi.com/G2G61TCD8H)
+Distribuito sotto licenza [MIT](LICENSE).
 
-Il supporto aiuta a mantenere il progetto attivo e a sviluppare nuove funzionalità!
+## Autore
 
-**Per fork del progetto**: Il bottone Ko-fi è completamente opzionale e configurabile tramite la variabile d'ambiente `VITE_KOFI_URL`. Lasciandola vuota nel tuo `.env.local`, il bottone non apparirà nella tua versione.
+**Edmondo Domenico Lopez** — [@E-Lop](https://github.com/E-Lop)
 
-## 📝 License
+## Riconoscimenti
 
-[Specifica la tua licenza]
-
-## 👤 Author
-
-Edmondo - [@E-Lop]
-
-## 🙏 Acknowledgments
-
-- [Open Food Facts](https://world.openfoodfacts.org/) - Database prodotti
-- [Supabase](https://supabase.com/) - Backend as a Service
-- [shadcn/ui](https://ui.shadcn.com/) - UI Components
+- [Open Food Facts](https://world.openfoodfacts.org/) — Database prodotti alimentari
+- [Supabase](https://supabase.com/) — Backend as a Service
+- [shadcn/ui](https://ui.shadcn.com/) — Componenti UI
