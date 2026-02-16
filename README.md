@@ -44,7 +44,7 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 - **Vista calendario** — Rolling 7 giorni con gli alimenti in scadenza, organizzati per giorno
 - **Swipe gestures** — Swipe destro per modificare, sinistro per eliminare (mobile)
 - **Dark mode** — Light, dark e automatico (segue il sistema)
-- **PWA installabile** — Funziona offline, installabile da browser su iOS e Android
+- **PWA installabile** — Installabile da browser su iOS e Android
 - **GDPR compliant** — Export dati personali (Art. 20), cancellazione account (Art. 17), Privacy Policy e T&C integrati
 - **Feature flags** — Barcode scanner, swipe gestures e liste condivise attivabili via variabili d'ambiente
 
