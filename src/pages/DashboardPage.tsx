@@ -109,8 +109,16 @@ export function DashboardPage() {
     }
   }, [filters, debouncedSearch])
 
+  // Filters for stats: same as current filters but always status='all'
+  // When status is already 'all', React Query reuses the same cache entry (no extra request)
+  const statsFilters = useMemo<FilterParams>(() => ({
+    ...debouncedFilters,
+    status: 'all',
+  }), [debouncedFilters])
+
   // Fetch data with filters
   const { data: foods = [], isLoading: foodsLoading } = useFoods(debouncedFilters)
+  const { data: allFoods = [] } = useFoods(statsFilters)
   const { data: categories = [] } = useCategories()
 
   // Mutations
@@ -187,13 +195,13 @@ export function DashboardPage() {
     const now = new Date()
     now.setHours(0, 0, 0, 0)
 
-    const expiringSoon = foods.filter((food) => {
+    const expiringSoon = allFoods.filter((food) => {
       const expiryDate = new Date(food.expiry_date)
       expiryDate.setHours(0, 0, 0, 0)
       const daysUntilExpiry = differenceInDays(expiryDate, now)
       return daysUntilExpiry >= 0 && daysUntilExpiry <= 7
     })
-    const expired = foods.filter((food) => {
+    const expired = allFoods.filter((food) => {
       const expiryDate = new Date(food.expiry_date)
       expiryDate.setHours(0, 0, 0, 0)
       const daysUntilExpiry = differenceInDays(expiryDate, now)
@@ -201,11 +209,11 @@ export function DashboardPage() {
     })
 
     return {
-      total: foods.length,
+      total: allFoods.length,
       expiringSoon: expiringSoon.length,
       expired: expired.length,
     }
-  }, [foods])
+  }, [allFoods])
 
   // Handlers
   const handleCreateFood = async (data: FoodFormData) => {
