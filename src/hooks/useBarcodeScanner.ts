@@ -49,8 +49,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
 
       videoRef.current = videoElement
 
-      console.log('Starting ZXing scanner...')
-
       // Check if mediaDevices API is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('API fotocamera non disponibile su questo browser')
@@ -62,7 +60,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       // Using undefined lets the browser automatically select the appropriate camera,
       // which works reliably on both iOS and Android.
       const selectedDeviceId: string | undefined = undefined
-      console.log('Using browser default camera (undefined deviceId for best compatibility)')
 
       // Start continuous decoding from video device
       // CRITICAL: Save the controls object returned by decodeFromVideoDevice
@@ -72,7 +69,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         (result, error, controls) => {
           // Check if component is still mounted - stop if unmounted
           if (!mountedRef.current) {
-            console.log('Component unmounted, stopping scanner')
             controls.stop()
             return
           }
@@ -82,22 +78,17 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
             hasScannedRef.current = true
 
             const barcode = result.getText()
-            console.log('Barcode scanned:', barcode)
 
             // CRITICAL FIX: Stop scanner controls IMMEDIATELY
-            console.log('Calling controls.stop()...')
             controls.stop()
-            console.log('Scanner controls stopped')
 
             // Stop video stream
             if (videoRef.current && videoRef.current.srcObject) {
               const stream = videoRef.current.srcObject as MediaStream
               stream.getTracks().forEach(track => {
                 track.stop()
-                console.log('Track stopped:', track.kind)
               })
               videoRef.current.srcObject = null
-              console.log('Video stream stopped after scan')
             }
 
             setState('processing')
@@ -115,7 +106,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
 
       // Save controls reference for external stop
       controlsRef.current = controls
-      console.log('Scanner started successfully, controls saved')
     } catch (err) {
       console.error('Error starting scanner:', err)
       const errorMsg =
@@ -131,14 +121,12 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
    */
   const stopScanning = useCallback(async () => {
     try {
-      console.log('Stopping scanner...')
       hasScannedRef.current = false // Reset scan flag
 
       // Stop scanner controls first
       if (controlsRef.current) {
         try {
           controlsRef.current.stop()
-          console.log('Scanner controls stopped')
         } catch (err) {
           console.warn('Error stopping scanner controls:', err)
         }
@@ -150,16 +138,13 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         const stream = videoRef.current.srcObject as MediaStream
         stream.getTracks().forEach(track => {
           track.stop()
-          console.log('Track stopped:', track.kind, track.label)
         })
         videoRef.current.srcObject = null
-        console.log('Video stream stopped')
       }
 
       // Release all ZXing streams (global cleanup)
       try {
         BrowserCodeReader.releaseAllStreams()
-        console.log('All ZXing streams released')
       } catch (err) {
         console.warn('Error releasing streams:', err)
       }
@@ -168,7 +153,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       if (videoRef.current) {
         try {
           BrowserCodeReader.cleanVideoSource(videoRef.current)
-          console.log('Video source cleaned')
         } catch (err) {
           console.warn('Error cleaning video source:', err)
         }
@@ -179,7 +163,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       if (readerRef.current) {
         // Nullify to force new instance on next scan
         readerRef.current = null
-        console.log('Reader instance nullified - will create fresh instance on next scan')
       }
 
       setState('idle')
@@ -210,7 +193,6 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
     return () => {
       // Mark component as unmounted
       mountedRef.current = false
-      console.log('Component unmounting, cleaning up scanner...')
 
       // Perform complete cleanup
       stopScanning()

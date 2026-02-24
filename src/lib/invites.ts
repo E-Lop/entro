@@ -103,12 +103,6 @@ export async function registerPendingInvite(
     // Normalize email to lowercase for consistent matching
     const normalizedEmail = userEmail.toLowerCase().trim()
 
-    console.log('[registerPendingInvite] Starting registration:', {
-      shortCode: shortCode.toUpperCase(),
-      originalEmail: userEmail,
-      normalizedEmail,
-    })
-
     // Update invite with pending user email
     const { error } = await supabase
       .from('invites')
@@ -120,8 +114,6 @@ export async function registerPendingInvite(
       console.error('[registerPendingInvite] Error registering pending invite:', error)
       throw error
     }
-
-    console.log('[registerPendingInvite] Successfully registered pending invite')
 
     return {
       success: true,
@@ -183,8 +175,6 @@ export async function acceptInvite(shortCode: string): Promise<AcceptInviteRespo
  */
 export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
   try {
-    console.log('[acceptInviteByEmail] Starting invite acceptance flow')
-
     // Get current user
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
@@ -194,12 +184,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
 
     const userId = userData.user.id
     const userEmail = userData.user.email
-
-    console.log('[acceptInviteByEmail] User details:', {
-      userId,
-      userEmail,
-      emailVerified: userData.user.email_confirmed_at,
-    })
 
     // Check if user has an email
     if (!userEmail) {
@@ -213,8 +197,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
 
     // Normalize email for matching
     const normalizedEmail = userEmail.toLowerCase().trim()
-
-    console.log('[acceptInviteByEmail] Looking for pending invite with email:', normalizedEmail)
 
     // Find pending invite for this email (using pending_user_email field)
     // Use ilike for case-insensitive email matching
@@ -233,20 +215,12 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     }
 
     if (!inviteData) {
-      console.log('[acceptInviteByEmail] No pending invite found for this email')
       return {
         success: false,
         listId: null,
         error: null, // Not an error, just no invite
       }
     }
-
-    console.log('[acceptInviteByEmail] Found pending invite:', {
-      inviteId: inviteData.id,
-      listId: inviteData.list_id,
-      shortCode: inviteData.short_code,
-      expiresAt: inviteData.expires_at,
-    })
 
     // Check if invite has expired
     const expiresAt = new Date(inviteData.expires_at)
@@ -271,8 +245,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       }
     }
 
-    console.log('[acceptInviteByEmail] Invite is valid, checking existing membership')
-
     // Check if user is already a member of this list
     const { data: existingMember, error: memberCheckError } = await supabase
       .from('list_members')
@@ -286,8 +258,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     }
 
     if (existingMember) {
-      console.log('[acceptInviteByEmail] User is already a member, marking invite as accepted')
-
       // User is already a member, just mark invite as accepted
       await supabase
         .from('invites')
@@ -303,8 +273,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
         error: null,
       }
     }
-
-    console.log('[acceptInviteByEmail] Adding user to list_members')
 
     // Add user to list_members
     const { error: memberError } = await supabase
@@ -325,8 +293,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       throw memberError
     }
 
-    console.log('[acceptInviteByEmail] Successfully added user to list, updating invite status')
-
     // Update invite status to accepted
     const { error: updateError } = await supabase
       .from('invites')
@@ -340,8 +306,6 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
       console.error('[acceptInviteByEmail] Error updating invite status:', updateError)
       // Don't fail if we can't update the status - the member was added successfully
     }
-
-    console.log('[acceptInviteByEmail] Successfully accepted invite and added user to list:', inviteData.list_id)
 
     return {
       success: true,
@@ -364,15 +328,11 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
  */
 export async function getUserList(): Promise<ListResponse> {
   try {
-    console.log('[getUserList] Getting user list')
-
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
       console.error('[getUserList] User not authenticated')
       throw new Error('Not authenticated')
     }
-
-    console.log('[getUserList] Querying list_members for user:', userData.user.id)
 
     // First, get the list_member record for this user
     const { data: memberData, error: memberError } = await supabase
@@ -395,8 +355,6 @@ export async function getUserList(): Promise<ListResponse> {
       throw new Error(memberError?.message || 'User is not a member of any list')
     }
 
-    console.log('[getUserList] Found list membership, list_id:', memberData.list_id)
-
     // Then, get the list details
     const { data: listData, error: listError } = await supabase
       .from('lists')
@@ -412,11 +370,6 @@ export async function getUserList(): Promise<ListResponse> {
       console.error('[getUserList] List not found for id:', memberData.list_id)
       throw new Error(listError?.message || 'List not found')
     }
-
-    console.log('[getUserList] Successfully retrieved list:', {
-      listId: listData.id,
-      listName: listData.name,
-    })
 
     return {
       list: listData,
@@ -482,8 +435,6 @@ export async function createPersonalList(): Promise<{
   error: Error | null
 }> {
   try {
-    console.log('[createPersonalList] Starting personal list creation')
-
     // Call the PostgreSQL function
     // This runs server-side and bypasses client-side RLS issues
     const { data, error } = await supabase
@@ -503,19 +454,11 @@ export async function createPersonalList(): Promise<{
     // Type assertion for the RPC response
     const result = data as CreatePersonalListRpcResponse
 
-    console.log('[createPersonalList] RPC result:', {
-      success: result.success,
-      listId: result.list_id,
-      errorMessage: result.error_message,
-    })
-
     // Check the result from the function
     if (!result.success) {
       console.error('[createPersonalList] Function returned error:', result.error_message)
       throw new Error(result.error_message || 'Failed to create personal list')
     }
-
-    console.log('[createPersonalList] Successfully created personal list:', result.list_id)
 
     return {
       success: true,
@@ -746,8 +689,6 @@ export async function acceptInviteWithConfirmation(
  */
 export async function leaveSharedList(): Promise<{ success: boolean; error: Error | null }> {
   try {
-    console.log('[leaveSharedList] Starting leave list flow')
-
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
       console.error('[leaveSharedList] User not authenticated')
@@ -755,7 +696,6 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
     }
 
     const userId = userData.user.id
-    console.log('[leaveSharedList] User ID:', userId)
 
     // Step 1: Get user's current list
     const { data: currentMemberData, error: currentMemberError } = await supabase
@@ -775,7 +715,6 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
     }
 
     const currentListId = currentMemberData.list_id
-    console.log('[leaveSharedList] Current list ID:', currentListId)
 
     // Step 2: Check if list is shared (>1 member)
     const { count: memberCount, error: memberCountError } = await supabase
@@ -788,15 +727,12 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       throw memberCountError
     }
 
-    console.log('[leaveSharedList] Member count:', memberCount)
-
     if (memberCount === null || memberCount <= 1) {
       console.warn('[leaveSharedList] Cannot leave personal list')
       throw new Error('Non puoi abbandonare una lista personale')
     }
 
     // Step 3: Remove user from current list
-    console.log('[leaveSharedList] Removing user from list:', currentListId)
     const { error: removeError } = await supabase
       .from('list_members')
       .delete()
@@ -813,17 +749,12 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       throw removeError
     }
 
-    console.log('[leaveSharedList] Successfully removed user from list')
-
     // Step 4: Create new personal list
-    console.log('[leaveSharedList] Creating new personal list')
     const createResult = await createPersonalList()
     if (!createResult.success) {
       console.error('[leaveSharedList] Failed to create personal list:', createResult.error)
       throw createResult.error || new Error('Failed to create personal list')
     }
-
-    console.log('[leaveSharedList] Successfully created new personal list:', createResult.listId)
 
     return {
       success: true,

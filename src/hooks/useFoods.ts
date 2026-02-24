@@ -90,7 +90,6 @@ export function useCreateFood() {
     },
     onSuccess: (newFood) => {
       // Track mutation for deduplication
-      console.log('[useFoods] Tracking local INSERT mutation for:', newFood.id, newFood.name)
       mutationTracker.track(newFood.id, 'INSERT')
 
       // Invalidate and refetch foods list
