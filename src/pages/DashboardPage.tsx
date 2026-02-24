@@ -8,13 +8,13 @@ import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
 import { useRealtimeFoods } from '../hooks/useRealtimeFoods'
 import { FoodCard } from '../components/foods/FoodCard'
-import { FoodForm } from '../components/foods/FoodForm'
 import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
 import { KofiButton } from '../components/ui/KofiButton'
 
-// Lazy load WeekView (calendar view)
+// Lazy load heavy components only shown on user interaction
 const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ default: m.WeekView })))
+const FoodForm = lazy(() => import('../components/foods/FoodForm').then(m => ({ default: m.FoodForm })))
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import {
@@ -535,12 +535,14 @@ export function DashboardPage() {
               Inserisci le informazioni dell'alimento da aggiungere
             </DialogDescription>
           </DialogHeader>
-          <FoodForm
-            mode="create"
-            onSubmit={handleCreateFood}
-            onCancel={() => setIsAddDialogOpen(false)}
-            isSubmitting={createMutation.isPending}
-          />
+          <Suspense fallback={<div className="flex justify-center py-8"><div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" /></div>}>
+            <FoodForm
+              mode="create"
+              onSubmit={handleCreateFood}
+              onCancel={() => setIsAddDialogOpen(false)}
+              isSubmitting={createMutation.isPending}
+            />
+          </Suspense>
         </DialogContent>
       </Dialog>
 
@@ -554,13 +556,15 @@ export function DashboardPage() {
             </DialogDescription>
           </DialogHeader>
           {editingFood && (
-            <FoodForm
-              mode="edit"
-              initialData={editingFood}
-              onSubmit={handleUpdateFood}
-              onCancel={() => setEditingFood(null)}
-              isSubmitting={updateMutation.isPending}
-            />
+            <Suspense fallback={<div className="flex justify-center py-8"><div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" /></div>}>
+              <FoodForm
+                mode="edit"
+                initialData={editingFood}
+                onSubmit={handleUpdateFood}
+                onCancel={() => setEditingFood(null)}
+                isSubmitting={updateMutation.isPending}
+              />
+            </Suspense>
           )}
         </DialogContent>
       </Dialog>

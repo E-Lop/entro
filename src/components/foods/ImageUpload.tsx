@@ -2,7 +2,6 @@ import { useState, useRef, ChangeEvent, useEffect } from 'react'
 import { Upload, X, Image as ImageIcon, Loader2, Camera } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
-import heic2any from 'heic2any'
 
 interface ImageUploadProps {
   /** Current image: File (new upload), string (existing path), or null */
@@ -68,6 +67,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
     if (isHEIC) {
       try {
         setIsConverting(true)
+        const { default: heic2any } = await import('heic2any')
         const convertedBlob = await heic2any({
           blob: file,
           toType: 'image/jpeg',

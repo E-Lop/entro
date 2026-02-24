@@ -117,7 +117,7 @@ export default defineConfig({
         },
       },
     },
-    // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000,
+    // heic2any (HEIC→JPEG WASM decoder) is ~1.3MB but loaded on-demand only for iPhone HEIC uploads
+    chunkSizeWarningLimit: 1400,
   },
 })
