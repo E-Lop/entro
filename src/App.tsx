@@ -5,8 +5,8 @@ import { useAuthStore } from './stores/authStore'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import { OfflineBanner } from './components/pwa/OfflineBanner'
+import { PageLoader } from './components/ui/PageLoader'
 
-// Lazy load pages for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const SignUpPage = lazy(() => import('./pages/SignUpPage'))
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
@@ -19,22 +19,9 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 
-// Loading fallback component
-function PageLoader() {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary"></div>
-        <div className="text-muted-foreground">Caricamento...</div>
-      </div>
-    </div>
-  )
-}
-
 function App() {
   const initialize = useAuthStore((state) => state.initialize)
 
-  // Initialize auth state on mount
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
 
@@ -42,11 +29,8 @@ function App() {
       unsubscribe = unsub
     })
 
-    // Cleanup: unsubscribe from auth listener
     return () => {
-      if (unsubscribe) {
-        unsubscribe()
-      }
+      unsubscribe?.()
     }
   }, [initialize])
 
@@ -78,7 +62,6 @@ function App() {
         </Suspense>
       </BrowserRouter>
 
-      {/* Toast notifications */}
       <Toaster position="top-center" richColors />
     </>
   )

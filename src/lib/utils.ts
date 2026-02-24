@@ -33,20 +33,21 @@ export function formatDateKey(date: Date): string {
 }
 
 /**
- * Group foods by expiry date
- * Returns Map<dateKey, Food[]>
+ * Group foods by expiry date.
+ * Returns Map<dateKey (YYYY-MM-DD), Food[]>
  */
 export function groupFoodsByDate(foods: Food[]): Map<string, Food[]> {
   const groups = new Map<string, Food[]>()
 
-  foods.forEach(food => {
-    // Normalize to YYYY-MM-DD
+  for (const food of foods) {
     const dateKey = food.expiry_date.split('T')[0]
-    if (!groups.has(dateKey)) {
-      groups.set(dateKey, [])
+    const existing = groups.get(dateKey)
+    if (existing) {
+      existing.push(food)
+    } else {
+      groups.set(dateKey, [food])
     }
-    groups.get(dateKey)!.push(food)
-  })
+  }
 
   return groups
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Trash2, AlertTriangle, Info, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
+import { clearAuthStorage } from '../../lib/auth'
 import { useAuth } from '../../hooks/useAuth'
 import {
   AlertDialog,
@@ -129,33 +130,7 @@ export function DeleteAccountDialog() {
       // Step 4: Clear local session only (account already deleted from server)
       // Use scope: 'local' to avoid 400 error when trying to invalidate deleted account
       await supabase.auth.signOut({ scope: 'local' })
-
-      // Clear auth-related storage manually (since we're not using our signOut() function)
-      const localStorageKeysToRemove: string[] = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && (
-          key.startsWith('sb-') ||
-          key === 'supabase.auth.token' ||
-          key === 'show_welcome_toast'
-        )) {
-          localStorageKeysToRemove.push(key)
-        }
-      }
-      localStorageKeysToRemove.forEach(key => localStorage.removeItem(key))
-
-      const sessionStorageKeysToRemove: string[] = []
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const key = sessionStorage.key(i)
-        if (key && (
-          key.startsWith('user_initialized_') ||
-          key === 'explicit_auth' ||
-          key === 'verify_email'
-        )) {
-          sessionStorageKeysToRemove.push(key)
-        }
-      }
-      sessionStorageKeysToRemove.forEach(key => sessionStorage.removeItem(key))
+      clearAuthStorage()
 
       // Step 5: Show success message and redirect
       toast.success('Account eliminato con successo', {

@@ -12,6 +12,63 @@ export interface AuthResponse {
 }
 
 /**
+ * Selectively clear auth-related keys from a storage object.
+ * Preserves non-auth data like service worker cache, theme, and app preferences.
+ */
+function clearAuthKeys(storage: Storage, matchers: Array<string | ((key: string) => boolean)>): void {
+  const keysToRemove: string[] = []
+  for (let i = 0; i < storage.length; i++) {
+    const key = storage.key(i)
+    if (!key) continue
+    const shouldRemove = matchers.some(matcher =>
+      typeof matcher === 'string' ? key === matcher : matcher(key)
+    )
+    if (shouldRemove) {
+      keysToRemove.push(key)
+    }
+  }
+  keysToRemove.forEach(key => storage.removeItem(key))
+}
+
+/**
+ * Clear all auth-related data from both localStorage and sessionStorage.
+ * Preserves service worker cache, theme, and other app settings.
+ */
+export function clearAuthStorage(): void {
+  clearAuthKeys(localStorage, [
+    (key) => key.startsWith('sb-'),
+    'supabase.auth.token',
+    'show_welcome_toast',
+  ])
+
+  clearAuthKeys(sessionStorage, [
+    (key) => key.startsWith('user_initialized_'),
+    'explicit_auth',
+    'verify_email',
+  ])
+}
+
+/**
+ * Mark a session as an explicit user action (not auto-login from URL).
+ */
+function markExplicitAuth(session: Session | null): void {
+  if (session) {
+    sessionStorage.setItem('explicit_auth', Date.now().toString())
+  }
+}
+
+/**
+ * Wrap an error into the AuthResponse failure shape.
+ */
+function authFailure(error: unknown, fallbackMessage: string): AuthResponse {
+  return {
+    user: null,
+    session: null,
+    error: error instanceof Error ? error : new Error(fallbackMessage),
+  }
+}
+
+/**
  * Sign up a new user with email, password, and full name
  */
 export async function signUp(
@@ -23,33 +80,16 @@ export async function signUp(
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
+      options: { data: { full_name: fullName } },
     })
 
-    if (error) {
-      throw new Error(error.message)
-    }
+    if (error) throw new Error(error.message)
 
-    // Mark this as an explicit user action (not auto-login from URL)
-    if (data.session) {
-      sessionStorage.setItem('explicit_auth', Date.now().toString())
-    }
+    markExplicitAuth(data.session)
 
-    return {
-      user: data.user,
-      session: data.session,
-      error: null,
-    }
+    return { user: data.user, session: data.session, error: null }
   } catch (error) {
-    return {
-      user: null,
-      session: null,
-      error: error instanceof Error ? error : new Error('Errore durante la registrazione'),
-    }
+    return authFailure(error, 'Errore durante la registrazione')
   }
 }
 
@@ -66,71 +106,29 @@ export async function signIn(
       password,
     })
 
-    if (error) {
-      throw new Error(error.message)
-    }
+    if (error) throw new Error(error.message)
 
-    // Mark this as an explicit user action (not auto-login from URL)
-    if (data.session) {
-      sessionStorage.setItem('explicit_auth', Date.now().toString())
-    }
+    markExplicitAuth(data.session)
 
-    return {
-      user: data.user,
-      session: data.session,
-      error: null,
-    }
+    return { user: data.user, session: data.session, error: null }
   } catch (error) {
-    return {
-      user: null,
-      session: null,
-      error: error instanceof Error ? error : new Error('Errore durante il login'),
-    }
+    return authFailure(error, 'Errore durante il login')
   }
 }
 
 /**
- * Sign out the current user and clear session
- * Selectively clears auth-related storage to prevent session persistence
- * while preserving app settings and service worker data
+ * Sign out the current user and clear session.
+ * Selectively clears auth-related storage while preserving app settings.
  */
 export async function signOut(): Promise<{ error: Error | null }> {
   try {
-    // Sign out from Supabase
     const { error } = await supabase.auth.signOut()
 
     if (error) {
       throw new Error(error.message)
     }
 
-    // Selectively clear only auth-related data from localStorage
-    // This preserves service worker cache, theme, and other app settings
-    const localStorageKeysToRemove: string[] = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && (
-        key.startsWith('sb-') ||           // Supabase auth keys
-        key === 'supabase.auth.token' ||   // Legacy Supabase key
-        key === 'show_welcome_toast'       // User-specific flag
-      )) {
-        localStorageKeysToRemove.push(key)
-      }
-    }
-    localStorageKeysToRemove.forEach(key => localStorage.removeItem(key))
-
-    // Clear auth-related sessionStorage
-    const sessionStorageKeysToRemove: string[] = []
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i)
-      if (key && (
-        key.startsWith('user_initialized_') || // User initialization flags
-        key === 'explicit_auth' ||             // Explicit auth tracking
-        key === 'verify_email'                 // Email verification
-      )) {
-        sessionStorageKeysToRemove.push(key)
-      }
-    }
-    sessionStorageKeysToRemove.forEach(key => sessionStorage.removeItem(key))
+    clearAuthStorage()
 
     return { error: null }
   } catch (error) {
@@ -141,6 +139,15 @@ export async function signOut(): Promise<{ error: Error | null }> {
 }
 
 /**
+ * Check if an error message indicates a missing auth session.
+ * This is expected when no user is logged in and should not be logged.
+ */
+function isSessionMissingError(message: string): boolean {
+  const lower = message.toLowerCase()
+  return lower.includes('session') && lower.includes('missing')
+}
+
+/**
  * Get the currently authenticated user
  */
 export async function getCurrentUser(): Promise<User | null> {
@@ -148,26 +155,16 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data, error } = await supabase.auth.getUser()
 
     if (error) {
-      // "Auth session missing" is expected when user is not logged in
-      // Don't log this as an error
-      const isSessionMissing = error.message?.toLowerCase().includes('session') &&
-                               error.message?.toLowerCase().includes('missing')
-
-      if (!isSessionMissing) {
+      if (!isSessionMissingError(error.message ?? '')) {
         console.error('Error getting current user:', error)
       }
-
       return null
     }
 
     return data.user
   } catch (error) {
-    // Only log unexpected errors
-    const errorMessage = error instanceof Error ? error.message : ''
-    const isSessionMissing = errorMessage.toLowerCase().includes('session') &&
-                             errorMessage.toLowerCase().includes('missing')
-
-    if (!isSessionMissing) {
+    const message = error instanceof Error ? error.message : ''
+    if (!isSessionMissingError(message)) {
       console.error('Error getting current user:', error)
     }
     return null
@@ -180,11 +177,7 @@ export async function getCurrentUser(): Promise<User | null> {
 export async function getSession(): Promise<Session | null> {
   try {
     const { data, error } = await supabase.auth.getSession()
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
+    if (error) throw new Error(error.message)
     return data.session
   } catch (error) {
     console.error('Error getting session:', error)
@@ -193,12 +186,12 @@ export async function getSession(): Promise<Session | null> {
 }
 
 /**
- * Subscribe to auth state changes
- * Returns an unsubscribe function
+ * Subscribe to auth state changes.
+ * Returns an unsubscribe function.
  */
 export function onAuthStateChange(
   callback: (event: string, user: User | null, session: Session | null) => void
-) {
+): () => void {
   const { data: { subscription } } = supabase.auth.onAuthStateChange(
     (event, session) => {
       callback(event, session?.user ?? null, session)
@@ -218,11 +211,7 @@ export async function resetPasswordRequest(
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
+    if (error) throw new Error(error.message)
     return { error: null }
   } catch (error) {
     return {
@@ -232,20 +221,14 @@ export async function resetPasswordRequest(
 }
 
 /**
- * Update user password with new password
+ * Update user password
  */
 export async function updatePassword(
   newPassword: string
 ): Promise<{ error: Error | null }> {
   try {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    })
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw new Error(error.message)
     return { error: null }
   } catch (error) {
     return {

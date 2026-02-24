@@ -18,11 +18,15 @@ interface FoodCardProps {
 }
 
 /**
- * Get expiry status and color based on days until expiry
- * FIX: Normalize dates to midnight to avoid time-of-day issues
+ * Get expiry status and color based on days until expiry.
+ * Normalizes dates to midnight for accurate calendar day difference.
  */
-function getExpiryStatus(expiryDate: string) {
-  // Normalize both dates to midnight to get accurate calendar day difference
+function getExpiryStatus(expiryDate: string): {
+  status: 'expired' | 'critical' | 'warning' | 'good'
+  colorClasses: string
+  badgeText: string
+  daysUntilExpiry: number
+} {
   const now = new Date()
   now.setHours(0, 0, 0, 0)
 
@@ -31,45 +35,25 @@ function getExpiryStatus(expiryDate: string) {
 
   const daysUntilExpiry = differenceInDays(expiry, now)
 
-  let status: 'expired' | 'critical' | 'warning' | 'good'
-  let colorClasses: string
-  let badgeText: string
-
   if (daysUntilExpiry < 0) {
-    status = 'expired'
-    colorClasses = 'bg-red-100 text-red-800 border-red-200'
-    badgeText = 'Scaduto'
-  } else if (daysUntilExpiry === 0) {
-    status = 'critical'
-    colorClasses = 'bg-red-100 text-red-800 border-red-200'
-    badgeText = 'Scade oggi'
-  } else if (daysUntilExpiry <= 3) {
-    status = 'critical'
-    colorClasses = 'bg-orange-100 text-orange-800 border-orange-200'
-    badgeText = `${daysUntilExpiry} giorni`
-  } else if (daysUntilExpiry <= 7) {
-    status = 'warning'
-    colorClasses = 'bg-yellow-100 text-yellow-800 border-yellow-200'
-    badgeText = `${daysUntilExpiry} giorni`
-  } else {
-    status = 'good'
-    colorClasses = 'bg-green-100 text-green-800 border-green-200'
-    badgeText = `${daysUntilExpiry} giorni`
+    return { status: 'expired', colorClasses: 'bg-red-100 text-red-800 border-red-200', badgeText: 'Scaduto', daysUntilExpiry }
   }
-
-  return { status, colorClasses, badgeText, daysUntilExpiry }
+  if (daysUntilExpiry === 0) {
+    return { status: 'critical', colorClasses: 'bg-red-100 text-red-800 border-red-200', badgeText: 'Scade oggi', daysUntilExpiry }
+  }
+  if (daysUntilExpiry <= 3) {
+    return { status: 'critical', colorClasses: 'bg-orange-100 text-orange-800 border-orange-200', badgeText: `${daysUntilExpiry} giorni`, daysUntilExpiry }
+  }
+  if (daysUntilExpiry <= 7) {
+    return { status: 'warning', colorClasses: 'bg-yellow-100 text-yellow-800 border-yellow-200', badgeText: `${daysUntilExpiry} giorni`, daysUntilExpiry }
+  }
+  return { status: 'good', colorClasses: 'bg-green-100 text-green-800 border-green-200', badgeText: `${daysUntilExpiry} giorni`, daysUntilExpiry }
 }
 
-/**
- * Get storage location label in Italian
- */
-function getStorageLabel(location: Food['storage_location']): string {
-  const labels: Record<Food['storage_location'], string> = {
-    fridge: 'Frigo',
-    freezer: 'Freezer',
-    pantry: 'Dispensa',
-  }
-  return labels[location]
+const STORAGE_LABELS: Record<Food['storage_location'], string> = {
+  fridge: 'Frigo',
+  freezer: 'Freezer',
+  pantry: 'Dispensa',
 }
 
 /**
@@ -199,7 +183,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
           )}
           <div className="flex items-center gap-1.5">
             <MapPin className="h-4 w-4 text-muted-foreground/70" />
-            <span>{getStorageLabel(food.storage_location)}</span>
+            <span>{STORAGE_LABELS[food.storage_location]}</span>
           </div>
         </div>
 
