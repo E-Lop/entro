@@ -8,6 +8,7 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { validateInvite, registerPendingInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
 
@@ -35,6 +36,7 @@ function getSignUpDescription(
 }
 
 export function SignUpPage() {
+  useDocumentMeta('Registrati')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { isAuthenticated, loading } = useAuth()

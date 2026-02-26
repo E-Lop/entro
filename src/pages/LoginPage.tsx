@@ -5,10 +5,12 @@ import { AuthForm } from '../components/auth/AuthForm'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { validateInvite, acceptInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
 
 export function LoginPage() {
+  useDocumentMeta('Accedi')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { isAuthenticated, loading } = useAuth()

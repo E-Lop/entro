@@ -161,6 +161,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
               <img
                 src={displayPreview}
                 alt="Anteprima immagine alimento"
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
             ) : null}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { AcceptInviteDialog } from '../components/sharing/AcceptInviteDialog'
 import { PageLoader } from '../components/ui/PageLoader'
 
@@ -10,6 +11,7 @@ import { PageLoader } from '../components/ui/PageLoader'
  * - If user is authenticated: show AcceptInviteDialog
  */
 export default function JoinPage() {
+  useDocumentMeta('Unisciti alla lista')
   const { code } = useParams<{ code: string }>()
   const navigate = useNavigate()
   const { user, loading } = useAuth()

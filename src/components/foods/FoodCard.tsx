@@ -159,6 +159,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
                   <img
                     src={signedUrl!}
                     alt={food.name}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                 </div>

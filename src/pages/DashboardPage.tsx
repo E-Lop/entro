@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
@@ -60,6 +61,7 @@ function getEmptyStateType(activeFiltersCount: number, showInstructionCard: bool
 }
 
 export function DashboardPage() {
+  useDocumentMeta('I miei alimenti')
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 

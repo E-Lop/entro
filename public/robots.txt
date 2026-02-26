@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /login
+Allow: /signup
+Allow: /privacy
+Allow: /terms
+Disallow: /settings
+Disallow: /test-connection
+Disallow: /verify-email
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /join/
+
+Sitemap: https://entroapp.it/sitemap.xml

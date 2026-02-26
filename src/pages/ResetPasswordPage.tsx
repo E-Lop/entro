@@ -5,12 +5,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { updatePassword } from '../lib/auth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { resetPasswordSchema, type ResetPasswordFormData } from '../lib/validations/auth.schemas'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../components/ui/form'
 
 export default function ResetPasswordPage() {
+  useDocumentMeta('Reimposta password')
   const navigate = useNavigate()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)

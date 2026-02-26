@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { ArrowLeft, Shield } from 'lucide-react'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 
 /**
  * Privacy Policy Page - Placeholder
  * This page will be populated with the Privacy Policy from Aruba LegalBlink
  */
 export function PrivacyPolicyPage() {
+  useDocumentMeta('Privacy Policy')
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-4xl mx-auto py-8">

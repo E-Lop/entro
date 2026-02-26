@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { ArrowLeft, FileText } from 'lucide-react'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 
 /**
  * Terms & Conditions Page - Placeholder
  * This page will be populated with the Terms from Aruba LegalBlink
  */
 export function TermsPage() {
+  useDocumentMeta('Termini e Condizioni')
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-4xl mx-auto py-8">

@@ -3,6 +3,7 @@ import { AccountSection } from '../components/settings/AccountSection'
 import { DataExportButton } from '../components/settings/DataExportButton'
 import { DeleteAccountDialog } from '../components/settings/DeleteAccountDialog'
 import { Shield, Download, AlertTriangle } from 'lucide-react'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 
 /**
  * Settings Page Component
@@ -12,6 +13,7 @@ import { Shield, Download, AlertTriangle } from 'lucide-react'
  * - Danger Zone (account deletion)
  */
 export function SettingsPage() {
+  useDocumentMeta('Impostazioni')
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Page Header */}

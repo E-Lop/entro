@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { supabase } from '../lib/supabase'
 import { Mail, CheckCircle2, Loader2 } from 'lucide-react'
 
@@ -29,6 +30,7 @@ function getResendButtonContent(isResending: boolean, resendSuccess: boolean): R
 }
 
 export function VerifyEmailPage() {
+  useDocumentMeta('Verifica email')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { isAuthenticated, loading: authLoading } = useAuth()

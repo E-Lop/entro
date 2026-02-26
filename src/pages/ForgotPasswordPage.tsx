@@ -5,12 +5,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { ArrowLeft, Mail } from 'lucide-react'
 import { resetPasswordRequest } from '../lib/auth'
+import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../lib/validations/auth.schemas'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../components/ui/form'
 
 export default function ForgotPasswordPage() {
+  useDocumentMeta('Recupera password')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
 

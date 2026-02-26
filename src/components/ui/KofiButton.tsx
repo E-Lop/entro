@@ -30,6 +30,7 @@ export function KofiButton() {
           style={{ border: 0 }}
           src='https://storage.ko-fi.com/cdn/kofi6.png?v=6'
           alt='Buy Me a Coffee at ko-fi.com'
+          loading="lazy"
         />
       </a>
     </div>
