@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Loader2, Camera, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Loader2, Camera, AlertCircle, CheckCircle2, Flashlight, FlashlightOff } from 'lucide-react'
 
 interface BarcodeScannerProps {
   open: boolean
@@ -31,6 +31,9 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
     startScanning,
     stopScanning,
     reset,
+    isTorchAvailable,
+    isTorchOn,
+    toggleTorch,
     isScanning,
     isProcessing,
     isSuccess,
@@ -94,6 +97,18 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
                 display: state === 'idle' ? 'none' : 'block',
               }}
             />
+
+            {/* Torch toggle button */}
+            {isScanning && isTorchAvailable && (
+              <button
+                type="button"
+                onClick={toggleTorch}
+                className="absolute top-3 right-3 z-10 rounded-full bg-black/50 p-2.5 text-white backdrop-blur-sm transition-colors hover:bg-black/70 active:bg-black/80"
+                aria-label={isTorchOn ? 'Disattiva flash' : 'Attiva flash'}
+              >
+                {isTorchOn ? <Flashlight className="h-5 w-5" /> : <FlashlightOff className="h-5 w-5" />}
+              </button>
+            )}
 
             {/* Loading state overlay */}
             {state === 'idle' && (

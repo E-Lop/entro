@@ -13,6 +13,8 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
   const [state, setState] = useState<ScannerState>('idle')
   const [error, setError] = useState<string | null>(null)
   const [scannedCode, setScannedCode] = useState<string | null>(null)
+  const [isTorchAvailable, setIsTorchAvailable] = useState(false)
+  const [isTorchOn, setIsTorchOn] = useState(false)
 
   const readerRef = useRef<BrowserMultiFormatReader | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -91,6 +93,8 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
               videoRef.current.srcObject = null
             }
 
+            setIsTorchAvailable(false)
+            setIsTorchOn(false)
             setState('processing')
             setScannedCode(barcode)
             setState('success')
@@ -106,6 +110,18 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
 
       // Save controls reference for external stop
       controlsRef.current = controls
+
+      // Detect torch capability
+      try {
+        const stream = videoElement.srcObject as MediaStream | null
+        const track = stream?.getVideoTracks()[0]
+        if (track) {
+          const capabilities = track.getCapabilities()
+          setIsTorchAvailable(!!capabilities.torch)
+        }
+      } catch {
+        // Torch detection not supported
+      }
     } catch (err) {
       console.error('Error starting scanner:', err)
       const errorMsg =
@@ -165,6 +181,8 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         readerRef.current = null
       }
 
+      setIsTorchAvailable(false)
+      setIsTorchOn(false)
       setState('idle')
       setError(null)
     } catch (err) {
@@ -183,6 +201,21 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
     setError(null)
     setScannedCode(null)
   }, [])
+
+  const toggleTorch = useCallback(async () => {
+    try {
+      const stream = videoRef.current?.srcObject as MediaStream | null
+      const track = stream?.getVideoTracks()[0]
+      if (!track) return
+
+      const newTorchState = !isTorchOn
+      await track.applyConstraints({ advanced: [{ torch: newTorchState }] })
+      setIsTorchOn(newTorchState)
+    } catch {
+      setIsTorchAvailable(false)
+      setIsTorchOn(false)
+    }
+  }, [isTorchOn])
 
   /**
    * Manage mounted state and cleanup on unmount
@@ -207,6 +240,9 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
     startScanning,
     stopScanning,
     reset,
+    isTorchAvailable,
+    isTorchOn,
+    toggleTorch,
     isScanning: state === 'scanning',
     isProcessing: state === 'processing',
     isSuccess: state === 'success',

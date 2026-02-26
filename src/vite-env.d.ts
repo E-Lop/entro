@@ -9,3 +9,14 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+// Torch/flashlight support (Chrome Android, Safari 17+)
+interface MediaTrackCapabilities {
+  torch?: boolean
+}
+interface MediaTrackConstraintSet {
+  torch?: ConstrainBoolean
+}
+interface MediaTrackSettings {
+  torch?: boolean
+}
