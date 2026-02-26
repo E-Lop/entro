@@ -4,6 +4,7 @@ import { LogOut, User, Settings } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { AppIcon } from '../ui/AppIcon'
 import { ThemeToggle } from './ThemeToggle'
+import { QuickGuideDialog } from '../guide/QuickGuideDialog'
 import { InviteButton } from '../sharing/InviteButton'
 import { InviteDialog } from '../sharing/InviteDialog'
 import { InviteMenuDialog } from '../sharing/InviteMenuDialog'
@@ -83,6 +84,7 @@ export function AppLayout() {
 
           {/* Actions - Navigation landmark */}
           <nav aria-label="Menu principale" className="flex items-center gap-2">
+            <QuickGuideDialog />
             <ThemeToggle />
 
             {/* User Menu */}

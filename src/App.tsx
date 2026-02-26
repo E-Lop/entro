@@ -16,6 +16,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const TestConnection = lazy(() => import('./pages/TestConnection'))
 const JoinPage = lazy(() => import('./pages/JoinPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const GuidaPage = lazy(() => import('./pages/GuidaPage'))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 
@@ -55,6 +56,7 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/guida" element={<GuidaPage />} />
                 <Route path="/test-connection" element={<TestConnection />} />
               </Route>
             </Route>
