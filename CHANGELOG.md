@@ -7,7 +7,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
-## [0.12.0] - 2026-02-26
+## [1.2.0] - 2026-02-26
+
+### Added
+- Changelog completo del progetto con storico da v0.1.0
+- Tag git e GitHub Releases per tutte le versioni
+
+## [1.1.0] - 2026-02-26
 
 ### Added
 - Torcia/flashlight nel barcode scanner per ambienti con poca luce
@@ -22,7 +28,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Semplificazione codebase: deduplica auth helpers, rimosso try/catch ridondanti, pulizia utils
 - Rimossi console.log di sviluppo residui
 
-## [0.11.0] - 2026-02-05
+## [1.0.0] - 2026-02-19
+
+Lancio pubblico di Entro su LinkedIn.
 
 ### Changed
 - Migliorata UX di registrazione con requisiti password più robusti
@@ -178,9 +186,10 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v0.12.0...HEAD
-[0.12.0]: https://github.com/E-Lop/entro/compare/v0.11.0...v0.12.0
-[0.11.0]: https://github.com/E-Lop/entro/compare/v0.10.0...v0.11.0
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/E-Lop/entro/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/E-Lop/entro/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/E-Lop/entro/compare/v0.10.0...v1.0.0
 [0.10.0]: https://github.com/E-Lop/entro/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/E-Lop/entro/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/E-Lop/entro/compare/v0.7.0...v0.8.0
