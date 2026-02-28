@@ -8,6 +8,7 @@ import {
   Search,
   Calendar,
   Users,
+  Bell,
   Download,
 } from 'lucide-react'
 import { Button } from '../ui/button'
@@ -51,6 +52,11 @@ const guideItems = [
     icon: Users,
     title: 'Condividi lista',
     description: 'Dal menu utente, genera un codice invito per condividere la lista',
+  },
+  {
+    icon: Bell,
+    title: 'Notifiche scadenza',
+    description: 'Attivale in Impostazioni per ricevere avvisi quando i tuoi alimenti stanno per scadere. Su iPhone funzionano solo con l\'app installata',
   },
   {
     icon: Download,

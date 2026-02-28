@@ -10,6 +10,7 @@ import {
   Calendar,
   Users,
   Share2,
+  Bell,
   Smartphone,
   WifiOff,
   CircleHelp,
@@ -218,6 +219,49 @@ export function GuidaPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-orange-600" />
+            Notifiche Scadenza
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <h3 className="font-medium mb-2">Attivare le notifiche</h3>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+              <li>Vai in <strong className="text-foreground">Impostazioni</strong> (icona utente in alto a destra)</li>
+              <li>Nella sezione <strong className="text-foreground">Notifiche</strong>, premi <strong className="text-foreground">"Attiva"</strong></li>
+              <li>Consenti le notifiche quando il browser lo chiede</li>
+            </ol>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Personalizzare gli avvisi</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li><strong className="text-foreground">Quando avvisarti:</strong> scegli quanti giorni prima della scadenza ricevere l'avviso (7, 3, 2, 1 giorni prima o il giorno stesso)</li>
+              <li><strong className="text-foreground">Ore silenziose:</strong> imposta una fascia oraria in cui non ricevere notifiche</li>
+              <li><strong className="text-foreground">Limite giornaliero:</strong> decidi quante notifiche ricevere al massimo ogni giorno</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Quando arrivano</h3>
+            <p className="text-sm text-muted-foreground">
+              Le notifiche vengono inviate ogni giorno alle 10:00 (ora italiana). Riceverai un unico avviso
+              che raggruppa tutti gli alimenti in scadenza secondo le tue preferenze.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Note importanti</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li><strong className="text-foreground">iPhone:</strong> le notifiche push funzionano solo con l'app installata sulla schermata Home, non dal browser Safari</li>
+              <li><strong className="text-foreground">Ogni dispositivo va attivato separatamente:</strong> se usi entro su più dispositivi, attiva le notifiche su ognuno</li>
+              <li>Le notifiche funzionano anche quando il browser è chiuso</li>
+              <li>Per disattivarle, premi "Disattiva" nelle impostazioni</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <ScanBarcode className="h-5 w-5 text-amber-600" />
             Scansione Barcode
           </CardTitle>
@@ -319,6 +363,13 @@ export function GuidaPage() {
             <h3 className="font-medium mb-1">Perché il barcode non riconosce il mio prodotto?</h3>
             <p className="text-sm text-muted-foreground">
               Il database Open Food Facts è mantenuto dalla comunità. Alcuni prodotti locali o nuovi potrebbero non essere presenti. Puoi inserire l'alimento manualmente.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-1">Perché non ricevo le notifiche su iPhone?</h3>
+            <p className="text-sm text-muted-foreground">
+              Su iPhone le notifiche push funzionano solo se hai installato l'app sulla schermata Home.
+              Apri entroapp.it in Safari, tocca Condividi e poi "Aggiungi alla schermata Home". Dopo l'installazione, attiva le notifiche dalle impostazioni dell'app.
             </p>
           </div>
           <div>
