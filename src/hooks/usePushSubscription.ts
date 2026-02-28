@@ -13,20 +13,25 @@ export function usePushSubscription() {
 
   useEffect(() => {
     async function checkStatus(): Promise<void> {
-      if (!isPushSupported()) {
-        setStatus('unsupported')
-        return
+      try {
+        if (!isPushSupported()) {
+          setStatus('unsupported')
+          return
+        }
+        if (isIOS() && !isPWAInstalled()) {
+          setStatus('ios-not-installed')
+          return
+        }
+        if (getPermissionState() === 'denied') {
+          setStatus('denied')
+          return
+        }
+        const subscription = await getCurrentSubscription()
+        setStatus(subscription ? 'subscribed' : 'prompt')
+      } catch (error) {
+        console.error('[usePushSubscription] checkStatus error:', error)
+        setStatus('prompt')
       }
-      if (isIOS() && !isPWAInstalled()) {
-        setStatus('ios-not-installed')
-        return
-      }
-      if (getPermissionState() === 'denied') {
-        setStatus('denied')
-        return
-      }
-      const subscription = await getCurrentSubscription()
-      setStatus(subscription ? 'subscribed' : 'prompt')
     }
     checkStatus()
   }, [])
