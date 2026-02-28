@@ -8,10 +8,9 @@ import {
 export type PushStatus = 'unsupported' | 'ios-not-installed' | 'prompt' | 'subscribed' | 'denied' | 'loading'
 
 function getInitialStatus(): PushStatus {
-  if (!isPushSupported()) { console.log('[pushHook] unsupported'); return 'unsupported' }
-  if (isIOS() && !isPWAInstalled()) { console.log('[pushHook] ios-not-installed'); return 'ios-not-installed' }
+  if (!isPushSupported()) return 'unsupported'
+  if (isIOS() && !isPWAInstalled()) return 'ios-not-installed'
   const permission = getPermissionState()
-  console.log('[pushHook] permission:', permission)
   if (permission === 'denied') return 'denied'
   if (permission === 'granted') return 'subscribed'
   return 'prompt'
@@ -46,10 +45,8 @@ export function usePushSubscription() {
   }, [])
 
   const subscribe = useCallback(async () => {
-    console.log('[pushHook] subscribe clicked')
     setIsLoading(true)
     const result = await subscribeToPush()
-    console.log('[pushHook] subscribe result:', result)
     setIsLoading(false)
 
     if (result.success) {
@@ -72,10 +69,8 @@ export function usePushSubscription() {
   }, [])
 
   const unsubscribe = useCallback(async () => {
-    console.log('[pushHook] unsubscribe clicked')
     setIsLoading(true)
     const result = await unsubscribeFromPush()
-    console.log('[pushHook] unsubscribe result:', result)
     setIsLoading(false)
 
     if (result.success) {

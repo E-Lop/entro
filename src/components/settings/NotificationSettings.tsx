@@ -16,7 +16,7 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i)
 const MAX_DAILY_OPTIONS = Array.from({ length: 10 }, (_, i) => i + 1)
 
 function getToggleButtonLabel(isLoading: boolean, isSubscribed: boolean): string {
-  if (isLoading) return 'Caricamento...'
+  if (isLoading) return isSubscribed ? 'Disattivazione...' : 'Attivazione...'
   if (isSubscribed) return 'Disattiva'
   return 'Attiva'
 }
