@@ -21,6 +21,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Navigazione automatica al click su notifica push
 - Unsubscribe automatico al logout
 
+### Fixed
+- Sostituita libreria `web-push` (Node.js) con `@negrel/webpush` (Deno-nativo) per compatibilità Supabase Edge Functions
+- Auth Edge Function cron: sostituito confronto con `SUPABASE_SERVICE_ROLE_KEY` con shared secret `CRON_SECRET` via Vault (compatibile con nuovo formato API key Supabase)
+- Stato iniziale bottone notifiche calcolato in modo sincrono da `Notification.permission` per evitare blocco su "Caricamento..."
+- Aggiunto timeout 10s a `navigator.serviceWorker.ready` in `subscribeToPush()` per evitare hang dopo cache clear
+- Label bottone notifiche contestuali: "Attivazione..." / "Disattivazione..." invece del generico "Caricamento..."
+
 ### Changed
 - vite-plugin-pwa: switch da `generateSW` a `injectManifest` per supporto push handler nel SW
 - Runtime caching migrato da config Vite al service worker custom
