@@ -7,34 +7,30 @@ import {
 
 export type PushStatus = 'unsupported' | 'ios-not-installed' | 'prompt' | 'subscribed' | 'denied' | 'loading'
 
+function getInitialStatus(): PushStatus {
+  if (!isPushSupported()) return 'unsupported'
+  if (isIOS() && !isPWAInstalled()) return 'ios-not-installed'
+  const permission = getPermissionState()
+  if (permission === 'denied') return 'denied'
+  if (permission === 'granted') return 'subscribed'
+  return 'prompt'
+}
+
 export function usePushSubscription() {
-  const [status, setStatus] = useState<PushStatus>('loading')
+  const [status, setStatus] = useState<PushStatus>(getInitialStatus)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Refine status by checking actual subscription (async, non-blocking)
   useEffect(() => {
-    async function checkStatus(): Promise<void> {
-      try {
-        if (!isPushSupported()) {
-          setStatus('unsupported')
-          return
-        }
-        if (isIOS() && !isPWAInstalled()) {
-          setStatus('ios-not-installed')
-          return
-        }
-        if (getPermissionState() === 'denied') {
-          setStatus('denied')
-          return
-        }
-        const subscription = await getCurrentSubscription()
-        setStatus(subscription ? 'subscribed' : 'prompt')
-      } catch (error) {
-        console.error('[usePushSubscription] checkStatus error:', error)
-        setStatus('prompt')
-      }
-    }
-    checkStatus()
-  }, [])
+    if (status !== 'subscribed') return
+    let cancelled = false
+    getCurrentSubscription().then((sub) => {
+      if (!cancelled && !sub) setStatus('prompt')
+    }).catch(() => {
+      // If we can't check, keep showing 'subscribed' since permission is granted
+    })
+    return () => { cancelled = true }
+  }, [status])
 
   useEffect(() => {
     function handleSwMessage(event: MessageEvent): void {
