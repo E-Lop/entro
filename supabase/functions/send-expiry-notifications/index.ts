@@ -36,9 +36,12 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // Verificare che sia chiamata dal cron (service_role key)
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader?.includes(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'NONE')) {
+  // Auth: verifica shared secret (CRON_SECRET) impostato via Vault + Edge Function secrets
+  const authHeader = req.headers.get('Authorization') ?? ''
+  const token = authHeader.replace('Bearer ', '')
+  const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
+
+  if (!cronSecret || token !== cronSecret) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }),
       { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }

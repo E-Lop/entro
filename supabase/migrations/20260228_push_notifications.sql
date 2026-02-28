@@ -108,6 +108,8 @@ $$;
 
 -- 4. pg_cron schedule (eseguire DOPO deploy Edge Functions)
 -- Nota: abilitare pg_cron e pg_net dal Dashboard Supabase > Database > Extensions
+-- Il CRON_SECRET deve essere salvato in Vault prima di creare il cron job:
+--   SELECT vault.create_secret('<CRON_SECRET>', 'cron_secret', 'Shared secret for Edge Function cron auth');
 --
 -- SELECT cron.schedule(
 --   'send-expiry-notifications',
@@ -117,7 +119,7 @@ $$;
 --       url := '<SUPABASE_URL>/functions/v1/send-expiry-notifications',
 --       headers := jsonb_build_object(
 --         'Content-Type', 'application/json',
---         'Authorization', 'Bearer <SERVICE_ROLE_KEY>'
+--         'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'cron_secret' LIMIT 1)
 --       ),
 --       body := '{}'::jsonb
 --     );

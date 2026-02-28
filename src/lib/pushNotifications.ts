@@ -53,7 +53,12 @@ export function getPermissionState(): NotificationPermission {
 
 export async function getCurrentSubscription(): Promise<PushSubscription | null> {
   if (!isPushSupported()) return null
-  const registration = await navigator.serviceWorker.ready
+  // Timeout after 3s — SW may not be active yet on first visit
+  const registration = await Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+  ])
+  if (!registration) return null
   return registration.pushManager.getSubscription()
 }
 
