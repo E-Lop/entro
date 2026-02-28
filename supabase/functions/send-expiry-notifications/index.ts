@@ -1,34 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { ApplicationServer, importVapidKeys } from '@negrel/webpush'
+import type { PushSubscription as WebPushSubscription } from '@negrel/webpush'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Web Push via VAPID
-async function sendWebPush(
-  subscription: { endpoint: string; p256dh: string; auth_key: string },
-  payload: string,
-  vapidKeys: { publicKey: string; privateKey: string; subject: string }
-): Promise<{ success: boolean; statusCode?: number; gone?: boolean }> {
-  const webpush = await import('https://esm.sh/web-push@3.6.7')
-  webpush.setVapidDetails(vapidKeys.subject, vapidKeys.publicKey, vapidKeys.privateKey)
-
-  try {
-    const result = await webpush.sendNotification(
-      { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth_key } },
-      payload
-    )
-    return { success: true, statusCode: result.statusCode }
-  } catch (error: unknown) {
-    const pushError = error as { statusCode?: number }
-    if (pushError.statusCode === 410 || pushError.statusCode === 404) {
-      return { success: false, statusCode: pushError.statusCode, gone: true }
-    }
-    console.error('Push send error:', error)
-    return { success: false, statusCode: pushError.statusCode }
-  }
 }
 
 serve(async (req) => {
@@ -53,11 +30,13 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    const vapidKeys = {
-      publicKey: Deno.env.get('VAPID_PUBLIC_KEY') ?? '',
-      privateKey: Deno.env.get('VAPID_PRIVATE_KEY') ?? '',
-      subject: Deno.env.get('VAPID_SUBJECT') ?? '',
-    }
+    // Inizializzare Web Push con VAPID keys (JWK format)
+    const vapidKeysJson = JSON.parse(Deno.env.get('VAPID_KEYS') ?? '{}')
+    const vapidKeys = await importVapidKeys(vapidKeysJson)
+    const appServer = await ApplicationServer.new({
+      contactInformation: Deno.env.get('VAPID_SUBJECT') ?? 'mailto:support@entroapp.it',
+      vapidKeys,
+    })
 
     // 1. Ottenere alimenti che necessitano notifica oggi
     const { data: expiringFoods, error: queryError } = await supabase
@@ -88,9 +67,9 @@ serve(async (req) => {
       if (!subscriptions || subscriptions.length === 0) continue
 
       // Comporre messaggio in italiano
-      const expiredToday = foods.filter((f) => f.days_until_expiry === 0)
-      const expiringTomorrow = foods.filter((f) => f.days_until_expiry === 1)
-      const expiringSoon = foods.filter((f) => f.days_until_expiry > 1)
+      const expiredToday = foods.filter((f: { days_until_expiry: number }) => f.days_until_expiry === 0)
+      const expiringTomorrow = foods.filter((f: { days_until_expiry: number }) => f.days_until_expiry === 1)
+      const expiringSoon = foods.filter((f: { days_until_expiry: number }) => f.days_until_expiry > 1)
 
       let title: string
       let body: string
@@ -98,11 +77,11 @@ serve(async (req) => {
       if (expiredToday.length > 0) {
         title = expiredToday.length <= 2 ? 'Scadenza oggi!' : `${expiredToday.length} alimenti scadono oggi!`
         body = expiredToday.length <= 2
-          ? expiredToday.map((f) => f.food_name).join(', ')
-          : expiredToday.slice(0, 3).map((f) => f.food_name).join(', ') + '...'
+          ? expiredToday.map((f: { food_name: string }) => f.food_name).join(', ')
+          : expiredToday.slice(0, 3).map((f: { food_name: string }) => f.food_name).join(', ') + '...'
       } else if (expiringTomorrow.length > 0) {
         title = 'Scadenza domani'
-        body = expiringTomorrow.map((f) => f.food_name).join(', ')
+        body = expiringTomorrow.map((f: { food_name: string }) => f.food_name).join(', ')
       } else {
         const first = expiringSoon[0]
         title = `${expiringSoon.length} aliment${expiringSoon.length === 1 ? 'o' : 'i'} in scadenza`
@@ -119,9 +98,22 @@ serve(async (req) => {
       })
 
       for (const sub of subscriptions) {
-        const result = await sendWebPush(sub, payload, vapidKeys)
-        if (result.success) totalSent++
-        else if (result.gone) staleEndpoints.push(sub.endpoint)
+        try {
+          const pushSub: WebPushSubscription = {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth_key },
+          }
+          const subscriber = appServer.subscribe(pushSub)
+          await subscriber.pushTextMessage(payload, {})
+          totalSent++
+        } catch (error: unknown) {
+          const pushErr = error as { statusCode?: number; isGone?: () => boolean }
+          if (pushErr.isGone?.() || pushErr.statusCode === 410 || pushErr.statusCode === 404) {
+            staleEndpoints.push(sub.endpoint)
+          } else {
+            console.error('Push send error:', error)
+          }
+        }
       }
 
       // Aggiornare contatore rate limiting
