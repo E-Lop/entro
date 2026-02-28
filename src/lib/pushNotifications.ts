@@ -53,13 +53,23 @@ export function getPermissionState(): NotificationPermission {
 
 export async function getCurrentSubscription(): Promise<PushSubscription | null> {
   if (!isPushSupported()) return null
-  // Timeout after 3s — SW may not be active yet on first visit
+  try {
+    const registration = await waitForServiceWorker(3000)
+    return registration.pushManager.getSubscription()
+  } catch {
+    return null
+  }
+}
+
+async function waitForServiceWorker(timeoutMs = 10000): Promise<ServiceWorkerRegistration> {
   const registration = await Promise.race([
     navigator.serviceWorker.ready,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
   ])
-  if (!registration) return null
-  return registration.pushManager.getSubscription()
+  if (!registration) {
+    throw new Error('Service worker non pronto. Ricarica la pagina e riprova.')
+  }
+  return registration
 }
 
 export async function subscribeToPush(): Promise<{
@@ -75,7 +85,7 @@ export async function subscribeToPush(): Promise<{
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') return { success: false, error: 'Permesso notifiche negato' }
 
-    const registration = await navigator.serviceWorker.ready
+    const registration = await waitForServiceWorker()
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
