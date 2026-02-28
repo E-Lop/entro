@@ -12,6 +12,7 @@ import { FoodCard } from '../components/foods/FoodCard'
 import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
 import { KofiButton } from '../components/ui/KofiButton'
+import { NotificationPrompt } from '../components/pwa/NotificationPrompt'
 
 // Lazy load heavy components only shown on user interaction
 const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ default: m.WeekView })))
@@ -381,6 +382,9 @@ export function DashboardPage() {
           </div>
         </button>
       </div>
+
+      {/* Notification Prompt */}
+      <NotificationPrompt foodCount={stats.total} />
 
       {/* Filters and Search - Collapsible */}
       <FoodFilters

@@ -8,3 +8,9 @@ verify_jwt = false  # Public endpoint for signup validation
 
 [functions.accept-invite]
 verify_jwt = false  # Custom JWT validation in function code
+
+[functions.register-push]
+verify_jwt = false
+
+[functions.send-expiry-notifications]
+verify_jwt = false

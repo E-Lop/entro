@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { unsubscribeFromPush } from './pushNotifications'
 import type { User, Session } from '@supabase/supabase-js'
 
 /**
@@ -122,6 +123,9 @@ export async function signIn(
  */
 export async function signOut(): Promise<{ error: Error | null }> {
   try {
+    // Best-effort push cleanup -- errors are ignored since the user is signing out
+    await unsubscribeFromPush().catch(() => {})
+
     const { error } = await supabase.auth.signOut()
 
     if (error) {

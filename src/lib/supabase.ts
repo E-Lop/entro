@@ -122,6 +122,40 @@ export type Database = {
         Insert: Omit<Database['public']['Tables']['invites']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['invites']['Insert']>
       }
+      push_subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          endpoint: string
+          p256dh: string
+          auth_key: string
+          user_agent: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['push_subscriptions']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['push_subscriptions']['Insert']>
+      }
+      notification_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          enabled: boolean
+          expiry_intervals: number[]
+          quiet_hours_enabled: boolean
+          quiet_hours_start: number
+          quiet_hours_end: number
+          max_notifications_per_day: number
+          timezone: string
+          last_notification_sent_at: string | null
+          notifications_sent_today: number
+          notifications_sent_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['notification_preferences']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['notification_preferences']['Insert']>
+      }
     }
   }
 }

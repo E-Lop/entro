@@ -1,17 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { AccountSection } from '../components/settings/AccountSection'
+import { NotificationSettings } from '../components/settings/NotificationSettings'
 import { DataExportButton } from '../components/settings/DataExportButton'
 import { DeleteAccountDialog } from '../components/settings/DeleteAccountDialog'
 import { Shield, Download, AlertTriangle } from 'lucide-react'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 
-/**
- * Settings Page Component
- * Main settings dashboard with:
- * - Account information (email, name)
- * - Privacy & Data management (export, policies)
- * - Danger Zone (account deletion)
- */
 export function SettingsPage() {
   useDocumentMeta('Impostazioni')
   return (
@@ -26,6 +20,9 @@ export function SettingsPage() {
 
       {/* Account Section */}
       <AccountSection />
+
+      {/* Notification Settings */}
+      <NotificationSettings />
 
       {/* Privacy & Data Section */}
       <Card>

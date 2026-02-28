@@ -7,6 +7,24 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-28
+
+### Added
+- Push notifications per scadenze alimenti (Web Push API con VAPID)
+- Service worker custom con handler push, notificationclick e pushsubscriptionchange
+- Edge Functions: `register-push` (subscribe/unsubscribe) e `send-expiry-notifications` (cron giornaliero)
+- Tabelle DB: `push_subscriptions` e `notification_preferences` con RLS
+- Funzione DB `get_expiring_foods_for_notifications()` per il cron job
+- Cron schedule pg_cron (ogni giorno alle 9:00 UTC)
+- Impostazioni notifiche nella pagina Settings: toggle, intervalli scadenza, ore silenziose, max giornaliero
+- Banner opt-in notifiche nella Dashboard (dismissibile, mostrato dopo 3+ alimenti)
+- Navigazione automatica al click su notifica push
+- Unsubscribe automatico al logout
+
+### Changed
+- vite-plugin-pwa: switch da `generateSW` a `injectManifest` per supporto push handler nel SW
+- Runtime caching migrato da config Vite al service worker custom
+
 ## [1.2.0] - 2026-02-26
 
 ### Added

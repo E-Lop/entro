@@ -35,6 +35,16 @@ function App() {
     }
   }, [initialize])
 
+  useEffect(() => {
+    function handleSwMessage(event: MessageEvent): void {
+      if (event.data?.type === 'NOTIFICATION_CLICK' && event.data.url) {
+        window.location.href = event.data.url
+      }
+    }
+    navigator.serviceWorker?.addEventListener('message', handleSwMessage)
+    return () => navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
+  }, [])
+
   return (
     <>
       <OfflineBanner />
