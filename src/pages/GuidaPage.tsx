@@ -381,6 +381,9 @@ export function GuidaPage() {
             <h3 className="font-medium mb-2 text-foreground/80">Non disponibile offline</h3>
             <ul className="list-disc list-inside space-y-1">
               <li>Attivazione notifiche push (richiede registrazione sul server)</li>
+              <li>Modifica preferenze notifiche (intervalli, ore silenziose, max giornaliere)</li>
+              <li>Gestione liste condivise e inviti (creare, accettare, abbandonare)</li>
+              <li>Esportazione dati</li>
               <li>Scansione barcode (richiede connessione a Open Food Facts)</li>
               <li>Login e logout</li>
               <li>Caricamento nuove foto</li>
