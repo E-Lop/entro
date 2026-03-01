@@ -7,6 +7,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Changed
+- Guida utente: sezione "Utilizzo Offline" riscritta per distinguere tra app installata (cache persistente, offline completo, push su tutti i dispositivi) e browser mobile (limitazioni iOS Safari: cache cancellata dopo 7 giorni, no push)
+- Guida rapida: voce "Installa app" aggiornata con benefici offline e nota su iPhone
+- FAQ: aggiunta domanda "Perché offline non vedo i miei dati su iPhone?"
+
 ## [1.4.0] - 2026-03-01
 
 ### Added
