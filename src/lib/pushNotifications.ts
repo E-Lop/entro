@@ -82,6 +82,10 @@ export async function subscribeToPush(): Promise<{
       return { success: false, error: "Su iOS, aggiungi l'app alla Schermata Home per ricevere notifiche" }
     }
 
+    if (!navigator.onLine) {
+      return { success: false, error: 'Connessione internet necessaria per attivare le notifiche. Riprova quando sei online.' }
+    }
+
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') return { success: false, error: 'Permesso notifiche negato' }
 
@@ -97,7 +101,11 @@ export async function subscribeToPush(): Promise<{
       userAgent: navigator.userAgent,
     })
 
-    if (!response.ok) throw new Error('Failed to register subscription on server')
+    if (!response.ok) {
+      // Rollback local subscription to avoid inconsistent state
+      await subscription.unsubscribe().catch(() => {})
+      throw new Error('Failed to register subscription on server')
+    }
     return { success: true, subscription }
   } catch (error) {
     console.error('[pushNotifications] Subscribe error:', error)

@@ -374,6 +374,7 @@ Installando entro sulla schermata Home hai l'esperienza offline migliore:
 
 | Funzionalità | Motivo |
 |--------------|--------|
+| Attivazione notifiche push | Richiede registrazione sul server |
 | Scansione barcode | Richiede connessione a Open Food Facts |
 | Login/Logout | Richiede autenticazione con il server |
 

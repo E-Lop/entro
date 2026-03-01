@@ -7,6 +7,10 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Fixed
+- Attivazione notifiche push offline: aggiunto controllo connessione prima del tentativo e rollback della subscription locale se la registrazione server fallisce, evitando stato inconsistente
+- Documentazione: aggiunta attivazione notifiche push alla lista delle funzionalità non disponibili offline
+
 ## [1.5.0] - 2026-03-01
 
 ### Added
