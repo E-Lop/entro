@@ -328,13 +328,19 @@ export function GuidaPage() {
             Utilizzo Offline
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>I dati sono salvati nel cloud (Supabase). Senza connessione:</p>
+        <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <p>Entro funziona anche senza connessione internet:</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>L'app si apre e mostra l'interfaccia</li>
-            <li>Un banner arancione avvisa che sei offline</li>
-            <li>Non puoi vedere, aggiungere o modificare alimenti</li>
-            <li>Quando torni online, tutto torna a funzionare automaticamente</li>
+            <li>Vedi i tuoi alimenti, scadenze e filtri dalla cache</li>
+            <li>Puoi aggiungere, modificare ed eliminare alimenti</li>
+            <li>Le modifiche vengono salvate e sincronizzate automaticamente quando torni online</li>
+            <li>Un banner ti mostra quante modifiche sono in attesa di sincronizzazione</li>
+          </ul>
+          <p className="font-medium text-foreground/80">Non disponibile offline:</p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>Scansione barcode (richiede connessione a Open Food Facts)</li>
+            <li>Login e logout</li>
+            <li>Caricamento nuove foto</li>
           </ul>
         </CardContent>
       </Card>

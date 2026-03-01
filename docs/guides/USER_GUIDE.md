@@ -310,34 +310,34 @@ Attualmente non è possibile annullare un codice già generato. Il codice scadr�
 
 ## Utilizzo Offline
 
+Entro funziona anche senza connessione internet. I tuoi dati vengono salvati localmente e le modifiche vengono sincronizzate automaticamente quando torni online.
+
 ### Cosa Funziona Offline
 
-| Funzionalità | Disponibile Offline |
-|--------------|---------------------|
-| Aprire l'app | ✅ Sì |
-| Vedere l'interfaccia | ✅ Sì |
-| Banner "Sei offline" | ✅ Sì |
+| Funzionalità | Disponibile Offline | Note |
+|--------------|---------------------|------|
+| Vedere i tuoi alimenti | ✅ Sì | Dalla cache locale |
+| Cercare e filtrare | ✅ Sì | Sui dati in cache |
+| Vista calendario | ✅ Sì | Dalla cache locale |
+| Aggiungere alimenti | ✅ Sì | Sincronizzato al ritorno online |
+| Modificare alimenti | ✅ Sì | Sincronizzato al ritorno online |
+| Eliminare alimenti | ✅ Sì | Sincronizzato al ritorno online |
+| Cambiare stato (consumato) | ✅ Sì | Sincronizzato al ritorno online |
 
 ### Cosa NON Funziona Offline
 
-| Funzionalità | Disponibile Offline |
-|--------------|---------------------|
-| Vedere i tuoi alimenti | ❌ No |
-| Aggiungere alimenti | ❌ No |
-| Modificare/eliminare | ❌ No |
-| Scansione barcode | ❌ No |
-| Login/Logout | ❌ No |
+| Funzionalità | Motivo |
+|--------------|--------|
+| Scansione barcode | Richiede connessione a Open Food Facts |
+| Caricamento foto | L'upload richiede connessione al server |
+| Login/Logout | Richiede autenticazione con il server |
 
-### Perché?
+### Come Funziona
 
-I tuoi dati sono salvati in modo sicuro nel cloud (Supabase). Quando sei offline, l'app non può comunicare con il server per recuperare o salvare i dati.
-
-### Cosa Vedere Quando Sei Offline
-
-Vedrai un **banner arancione** in cima alla pagina con il messaggio:
-> "Sei offline - alcune funzionalità potrebbero non essere disponibili"
-
-Quando torni online, il banner scompare automaticamente e puoi usare tutte le funzionalità.
+1. **Quando perdi la connessione**: un banner arancione appare in cima alla pagina. Puoi continuare a usare l'app normalmente.
+2. **Le tue modifiche vengono salvate**: il banner mostra quante modifiche sono in attesa di sincronizzazione (es. "2 modifiche in attesa").
+3. **Quando torni online**: le modifiche vengono inviate automaticamente al server. Un banner blu con "Sincronizzazione in corso..." appare brevemente durante il processo.
+4. **Dopo la sincronizzazione**: il banner scompare e i dati sono aggiornati.
 
 ---
 

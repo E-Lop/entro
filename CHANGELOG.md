@@ -7,6 +7,22 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-01
+
+### Added
+- Esperienza offline completa: cache persistente in IndexedDB e mutazioni offline con coda automatica
+- Creazione, modifica, eliminazione e cambio stato alimenti funzionano offline con optimistic updates
+- UUID generati client-side (`crypto.randomUUID()`) per inserimenti offline
+- Le mutazioni in pausa vengono riprese automaticamente al ritorno della connessione
+- Le mutazioni persistite sopravvivono al ricaricamento della pagina e vengono rieseguite all'avvio
+- Banner offline migliorato: mostra il numero di modifiche in attesa e indicatore di sincronizzazione
+- Pulizia automatica della cache IndexedDB al logout per prevenire leak di dati tra account
+
+### Changed
+- Migrazione da `QueryClientProvider` a `PersistQueryClientProvider` con `gcTime` di 24 ore
+- Tutte le mutazioni food ora utilizzano `mutationKey` e optimistic updates consistenti
+- Logica `mutationFn` centralizzata in `mutationDefaults.ts` (singola fonte di verità)
+
 ## [1.3.1] - 2026-03-01
 
 ### Security
@@ -216,7 +232,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/E-Lop/entro/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/E-Lop/entro/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/E-Lop/entro/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/E-Lop/entro/compare/v1.1.0...v1.2.0
