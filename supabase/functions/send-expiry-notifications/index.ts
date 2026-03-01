@@ -116,11 +116,22 @@ serve(async (req) => {
         }
       }
 
-      // Aggiornare contatore rate limiting
+      // Aggiornare contatore rate limiting (incrementale, non sovrascrittura)
+      const today = new Date().toISOString().split('T')[0]
+      const { data: currentPrefs } = await supabase
+        .from('notification_preferences')
+        .select('notifications_sent_today, notifications_sent_date')
+        .eq('user_id', userId)
+        .single()
+
+      const existingCount = currentPrefs?.notifications_sent_date === today
+        ? (currentPrefs?.notifications_sent_today ?? 0)
+        : 0
+
       await supabase.from('notification_preferences').update({
         last_notification_sent_at: new Date().toISOString(),
-        notifications_sent_today: foods.length,
-        notifications_sent_date: new Date().toISOString().split('T')[0],
+        notifications_sent_today: existingCount + foods.length,
+        notifications_sent_date: today,
       }).eq('user_id', userId)
     }
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   isPushSupported, isPWAInstalled, isIOS, getPermissionState,
-  getCurrentSubscription, subscribeToPush, unsubscribeFromPush,
+  getCurrentSubscription, subscribeToPush, unsubscribeFromPush, syncSubscription,
 } from '@/lib/pushNotifications'
 
 export type PushStatus = 'unsupported' | 'ios-not-installed' | 'prompt' | 'subscribed' | 'denied' | 'loading'
@@ -21,11 +21,18 @@ export function usePushSubscription() {
   const [isLoading, setIsLoading] = useState(false)
 
   // Refine status by checking actual subscription (async, non-blocking)
+  // If subscribed, silently re-register to ensure server has the current endpoint
+  // (handles pushsubscriptionchange events that fired while no window was open)
   useEffect(() => {
     if (status !== 'subscribed') return
     let cancelled = false
     getCurrentSubscription().then((sub) => {
-      if (!cancelled && !sub) setStatus('prompt')
+      if (cancelled) return
+      if (!sub) {
+        setStatus('prompt')
+      } else {
+        syncSubscription()
+      }
     }).catch(() => {
       // If we can't check, keep showing 'subscribed' since permission is granted
     })

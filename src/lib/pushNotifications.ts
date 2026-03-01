@@ -113,6 +113,21 @@ export async function subscribeToPush(): Promise<{
   }
 }
 
+export async function syncSubscription(): Promise<void> {
+  try {
+    const subscription = await getCurrentSubscription()
+    if (!subscription) return
+
+    await callPushApi({
+      action: 'subscribe',
+      subscription: subscription.toJSON(),
+      userAgent: navigator.userAgent,
+    })
+  } catch {
+    // Silent failure — sync will retry on next app load
+  }
+}
+
 export async function unsubscribeFromPush(): Promise<{ success: boolean; error?: string }> {
   try {
     const subscription = await getCurrentSubscription()
