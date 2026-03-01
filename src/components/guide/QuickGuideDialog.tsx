@@ -61,7 +61,7 @@ const guideItems = [
   {
     icon: Download,
     title: 'Installa app',
-    description: 'Dal browser, aggiungi entro alla schermata Home per accesso rapido',
+    description: 'Aggiungi entro alla schermata Home per accesso rapido, notifiche e offline completo. Su iPhone è essenziale per non perdere i dati in cache',
   },
 ]
 

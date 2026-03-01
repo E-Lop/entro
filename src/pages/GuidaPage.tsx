@@ -328,20 +328,63 @@ export function GuidaPage() {
             Utilizzo Offline
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>Entro funziona anche senza connessione internet:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Vedi i tuoi alimenti, scadenze e filtri dalla cache</li>
-            <li>Puoi aggiungere, modificare ed eliminare alimenti</li>
-            <li>Le modifiche vengono salvate e sincronizzate automaticamente quando torni online</li>
-            <li>Un banner ti mostra quante modifiche sono in attesa di sincronizzazione</li>
-          </ul>
-          <p className="font-medium text-foreground/80">Non disponibile offline:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Scansione barcode (richiede connessione a Open Food Facts)</li>
-            <li>Login e logout</li>
-            <li>Caricamento nuove foto</li>
-          </ul>
+        <CardContent className="space-y-4 text-sm text-muted-foreground">
+          <p>Entro funziona anche senza connessione internet, ma l'esperienza varia in base a come usi l'app.</p>
+
+          <div>
+            <h3 className="font-medium mb-2 text-foreground/80 flex items-center gap-2">
+              <Smartphone className="h-4 w-4" />
+              Con l'app installata (consigliato)
+            </h3>
+            <p className="mb-1">Installando entro sulla schermata Home hai l'esperienza offline migliore:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>I tuoi dati restano in cache <strong className="text-foreground">senza limiti di tempo</strong></li>
+              <li>Puoi aggiungere, modificare ed eliminare alimenti anche offline</li>
+              <li>Le modifiche vengono sincronizzate automaticamente quando torni online</li>
+              <li>Le notifiche push funzionano su tutti i dispositivi, incluso iPhone</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium mb-2 text-foreground/80">Da browser mobile (senza installare)</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>
+                <strong className="text-foreground">Android (Chrome):</strong> l'offline funziona come con l'app installata, incluse le notifiche push
+              </li>
+              <li>
+                <strong className="text-foreground">iPhone (Safari):</strong> puoi consultare i dati in cache, ma con limitazioni importanti:
+                <ul className="list-disc list-inside ml-5 mt-1 space-y-1">
+                  <li>Safari cancella i dati salvati dopo <strong className="text-foreground">7 giorni di non utilizzo</strong></li>
+                  <li>Le notifiche push <strong className="text-foreground">non funzionano</strong> da Safari</li>
+                  <li>Le modifiche offline potrebbero non essere salvate in modo affidabile</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 p-3">
+            <p className="text-foreground/80 font-medium text-xs">
+              Per la migliore esperienza offline, installa l'app sulla schermata Home. Su iPhone è particolarmente importante per evitare la perdita dei dati in cache e abilitare le notifiche.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-medium mb-2 text-foreground/80">Cosa funziona sempre offline</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Visualizzare alimenti, scadenze, filtri e calendario</li>
+              <li>Aggiungere, modificare ed eliminare alimenti (con sync automatica)</li>
+              <li>Un banner ti mostra quante modifiche sono in attesa di sincronizzazione</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium mb-2 text-foreground/80">Non disponibile offline</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Scansione barcode (richiede connessione a Open Food Facts)</li>
+              <li>Login e logout</li>
+              <li>Caricamento nuove foto</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
 
@@ -376,6 +419,13 @@ export function GuidaPage() {
             <p className="text-sm text-muted-foreground">
               Su iPhone le notifiche push funzionano solo se hai installato l'app sulla schermata Home.
               Apri entroapp.it in Safari, tocca Condividi e poi "Aggiungi alla schermata Home". Dopo l'installazione, attiva le notifiche dalle impostazioni dell'app.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-1">Perché offline non vedo i miei dati su iPhone?</h3>
+            <p className="text-sm text-muted-foreground">
+              Se usi entro da Safari senza installarlo, iOS cancella i dati in cache dopo 7 giorni di non utilizzo.
+              Installa l'app sulla schermata Home per avere i dati sempre disponibili offline.
             </p>
           </div>
           <div>
