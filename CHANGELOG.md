@@ -7,6 +7,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Security
+- Aggiornamento `serialize-javascript` a 7.0.3 via override npm per vulnerabilità RCE (GHSA-5c6j-r48x-rmvq)
+
 ## [1.3.0] - 2026-02-28
 
 ### Added
