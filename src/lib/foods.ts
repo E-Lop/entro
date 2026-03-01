@@ -171,12 +171,15 @@ export async function createFood(
   preGeneratedId?: string,
 ): Promise<FoodResponse> {
   try {
-    // Get current user ID
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Use getSession() (local cache) instead of getUser() (network call)
+    // so the function works when resumed from offline mutation queue
+    const { data: { session }, error: authError } = await supabase.auth.getSession()
 
-    if (authError || !user) {
+    if (authError || !session?.user) {
       throw new Error('Utente non autenticato')
     }
+
+    const user = session.user
 
     // Get user's list ID (for shared lists feature)
     let listId: string | null = null
@@ -227,12 +230,13 @@ export async function createFood(
  */
 export async function updateFood(id: string, foodData: FoodUpdate): Promise<FoodResponse> {
   try {
-    // Get current user ID
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { session }, error: authError } = await supabase.auth.getSession()
 
-    if (authError || !user) {
+    if (authError || !session?.user) {
       throw new Error('Utente non autenticato')
     }
+
+    const user = session.user
 
     // If image_url is being updated, get the old image to delete it
     if ('image_url' in foodData) {
@@ -283,12 +287,13 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
  */
 export async function deleteFood(id: string): Promise<{ error: Error | null }> {
   try {
-    // Get current user ID
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const { data: { session }, error: authError } = await supabase.auth.getSession()
 
-    if (authError || !user) {
+    if (authError || !session?.user) {
       throw new Error('Utente non autenticato')
     }
+
+    const user = session.user
 
     // First, get the food to check if it has an image
     const { data: food, error: fetchError } = await supabase
