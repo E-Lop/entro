@@ -18,10 +18,14 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Banner offline migliorato: mostra il numero di modifiche in attesa e indicatore di sincronizzazione
 - Pulizia automatica della cache IndexedDB al logout per prevenire leak di dati tra account
 
+### Fixed
+- Le foto degli alimenti ora sono visibili offline grazie alla normalizzazione delle cache key nel service worker (i token delle signed URL venivano trattati come chiavi uniche, impedendo il cache hit)
+
 ### Changed
 - Migrazione da `QueryClientProvider` a `PersistQueryClientProvider` con `gcTime` di 24 ore
 - Tutte le mutazioni food ora utilizzano `mutationKey` e optimistic updates consistenti
 - Logica `mutationFn` centralizzata in `mutationDefaults.ts` (singola fonte di verità)
+- Cache immagini Supabase Storage: aumentati limiti a 200 immagini e 7 giorni di retention
 
 ## [1.3.1] - 2026-03-01
 

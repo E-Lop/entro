@@ -34,12 +34,22 @@ registerRoute(
   })
 )
 
+// Supabase Storage signed image URLs contain a unique token in the query string.
+// We strip the query params so the same image always hits the same cache entry,
+// regardless of which signed URL was generated.
 registerRoute(
   /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/sign\/.*/i,
   new CacheFirst({
     cacheName: 'supabase-images-cache',
     plugins: [
-      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 60 * 60 }),
+      {
+        cacheKeyWillBeUsed: async ({ request }) => {
+          const url = new URL(request.url)
+          url.search = ''
+          return url.href
+        },
+      },
+      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 }),
       new CacheableResponsePlugin({ statuses: [0, 200] }),
     ],
   })
