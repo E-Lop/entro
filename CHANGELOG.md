@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-03-01
+
 ### Fixed
 - Query notifiche push: cibi senza `list_id` o `category_id` venivano esclusi silenziosamente dalle notifiche a causa di INNER JOIN nella funzione SQL — convertiti in LEFT JOIN
 - Sincronizzazione subscription push: se il browser rigenera la subscription (es. iOS mensile) senza finestra aperta, l'endpoint veniva perso — aggiunta ri-registrazione automatica al caricamento dell'app
@@ -264,7 +266,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/E-Lop/entro/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/E-Lop/entro/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/E-Lop/entro/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/E-Lop/entro/compare/v1.4.0...v1.4.1
