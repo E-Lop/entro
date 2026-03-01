@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-03-01
+
 ### Added
 - Persistenza immagini offline: le foto scattate durante la creazione/modifica di un alimento offline vengono compresse e salvate in IndexedDB, mostrate in anteprima locale e caricate su Supabase Storage alla riconnessione
 
@@ -248,7 +250,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/E-Lop/entro/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/E-Lop/entro/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/E-Lop/entro/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/E-Lop/entro/compare/v1.3.0...v1.3.1
