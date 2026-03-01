@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, onlineManager } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, onlineManager, type QueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   getFoods,
@@ -10,6 +10,21 @@ import {
   type FilterParams,
 } from '@/lib/foods'
 import { mutationKeys } from '@/lib/mutationDefaults'
+
+type PreviousListsContext = { previousLists: [unknown, Food[] | undefined][] }
+
+function restorePreviousLists(queryClient: QueryClient, context: PreviousListsContext | undefined) {
+  if (!context?.previousLists) return
+  for (const [queryKey, data] of context.previousLists) {
+    queryClient.setQueryData(queryKey as readonly unknown[], data)
+  }
+}
+
+function onlineToast(message: string) {
+  if (onlineManager.isOnline()) {
+    toast.success(message)
+  }
+}
 
 /**
  * Query keys for React Query cache management
@@ -62,8 +77,7 @@ export function useFoodById(id: string | undefined) {
   return useQuery({
     queryKey: foodsKeys.detail(id || ''),
     queryFn: async () => {
-      if (!id) return null
-      const { food, error } = await getFoodById(id)
+      const { food, error } = await getFoodById(id!)
       if (error) throw error
       return food
     },
@@ -114,11 +128,7 @@ export function useCreateFood() {
 
       return { optimisticFood }
     },
-    onSuccess: () => {
-      if (onlineManager.isOnline()) {
-        toast.success('Alimento aggiunto con successo')
-      }
-    },
+    onSuccess: () => onlineToast('Alimento aggiunto con successo'),
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nella creazione dell\'alimento')
     },
@@ -156,17 +166,9 @@ export function useUpdateFood() {
 
       return { previousLists }
     },
-    onSuccess: () => {
-      if (onlineManager.isOnline()) {
-        toast.success('Alimento aggiornato con successo')
-      }
-    },
+    onSuccess: () => onlineToast('Alimento aggiornato con successo'),
     onError: (error: Error, { id }: { id: string; data: FoodUpdate }, context) => {
-      if (context?.previousLists) {
-        for (const [queryKey, data] of context.previousLists) {
-          queryClient.setQueryData(queryKey, data)
-        }
-      }
+      restorePreviousLists(queryClient, context)
       queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
       toast.error(error.message || 'Errore nell\'aggiornamento dell\'alimento')
     },
@@ -200,18 +202,10 @@ export function useDeleteFood() {
       return { previousLists }
     },
     onError: (error: Error, _deletedId: string, context) => {
-      if (context?.previousLists) {
-        for (const [queryKey, data] of context.previousLists) {
-          queryClient.setQueryData(queryKey, data)
-        }
-      }
+      restorePreviousLists(queryClient, context)
       toast.error(error.message || 'Errore nell\'eliminazione dell\'alimento')
     },
-    onSuccess: () => {
-      if (onlineManager.isOnline()) {
-        toast.success('Alimento eliminato con successo')
-      }
-    },
+    onSuccess: () => onlineToast('Alimento eliminato con successo'),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
     },
@@ -251,17 +245,9 @@ export function useUpdateFoodStatus() {
 
       return { previousLists }
     },
-    onSuccess: () => {
-      if (onlineManager.isOnline()) {
-        toast.success('Stato aggiornato con successo')
-      }
-    },
+    onSuccess: () => onlineToast('Stato aggiornato con successo'),
     onError: (error: Error, { id }: { id: string; status: Food['status'] }, context) => {
-      if (context?.previousLists) {
-        for (const [queryKey, data] of context.previousLists) {
-          queryClient.setQueryData(queryKey, data)
-        }
-      }
+      restorePreviousLists(queryClient, context)
       queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
       toast.error(error.message || 'Errore nell\'aggiornamento dello stato')
     },
