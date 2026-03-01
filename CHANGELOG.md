@@ -7,6 +7,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Added
+- Persistenza immagini offline: le foto scattate durante la creazione/modifica di un alimento offline vengono compresse e salvate in IndexedDB, mostrate in anteprima locale e caricate su Supabase Storage alla riconnessione
+
 ## [1.4.1] - 2026-03-01
 
 ### Changed

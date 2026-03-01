@@ -375,7 +375,6 @@ Installando entro sulla schermata Home hai l'esperienza offline migliore:
 | Funzionalità | Motivo |
 |--------------|--------|
 | Scansione barcode | Richiede connessione a Open Food Facts |
-| Caricamento foto | L'upload richiede connessione al server |
 | Login/Logout | Richiede autenticazione con il server |
 
 ### Come Funziona
