@@ -248,7 +248,7 @@ export function DashboardPage() {
       deleted_at: null,
     }
 
-    await createMutation.mutateAsync(foodData)
+    await createMutation.mutateAsync({ data: foodData, id: crypto.randomUUID() })
     setIsAddDialogOpen(false)
   }
 

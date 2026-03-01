@@ -1,19 +1,15 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, onlineManager } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   getFoods,
   getFoodById,
   getCategories,
-  createFood,
-  updateFood,
-  deleteFood,
-  updateFoodStatus,
   type Food,
   type FoodInsert,
   type FoodUpdate,
   type FilterParams,
 } from '@/lib/foods'
-import { mutationTracker } from './useRealtimeFoods'
+import { mutationKeys } from '@/lib/mutationDefaults'
 
 /**
  * Query keys for React Query cache management
@@ -71,136 +67,207 @@ export function useFoodById(id: string | undefined) {
       if (error) throw error
       return food
     },
-    enabled: !!id, // Only run query if id is provided
+    enabled: !!id,
   })
 }
 
 /**
- * Create a new food item
+ * Create a new food item.
+ * Generates a client-side UUID so the item appears in the cache immediately
+ * (optimistic update) and works offline.
+ *
+ * Note: mutationFn is provided by registerMutationDefaults() so that
+ * paused mutations can resume after a page reload.
  */
 export function useCreateFood() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: FoodInsert) => {
-      const { food, error } = await createFood(data)
-      if (error) throw error
-      if (!food) throw new Error('Nessun dato restituito')
-      return food
-    },
-    onSuccess: (newFood) => {
-      // Track mutation for deduplication
-      mutationTracker.track(newFood.id, 'INSERT')
+    mutationKey: mutationKeys.createFood,
+    onMutate: async (variables: { data: FoodInsert; id: string }) => {
+      await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
 
-      // Invalidate and refetch foods list
-      queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
-      toast.success('Alimento aggiunto con successo')
+      const optimisticFood: Food = {
+        id: variables.id,
+        name: variables.data.name,
+        expiry_date: variables.data.expiry_date,
+        category_id: variables.data.category_id ?? null,
+        storage_location: variables.data.storage_location ?? 'fridge',
+        quantity: variables.data.quantity ?? null,
+        quantity_unit: variables.data.quantity_unit ?? null,
+        notes: variables.data.notes ?? null,
+        image_url: variables.data.image_url ?? null,
+        barcode: variables.data.barcode ?? null,
+        status: variables.data.status ?? 'active',
+        consumed_at: null,
+        deleted_at: null,
+        user_id: '',
+        list_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+
+      queryClient.setQueriesData<Food[]>(
+        { queryKey: foodsKeys.lists() },
+        (old) => old ? [optimisticFood, ...old] : [optimisticFood],
+      )
+
+      return { optimisticFood }
+    },
+    onSuccess: () => {
+      if (onlineManager.isOnline()) {
+        toast.success('Alimento aggiunto con successo')
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nella creazione dell\'alimento')
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
     },
   })
 }
 
 /**
- * Update an existing food item
+ * Update an existing food item.
+ *
+ * Note: mutationFn is provided by registerMutationDefaults().
  */
 export function useUpdateFood() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: FoodUpdate }) => {
-      const { food, error } = await updateFood(id, data)
-      if (error) throw error
-      if (!food) throw new Error('Nessun dato restituito')
-      return food
-    },
-    onSuccess: (updatedFood) => {
-      // Track mutation for deduplication
-      mutationTracker.track(updatedFood.id, 'UPDATE')
+    mutationKey: mutationKeys.updateFood,
+    onMutate: async ({ id, data }: { id: string; data: FoodUpdate }) => {
+      await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: foodsKeys.detail(id) })
 
-      // Invalidate foods list and specific food detail
-      queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: foodsKeys.detail(updatedFood.id) })
-      toast.success('Alimento aggiornato con successo')
+      const previousLists = queryClient.getQueriesData<Food[]>({ queryKey: foodsKeys.lists() })
+
+      queryClient.setQueriesData<Food[]>(
+        { queryKey: foodsKeys.lists() },
+        (old) => old?.map((food) => (food.id === id ? { ...food, ...data } : food)),
+      )
+
+      queryClient.setQueryData<Food>(
+        foodsKeys.detail(id),
+        (old) => old ? { ...old, ...data } : old,
+      )
+
+      return { previousLists }
     },
-    onError: (error: Error) => {
+    onSuccess: () => {
+      if (onlineManager.isOnline()) {
+        toast.success('Alimento aggiornato con successo')
+      }
+    },
+    onError: (error: Error, { id }: { id: string; data: FoodUpdate }, context) => {
+      if (context?.previousLists) {
+        for (const [queryKey, data] of context.previousLists) {
+          queryClient.setQueryData(queryKey, data)
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
       toast.error(error.message || 'Errore nell\'aggiornamento dell\'alimento')
+    },
+    onSettled: (_data, _error, { id }: { id: string; data: FoodUpdate }) => {
+      queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
     },
   })
 }
 
 /**
- * Delete a food item
+ * Delete a food item.
+ *
+ * Note: mutationFn is provided by registerMutationDefaults().
  */
 export function useDeleteFood() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await deleteFood(id)
-      if (error) throw error
-    },
-    onMutate: async (deletedId) => {
-      // Track mutation for deduplication
-      mutationTracker.track(deletedId, 'DELETE')
-
-      // Cancel outgoing refetches
+    mutationKey: mutationKeys.deleteFood,
+    onMutate: async (deletedId: string) => {
       await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
 
-      // Snapshot previous value
-      const previousFoods = queryClient.getQueryData<Food[]>(foodsKeys.lists())
+      const previousLists = queryClient.getQueriesData<Food[]>({ queryKey: foodsKeys.lists() })
 
-      // Optimistically update cache by removing the deleted item
-      if (previousFoods) {
-        queryClient.setQueryData<Food[]>(
-          foodsKeys.lists(),
-          previousFoods.filter((food) => food.id !== deletedId)
-        )
-      }
+      queryClient.setQueriesData<Food[]>(
+        { queryKey: foodsKeys.lists() },
+        (old) => old?.filter((food) => food.id !== deletedId),
+      )
 
-      return { previousFoods }
+      return { previousLists }
     },
-    onError: (error: Error, _deletedId, context) => {
-      // Rollback on error
-      if (context?.previousFoods) {
-        queryClient.setQueryData(foodsKeys.lists(), context.previousFoods)
+    onError: (error: Error, _deletedId: string, context) => {
+      if (context?.previousLists) {
+        for (const [queryKey, data] of context.previousLists) {
+          queryClient.setQueryData(queryKey, data)
+        }
       }
       toast.error(error.message || 'Errore nell\'eliminazione dell\'alimento')
     },
     onSuccess: () => {
-      toast.success('Alimento eliminato con successo')
+      if (onlineManager.isOnline()) {
+        toast.success('Alimento eliminato con successo')
+      }
     },
     onSettled: () => {
-      // Always refetch after error or success
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
     },
   })
 }
 
 /**
- * Update food status (consumed, expired, wasted)
+ * Update food status (consumed, expired, wasted).
+ *
+ * Note: mutationFn is provided by registerMutationDefaults().
  */
 export function useUpdateFoodStatus() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: Food['status'] }) => {
-      const { food, error } = await updateFoodStatus(id, status)
-      if (error) throw error
-      if (!food) throw new Error('Nessun dato restituito')
-      return food
-    },
-    onSuccess: (updatedFood) => {
-      // Track mutation for deduplication
-      mutationTracker.track(updatedFood.id, 'UPDATE')
+    mutationKey: mutationKeys.updateFoodStatus,
+    onMutate: async ({ id, status }: { id: string; status: Food['status'] }) => {
+      await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
+      await queryClient.cancelQueries({ queryKey: foodsKeys.detail(id) })
 
-      queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
-      queryClient.invalidateQueries({ queryKey: foodsKeys.detail(updatedFood.id) })
-      toast.success('Stato aggiornato con successo')
+      const previousLists = queryClient.getQueriesData<Food[]>({ queryKey: foodsKeys.lists() })
+
+      const statusUpdate: Partial<Food> = { status }
+      if (status === 'consumed') {
+        statusUpdate.consumed_at = new Date().toISOString()
+      }
+
+      queryClient.setQueriesData<Food[]>(
+        { queryKey: foodsKeys.lists() },
+        (old) => old?.map((food) => (food.id === id ? { ...food, ...statusUpdate } : food)),
+      )
+
+      queryClient.setQueryData<Food>(
+        foodsKeys.detail(id),
+        (old) => old ? { ...old, ...statusUpdate } : old,
+      )
+
+      return { previousLists }
     },
-    onError: (error: Error) => {
+    onSuccess: () => {
+      if (onlineManager.isOnline()) {
+        toast.success('Stato aggiornato con successo')
+      }
+    },
+    onError: (error: Error, { id }: { id: string; status: Food['status'] }, context) => {
+      if (context?.previousLists) {
+        for (const [queryKey, data] of context.previousLists) {
+          queryClient.setQueryData(queryKey, data)
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
       toast.error(error.message || 'Errore nell\'aggiornamento dello stato')
+    },
+    onSettled: (_data, _error, { id }: { id: string; status: Food['status'] }) => {
+      queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
     },
   })
 }

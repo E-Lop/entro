@@ -163,9 +163,13 @@ export async function getFoodById(id: string): Promise<FoodResponse> {
 }
 
 /**
- * Create a new food item
+ * Create a new food item.
+ * Accepts an optional pre-generated `id` for offline/optimistic inserts.
  */
-export async function createFood(foodData: FoodInsert): Promise<FoodResponse> {
+export async function createFood(
+  foodData: FoodInsert,
+  preGeneratedId?: string,
+): Promise<FoodResponse> {
   try {
     // Get current user ID
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -194,8 +198,9 @@ export async function createFood(foodData: FoodInsert): Promise<FoodResponse> {
       .from('foods')
       .insert({
         ...foodData,
+        ...(preGeneratedId ? { id: preGeneratedId } : {}),
         user_id: user.id,
-        list_id: listId, // Added for shared lists support
+        list_id: listId,
       })
       .select()
       .single()

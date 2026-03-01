@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { unsubscribeFromPush } from './pushNotifications'
+import { clearPersistedCache } from './queryPersister'
 import type { User, Session } from '@supabase/supabase-js'
 
 /**
@@ -33,6 +34,8 @@ function clearAuthKeys(storage: Storage, matchers: Array<string | ((key: string)
 
 /**
  * Clear all auth-related data from both localStorage and sessionStorage.
+ * Also clears the React Query IndexedDB cache to prevent data leaking
+ * between accounts.
  * Preserves service worker cache, theme, and other app settings.
  */
 export function clearAuthStorage(): void {
@@ -47,6 +50,9 @@ export function clearAuthStorage(): void {
     'explicit_auth',
     'verify_email',
   ])
+
+  // Clear persisted React Query cache (IndexedDB) — best-effort, fire and forget
+  clearPersistedCache().catch(() => {})
 }
 
 /**
