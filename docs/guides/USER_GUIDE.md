@@ -13,6 +13,7 @@
 - [Vista Calendario](#vista-calendario)
 - [Condividere la Lista](#condividere-la-lista)
 - [Scansione Barcode](#scansione-barcode)
+- [Notifiche Scadenza](#notifiche-scadenza)
 - [Installare l'App (PWA)](#installare-lapp-pwa)
 - [Utilizzo Offline](#utilizzo-offline)
 - [Domande Frequenti](#domande-frequenti)
@@ -276,6 +277,35 @@ Attualmente non è possibile annullare un codice già generato. Il codice scadr�
 
 ---
 
+## Notifiche Scadenza
+
+Entro può inviarti notifiche push per avvisarti quando i tuoi alimenti stanno per scadere.
+
+### Attivare le Notifiche
+
+1. Vai in **Impostazioni** (icona utente in alto a destra)
+2. Nella sezione **Notifiche**, premi **"Attiva"**
+3. Consenti le notifiche quando il browser lo chiede
+
+### Personalizzare gli Avvisi
+
+- **Quando avvisarti**: scegli quanti giorni prima della scadenza ricevere l'avviso (7, 3, 2, 1 giorni prima o il giorno stesso)
+- **Ore silenziose**: imposta una fascia oraria in cui non ricevere notifiche
+- **Limite giornaliero**: decidi quante notifiche ricevere al massimo ogni giorno
+
+### Quando Arrivano
+
+Le notifiche vengono inviate ogni giorno alle **10:00 (ora italiana)**. Riceverai un unico avviso che raggruppa tutti gli alimenti in scadenza secondo le tue preferenze.
+
+### Note Importanti
+
+- **iPhone**: le notifiche push funzionano **solo** con l'app installata sulla schermata Home, non dal browser Safari
+- **Ogni dispositivo va attivato separatamente**: se usi entro su più dispositivi, attiva le notifiche su ognuno
+- Le notifiche funzionano anche quando il browser è chiuso
+- Per disattivarle, premi "Disattiva" nelle impostazioni
+
+---
+
 ## Installare l'App (PWA)
 
 **entro** può essere installata come un'app sul tuo dispositivo per un accesso più rapido.
@@ -305,24 +335,40 @@ Attualmente non è possibile annullare un codice già generato. Il codice scadr�
 - Accesso rapido dalla schermata home
 - Si apre a schermo intero (senza barra del browser)
 - Icona dedicata con il logo entro
+- **Cache offline persistente** — i tuoi dati restano disponibili senza limiti di tempo
+- **Push notifications** — ricevi avvisi per le scadenze (su iPhone funzionano *solo* con l'app installata)
+- **Offline completo su iOS** — senza installazione, Safari cancella i dati in cache dopo 7 giorni di non utilizzo
 
 ---
 
 ## Utilizzo Offline
 
-Entro funziona anche senza connessione internet. I tuoi dati vengono salvati localmente e le modifiche vengono sincronizzate automaticamente quando torni online.
+Entro funziona anche senza connessione internet, ma l'esperienza varia in base a come usi l'app.
 
-### Cosa Funziona Offline
+### Con l'App Installata (consigliato)
+
+Installando entro sulla schermata Home hai l'esperienza offline migliore:
 
 | Funzionalità | Disponibile Offline | Note |
 |--------------|---------------------|------|
-| Vedere i tuoi alimenti | ✅ Sì | Dalla cache locale |
+| Vedere i tuoi alimenti | ✅ Sì | Dalla cache locale, **senza limiti di tempo** |
 | Cercare e filtrare | ✅ Sì | Sui dati in cache |
 | Vista calendario | ✅ Sì | Dalla cache locale |
 | Aggiungere alimenti | ✅ Sì | Sincronizzato al ritorno online |
 | Modificare alimenti | ✅ Sì | Sincronizzato al ritorno online |
 | Eliminare alimenti | ✅ Sì | Sincronizzato al ritorno online |
 | Cambiare stato (consumato) | ✅ Sì | Sincronizzato al ritorno online |
+| Notifiche push | ✅ Sì | Su tutti i dispositivi, incluso iPhone |
+
+### Da Browser Mobile (senza installare)
+
+- **Android (Chrome)**: l'offline funziona come con l'app installata, incluse le notifiche push.
+- **iPhone (Safari)**: puoi consultare i dati in cache, ma con limitazioni importanti:
+  - Safari **cancella i dati salvati** dopo **7 giorni di non utilizzo**
+  - Le notifiche push **non funzionano** da Safari
+  - Le modifiche offline potrebbero non essere salvate in modo affidabile
+
+> **Consiglio**: installa l'app sulla schermata Home per l'esperienza migliore. Su iPhone è particolarmente importante per evitare la perdita dei dati in cache e abilitare le notifiche.
 
 ### Cosa NON Funziona Offline
 
@@ -370,6 +416,14 @@ Sì, i tuoi dati sono:
 
 Il database Open Food Facts è mantenuto dalla comunità. Alcuni prodotti, specialmente quelli locali o nuovi, potrebbero non essere presenti. Puoi inserire l'alimento manualmente.
 
+### Perché non ricevo le notifiche su iPhone?
+
+Su iPhone le notifiche push funzionano solo se hai installato l'app sulla schermata Home. Apri entroapp.it in Safari, tocca **Condividi** e poi **"Aggiungi alla schermata Home"**. Dopo l'installazione, attiva le notifiche dalle impostazioni dell'app.
+
+### Perché offline non vedo i miei dati su iPhone?
+
+Se usi entro da Safari senza installarlo, iOS cancella i dati in cache dopo 7 giorni di non utilizzo. Installa l'app sulla schermata Home per avere i dati sempre disponibili offline.
+
 ### Come disinstallo l'app?
 
 - **iPhone/Android**: tieni premuta l'icona e seleziona "Elimina" o "Disinstalla"
@@ -384,4 +438,4 @@ Per segnalare problemi o suggerire miglioramenti:
 
 ---
 
-*Ultimo aggiornamento: 5 febbraio 2026*
+*Ultimo aggiornamento: 1 marzo 2026*

@@ -41,10 +41,12 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 - **Scansione barcode** — Riconosce EAN-13, UPC e QR Code tramite la fotocamera; auto-compila i dati da Open Food Facts
 - **Liste condivise** — Un codice invito a 6 caratteri (es. `ABC123`) permette a più utenti di condividere una lista in tempo reale
 - **Sync multi-device** — Aggiornamenti istantanei su desktop, iOS e Android tramite Supabase Realtime
+- **Supporto offline completo** — Cache persistente in IndexedDB, CRUD offline con coda mutazioni e sync automatica al ritorno della connessione
+- **Push notifications** — Avvisi giornalieri per alimenti in scadenza, personalizzabili per anticipo, ore silenziose e limite giornaliero
 - **Vista calendario** — Rolling 7 giorni con gli alimenti in scadenza, organizzati per giorno
 - **Swipe gestures** — Swipe destro per modificare, sinistro per eliminare (mobile)
 - **Dark mode** — Light, dark e automatico (segue il sistema)
-- **PWA installabile** — Installabile da browser su iOS e Android
+- **PWA installabile** — Installabile da browser su iOS e Android con esperienza offline nativa
 - **GDPR compliant** — Export dati personali (Art. 20), cancellazione account (Art. 17), Privacy Policy e T&C integrati
 - **Feature flags** — Barcode scanner, swipe gestures e liste condivise attivabili via variabili d'ambiente
 
@@ -58,11 +60,13 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 | **Build Tool** | Vite 6 (SWC) |
 | **Styling** | Tailwind CSS 3, shadcn/ui |
 | **State Management** | Zustand (client), TanStack Query (server) |
+| **Offline** | IndexedDB (idb-keyval), PersistQueryClient, mutation queue |
 | **Backend** | Supabase (PostgreSQL, Auth, Storage, Realtime, Edge Functions) |
+| **Push Notifications** | Web Push API (VAPID), @negrel/webpush (Deno) |
 | **Forms** | React Hook Form + Zod |
 | **Barcode** | @zxing/browser + Open Food Facts API |
 | **Date** | date-fns |
-| **PWA** | vite-plugin-pwa (Workbox) |
+| **PWA** | vite-plugin-pwa (Workbox), custom service worker |
 | **Deploy** | Netlify |
 
 ---
@@ -76,26 +80,31 @@ src/
 │   ├── barcode/        # Scanner modale con ZXing
 │   ├── calendar/       # Vista calendario settimanale
 │   ├── foods/          # Card, form, lista, swipe gestures
+│   ├── guide/          # Guida rapida e help in-app
 │   ├── layout/         # Header, navigation, app shell
-│   ├── settings/       # Account, export dati, eliminazione
+│   ├── settings/       # Account, notifiche, export dati, eliminazione
 │   ├── sharing/        # Inviti, codici, accettazione
-│   ├── pwa/            # Banner offline
+│   ├── pwa/            # Banner offline, prompt notifiche
 │   └── ui/             # Primitivi shadcn/ui
-├── hooks/              # Custom hooks (auth, foods, theme, network)
+├── hooks/              # Custom hooks (auth, foods, theme, network, push)
 ├── stores/             # Zustand stores (auth, session)
 ├── types/              # TypeScript types
 ├── utils/              # Utility functions
-├── pages/              # Route pages (11 pagine)
-└── lib/                # Config Supabase, utility classi
+├── pages/              # Route pages
+├── lib/                # Config Supabase, persistenza offline, push notifications
+├── sw.ts               # Service worker custom (cache, push handlers)
+└── supabase/functions/ # Edge Functions (register-push, send-expiry-notifications)
 ```
 
 ### Scelte tecniche
 
 - **Zustand + TanStack Query** — Zustand per lo stato UI globale (auth, sessione), React Query per lo stato server (foods, categorie) con cache e invalidazione automatica
+- **Offline-first** — Cache React Query persistita in IndexedDB via `idb-keyval`; mutazioni offline accodate e riprese automaticamente al ritorno della connessione, anche dopo ricaricamento della pagina
 - **Supabase Realtime** — LISTEN/NOTIFY di PostgreSQL per sync multi-device, con deduplicazione per evitare flash di aggiornamenti locali
+- **Push notifications** — Web Push API con VAPID; Edge Function cron giornaliera per invio notifiche scadenza; `@negrel/webpush` (JSR) per compatibilità Deno
 - **Code splitting** — Pagine lazy-loaded, chunk separati per React, Supabase, ZXing e form libraries
 - **RLS (Row Level Security)** — Policy multi-livello per isolare i dati tra utenti e gestire l'accesso alle liste condivise
-- **Workbox caching** — CacheFirst per font e asset, NetworkFirst per API, signed URL delle immagini con cache di 1 ora
+- **Service worker custom** — Precaching Workbox per bundle, CacheFirst per font e immagini Supabase (normalizzazione signed URL, 200 entry, 7 giorni), fallback SPA per navigazione offline
 
 ### Schema database
 
@@ -173,13 +182,10 @@ Il deploy avviene su **Netlify** con build automatica ad ogni push su `main`:
 
 | Documento | Contenuto |
 |---|---|
-| [Project Overview](docs/private/PROJECT_OVERVIEW.md) | Visione e obiettivi del progetto |
-| [Technical Specs](docs/private/TECHNICAL_SPECS.md) | Architettura e decisioni tecniche |
-| [Features](docs/private/FEATURES.md) | Specifiche funzionalità |
-| [Barcode Integration](docs/private/BARCODE_INTEGRATION.md) | Implementazione barcode scanning |
-| [Database Schema](docs/private/DATABASE_SCHEMA.md) | Struttura DB e migration |
-| [Roadmap](docs/private/ROADMAP.md) | Piano di sviluppo |
-| [User Guide](docs/guides/USER_GUIDE.md) | Guida utente |
+| [User Guide](docs/guides/USER_GUIDE.md) | Guida utente completa |
+| [Changelog](CHANGELOG.md) | Storico delle versioni e modifiche |
+| [Deploy Guide](docs/guides/DEPLOY.md) | Istruzioni di deploy |
+| [Privacy Policy](docs/guides/privacy.md) | Policy privacy e gestione dati |
 
 ---
 
