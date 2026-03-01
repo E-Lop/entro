@@ -1,73 +1,89 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getSignedImageUrl } from '@/lib/storage'
+import { getPendingImage, isPendingUrl } from '@/lib/pendingImages'
 
 /**
- * Hook to generate and manage signed URL for a storage path
- * @param storagePath - Storage path (e.g. "user_id/filename.jpg") or null
- * @param expiresIn - Expiration time in seconds (default: 1 hour)
- * @returns Object with signed URL, loading state, and error
+ * Hook to generate and manage signed URL for a storage path.
+ * Supports regular storage paths, full URLs, and pending:// references.
  */
 export function useSignedUrl(storagePath: string | null | undefined, expiresIn: number = 3600) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const blobUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
-    // Reset state when path changes
+    // Revoke previous blob URL if any
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current)
+      blobUrlRef.current = null
+    }
+
     setSignedUrl(null)
     setError(null)
 
-    // If no path, nothing to load
     if (!storagePath) {
       setIsLoading(false)
       return
     }
 
-    // If it's already a full URL (signed or public), use it as is
+    // Already a full URL (signed or public) -- use as-is
     if (storagePath.startsWith('http')) {
       setSignedUrl(storagePath)
       setIsLoading(false)
       return
     }
 
-    // Generate signed URL for storage path
     let isCancelled = false
     setIsLoading(true)
 
-    getSignedImageUrl(storagePath, expiresIn)
+    const promise = isPendingUrl(storagePath)
+      ? loadPendingImage(storagePath)
+      : loadSignedUrl(storagePath, expiresIn)
+
+    promise
       .then((url) => {
         if (!isCancelled) {
           setSignedUrl(url)
           setError(null)
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!isCancelled) {
-          // Check if error is IMAGE_NOT_FOUND (expected for deleted images)
-          const isImageNotFound = err instanceof Error && err.message === 'IMAGE_NOT_FOUND'
-
-          if (isImageNotFound) {
-            // Silently handle missing images - this is expected when images are deleted
-            // from storage but database still has references
-            setError(new Error('IMAGE_NOT_FOUND'))
-          } else {
-            // Log unexpected errors
-            console.error('Error generating signed URL:', err)
-            setError(err instanceof Error ? err : new Error('Errore nel caricamento dell\'immagine'))
+          const wrapped = err instanceof Error ? err : new Error('Errore nel caricamento dell\'immagine')
+          if (wrapped.message !== 'IMAGE_NOT_FOUND') {
+            console.error('Error loading image URL:', wrapped)
           }
+          setError(wrapped)
         }
       })
       .finally(() => {
-        if (!isCancelled) {
-          setIsLoading(false)
-        }
+        if (!isCancelled) setIsLoading(false)
       })
 
-    // Cleanup function to prevent state updates after unmount
     return () => {
       isCancelled = true
+      // Revoke blob URL on cleanup (unmount or path change)
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current)
+        blobUrlRef.current = null
+      }
     }
   }, [storagePath, expiresIn])
+
+  /** Load a pending image from IndexedDB and return a blob URL. */
+  function loadPendingImage(pendingUrl: string): Promise<string> {
+    return getPendingImage(pendingUrl).then(({ buffer, type }) => {
+      const url = URL.createObjectURL(new Blob([buffer], { type }))
+      blobUrlRef.current = url
+      return url
+    })
+  }
+
+  /** Generate a signed URL, re-throwing IMAGE_NOT_FOUND silently. */
+  function loadSignedUrl(path: string, expires: number): Promise<string> {
+    return getSignedImageUrl(path, expires)
+  }
 
   return { signedUrl, isLoading, error }
 }

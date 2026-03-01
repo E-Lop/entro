@@ -35,7 +35,7 @@ function extractPathFromUrlOrPath(urlOrPath: string): string {
 /**
  * Compress image before upload
  */
-async function compressImage(file: File): Promise<File> {
+export async function compressImage(file: File): Promise<File> {
   const options = {
     maxSizeMB: COMPRESSED_MAX_SIZE_MB,
     maxWidthOrHeight: 800, // Resize to max 800px on longest side

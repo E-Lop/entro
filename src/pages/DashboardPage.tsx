@@ -1,6 +1,7 @@
 import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { onlineManager } from '@tanstack/react-query'
 import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
@@ -40,6 +41,36 @@ import type { Food, FoodInsert, FoodUpdate, FilterParams } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { differenceInDays } from 'date-fns'
 import { cn } from '@/lib/utils'
+
+/**
+ * Upload or persist an image File depending on online/offline state.
+ * Returns the storage path, pending:// URL, or the fallback value on failure.
+ */
+async function resolveImageFile(
+  file: File,
+  userId: string,
+  isOnline: boolean,
+  fallback: string | null = null,
+): Promise<string | null> {
+  if (isOnline) {
+    try {
+      const { uploadFoodImage } = await import('@/lib/storage')
+      return await uploadFoodImage(file, userId)
+    } catch (error) {
+      console.error('Image upload failed:', error)
+      return fallback
+    }
+  }
+
+  // Offline: persist compressed image in IndexedDB for later upload
+  try {
+    const { savePendingImage } = await import('@/lib/pendingImages')
+    return await savePendingImage(file)
+  } catch (error) {
+    console.error('Failed to save pending image:', error)
+    return fallback
+  }
+}
 
 /**
  * Dashboard Page - Home page for authenticated users with food management
@@ -220,16 +251,11 @@ export function DashboardPage() {
 
   // Handlers
   const handleCreateFood = async (data: FoodFormData) => {
-    // Upload image if File is selected
+    const isOnline = onlineManager.isOnline()
+
     let imagePath: string | null = null
     if (data.image_url instanceof File) {
-      try {
-        const { uploadFoodImage } = await import('@/lib/storage')
-        imagePath = await uploadFoodImage(data.image_url, user!.id)
-      } catch (error) {
-        console.error('Image upload failed:', error)
-        // Continue without image rather than failing the whole operation
-      }
+      imagePath = await resolveImageFile(data.image_url, user!.id, isOnline)
     } else if (typeof data.image_url === 'string') {
       imagePath = data.image_url
     }
@@ -248,26 +274,25 @@ export function DashboardPage() {
       deleted_at: null,
     }
 
-    await createMutation.mutateAsync({ data: foodData, id: crypto.randomUUID() })
+    // Use mutate (not mutateAsync) to avoid blocking when offline.
+    // mutateAsync returns a Promise that never resolves when the mutation
+    // is paused, causing the form to hang on "Creazione in corso...".
+    createMutation.mutate({ data: foodData, id: crypto.randomUUID() })
     setIsAddDialogOpen(false)
+
+    if (!isOnline) {
+      toast.info('Alimento salvato offline. Verrà sincronizzato quando torni online.')
+    }
   }
 
   const handleUpdateFood = async (data: FoodFormData) => {
     if (!editingFood) return
+    const isOnline = onlineManager.isOnline()
 
-    // Upload image if File is selected
     let imagePath: string | null | undefined
     if (data.image_url instanceof File) {
-      try {
-        const { uploadFoodImage } = await import('@/lib/storage')
-        imagePath = await uploadFoodImage(data.image_url, user!.id)
-      } catch (error) {
-        console.error('Image upload failed:', error)
-        // Keep existing image on upload failure
-        imagePath = editingFood.image_url
-      }
+      imagePath = await resolveImageFile(data.image_url, user!.id, isOnline, editingFood.image_url)
     } else {
-      // Keep string path or null
       imagePath = data.image_url ?? undefined
     }
 
@@ -280,15 +305,23 @@ export function DashboardPage() {
       image_url: imagePath,
     }
 
-    await updateMutation.mutateAsync({ id: editingFood.id, data: foodData })
+    updateMutation.mutate({ id: editingFood.id, data: foodData })
     setEditingFood(null)
+
+    if (!isOnline) {
+      toast.info('Modifica salvata offline. Verrà sincronizzata quando torni online.')
+    }
   }
 
-  const handleDeleteFood = async () => {
+  const handleDeleteFood = () => {
     if (!deletingFood) return
 
-    await deleteMutation.mutateAsync(deletingFood.id)
+    deleteMutation.mutate(deletingFood.id)
     setDeletingFood(null)
+
+    if (!onlineManager.isOnline()) {
+      toast.info('Eliminazione salvata offline. Verrà sincronizzata quando torni online.')
+    }
   }
 
   const handleEditClick = (food: Food) => {
