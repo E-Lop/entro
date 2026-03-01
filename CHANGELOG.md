@@ -7,6 +7,14 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Fixed
+- Query notifiche push: cibi senza `list_id` o `category_id` venivano esclusi silenziosamente dalle notifiche a causa di INNER JOIN nella funzione SQL — convertiti in LEFT JOIN
+- Sincronizzazione subscription push: se il browser rigenera la subscription (es. iOS mensile) senza finestra aperta, l'endpoint veniva perso — aggiunta ri-registrazione automatica al caricamento dell'app
+- Rate limiter notifiche: il contatore giornaliero veniva sovrascritto invece di essere incrementato in caso di esecuzioni multiple del cron
+
+### Changed
+- Estratti helper `restorePreviousLists()` e `onlineToast()` in `useFoods.ts` per ridurre duplicazione nei mutation hooks
+
 ## [1.5.1] - 2026-03-01
 
 ### Fixed
