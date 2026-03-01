@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-03-01
+
 ### Fixed
 - Attivazione notifiche push offline: aggiunto controllo connessione prima del tentativo e rollback della subscription locale se la registrazione server fallisce, evitando stato inconsistente
 - Documentazione: aggiunta attivazione notifiche push alla lista delle funzionalità non disponibili offline
@@ -254,7 +256,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/E-Lop/entro/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/E-Lop/entro/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/E-Lop/entro/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/E-Lop/entro/compare/v1.3.1...v1.4.0
