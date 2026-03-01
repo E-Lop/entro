@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-03-01
+
 ### Changed
 - Guida utente in-app: sezione "Utilizzo Offline" riscritta per distinguere tra app installata (cache persistente, offline completo, push su tutti i dispositivi) e browser mobile (limitazioni iOS Safari: cache cancellata dopo 7 giorni, no push)
 - Guida rapida: voce "Installa app" aggiornata con benefici offline e nota su iPhone
@@ -243,7 +245,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/E-Lop/entro/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/E-Lop/entro/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/E-Lop/entro/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/E-Lop/entro/compare/v1.2.0...v1.3.0
