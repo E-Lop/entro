@@ -7,6 +7,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Added
+- Sezione "Supporto" nella pagina Impostazioni con link email per contattare lo sviluppatore (`mailto:support@entroapp.it`)
+
 ## [1.5.2] - 2026-03-01
 
 ### Fixed
