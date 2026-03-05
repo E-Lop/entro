@@ -436,9 +436,10 @@ Se usi entro da Safari senza installarlo, iOS cancella i dati in cache dopo 7 gi
 
 ## Supporto
 
-Per segnalare problemi o suggerire miglioramenti:
+Per segnalare problemi, suggerire miglioramenti o chiedere aiuto:
+- Email: [support@entroapp.it](mailto:support@entroapp.it)
 - Repository GitHub: https://github.com/E-Lop/entro
 
 ---
 
-*Ultimo aggiornamento: 1 marzo 2026*
+*Ultimo aggiornamento: 5 marzo 2026*
