@@ -3,7 +3,7 @@ import { AccountSection } from '../components/settings/AccountSection'
 import { NotificationSettings } from '../components/settings/NotificationSettings'
 import { DataExportButton } from '../components/settings/DataExportButton'
 import { DeleteAccountDialog } from '../components/settings/DeleteAccountDialog'
-import { Shield, Download, AlertTriangle } from 'lucide-react'
+import { Shield, Download, AlertTriangle, Mail } from 'lucide-react'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 
 export function SettingsPage() {
@@ -23,6 +23,27 @@ export function SettingsPage() {
 
       {/* Notification Settings */}
       <NotificationSettings />
+
+      {/* Support Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Mail className="h-5 w-5 text-primary" />
+            <CardTitle>Supporto</CardTitle>
+          </div>
+          <CardDescription>
+            Hai bisogno di aiuto o vuoi inviarci un suggerimento?
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <a
+            href="mailto:support@entroapp.it"
+            className="text-primary hover:underline text-sm"
+          >
+            Scrivici a support@entroapp.it
+          </a>
+        </CardContent>
+      </Card>
 
       {/* Privacy & Data Section */}
       <Card>
