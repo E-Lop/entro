@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-07
+
 ### Added
 - Feedback aptico (vibrazione) sulle interazioni principali tramite libreria `web-haptics`
   - Swipe card: `nudge` al raggiungimento della soglia, `buzz` all'azione confermata
@@ -276,7 +278,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/E-Lop/entro/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/E-Lop/entro/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/E-Lop/entro/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/E-Lop/entro/compare/v1.4.1...v1.5.0
