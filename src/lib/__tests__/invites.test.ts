@@ -320,7 +320,8 @@ describe('acceptInviteWithConfirmation', () => {
           eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       }
-    }) as () => typeof mockBuilder)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }) as any)
 
     const result = await acceptInviteWithConfirmation('ABCDEF', true)
 
@@ -338,7 +339,8 @@ describe('registerPendingInvite', () => {
         eq: vi.fn().mockResolvedValue({ error: null }),
       }),
     })
-    mockFrom.mockReturnValue({ update: updateMock } as typeof mockBuilder)
+    mockFrom.mockReturnValue({ update: updateMock     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
 
     await registerPendingInvite('ABCDEF', ' User@TEST.com ')
 
@@ -353,7 +355,8 @@ describe('registerPendingInvite', () => {
           eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       }),
-    } as typeof mockBuilder)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
 
     const result = await registerPendingInvite('ABCDEF', 'test@example.com')
 
@@ -369,7 +372,8 @@ describe('registerPendingInvite', () => {
           eq: vi.fn().mockResolvedValue({ error: supabaseError }),
         }),
       }),
-    } as typeof mockBuilder)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any)
 
     const result = await registerPendingInvite('ABCDEF', 'test@example.com')
 
@@ -415,7 +419,8 @@ describe('leaveSharedList', () => {
           eq: vi.fn().mockResolvedValue({ count: 1, error: null }),
         }),
       }
-    }) as () => typeof mockBuilder)
+    }    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any)
 
     const result = await leaveSharedList()
 
@@ -451,7 +456,8 @@ describe('leaveSharedList', () => {
           }),
         }),
       }
-    }) as () => typeof mockBuilder)
+    }    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any)
 
     mockRpc.mockReturnValue({
       single: vi.fn().mockResolvedValue({
