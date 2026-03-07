@@ -51,6 +51,14 @@ export function getPermissionState(): NotificationPermission {
   return Notification.permission
 }
 
+/**
+ * Attende che il service worker sia pronto, con timeout.
+ * Ritorna la ServiceWorkerRegistration attiva o lancia errore
+ * se il SW non si attiva entro il timeout specificato.
+ *
+ * @param timeoutMs - Tempo massimo di attesa in ms (default: 10000)
+ * @throws Error se il service worker non è pronto entro il timeout
+ */
 async function waitForServiceWorker(timeoutMs = 10000): Promise<ServiceWorkerRegistration> {
   const registration = await Promise.race([
     navigator.serviceWorker.ready,
@@ -62,6 +70,12 @@ async function waitForServiceWorker(timeoutMs = 10000): Promise<ServiceWorkerReg
   return registration
 }
 
+/**
+ * Ottiene la push subscription corrente dal browser, se esiste.
+ * Usa un timeout ridotto (3s) perché il SW dovrebbe già essere attivo.
+ * Ritorna null in caso di qualsiasi errore (non supportato, SW non pronto,
+ * nessuna subscription esistente).
+ */
 export async function getCurrentSubscription(): Promise<PushSubscription | null> {
   if (!isPushSupported()) return null
   try {
@@ -72,6 +86,23 @@ export async function getCurrentSubscription(): Promise<PushSubscription | null>
   }
 }
 
+/**
+ * Sottoscrive l'utente alle push notifications.
+ *
+ * Guard (ritorna errore senza procedere):
+ * 1. Push API non supportata dal browser
+ * 2. iOS senza installazione PWA (Push richiede Home Screen)
+ * 3. Dispositivo offline (registrazione server fallirebbe)
+ * 4. Utente nega il permesso di notifica
+ * 5. Service worker non pronto entro 10s di timeout
+ *
+ * In caso di successo, registra la subscription sul server via Edge Function.
+ * Se la registrazione server fallisce, esegue ROLLBACK: rimuove la
+ * PushSubscription locale per evitare stato inconsistente (browser pensa
+ * di essere iscritto, ma il server non ha record).
+ *
+ * @returns Oggetto con success, subscription (se ok), o messaggio errore
+ */
 export async function subscribeToPush(): Promise<{
   success: boolean; subscription?: PushSubscription; error?: string
 }> {
@@ -113,6 +144,19 @@ export async function subscribeToPush(): Promise<{
   }
 }
 
+/**
+ * Sincronizza la push subscription locale con il server.
+ * Chiamata al caricamento dell'app per assicurare che il server abbia
+ * i dati di subscription aggiornati (es. dopo rigenerazione chiavi VAPID
+ * o cambio endpoint da pushsubscriptionchange nel SW).
+ *
+ * Scenari:
+ * 1. Nessuna subscription locale → ritorna subito (niente da sincronizzare)
+ * 2. Chiamata server ok → subscription sincronizzata
+ * 3. Chiamata server fallisce → fallimento silenzioso, riprova al prossimo load
+ *
+ * Non lancia mai errori e non mostra messaggi all'utente.
+ */
 export async function syncSubscription(): Promise<void> {
   try {
     const subscription = await getCurrentSubscription()
@@ -128,6 +172,12 @@ export async function syncSubscription(): Promise<void> {
   }
 }
 
+/**
+ * Rimuove la sottoscrizione alle push notifications.
+ * Rimuove la subscription dal server (best-effort, ignora errori server)
+ * poi rimuove localmente via Push API.
+ * Ritorna success anche se non esiste subscription (idempotente).
+ */
 export async function unsubscribeFromPush(): Promise<{ success: boolean; error?: string }> {
   try {
     const subscription = await getCurrentSubscription()
