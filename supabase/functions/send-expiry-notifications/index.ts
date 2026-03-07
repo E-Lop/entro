@@ -13,7 +13,27 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  // Auth: verifica shared secret (CRON_SECRET) impostato via Vault + Edge Function secrets
+  /**
+   * Autenticazione cron job: pg_cron → Vault → Edge Function
+   *
+   * Flusso completo:
+   * 1. pg_cron esegue il job schedulato ogni giorno alle 9:00 UTC
+   * 2. Il job legge il shared secret da Vault:
+   *      SELECT decrypted_secret FROM vault.decrypted_secrets
+   *      WHERE name = 'cron_secret' LIMIT 1
+   * 3. pg_net invia HTTP POST con header:
+   *      Authorization: Bearer {cron_secret}
+   * 4. Questa Edge Function confronta il token con la env var CRON_SECRET
+   *
+   * Perché questo pattern: il nuovo formato API key di Supabase (sb_secret_...)
+   * non è un JWT decodificabile, quindi non si può usare come Bearer token
+   * standard. Si usa invece un shared secret salvato sia in Vault (letto da
+   * pg_cron) che come Edge Function secret (letto qui con Deno.env).
+   *
+   * Riferimenti:
+   * - Migration: supabase/migrations/20260228_push_notifications.sql (sezione 4)
+   * - Vault setup: SELECT vault.create_secret('<secret>', 'cron_secret', '...')
+   */
   const authHeader = req.headers.get('Authorization') ?? ''
   const token = authHeader.replace('Bearer ', '')
   const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
