@@ -8,6 +8,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 ## [Unreleased]
 
 ### Added
+- Feedback aptico (vibrazione) sulle interazioni principali tramite libreria `web-haptics`
+  - Swipe card: `nudge` al raggiungimento della soglia, `buzz` all'azione confermata
+  - Crea/modifica alimento: `success`
+  - Elimina alimento/account: `error` (warning tattile)
+- Toggle feedback aptico nella pagina Impostazioni (nascosto su dispositivi non supportati)
+- Supporto iOS Safari 17.4+ tramite workaround `<input type="checkbox" switch>` (la Vibration API non esiste su iOS)
+- Preferenza utente in `localStorage` con cache in memoria per performance durante swipe
 - Sezione "Supporto" nella pagina Impostazioni con link email per contattare lo sviluppatore (`mailto:support@entroapp.it`)
 
 ## [1.5.2] - 2026-03-01

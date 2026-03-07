@@ -31,7 +31,7 @@ const guideItems = [
   {
     icon: ArrowLeftRight,
     title: 'Modifica ed elimina',
-    description: 'Swipe dx per modificare, sx per eliminare (su desktop usa i pulsanti)',
+    description: 'Swipe dx per modificare, sx per eliminare con vibrazione tattile (su desktop usa i pulsanti)',
   },
   {
     icon: Palette,

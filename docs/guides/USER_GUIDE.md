@@ -14,6 +14,7 @@
 - [Condividere la Lista](#condividere-la-lista)
 - [Scansione Barcode](#scansione-barcode)
 - [Notifiche Scadenza](#notifiche-scadenza)
+- [Feedback Aptico](#feedback-aptico)
 - [Installare l'App (PWA)](#installare-lapp-pwa)
 - [Utilizzo Offline](#utilizzo-offline)
 - [Domande Frequenti](#domande-frequenti)
@@ -103,6 +104,7 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 
 **Su Mobile:**
 - Fai uno **swipe verso destra** sulla card dell'alimento
+- Sentirai una vibrazione quando raggiungi la soglia di azione
 
 ### Eliminare un Alimento
 
@@ -113,6 +115,8 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 **Su Mobile:**
 - Fai uno **swipe verso sinistra** sulla card dell'alimento
 - Conferma l'eliminazione
+
+> **Feedback aptico**: su dispositivi supportati (iOS 17.4+, Android) riceverai una vibrazione tattile durante lo swipe e alla conferma delle azioni. Puoi disattivarlo da **Impostazioni > Feedback Aptico**.
 
 ### Capire i Colori
 
@@ -303,6 +307,23 @@ Le notifiche vengono inviate ogni giorno alle **10:00 (ora italiana)**. Ricevera
 - **Ogni dispositivo va attivato separatamente**: se usi entro su più dispositivi, attiva le notifiche su ognuno
 - Le notifiche funzionano anche quando il browser è chiuso
 - Per disattivarle, premi "Disattiva" nelle impostazioni
+
+---
+
+## Feedback Aptico
+
+Su dispositivi supportati (iOS 17.4+ e Android), Entro fornisce vibrazione tattile durante le interazioni principali:
+
+- **Swipe**: vibrazione leggera quando raggiungi la soglia di azione, più intensa alla conferma
+- **Creazione/modifica alimento**: vibrazione di successo
+- **Eliminazione**: vibrazione di avviso
+
+### Attivare/Disattivare
+
+1. Vai in **Impostazioni**
+2. Nella sezione **Feedback Aptico**, premi **"Attiva"** o **"Disattiva"**
+
+> **Nota**: questa opzione appare solo su dispositivi che supportano il feedback aptico. Su desktop non è disponibile.
 
 ---
 
