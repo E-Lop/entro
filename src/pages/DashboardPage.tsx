@@ -1,11 +1,12 @@
 import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
+import { FoodModals } from '../components/foods/FoodModals'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { onlineManager } from '@tanstack/react-query'
-import { Plus, ShoppingBasket, CalendarDays, AlertTriangle, X, List, Calendar } from 'lucide-react'
+import { Plus, ShoppingBasket, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
-import { useFoods, useCategories, useCreateFood, useUpdateFood, useDeleteFood } from '../hooks/useFoods'
+import { useFoods, useCategories } from '../hooks/useFoods'
+import { useFoodFormDialog } from '../hooks/useFoodFormDialog'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
 import { useRealtimeFoods } from '../hooks/useRealtimeFoods'
@@ -14,63 +15,15 @@ import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
 import { KofiButton } from '../components/ui/KofiButton'
 import { NotificationPrompt } from '../components/pwa/NotificationPrompt'
+import { DashboardStats } from '../components/foods/DashboardStats'
 
 // Lazy load heavy components only shown on user interaction
 const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ default: m.WeekView })))
-const FoodForm = lazy(() => import('../components/foods/FoodForm').then(m => ({ default: m.FoodForm })))
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '../components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '../components/ui/alert-dialog'
-import type { Food, FoodInsert, FoodUpdate, FilterParams } from '@/lib/foods'
-import type { FoodFormData } from '@/lib/validations/food.schemas'
+import type { Food, FilterParams } from '@/lib/foods'
 import { differenceInDays } from 'date-fns'
 import { cn } from '@/lib/utils'
-
-/**
- * Upload or persist an image File depending on online/offline state.
- * Returns the storage path, pending:// URL, or the fallback value on failure.
- */
-async function resolveImageFile(
-  file: File,
-  userId: string,
-  isOnline: boolean,
-  fallback: string | null = null,
-): Promise<string | null> {
-  if (isOnline) {
-    try {
-      const { uploadFoodImage } = await import('@/lib/storage')
-      return await uploadFoodImage(file, userId)
-    } catch (error) {
-      console.error('Image upload failed:', error)
-      return fallback
-    }
-  }
-
-  // Offline: persist compressed image in IndexedDB for later upload
-  try {
-    const { savePendingImage } = await import('@/lib/pendingImages')
-    return await savePendingImage(file)
-  } catch (error) {
-    console.error('Failed to save pending image:', error)
-    return fallback
-  }
-}
 
 /**
  * Dashboard Page - Home page for authenticated users with food management
@@ -155,15 +108,15 @@ export function DashboardPage() {
   const { data: allFoods = [] } = useFoods(statsFilters)
   const { data: categories = [] } = useCategories()
 
-  // Mutations
-  const createMutation = useCreateFood()
-  const updateMutation = useUpdateFood()
-  const deleteMutation = useDeleteFood()
-
-  // Dialog states
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editingFood, setEditingFood] = useState<Food | null>(null)
-  const [deletingFood, setDeletingFood] = useState<Food | null>(null)
+  // Food CRUD dialogs and handlers
+  const {
+    isAddDialogOpen, setIsAddDialogOpen,
+    editingFood, setEditingFood,
+    deletingFood, setDeletingFood,
+    handleCreateFood, handleUpdateFood, handleDeleteFood,
+    handleEditClick, handleDeleteClick,
+    isCreating, isUpdating, isDeleting,
+  } = useFoodFormDialog()
 
   // Filters UI state - collapsed by default on mobile
   const [isFiltersExpanded, setIsFiltersExpanded] = useState(false)
@@ -249,89 +202,6 @@ export function DashboardPage() {
     }
   }, [allFoods])
 
-  // Handlers
-  const handleCreateFood = async (data: FoodFormData) => {
-    const isOnline = onlineManager.isOnline()
-
-    let imagePath: string | null = null
-    if (data.image_url instanceof File) {
-      imagePath = await resolveImageFile(data.image_url, user!.id, isOnline)
-    } else if (typeof data.image_url === 'string') {
-      imagePath = data.image_url
-    }
-
-    const foodData: FoodInsert = {
-      ...data,
-      quantity: data.quantity ?? null,
-      quantity_unit: data.quantity_unit ?? null,
-      notes: data.notes ?? null,
-      image_url: imagePath,
-      status: 'active',
-      user_id: user!.id,
-      list_id: null, // Will be set by createFood()
-      barcode: null,
-      consumed_at: null,
-      deleted_at: null,
-    }
-
-    // Use mutate (not mutateAsync) to avoid blocking when offline.
-    // mutateAsync returns a Promise that never resolves when the mutation
-    // is paused, causing the form to hang on "Creazione in corso...".
-    createMutation.mutate({ data: foodData, id: crypto.randomUUID() })
-    setIsAddDialogOpen(false)
-
-    if (!isOnline) {
-      toast.info('Alimento salvato offline. Verrà sincronizzato quando torni online.')
-    }
-  }
-
-  const handleUpdateFood = async (data: FoodFormData) => {
-    if (!editingFood) return
-    const isOnline = onlineManager.isOnline()
-
-    let imagePath: string | null | undefined
-    if (data.image_url instanceof File) {
-      imagePath = await resolveImageFile(data.image_url, user!.id, isOnline, editingFood.image_url)
-    } else {
-      imagePath = data.image_url ?? undefined
-    }
-
-    // Exclude image_url from spread since we handle it separately
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { image_url: _imageUrl, ...dataWithoutImage } = data
-
-    const foodData: FoodUpdate = {
-      ...dataWithoutImage,
-      image_url: imagePath,
-    }
-
-    updateMutation.mutate({ id: editingFood.id, data: foodData })
-    setEditingFood(null)
-
-    if (!isOnline) {
-      toast.info('Modifica salvata offline. Verrà sincronizzata quando torni online.')
-    }
-  }
-
-  const handleDeleteFood = () => {
-    if (!deletingFood) return
-
-    deleteMutation.mutate(deletingFood.id)
-    setDeletingFood(null)
-
-    if (!onlineManager.isOnline()) {
-      toast.info('Eliminazione salvata offline. Verrà sincronizzata quando torni online.')
-    }
-  }
-
-  const handleEditClick = (food: Food) => {
-    setEditingFood(food)
-  }
-
-  const handleDeleteClick = (food: Food) => {
-    setDeletingFood(food)
-  }
-
   // Get category for a food item
   const getCategoryForFood = (food: Food) => {
     return categories.find((cat) => cat.id === food.category_id)
@@ -366,55 +236,7 @@ export function DashboardPage() {
       </div>
 
       {/* Quick Stats - Compact Mobile Grid */}
-      <div className="grid grid-cols-3 gap-3" role="group" aria-label="Statistiche rapide">
-        <button
-          onClick={() => handleQuickFilter('all')}
-          className={cn(
-            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card text-card-foreground shadow",
-            !filters.status || filters.status === 'all' ? 'ring-2 ring-blue-500' : ''
-          )}
-          aria-label={`Mostra tutti gli alimenti (${stats.total})`}
-          aria-pressed={!filters.status || filters.status === 'all'}
-        >
-          <div className="p-4 flex flex-col items-center text-center">
-            <ShoppingBasket className="h-6 w-6 text-muted-foreground mb-2" aria-hidden="true" />
-            <div className="text-2xl font-bold mb-1">{stats.total}</div>
-            <p className="text-xs text-muted-foreground leading-tight">Totali</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => handleQuickFilter('expiring_soon')}
-          className={cn(
-            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card text-card-foreground shadow",
-            filters.status === 'expiring_soon' ? 'ring-2 ring-orange-500' : ''
-          )}
-          aria-label={`Mostra alimenti in scadenza (${stats.expiringSoon})`}
-          aria-pressed={filters.status === 'expiring_soon'}
-        >
-          <div className="p-4 flex flex-col items-center text-center">
-            <CalendarDays className="h-6 w-6 text-orange-600 mb-2" aria-hidden="true" />
-            <div className="text-2xl font-bold mb-1">{stats.expiringSoon}</div>
-            <p className="text-xs text-muted-foreground leading-tight">In scadenza</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => handleQuickFilter('expired')}
-          className={cn(
-            "text-left transition-all hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg border bg-card text-card-foreground shadow",
-            filters.status === 'expired' ? 'ring-2 ring-red-500' : ''
-          )}
-          aria-label={`Mostra alimenti scaduti (${stats.expired})`}
-          aria-pressed={filters.status === 'expired'}
-        >
-          <div className="p-4 flex flex-col items-center text-center">
-            <AlertTriangle className="h-6 w-6 text-red-600 mb-2" aria-hidden="true" />
-            <div className="text-2xl font-bold mb-1">{stats.expired}</div>
-            <p className="text-xs text-muted-foreground leading-tight">Scaduti</p>
-          </div>
-        </button>
-      </div>
+      <DashboardStats stats={stats} currentStatus={filters.status} onQuickFilter={handleQuickFilter} />
 
       {/* Notification Prompt */}
       <NotificationPrompt foodCount={stats.total} />
@@ -573,70 +395,21 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* Add Food Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Aggiungi Nuovo Alimento</DialogTitle>
-            <DialogDescription>
-              Inserisci le informazioni dell'alimento da aggiungere
-            </DialogDescription>
-          </DialogHeader>
-          <Suspense fallback={<div className="flex justify-center py-8"><div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" /></div>}>
-            <FoodForm
-              mode="create"
-              onSubmit={handleCreateFood}
-              onCancel={() => setIsAddDialogOpen(false)}
-              isSubmitting={createMutation.isPending}
-            />
-          </Suspense>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Food Dialog */}
-      <Dialog open={!!editingFood} onOpenChange={(open) => !open && setEditingFood(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Modifica Alimento</DialogTitle>
-            <DialogDescription>
-              Aggiorna le informazioni dell'alimento
-            </DialogDescription>
-          </DialogHeader>
-          {editingFood && (
-            <Suspense fallback={<div className="flex justify-center py-8"><div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" /></div>}>
-              <FoodForm
-                mode="edit"
-                initialData={editingFood}
-                onSubmit={handleUpdateFood}
-                onCancel={() => setEditingFood(null)}
-                isSubmitting={updateMutation.isPending}
-              />
-            </Suspense>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deletingFood} onOpenChange={(open) => !open && setDeletingFood(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Conferma Eliminazione</AlertDialogTitle>
-            <AlertDialogDescription>
-              Sei sicuro di voler eliminare "{deletingFood?.name}"? Questa azione non può essere annullata.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteFood}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? 'Eliminazione...' : 'Elimina'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Food Modals (Add, Edit, Delete) */}
+      <FoodModals
+        isAddDialogOpen={isAddDialogOpen}
+        onAddDialogChange={setIsAddDialogOpen}
+        onCreateFood={handleCreateFood}
+        isCreating={isCreating}
+        editingFood={editingFood}
+        onEditDialogChange={() => setEditingFood(null)}
+        onUpdateFood={handleUpdateFood}
+        isUpdating={isUpdating}
+        deletingFood={deletingFood}
+        onDeleteDialogChange={() => setDeletingFood(null)}
+        onDeleteFood={handleDeleteFood}
+        isDeleting={isDeleting}
+      />
 
       {/* Ko-fi Support Button */}
       <KofiButton />
