@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { AccountSection } from '../components/settings/AccountSection'
 import { NotificationSettings } from '../components/settings/NotificationSettings'
+import { HapticSettings } from '../components/settings/HapticSettings'
 import { DataExportButton } from '../components/settings/DataExportButton'
 import { DeleteAccountDialog } from '../components/settings/DeleteAccountDialog'
 import { Shield, Download, AlertTriangle, Mail } from 'lucide-react'
@@ -23,6 +24,9 @@ export function SettingsPage() {
 
       {/* Notification Settings */}
       <NotificationSettings />
+
+      {/* Haptic Feedback Settings */}
+      <HapticSettings />
 
       {/* Support Section */}
       <Card>

@@ -19,6 +19,7 @@ import {
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
+import { triggerHaptic } from '@/lib/haptics'
 
 /**
  * Delete Account Dialog Component
@@ -74,6 +75,7 @@ export function DeleteAccountDialog() {
     }
 
     setIsDeleting(true)
+    triggerHaptic('error')
 
     try {
       // Step 1: Re-authenticate user with password

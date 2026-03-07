@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { Edit, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { triggerHaptic } from '@/lib/haptics'
 
 interface SwipeableCardProps {
   children: React.ReactNode
@@ -26,6 +27,7 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+  const thresholdTriggered = useRef(false)
 
   const HINT_ANIMATION_KEY = 'entro_hasSeenSwipeAnimation'
 
@@ -79,6 +81,14 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
       // Limit swipe distance to ±150px
       const offset = Math.max(-150, Math.min(150, eventData.deltaX))
       setSwipeOffset(offset)
+
+      // Haptic feedback when reaching the action threshold
+      if (Math.abs(offset) >= 80 && !thresholdTriggered.current) {
+        thresholdTriggered.current = true
+        triggerHaptic('nudge')
+      } else if (Math.abs(offset) < 80) {
+        thresholdTriggered.current = false
+      }
     },
     onSwiped: (eventData) => {
       if (!isMobile) {
@@ -100,12 +110,15 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
       else {
         resetSwipe()
       }
+
+      thresholdTriggered.current = false
     },
     trackMouse: false, // Only track touch events
     trackTouch: true,
   })
 
   const triggerAction = (action: 'edit' | 'delete') => {
+    triggerHaptic('buzz')
     setIsAnimating(true)
 
     // Animate to full swipe

@@ -38,6 +38,7 @@
     "react-swipeable": "^7.0.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "web-haptics": "^0.0.6",
     "zod": "^4.3.5",
     "zustand": "^5.0.9"
   },

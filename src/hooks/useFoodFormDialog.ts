@@ -5,6 +5,7 @@ import { useAuth } from './useAuth'
 import { useCreateFood, useUpdateFood, useDeleteFood } from './useFoods'
 import type { Food, FoodInsert, FoodUpdate } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
+import { triggerHaptic } from '@/lib/haptics'
 
 /**
  * Upload or persist an image File depending on online/offline state.
@@ -77,6 +78,7 @@ export function useFoodFormDialog() {
     // mutateAsync returns a Promise that never resolves when the mutation
     // is paused, causing the form to hang on "Creazione in corso...".
     createMutation.mutate({ data: foodData, id: crypto.randomUUID() })
+    triggerHaptic('success')
     setIsAddDialogOpen(false)
 
     if (!isOnline) {
@@ -105,6 +107,7 @@ export function useFoodFormDialog() {
     }
 
     updateMutation.mutate({ id: editingFood.id, data: foodData })
+    triggerHaptic('success')
     setEditingFood(null)
 
     if (!isOnline) {
@@ -116,6 +119,7 @@ export function useFoodFormDialog() {
     if (!deletingFood) return
 
     deleteMutation.mutate(deletingFood.id)
+    triggerHaptic('error')
     setDeletingFood(null)
 
     if (!onlineManager.isOnline()) {
