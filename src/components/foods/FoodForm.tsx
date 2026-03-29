@@ -12,13 +12,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { ImageUpload } from './ImageUpload'
 import { fetchProductByBarcode, mapProductToFormData } from '@/lib/openfoodfacts'
 import type { Food } from '@/lib/foods'
-import { ScanLine, Loader2, AlertTriangle } from 'lucide-react'
+import { ScanLine, Loader2, AlertTriangle, ChevronDown, ChevronUp, ClipboardList, ImagePlus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { mutationTracker } from '@/lib/realtime'
 
 // Lazy load BarcodeScanner (heavy: includes ZXing library)
 const BarcodeScanner = lazy(() => import('../barcode/BarcodeScanner').then(m => ({ default: m.BarcodeScanner })))
+
+const MAIN_SECTION_FIELDS = ['name', 'category_id', 'storage_location', 'expiry_date'] as const
 
 /**
  * Get submit button text based on form mode and submission state
@@ -43,6 +45,9 @@ interface FoodFormProps {
  */
 export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting = false }: FoodFormProps) {
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
+
+  // Accordion state: which section is open ('main' = food data, 'details' = optional extras)
+  const [openSection, setOpenSection] = useState<'main' | 'details'>('main')
 
   // Barcode scanner state
   const [scannerOpen, setScannerOpen] = useState(false)
@@ -212,6 +217,11 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       // Note: We don't auto-set image_url from OFF as it would require downloading
       // User can still upload their own image
 
+      // Auto-expand details section if barcode populated optional fields
+      if (mappedData.notes) {
+        setOpenSection('details')
+      }
+
       setIsLoadingProduct(false)
     } catch (err) {
       console.error('Error loading product:', err)
@@ -259,7 +269,12 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+          // Auto-open main section if it contains fields with validation errors
+          if (MAIN_SECTION_FIELDS.some(f => f in errors)) {
+            setOpenSection('main')
+          }
+        })} className="space-y-4">
           {/* Conflict Warning Banner */}
           {hasRemoteUpdate && (
             <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800">
@@ -276,262 +291,301 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             </div>
           )}
 
-          {/* Barcode Scanner Button - Only in create mode */}
-          {mode === 'create' && (
-            <div className="pb-2">
+          {/* === ACCORDION SECTION: Dati alimento === */}
+          <button
+            type="button"
+            onClick={() => setOpenSection('main')}
+            className="flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -mx-2"
+            aria-expanded={openSection === 'main'}
+            aria-controls="section-main"
+          >
+            <ClipboardList className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span className="font-semibold text-sm text-foreground">Dati alimento</span>
+            {openSection === 'main' ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground ml-auto" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground ml-auto" aria-hidden="true" />
+            )}
+          </button>
+
+          <div id="section-main" className={openSection !== 'main' ? 'hidden' : 'space-y-4'}>
+            {/* Barcode Scanner Button - Only in create mode */}
+            {mode === 'create' && (
+              <div className="pb-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setScannerOpen(true)}
+                  disabled={isSubmitting || isLoadingProduct}
+                  className="w-full"
+                  aria-label="Apri scanner barcode per compilare automaticamente i dati"
+                >
+                  {isLoadingProduct ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                      Caricamento dati prodotto...
+                    </>
+                  ) : (
+                    <>
+                      <ScanLine className="mr-2 h-4 w-4" aria-hidden="true" />
+                      Scansiona Barcode
+                    </>
+                  )}
+                </Button>
+                {productError && (
+                  <p className="text-sm text-destructive mt-2" role="alert">
+                    {productError}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Name Field */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="es. Latte intero"
+                      disabled={isSubmitting || isLoadingProduct}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Category Field */}
+            <FormField
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria *</FormLabel>
+                  <FormControl>
+                    <select
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      disabled={isSubmitting || categoriesLoading}
+                      {...field}
+                    >
+                      <option value="">Seleziona una categoria</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name_it}
+                        </option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Storage Location Field */}
+            <FormField
+              control={form.control}
+              name="storage_location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Posizione *</FormLabel>
+                  <FormControl>
+                    <select
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      disabled={isSubmitting}
+                      {...field}
+                    >
+                      <option value="fridge">Frigo</option>
+                      <option value="freezer">Freezer</option>
+                      <option value="pantry">Dispensa</option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Expiry Date Field */}
+            <FormField
+              control={form.control}
+              name="expiry_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data di scadenza *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                      disabled={isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Quantity Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantità</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="1"
+                        min="0"
+                        step="0.01"
+                        disabled={isSubmitting}
+                        {...field}
+                        value={field.value ?? ''}
+                        onKeyDown={(e) => {
+                          // Prevent minus sign and 'e' (scientific notation)
+                          if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                            e.preventDefault()
+                          }
+                        }}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          if (value === '') {
+                            field.onChange(null)
+                            return
+                          }
+                          const numValue = parseFloat(value)
+                          // Prevent negative values from arrows or paste
+                          if (!isNaN(numValue) && numValue >= 0) {
+                            field.onChange(numValue)
+                          } else if (numValue < 0) {
+                            // Reset to 0 if negative
+                            field.onChange(0)
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="quantity_unit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unità</FormLabel>
+                    <FormControl>
+                      <select
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        disabled={isSubmitting}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const value = e.target.value
+                          field.onChange(value === '' ? null : value)
+                        }}
+                      >
+                        <option value="">Nessuna</option>
+                        <option value="pz">pz (pezzi)</option>
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="l">l (litri)</option>
+                        <option value="ml">ml</option>
+                        <option value="confezioni">confezioni</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* === ACCORDION SECTION: Dettagli aggiuntivi === */}
+          <button
+            type="button"
+            onClick={() => setOpenSection('details')}
+            className="flex w-full items-center gap-2 text-left border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 pb-2 -mx-2"
+            aria-expanded={openSection === 'details'}
+            aria-controls="section-details"
+          >
+            <ImagePlus className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span className="font-semibold text-sm text-foreground">Dettagli aggiuntivi</span>
+            <span className="text-xs text-muted-foreground">(foto, note)</span>
+            {openSection === 'details' ? (
+              <ChevronUp className="h-4 w-4 text-muted-foreground ml-auto" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-muted-foreground ml-auto" aria-hidden="true" />
+            )}
+          </button>
+
+          <div id="section-details" className={openSection !== 'details' ? 'hidden' : 'space-y-4'}>
+            {/* Image Upload Field */}
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Immagine (opzionale)</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Notes Field */}
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Note</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Aggiungi eventuali note..."
+                      disabled={isSubmitting}
+                      rows={3}
+                      {...field}
+                      value={field.value ?? ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Form Actions - Always visible outside accordion sections */}
+          <div className="flex gap-3 pt-4 border-t">
+            {onCancel && (
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setScannerOpen(true)}
-                disabled={isSubmitting || isLoadingProduct}
-                className="w-full"
-                aria-label="Apri scanner barcode per compilare automaticamente i dati"
+                onClick={onCancel}
+                disabled={isSubmitting}
+                className="flex-1"
               >
-                {isLoadingProduct ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                    Caricamento dati prodotto...
-                  </>
-                ) : (
-                  <>
-                    <ScanLine className="mr-2 h-4 w-4" aria-hidden="true" />
-                    Scansiona Barcode
-                  </>
-                )}
+                Annulla
               </Button>
-              {productError && (
-                <p className="text-sm text-destructive mt-2" role="alert">
-                  {productError}
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Name Field */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome *</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="es. Latte intero"
-                    disabled={isSubmitting || isLoadingProduct}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
             )}
-          />
-
-        {/* Category Field */}
-        <FormField
-          control={form.control}
-          name="category_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoria *</FormLabel>
-              <FormControl>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                  disabled={isSubmitting || categoriesLoading}
-                  {...field}
-                >
-                  <option value="">Seleziona una categoria</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name_it}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Storage Location Field */}
-        <FormField
-          control={form.control}
-          name="storage_location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Posizione *</FormLabel>
-              <FormControl>
-                <select
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                  disabled={isSubmitting}
-                  {...field}
-                >
-                  <option value="fridge">Frigo</option>
-                  <option value="freezer">Freezer</option>
-                  <option value="pantry">Dispensa</option>
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Expiry Date Field */}
-        <FormField
-          control={form.control}
-          name="expiry_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Data di scadenza *</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  min={format(new Date(), 'yyyy-MM-dd')}
-                  disabled={isSubmitting}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Quantity Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="quantity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quantità</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="1"
-                    min="0"
-                    step="0.01"
-                    disabled={isSubmitting}
-                    {...field}
-                    value={field.value ?? ''}
-                    onKeyDown={(e) => {
-                      // Prevent minus sign and 'e' (scientific notation)
-                      if (e.key === '-' || e.key === 'e' || e.key === 'E') {
-                        e.preventDefault()
-                      }
-                    }}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      if (value === '') {
-                        field.onChange(null)
-                        return
-                      }
-                      const numValue = parseFloat(value)
-                      // Prevent negative values from arrows or paste
-                      if (!isNaN(numValue) && numValue >= 0) {
-                        field.onChange(numValue)
-                      } else if (numValue < 0) {
-                        // Reset to 0 if negative
-                        field.onChange(0)
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="quantity_unit"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unità</FormLabel>
-                <FormControl>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    disabled={isSubmitting}
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      field.onChange(value === '' ? null : value)
-                    }}
-                  >
-                    <option value="">Nessuna</option>
-                    <option value="pz">pz (pezzi)</option>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="l">l (litri)</option>
-                    <option value="ml">ml</option>
-                    <option value="confezioni">confezioni</option>
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Image Upload Field */}
-        <FormField
-          control={form.control}
-          name="image_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Immagine (opzionale)</FormLabel>
-              <FormControl>
-                <ImageUpload
-                  value={field.value}
-                  onChange={field.onChange}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Notes Field */}
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Note</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Aggiungi eventuali note..."
-                  disabled={isSubmitting}
-                  rows={3}
-                  {...field}
-                  value={field.value ?? ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Form Actions */}
-        <div className="flex gap-3 pt-4">
-          {onCancel && (
             <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
+              type="submit"
               disabled={isSubmitting}
               className="flex-1"
             >
-              Annulla
+              {getSubmitButtonText(mode, isSubmitting)}
             </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1"
-          >
-            {getSubmitButtonText(mode, isSubmitting)}
-          </Button>
-        </div>
+          </div>
       </form>
     </Form>
     </>

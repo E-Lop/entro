@@ -7,6 +7,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Changed
+- Layout mobile del form inserimento/modifica alimenti: accordion a due sezioni ("Dati alimento" e "Dettagli aggiuntivi") per eliminare lo scroll su smartphone. I campi obbligatori e la quantità sono visibili in un unico schermo; foto e note sono collassate in una sezione espandibile. I pulsanti d'azione restano sempre visibili
+- Rimossa la descrizione ridondante sotto il titolo nei dialog di aggiunta e modifica alimento per recuperare spazio verticale su mobile
+- Auto-apertura intelligente delle sezioni: la sezione "Dati alimento" si riapre automaticamente se la validazione trova un campo obbligatorio mancante; la sezione "Dettagli aggiuntivi" si apre se il barcode popola le note
+
 ## [1.6.0] - 2026-03-07
 
 ### Added

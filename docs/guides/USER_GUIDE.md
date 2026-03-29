@@ -74,15 +74,18 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 ### Metodo 1: Inserimento Manuale
 
 1. Clicca il pulsante verde **"+ Alimento"** in alto a destra
-2. Compila i campi:
+2. Il form si apre con la sezione **"Dati alimento"** visibile:
    - **Nome**: nome dell'alimento (obbligatorio)
    - **Categoria**: seleziona dal menu (es. Latticini, Carne, Frutta)
-   - **Scadenza**: data di scadenza (obbligatoria)
-   - **Quantità**: numero e unità (es. 2 pz, 500 g)
    - **Posizione**: dove lo conservi (Frigo, Freezer, Dispensa)
-   - **Note**: informazioni aggiuntive (opzionale)
+   - **Scadenza**: data di scadenza (obbligatoria)
+   - **Quantità**: numero e unità (es. 2 pz, 500 g) — opzionale
+3. Per aggiungere foto o note, tocca **"Dettagli aggiuntivi"** — la sezione dati si chiude e si apre quella dei dettagli:
    - **Foto**: scatta o carica una foto (opzionale)
-3. Clicca **"Salva"**
+   - **Note**: informazioni aggiuntive (opzionale)
+4. Clicca **"Aggiungi alimento"** (sempre visibile in basso)
+
+> **Nota**: se provi a salvare senza compilare un campo obbligatorio, la sezione che contiene il campo mancante si riaprirà automaticamente.
 
 ### Metodo 2: Scansione Barcode
 
@@ -91,7 +94,8 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 3. Inquadra il codice a barre del prodotto con la fotocamera
 4. L'app compilerà automaticamente i dati disponibili
 5. Aggiungi la data di scadenza (non è sul barcode!)
-6. Clicca **"Salva"**
+6. Se il barcode ha trovato note aggiuntive, la sezione "Dettagli aggiuntivi" si aprirà automaticamente
+7. Clicca **"Aggiungi alimento"**
 
 ---
 
@@ -463,4 +467,4 @@ Per segnalare problemi, suggerire miglioramenti o chiedere aiuto:
 
 ---
 
-*Ultimo aggiornamento: 5 marzo 2026*
+*Ultimo aggiornamento: 29 marzo 2026*

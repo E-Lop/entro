@@ -51,9 +51,9 @@ export function GuidaPage() {
             <h3 className="font-medium mb-2">Inserimento manuale</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Premi il pulsante verde <strong className="text-foreground">"+ Alimento"</strong> in alto a destra</li>
-              <li>Compila i campi: nome, categoria, scadenza, quantità, posizione</li>
-              <li>Opzionalmente aggiungi note e una foto</li>
-              <li>Premi <strong className="text-foreground">"Salva"</strong></li>
+              <li>Compila i dati nella sezione <strong className="text-foreground">"Dati alimento"</strong>: nome, categoria, posizione, scadenza e quantità</li>
+              <li>Per aggiungere foto o note, tocca <strong className="text-foreground">"Dettagli aggiuntivi"</strong></li>
+              <li>Premi <strong className="text-foreground">"Aggiungi alimento"</strong></li>
             </ol>
           </div>
           <div>

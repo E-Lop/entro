@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog'
@@ -63,9 +62,6 @@ export function FoodModals({
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Aggiungi Nuovo Alimento</DialogTitle>
-            <DialogDescription>
-              Inserisci le informazioni dell'alimento da aggiungere
-            </DialogDescription>
           </DialogHeader>
           <Suspense fallback={<FormSpinner />}>
             <FoodForm
@@ -83,9 +79,6 @@ export function FoodModals({
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifica Alimento</DialogTitle>
-            <DialogDescription>
-              Aggiorna le informazioni dell'alimento
-            </DialogDescription>
           </DialogHeader>
           {editingFood && (
             <Suspense fallback={<FormSpinner />}>
