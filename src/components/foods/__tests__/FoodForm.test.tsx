@@ -20,7 +20,7 @@ vi.mock('@/lib/openfoodfacts', () => ({
 }))
 
 vi.mock('@/hooks/useFoods', () => ({
-  useCategories: () => ({ data: [{ id: 'cat-1', name: 'Latticini' }], isLoading: false }),
+  useCategories: () => ({ data: [{ id: 'cat-1', name_it: 'Latticini' }], isLoading: false }),
 }))
 
 vi.mock('@/lib/supabase', () => ({
@@ -29,13 +29,14 @@ vi.mock('@/lib/supabase', () => ({
       on: vi.fn().mockReturnThis(),
       subscribe: vi.fn().mockReturnValue({ unsubscribe: vi.fn() }),
     })),
+    getChannels: vi.fn(() => []),
     removeChannel: vi.fn(),
   },
 }))
 
 vi.mock('@/lib/realtime', () => ({
   mutationTracker: {
-    isLocalMutation: vi.fn().mockReturnValue(false),
+    wasRecentlyMutated: vi.fn().mockReturnValue(false),
   },
 }))
 
@@ -85,15 +86,6 @@ describe('FoodForm accordion sections', () => {
     // Closed section (details) should have background class
     expect(detailsButton.className).toMatch(/bg-muted/)
     // Open section (main) should NOT have the closed background class
-    expect(mainButton.className).not.toMatch(/bg-muted/)
-  })
-
-  it('should NOT apply background class to open section header', () => {
-    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
-
-    const mainButton = document.querySelector('button[aria-controls="section-main"]')!
-
-    // Main is open by default — no background
     expect(mainButton.className).not.toMatch(/bg-muted/)
   })
 
