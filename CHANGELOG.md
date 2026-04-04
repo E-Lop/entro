@@ -7,10 +7,25 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-04-04
+
 ### Changed
 - Layout mobile del form inserimento/modifica alimenti: accordion a due sezioni ("Dati alimento" e "Dettagli aggiuntivi") per eliminare lo scroll su smartphone. I campi obbligatori e la quantità sono visibili in un unico schermo; foto e note sono collassate in una sezione espandibile. I pulsanti d'azione restano sempre visibili
 - Rimossa la descrizione ridondante sotto il titolo nei dialog di aggiunta e modifica alimento per recuperare spazio verticale su mobile
-- Auto-apertura intelligente delle sezioni: la sezione "Dati alimento" si riapre automaticamente se la validazione trova un campo obbligatorio mancante; la sezione "Dettagli aggiuntivi" si apre se il barcode popola le note
+- Auto-apertura intelligente della sezione "Dati alimento" se la validazione trova un campo obbligatorio mancante
+- Le sezioni accordion chiuse ora hanno uno sfondo sottile (`bg-muted`) per renderle più visibili, sia in light che dark mode
+
+### Fixed
+- La scansione barcode non sposta più il focus sulla sezione "Dettagli aggiuntivi" — la sezione principale resta aperta per permettere l'inserimento di data di scadenza e quantità
+- Aggiornata la guida utente con il comportamento corretto dopo scansione barcode
+- Corretto link rotto a DATABASE_SCHEMA.md nel README
+
+### Security
+- Patch vulnerabilità serialize-javascript (RCE) e flatted
+- Patch vulnerabilità picomatch via npm override
+
+### Removed
+- Rimossi documenti di sviluppo interni dal repository pubblico (spostati in .gitignore)
 
 ## [1.6.0] - 2026-03-07
 
@@ -283,7 +298,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/E-Lop/entro/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/E-Lop/entro/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/E-Lop/entro/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/E-Lop/entro/compare/v1.5.0...v1.5.1
