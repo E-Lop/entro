@@ -290,7 +290,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
           <button
             type="button"
             onClick={() => setOpenSection('main')}
-            className="flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -mx-2"
+            className={`flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -mx-2${openSection !== 'main' ? ' bg-muted/50 dark:bg-muted/30' : ''}`}
             aria-expanded={openSection === 'main'}
             aria-controls="section-main"
           >
@@ -504,7 +504,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
           <button
             type="button"
             onClick={() => setOpenSection('details')}
-            className="flex w-full items-center gap-2 text-left border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 pb-2 -mx-2"
+            className={`flex w-full items-center gap-2 text-left border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 pb-2 -mx-2${openSection !== 'details' ? ' bg-muted/50 dark:bg-muted/30' : ''}`}
             aria-expanded={openSection === 'details'}
             aria-controls="section-details"
           >

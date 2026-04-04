@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, waitFor, act, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom/vitest'
 import { FoodForm } from '../FoodForm'
@@ -57,6 +57,10 @@ describe('FoodForm accordion sections', () => {
     capturedOnScanSuccess = null
   })
 
+  afterEach(() => {
+    cleanup()
+  })
+
   it('should have main section open by default', () => {
     render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
 
@@ -69,6 +73,47 @@ describe('FoodForm accordion sections', () => {
     expect(mainSection).not.toHaveClass('hidden')
     // Details section should be hidden
     expect(detailsSection).toHaveClass('hidden')
+  })
+
+  it('should apply background class to closed section header', () => {
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    // Main is open by default, details is closed
+    const mainButton = document.querySelector('button[aria-controls="section-main"]')!
+    const detailsButton = document.querySelector('button[aria-controls="section-details"]')!
+
+    // Closed section (details) should have background class
+    expect(detailsButton.className).toMatch(/bg-muted/)
+    // Open section (main) should NOT have the closed background class
+    expect(mainButton.className).not.toMatch(/bg-muted/)
+  })
+
+  it('should NOT apply background class to open section header', () => {
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    const mainButton = document.querySelector('button[aria-controls="section-main"]')!
+
+    // Main is open by default — no background
+    expect(mainButton.className).not.toMatch(/bg-muted/)
+  })
+
+  it('should swap background class when toggling sections', async () => {
+    const user = userEvent.setup()
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    const mainButton = document.querySelector('button[aria-controls="section-main"]')!
+    const detailsButton = document.querySelector('button[aria-controls="section-details"]')!
+
+    // Initially: main open (no bg), details closed (bg)
+    expect(mainButton.className).not.toMatch(/bg-muted/)
+    expect(detailsButton.className).toMatch(/bg-muted/)
+
+    // Click details to open it (closes main)
+    await user.click(detailsButton)
+
+    // Now: main closed (bg), details open (no bg)
+    expect(mainButton.className).toMatch(/bg-muted/)
+    expect(detailsButton.className).not.toMatch(/bg-muted/)
   })
 
   it('should keep main section open after barcode scan populates notes', async () => {
@@ -105,10 +150,12 @@ describe('FoodForm accordion sections', () => {
     })
 
     // After scan completes, main section should STILL be open (not switched to details)
-    const mainSection = document.getElementById('section-main')
-    const detailsSection = document.getElementById('section-details')
+    await waitFor(() => {
+      const mainSection = document.getElementById('section-main')
+      const detailsSection = document.getElementById('section-details')
 
-    expect(mainSection).not.toHaveClass('hidden')
-    expect(detailsSection).toHaveClass('hidden')
+      expect(mainSection).not.toHaveClass('hidden')
+      expect(detailsSection).toHaveClass('hidden')
+    })
   })
 })
