@@ -141,7 +141,7 @@ VITE_SUPABASE_ANON_KEY=your-anon-public-key-here
 VITE_APP_URL=http://localhost:5173
 ```
 
-4. Esegui le migration del database (vedi [`docs/private/DATABASE_SCHEMA.md`](docs/private/DATABASE_SCHEMA.md))
+4. Esegui le migration del database (vedi [`supabase/migrations/`](supabase/migrations/))
 
 5. Avvia il server di sviluppo:
 
