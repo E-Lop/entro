@@ -217,11 +217,6 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       // Note: We don't auto-set image_url from OFF as it would require downloading
       // User can still upload their own image
 
-      // Auto-expand details section if barcode populated optional fields
-      if (mappedData.notes) {
-        setOpenSection('details')
-      }
-
       setIsLoadingProduct(false)
     } catch (err) {
       console.error('Error loading product:', err)
@@ -308,7 +303,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             )}
           </button>
 
-          <div id="section-main" className={openSection !== 'main' ? 'hidden' : 'space-y-4'}>
+          <div id="section-main" data-testid="section-main" className={openSection !== 'main' ? 'hidden' : 'space-y-4'}>
             {/* Barcode Scanner Button - Only in create mode */}
             {mode === 'create' && (
               <div className="pb-2">
@@ -523,7 +518,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             )}
           </button>
 
-          <div id="section-details" className={openSection !== 'details' ? 'hidden' : 'space-y-4'}>
+          <div id="section-details" data-testid="section-details" className={openSection !== 'details' ? 'hidden' : 'space-y-4'}>
             {/* Image Upload Field */}
             <FormField
               control={form.control}
