@@ -316,7 +316,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   variant="outline"
                   onClick={() => setScannerOpen(true)}
                   disabled={isSubmitting || isLoadingProduct}
-                  className="w-full"
+                  className="w-full bg-primary/10 dark:bg-primary/15"
                   aria-label="Apri scanner barcode per compilare automaticamente i dati"
                 >
                   {isLoadingProduct ? (
