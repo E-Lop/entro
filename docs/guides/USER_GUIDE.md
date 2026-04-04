@@ -92,10 +92,9 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 1. Clicca **"+ Alimento"**
 2. Clicca **"Scansiona Barcode"**
 3. Inquadra il codice a barre del prodotto con la fotocamera
-4. L'app compilerà automaticamente i dati disponibili
-5. Aggiungi la data di scadenza (non è sul barcode!)
-6. Se il barcode ha trovato note aggiuntive, la sezione "Dettagli aggiuntivi" si aprirà automaticamente
-7. Clicca **"Aggiungi alimento"**
+4. L'app compilerà automaticamente i dati disponibili (nome, categoria, posizione)
+5. Aggiungi la **data di scadenza** e verifica la **quantità** — questi campi non vengono compilati dal barcode
+6. Clicca **"Aggiungi alimento"**
 
 ---
 

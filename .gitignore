@@ -56,3 +56,7 @@ workbox-*.js
 
 # Private documentation
 docs/private/
+
+# Internal development docs
+docs/development/
+docs/superpowers/
