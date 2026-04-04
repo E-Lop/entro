@@ -36,7 +36,7 @@ Add a subtle background color to collapsed section headers so they are visually 
 - **Open section**: No background change (current behavior)
 - **Closed section**: Subtle colored background on the header/button
 
-**Implementation**: The exact color will be determined using `/frontend-design` with screenshots of the current UI to ensure consistency with the app's theme.
+**Implementation**: The exact color will be determined using `/frontend-design` with screenshots of the current UI to ensure consistency with the app's theme. The chosen color must work well in both light mode and dark mode.
 
 **File**: `src/components/foods/FoodForm.tsx` — conditional class on the collapsible header buttons.
 
@@ -51,6 +51,6 @@ Add a subtle background color to collapsed section headers so they are visually 
 
 - Barcode scan keeps main section open; user can fill expiry date and quantity without switching
 - Manual form entry (no barcode) works as before — main section starts open
-- Closed collapsible headers show distinct background color
+- Closed collapsible headers show distinct background color in both light and dark mode
 - Opening a section removes the background color
 - Form validation still auto-expands main section on errors
