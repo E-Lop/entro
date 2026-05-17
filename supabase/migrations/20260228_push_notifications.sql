@@ -113,7 +113,7 @@ $$;
 --
 -- SELECT cron.schedule(
 --   'send-expiry-notifications',
---   '0 9 * * *',
+--   '0 8 * * *',          -- 8:00 UTC = 10:00 CEST (estate) / 9:00 CET (inverno)
 --   $$
 --     SELECT net.http_post(
 --       url := '<SUPABASE_URL>/functions/v1/send-expiry-notifications',

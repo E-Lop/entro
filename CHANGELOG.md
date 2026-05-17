@@ -7,6 +7,15 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-05-17
+
+### Fixed
+- Orario notifiche push allineato a 10:00 ora italiana tutto l'anno: `pg_cron` non supporta timezone per-job, quindi lo schedule è stato spostato da `0 9 * * *` (UTC) a `0 8 * * *` (UTC) — durante l'ora legale CEST le notifiche arrivavano alle 11:00 anziché alle 10:00
+
+### Security
+- Opt-in anticipato al [Supabase Data API hardening](https://github.com/orgs/supabase/discussions/45329): revocati i default privileges su `public` schema. Le tabelle esistenti restano raggiungibili (grandfathered), ma ogni nuova tabella/funzione richiederà `GRANT` espliciti — allineamento al comportamento che Supabase applicherà di default a tutti i progetti il 30 ottobre 2026
+- Aggiunto `CLAUDE.md` alla root con template obbligatorio (CREATE TABLE + RLS + GRANT) per future migrazioni, così da prevenire tabelle silenziosamente non esposte
+
 ## [1.6.1] - 2026-04-04
 
 ### Changed
@@ -298,7 +307,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.2...HEAD
+[1.6.2]: https://github.com/E-Lop/entro/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/E-Lop/entro/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/E-Lop/entro/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/E-Lop/entro/compare/v1.5.1...v1.5.2
