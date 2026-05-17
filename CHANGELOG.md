@@ -7,6 +7,15 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-05-17
+
+### Security
+- Patch vulnerabilità `vite` (≤ 6.4.1): Arbitrary File Read via Dev Server WebSocket ([GHSA-p9ff-h696-f583](https://github.com/advisories/GHSA-p9ff-h696-f583), High) e Path Traversal in Optimized Deps `.map` Handling ([GHSA-4w7w-66w2-5vf9](https://github.com/advisories/GHSA-4w7w-66w2-5vf9), Moderate) — bump a `^6.4.2`
+- Patch vulnerabilità `postcss` (< 8.5.10): XSS via Unescaped `</style>` in CSS Stringify Output ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), Moderate) — bump a `^8.5.10`
+- Patch vulnerabilità `fast-uri` (≤ 3.1.1) via npm override `^3.1.2`: path traversal via percent-encoded dot segments ([GHSA-q3j6-qgpj-74h6](https://github.com/advisories/GHSA-q3j6-qgpj-74h6), High) e host confusion via percent-encoded authority delimiters ([GHSA-v39h-62p7-jpjc](https://github.com/advisories/GHSA-v39h-62p7-jpjc), High) — transitiva da `vite-plugin-pwa` → `workbox-build` → `ajv`
+- Patch vulnerabilità `@babel/plugin-transform-modules-systemjs` (≤ 7.29.3) via npm override `^7.29.4`: generazione arbitraria di codice da input malevolo ([GHSA-fv7c-fp4j-7gwp](https://github.com/advisories/GHSA-fv7c-fp4j-7gwp), High) — transitiva da `vite-plugin-pwa` → `workbox-build` → `@babel/preset-env`
+- Patch vulnerabilità `brace-expansion`: DoS via "Zero-step sequence causes process hang and memory exhaustion" ([GHSA-f886-m6hf-6m8v](https://github.com/advisories/GHSA-f886-m6hf-6m8v), Moderate) — override per-parente in tre rami (`minimatch@3` → `^1.1.13`, `minimatch@5` → `^2.0.3`, fallback `^5.0.5`) perché l'API tra le major v1/v2/v5 non è retro-compatibile
+
 ## [1.6.2] - 2026-05-17
 
 ### Fixed
@@ -307,7 +316,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.3...HEAD
+[1.6.3]: https://github.com/E-Lop/entro/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/E-Lop/entro/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/E-Lop/entro/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/E-Lop/entro/compare/v1.5.2...v1.6.0
