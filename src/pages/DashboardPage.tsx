@@ -253,10 +253,11 @@ export function DashboardPage() {
       />
 
       {/* Foods Grid */}
+      <h2 className="sr-only">I tuoi alimenti</h2>
       {foodsLoading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
             <div className="text-muted-foreground">Caricamento alimenti...</div>
           </div>
         </div>
@@ -332,7 +333,7 @@ export function DashboardPage() {
               <button
                 onClick={() => handleViewModeChange('list')}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   viewMode === 'list'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -347,7 +348,7 @@ export function DashboardPage() {
               <button
                 onClick={() => handleViewModeChange('calendar')}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   viewMode === 'calendar'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -369,8 +370,8 @@ export function DashboardPage() {
           {/* Conditional View Rendering */}
           {viewMode === 'calendar' ? (
             <Suspense fallback={
-              <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary"></div>
+              <div className="flex items-center justify-center py-12" role="status" aria-label="Caricamento calendario">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
               </div>
             }>
               <WeekView
@@ -417,7 +418,7 @@ export function DashboardPage() {
       {/* Floating Action Button (FAB) - Mobile Only */}
       <button
         onClick={() => setIsAddDialogOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center sm:hidden"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center sm:hidden"
         aria-label="Aggiungi alimento"
       >
         <Plus className="h-6 w-6" />

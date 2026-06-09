@@ -21,11 +21,11 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
       onDelete={onDismiss} // Swipe left dismisses the card
       showHintAnimation={true} // Always show animation on this card
     >
-      <Card className="border-2 border-dashed border-blue-300 bg-blue-50/30">
+      <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Info className="h-5 w-5 text-blue-600" />
-            <CardTitle className="text-lg font-semibold text-blue-900">
+            <Info className="h-5 w-5 text-primary" />
+            <CardTitle as="h3" className="text-lg font-semibold text-foreground">
               Come funziona
             </CardTitle>
           </div>
@@ -36,16 +36,16 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground text-xs font-medium">Su smartphone</p>
 
-            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-blue-200">
-              <ArrowRight className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-border">
+              <ArrowRight className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-foreground">Swipe verso destra</p>
                 <p className="text-muted-foreground text-xs mt-0.5">Modifica un alimento</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-blue-200">
-              <ArrowLeft className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-border">
+              <ArrowLeft className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium text-foreground">Swipe verso sinistra</p>
                 <p className="text-muted-foreground text-xs mt-0.5">Elimina un alimento</p>
@@ -54,11 +54,11 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
           </div>
 
           {/* Hint to dismiss */}
-          <div className="bg-blue-100 rounded-lg p-3 text-center">
-            <p className="text-xs text-blue-800 font-medium">
+          <div className="bg-primary/10 rounded-lg p-3 text-center">
+            <p className="text-xs text-foreground font-medium">
               💡 I tuoi alimenti appariranno qui
             </p>
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               Fai swipe a sinistra per eliminare questa card
             </p>
           </div>

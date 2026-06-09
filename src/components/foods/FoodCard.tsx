@@ -34,20 +34,18 @@ function getExpiryStatus(expiryDate: string): {
   expiry.setHours(0, 0, 0, 0)
 
   const daysUntilExpiry = differenceInDays(expiry, now)
+  const dayLabel = `${daysUntilExpiry} ${daysUntilExpiry === 1 ? 'giorno' : 'giorni'}`
 
   if (daysUntilExpiry < 0) {
-    return { status: 'expired', colorClasses: 'bg-red-100 text-red-800 border-red-200', badgeText: 'Scaduto', daysUntilExpiry }
+    return { status: 'expired', colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scaduto', daysUntilExpiry }
   }
   if (daysUntilExpiry === 0) {
-    return { status: 'critical', colorClasses: 'bg-red-100 text-red-800 border-red-200', badgeText: 'Scade oggi', daysUntilExpiry }
-  }
-  if (daysUntilExpiry <= 3) {
-    return { status: 'critical', colorClasses: 'bg-orange-100 text-orange-800 border-orange-200', badgeText: `${daysUntilExpiry} giorni`, daysUntilExpiry }
+    return { status: 'critical', colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scade oggi', daysUntilExpiry }
   }
   if (daysUntilExpiry <= 7) {
-    return { status: 'warning', colorClasses: 'bg-yellow-100 text-yellow-800 border-yellow-200', badgeText: `${daysUntilExpiry} giorni`, daysUntilExpiry }
+    return { status: 'warning', colorClasses: 'bg-warning/10 text-warning border-warning/30', badgeText: dayLabel, daysUntilExpiry }
   }
-  return { status: 'good', colorClasses: 'bg-green-100 text-green-800 border-green-200', badgeText: `${daysUntilExpiry} giorni`, daysUntilExpiry }
+  return { status: 'good', colorClasses: 'bg-success/10 text-success border-success/30', badgeText: dayLabel, daysUntilExpiry }
 }
 
 const STORAGE_LABELS: Record<Food['storage_location'], string> = {
@@ -83,7 +81,7 @@ function getImageState(
  * FoodCard Component - Displays a single food item with expiry status
  */
 export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation = false }: FoodCardProps) {
-  const { colorClasses, badgeText, daysUntilExpiry } = getExpiryStatus(food.expiry_date)
+  const { status, colorClasses, badgeText, daysUntilExpiry } = getExpiryStatus(food.expiry_date)
   const formattedExpiryDate = format(new Date(food.expiry_date), 'dd MMM yyyy', { locale: it })
 
   // Generate signed URL for private image
@@ -102,14 +100,15 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
       <Card
         className={cn(
           'hover:shadow-md transition-shadow',
-          daysUntilExpiry <= 3 && 'border-orange-300',
-          isRemoteUpdate && 'ring-2 ring-blue-500 animate-pulse'
+          (status === 'expired' || status === 'critical') && 'border-destructive/40',
+          status === 'warning' && daysUntilExpiry <= 3 && 'border-warning/50',
+          isRemoteUpdate && 'ring-2 ring-primary animate-pulse'
         )}
       >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <CardTitle className="text-lg font-semibold text-foreground line-clamp-2">
+              <CardTitle as="h3" className="text-lg font-semibold text-foreground line-clamp-2">
                 {food.name}
                 {food.quantity && (
                   <span className="font-normal text-muted-foreground ml-1">
@@ -221,7 +220,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
             variant="outline"
             size="sm"
             onClick={() => onDelete(food)}
-            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/20"
+            className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
             aria-label={`Elimina ${food.name}`}
           >
             <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />

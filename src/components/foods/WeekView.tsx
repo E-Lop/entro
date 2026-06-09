@@ -44,7 +44,7 @@ export function WeekView({ foods, onEdit }: WeekViewProps) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">
             Ottimo! Nessun alimento in scadenza
           </h3>

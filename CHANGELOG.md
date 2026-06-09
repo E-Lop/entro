@@ -7,13 +7,20 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Added
+- Colori semantici per gli stati di scadenza ("in scadenza" ambra, "fresco" verde) come token del tema: ora gli stati si adattano correttamente al tema scuro e restano coerenti con l'identità dell'app.
+
 ### Changed
 - Pagine di autenticazione (accesso, registrazione, conferma email) uniformate a uno stile coerente basato sui token del tema: rimosso lo sfondo a gradiente, layout e tipografia allineati alle pagine di recupero password e pronti per il tema scuro.
+- Dashboard e lista alimenti allineate all'identità verde del brand: lo stato selezionato delle statistiche rapide (Totali / In scadenza / Scaduti) usa ora il verde del brand invece del blu, e la card "Come funziona" passa da un tema blu a uno coerente col brand.
 
 ### Fixed
 - Accessibilità dei moduli di autenticazione: il pulsante mostra/nascondi password è ora raggiungibile da tastiera e annunciato dagli screen reader, i titoli di pagina sono heading semantici (`<h1>`) e gli stati di caricamento vengono annunciati.
 - Gli errori di accesso e registrazione restano visibili come messaggio sotto il modulo invece di comparire come notifica temporanea.
 - Risolto un raro reindirizzamento errato dalla pagina di conferma email alla registrazione.
+- Tema scuro della Dashboard: i badge di scadenza degli alimenti e i conteggi per giorno del calendario ora si adattano allo sfondo scuro invece di restare riquadri chiari poco leggibili.
+- Caricamento di lista e calendario ora annunciato agli screen reader.
+- Etichetta di scadenza al singolare corretta ("1 giorno" invece di "1 giorni"); nome dell'alimento reso come heading per una navigazione più chiara con screen reader; pulsanti Lista/Calendario portati a un'area tattile di almeno 44px.
 
 ## [1.6.3] - 2026-05-17
 
