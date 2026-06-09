@@ -7,6 +7,14 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Changed
+- Pagine di autenticazione (accesso, registrazione, conferma email) uniformate a uno stile coerente basato sui token del tema: rimosso lo sfondo a gradiente, layout e tipografia allineati alle pagine di recupero password e pronti per il tema scuro.
+
+### Fixed
+- Accessibilità dei moduli di autenticazione: il pulsante mostra/nascondi password è ora raggiungibile da tastiera e annunciato dagli screen reader, i titoli di pagina sono heading semantici (`<h1>`) e gli stati di caricamento vengono annunciati.
+- Gli errori di accesso e registrazione restano visibili come messaggio sotto il modulo invece di comparire come notifica temporanea.
+- Risolto un raro reindirizzamento errato dalla pagina di conferma email alla registrazione.
+
 ## [1.6.3] - 2026-05-17
 
 ### Security

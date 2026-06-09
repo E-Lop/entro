@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
+import { AuthLoadingScreen } from '../components/auth/AuthLoadingScreen'
 import { Button } from '../components/ui/button'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
@@ -37,8 +37,14 @@ export function VerifyEmailPage() {
   const [email, setEmail] = useState<string>('')
   const [isResending, setIsResending] = useState(false)
   const [resendSuccess, setResendSuccess] = useState(false)
+  // Guard against React StrictMode double-invoking the effect (which would
+  // consume the one-shot sessionStorage email and wrongly redirect to /signup)
+  const handledRef = useRef(false)
 
   useEffect(() => {
+    if (handledRef.current) return
+    handledRef.current = true
+
     async function loadEmail() {
       // Try to get email from sessionStorage first (secure, not in URL)
       const sessionEmail = sessionStorage.getItem('verify_email')
@@ -110,21 +116,14 @@ export function VerifyEmailPage() {
   }
 
   if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-          <p className="mt-4 text-sm text-slate-600">Caricamento...</p>
-        </div>
-      </div>
-    )
+    return <AuthLoadingScreen />
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="flex min-h-screen flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
               {resendSuccess ? (
                 <CheckCircle2 className="h-10 w-10 text-primary" />
@@ -132,25 +131,21 @@ export function VerifyEmailPage() {
                 <Mail className="h-10 w-10 text-primary" />
               )}
             </div>
-            <CardTitle className="text-2xl font-bold">
-              Controlla la tua email
-            </CardTitle>
-            <CardDescription className="text-base">
-              Ti abbiamo inviato un link di conferma
-            </CardDescription>
-          </CardHeader>
+            <h1 className="text-2xl font-bold tracking-tight">Controlla la tua email</h1>
+            <p className="mt-2 text-muted-foreground">Ti abbiamo inviato un link di conferma</p>
+          </div>
 
-          <CardContent className="space-y-4">
-            <div className="rounded-lg bg-slate-50 p-4 text-center">
-              <p className="text-sm text-slate-600 mb-2">
+          <div className="rounded-lg border bg-card p-6 space-y-4">
+            <div className="rounded-lg bg-muted p-4 text-center">
+              <p className="text-sm text-muted-foreground mb-2">
                 Email inviata a:
               </p>
-              <p className="font-medium text-slate-900 break-all">
+              <p className="font-medium text-foreground break-all">
                 {email}
               </p>
             </div>
 
-            <div className="space-y-3 text-sm text-slate-600">
+            <div className="space-y-3 text-sm text-muted-foreground">
               <p>
                 <strong>Prossimi passi:</strong>
               </p>
@@ -168,13 +163,13 @@ export function VerifyEmailPage() {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-muted-foreground">
+                  <span className="bg-card px-2 text-muted-foreground">
                     Non hai ricevuto l'email?
                   </span>
                 </div>
               </div>
 
-              <div className="text-sm text-slate-600 space-y-2">
+              <div className="text-sm text-muted-foreground space-y-2">
                 <p>Controlla la cartella spam o promozioni</p>
                 <Button
                   variant="outline"
@@ -186,10 +181,10 @@ export function VerifyEmailPage() {
                 </Button>
               </div>
             </div>
-          </CardContent>
+          </div>
 
-          <CardFooter className="flex flex-col space-y-2 text-center">
-            <div className="text-sm text-slate-600">
+          <div className="space-y-2 text-center text-sm text-muted-foreground">
+            <div>
               <Link
                 to="/login"
                 className="font-medium text-primary hover:underline"
@@ -197,7 +192,7 @@ export function VerifyEmailPage() {
                 Torna al login
               </Link>
             </div>
-            <div className="text-sm text-slate-600">
+            <div>
               Email sbagliata?{' '}
               <Link
                 to="/signup"
@@ -206,8 +201,8 @@ export function VerifyEmailPage() {
                 Registrati di nuovo
               </Link>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
       <Footer />
     </div>

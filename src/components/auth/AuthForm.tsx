@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { loginSchema, signupSchema, type LoginFormData, type SignupFormData } from '../../lib/validations/auth.schemas'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
+import { Alert, AlertDescription } from '../ui/alert'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 
 interface AuthFormProps {
@@ -28,6 +29,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
 
   // Use appropriate schema based on mode
   const schema = mode === 'login' ? loginSchema : signupSchema
@@ -50,6 +52,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
 
   const handleSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsSubmitting(true)
+    setServerError(null)
 
     try {
       let result
@@ -65,6 +68,8 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
       if (result.success) {
         form.reset()
         onSuccess?.(data.email)
+      } else {
+        setServerError(result.error?.message ?? 'Si è verificato un errore. Riprova.')
       }
     } finally {
       setIsSubmitting(false)
@@ -145,7 +150,8 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
+                    aria-label={showPassword ? 'Nascondi password' : 'Mostra password'}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -194,7 +200,8 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      tabIndex={-1}
+                      aria-label={showConfirmPassword ? 'Nascondi conferma password' : 'Mostra conferma password'}
+                      aria-pressed={showConfirmPassword}
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -208,6 +215,13 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
               </FormItem>
             )}
           />
+        )}
+
+        {/* Server-side error (persistent, near the action) */}
+        {serverError && (
+          <Alert variant="destructive">
+            <AlertDescription>{serverError}</AlertDescription>
+          </Alert>
         )}
 
         {/* Submit Button */}
