@@ -60,3 +60,10 @@ docs/private/
 # Internal development docs
 docs/development/
 docs/superpowers/
+
+# Impeccable skill (locale, rigenerabile con: npx impeccable skills update)
+.claude/skills/
+.claude/settings.local.json
+
+# Impeccable: PRODUCT.md resta interno (strategia/brand). DESIGN.md invece è pubblico.
+PRODUCT.md
