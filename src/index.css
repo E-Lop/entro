@@ -20,6 +20,12 @@
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    /* Stati di scadenza semantici (DESIGN.md §2): "in scadenza" = ambra, "ok/fresco" = verde.
+       Valori scuri per superare AA come testo su tinte chiare (badge soft). */
+    --warning: 25 90% 34%;
+    --warning-foreground: 0 0% 100%;
+    --success: 142 74% 26%;
+    --success-foreground: 0 0% 100%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 142.1 76.2% 36.3%;
@@ -48,6 +54,11 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 98%;
+    /* Varianti chiare per superare AA come testo su tinte scure in dark mode */
+    --warning: 40 96% 60%;
+    --warning-foreground: 20 14% 4%;
+    --success: 142 60% 62%;
+    --success-foreground: 144.9 80.4% 10%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 142.1 70.6% 45.3%;

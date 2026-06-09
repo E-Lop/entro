@@ -23,7 +23,7 @@ export function DayColumn({ date, foods, onEdit }: DayColumnProps) {
         <div className="text-sm font-medium text-foreground mb-1">
           {format(date, 'EEEE dd MMM', { locale: it })}
         </div>
-        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
           {itemCount} {itemCount === 1 ? 'alimento' : 'alimenti'}
         </span>
       </div>
@@ -40,7 +40,7 @@ export function DayColumn({ date, foods, onEdit }: DayColumnProps) {
           ))
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <CheckCircle className="h-8 w-8 text-green-400 mb-2" />
+            <CheckCircle className="h-8 w-8 text-success mb-2" />
             <p className="text-xs text-muted-foreground/70">Nessuna scadenza</p>
           </div>
         )}
