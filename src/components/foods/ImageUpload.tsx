@@ -135,26 +135,26 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
     <div className="space-y-2">
       {/* Preview or Upload Button */}
       {displayPreview || isLoadingPreview || isConverting ? (
-        <div className="relative group">
+        <div className="relative">
           {/* Image Preview */}
-          <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+          <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border bg-muted">
             {isLoadingPreview ? (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center" role="status" aria-live="polite">
                 <div className="text-white text-center">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" aria-hidden="true" />
                   <p className="text-sm">Caricamento immagine...</p>
                 </div>
               </div>
             ) : isConverting ? (
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center" role="status" aria-live="polite">
                 <div className="text-white text-center">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" aria-hidden="true" />
                   <p className="text-sm">Conversione immagine HEIC...</p>
                 </div>
               </div>
             ) : signedUrlError ? (
-              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                <ImageIcon className="w-12 h-12 mb-2" />
+              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
+                <ImageIcon className="w-12 h-12 mb-2" aria-hidden="true" />
                 <span className="text-xs">Errore caricamento</span>
               </div>
             ) : displayPreview ? (
@@ -167,13 +167,13 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             ) : null}
           </div>
 
-          {/* Remove Button */}
+          {/* Remove Button — always visible (touch devices have no hover) */}
           {!disabled && !isLoadingPreview && !isConverting && (
             <Button
               type="button"
               variant="destructive"
               size="sm"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 min-h-[44px] shadow-md"
               onClick={handleRemove}
               aria-label="Rimuovi immagine"
             >
@@ -195,10 +195,10 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
               disabled={disabled || isConverting}
               aria-label="Scatta foto con fotocamera"
             >
-              <Camera className="w-6 h-6 text-gray-400" aria-hidden="true" />
+              <Camera className="w-6 h-6 text-muted-foreground" aria-hidden="true" />
               <div className="text-center">
                 <div className="text-sm font-medium">Fotocamera</div>
-                <p className="text-xs text-gray-500 mt-1">Scatta foto</p>
+                <p className="text-xs text-muted-foreground mt-1">Scatta foto</p>
               </div>
             </Button>
 
@@ -211,10 +211,10 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
               disabled={disabled || isConverting}
               aria-label="Scegli foto dalla galleria"
             >
-              <Upload className="w-6 h-6 text-gray-400" aria-hidden="true" />
+              <Upload className="w-6 h-6 text-muted-foreground" aria-hidden="true" />
               <div className="text-center">
                 <div className="text-sm font-medium">Galleria</div>
-                <p className="text-xs text-gray-500 mt-1">Scegli foto</p>
+                <p className="text-xs text-muted-foreground mt-1">Scegli foto</p>
               </div>
             </Button>
           </div>
@@ -247,7 +247,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
       {/* Error Message */}
       {error && (
         <div
-          className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2"
+          className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2"
           role="alert"
         >
           {error}
@@ -256,7 +256,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
 
       {/* Help Text */}
       {!displayPreview && !error && !isLoadingPreview && !isConverting && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           L'immagine verrà automaticamente compressa e ridimensionata.
           Le foto iPhone (HEIC) vengono convertite in JPEG.
         </p>

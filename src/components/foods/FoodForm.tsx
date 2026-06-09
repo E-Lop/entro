@@ -61,6 +61,13 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   // Prevent double submit (additional protection beyond isSubmitting)
   const isSubmittingRef = useRef(false)
 
+  // Keep latest onCancel in a ref so the realtime subscription effect below does
+  // not re-subscribe on every parent render (callers pass inline arrows).
+  const onCancelRef = useRef(onCancel)
+  useEffect(() => {
+    onCancelRef.current = onCancel
+  }, [onCancel])
+
   // Setup form with validation
   const form = useForm<FoodFormData>({
     resolver: zodResolver(foodFormSchema),
@@ -143,9 +150,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                     label: 'Ricarica',
                     onClick: () => {
                       // Close dialog to force refetch
-                      if (onCancel) {
-                        onCancel()
-                      }
+                      onCancelRef.current?.()
                     },
                   },
                 },
@@ -169,7 +174,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         supabase.removeChannel(channel)
       }
     }
-  }, [mode, initialData?.id, onCancel])
+  }, [mode, initialData?.id])
 
   // Handle barcode scan success
   const handleBarcodeScanned = async (barcode: string) => {
@@ -255,7 +260,18 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
     <>
       {/* Barcode Scanner Modal - Lazy loaded */}
       {scannerOpen && (
-        <Suspense fallback={<div>Caricamento scanner...</div>}>
+        <Suspense
+          fallback={
+            <div
+              className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground"
+              role="status"
+              aria-live="polite"
+            >
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Caricamento scanner...
+            </div>
+          }
+        >
           <BarcodeScanner
             open={scannerOpen}
             onOpenChange={setScannerOpen}
@@ -273,13 +289,13 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         })} className="space-y-4">
           {/* Conflict Warning Banner */}
           {hasRemoteUpdate && (
-            <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-900/20 dark:border-orange-800">
-              <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-4 rounded-lg border border-warning/30 bg-warning/10" role="alert">
+              <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-orange-900 dark:text-orange-200">
+                <p className="text-sm font-medium text-warning">
                   Alimento modificato remotamente
                 </p>
-                <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                <p className="text-sm text-foreground/90 mt-1">
                   Questo alimento è stato modificato da un altro utente mentre lo stavi modificando.
                   Puoi continuare a modificarlo (last-write-wins) o ricaricare per vedere le ultime modifiche.
                 </p>
@@ -316,8 +332,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   variant="outline"
                   onClick={() => setScannerOpen(true)}
                   disabled={isSubmitting || isLoadingProduct}
-                  className="w-full bg-primary/10 dark:bg-primary/15"
-                  aria-label="Apri scanner barcode per compilare automaticamente i dati"
+                  className="h-11 w-full bg-primary/10 dark:bg-primary/15"
                 >
                   {isLoadingProduct ? (
                     <>
@@ -349,6 +364,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   <FormControl>
                     <Input
                       placeholder="es. Latte intero"
+                      className="h-11"
                       disabled={isSubmitting || isLoadingProduct}
                       {...field}
                     />
@@ -367,7 +383,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   <FormLabel>Categoria *</FormLabel>
                   <FormControl>
                     <select
-                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                       disabled={isSubmitting || categoriesLoading}
                       {...field}
                     >
@@ -393,7 +409,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   <FormLabel>Posizione *</FormLabel>
                   <FormControl>
                     <select
-                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                       disabled={isSubmitting}
                       {...field}
                     >
@@ -418,6 +434,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                     <Input
                       type="date"
                       min={format(new Date(), 'yyyy-MM-dd')}
+                      className="h-11"
                       disabled={isSubmitting}
                       {...field}
                     />
@@ -441,6 +458,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                         placeholder="1"
                         min="0"
                         step="0.01"
+                        className="h-11"
                         disabled={isSubmitting}
                         {...field}
                         value={field.value ?? ''}
@@ -480,7 +498,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                     <FormLabel>Unità</FormLabel>
                     <FormControl>
                       <select
-                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                        className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                         disabled={isSubmitting}
                         value={field.value || ''}
                         onChange={(e) => {
@@ -575,7 +593,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
-                className="flex-1"
+                className="h-11 flex-1"
               >
                 Annulla
               </Button>
@@ -583,7 +601,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1"
+              className="h-11 flex-1"
             >
               {getSubmitButtonText(mode, isSubmitting)}
             </Button>

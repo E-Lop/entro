@@ -108,6 +108,27 @@ describe('FoodForm accordion sections', () => {
     expect(detailsButton.className).not.toMatch(/bg-primary/)
   })
 
+  it('barcode button accessible name contains its visible label (WCAG 2.5.3)', () => {
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    // The button must be findable by its visible text, with no overriding
+    // aria-label that hides "Scansiona Barcode" from voice-control users.
+    const scanButton = screen.getByRole('button', { name: /Scansiona Barcode/i })
+    expect(scanButton).toBeInTheDocument()
+    expect(scanButton).not.toHaveAttribute('aria-label')
+  })
+
+  it('renders form controls with a >=44px touch target height', () => {
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    // Name input and the submit button should carry the 44px height class.
+    const nameInput = screen.getByPlaceholderText('es. Latte intero')
+    expect(nameInput.className).toMatch(/h-11/)
+
+    const submit = screen.getByRole('button', { name: /Aggiungi alimento/i })
+    expect(submit.className).toMatch(/h-11/)
+  })
+
   it('should keep main section open after barcode scan populates notes', async () => {
     const user = userEvent.setup()
 
@@ -128,7 +149,7 @@ describe('FoodForm accordion sections', () => {
     render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
 
     // Open the barcode scanner by clicking the scan button
-    const scanButtons = screen.getAllByLabelText('Apri scanner barcode per compilare automaticamente i dati')
+    const scanButtons = screen.getAllByRole('button', { name: /Scansiona Barcode/i })
     await user.click(scanButtons[0])
 
     // Wait for lazy-loaded BarcodeScanner mock to render via Suspense
