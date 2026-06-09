@@ -18,7 +18,7 @@ export function useAuth() {
     const { user, error } = await authService.signUp(email, password, fullName)
 
     if (error) {
-      toast.error(error.message)
+      // Error surfaced inline by AuthForm, not as a transient toast
       return { success: false, error }
     }
 
@@ -36,7 +36,7 @@ export function useAuth() {
     const { user, error } = await authService.signIn(email, password)
 
     if (error) {
-      toast.error(error.message)
+      // Error surfaced inline by AuthForm, not as a transient toast
       return { success: false, error }
     }
 

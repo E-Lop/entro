@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthForm } from '../components/auth/AuthForm'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
+import { AuthLoadingScreen } from '../components/auth/AuthLoadingScreen'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
@@ -73,25 +73,16 @@ export function LoginPage() {
 
   // Show loading or nothing while checking auth status
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-          <p className="mt-4 text-sm text-slate-600">Caricamento...</p>
-        </div>
-      </div>
-    )
+    return <AuthLoadingScreen />
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="flex min-h-screen flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">
-              Accedi a entro
-            </CardTitle>
-            <CardDescription className="text-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight">Accedi a entro</h1>
+            <p className="mt-2 text-muted-foreground">
               {inviteLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -104,13 +95,15 @@ export function LoginPage() {
               ) : (
                 'Inserisci le tue credenziali per accedere'
               )}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+
+          <div className="rounded-lg border bg-card p-6">
             <AuthForm mode="login" onSuccess={handleSuccess} />
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <div className="text-sm text-center text-slate-600">
+          </div>
+
+          <div className="space-y-2 text-center text-sm text-muted-foreground">
+            <div>
               Non hai un account?{' '}
               <Link
                 to={inviteToken ? `/signup?invite_token=${inviteToken}` : '/signup'}
@@ -119,16 +112,16 @@ export function LoginPage() {
                 Registrati
               </Link>
             </div>
-            <div className="text-sm text-center text-slate-600">
+            <div>
               <Link
                 to="/forgot-password"
-                className="font-medium text-slate-600 hover:text-primary hover:underline"
+                className="font-medium text-muted-foreground hover:text-primary hover:underline"
               >
                 Password dimenticata?
               </Link>
             </div>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
       <Footer />
     </div>

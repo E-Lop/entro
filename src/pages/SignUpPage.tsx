@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthForm } from '../components/auth/AuthForm'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
+import { AuthLoadingScreen } from '../components/auth/AuthLoadingScreen'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
@@ -123,30 +123,21 @@ export function SignUpPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto" />
-          <p className="mt-4 text-sm text-slate-600">Caricamento...</p>
-        </div>
-      </div>
-    )
+    return <AuthLoadingScreen />
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="flex min-h-screen flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">
-              Crea il tuo account
-            </CardTitle>
-            <CardDescription className="text-center">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight">Crea il tuo account</h1>
+            <p className="mt-2 text-muted-foreground">
               {getSignUpDescription(inviteLoading, inviteValid, inviteCreatorName)}
-            </CardDescription>
-          </CardHeader>
+            </p>
+          </div>
 
-          <CardContent>
+          <div className="rounded-lg border bg-card p-6">
             {/* Input codice manuale */}
             {!inviteValid && !inviteCode && (
               <div className="mb-4">
@@ -200,9 +191,9 @@ export function SignUpPage() {
                 id="terms"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                className="mt-1 h-4 w-4 rounded border-input text-primary focus:ring-primary"
               />
-              <label htmlFor="terms" className="text-sm text-slate-600">
+              <label htmlFor="terms" className="text-sm text-muted-foreground">
                 Accetto i{' '}
                 <a
                   href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/condizioni-d'uso-del-sito-it"
@@ -223,20 +214,18 @@ export function SignUpPage() {
                 </a>
               </label>
             </div>
-          </CardContent>
+          </div>
 
-          <CardFooter className="flex flex-col space-y-2">
-            <div className="text-sm text-center text-slate-600">
-              Hai già un account?{' '}
-              <Link
-                to="/login"
-                className="font-medium text-primary hover:underline"
-              >
-                Accedi
-              </Link>
-            </div>
-          </CardFooter>
-        </Card>
+          <div className="text-center text-sm text-muted-foreground">
+            Hai già un account?{' '}
+            <Link
+              to="/login"
+              className="font-medium text-primary hover:underline"
+            >
+              Accedi
+            </Link>
+          </div>
+        </div>
       </div>
       <Footer />
     </div>
