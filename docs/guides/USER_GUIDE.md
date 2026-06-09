@@ -159,17 +159,17 @@ Clicca sulle **card statistiche** in alto:
 ### Passare alla Vista Calendario
 
 1. Clicca su **"Calendario"** (accanto a "Lista")
-2. Vedrai una vista settimanale con 7 giorni
+2. Vedrai un'**agenda della settimana**: i prossimi 7 giorni, uno sotto l'altro
 
-### Navigare il Calendario
+### Leggere l'Agenda
 
-- **Su mobile**: scorri orizzontalmente per vedere altri giorni
-- **Su desktop**: tutti i 7 giorni sono visibili
+- I giorni sono in ordine dall'alto: **"Oggi"**, **"Domani"**, poi il resto della settimana. Scorri in **verticale** per vederli tutti, l'intera settimana a colpo d'occhio.
+- Ogni giorno mostra **quanti alimenti scadono** e con quale **urgenza** (oggi in rosso, i giorni successivi in ambra).
+- I giorni senza scadenze restano visibili come riga "nessuna scadenza", così vedi subito dove si concentrano le scadenze.
 
 ### Interagire con gli Alimenti
 
-- Clicca su un alimento nel calendario per modificarlo
-- Il badge su ogni giorno mostra quanti alimenti scadono
+- Tocca un alimento (o selezionalo da tastiera) per modificarlo
 
 ---
 
