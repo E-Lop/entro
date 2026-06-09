@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { CheckCircle } from 'lucide-react'
-import { DayColumn } from './DayColumn'
+import { DayRow } from './DayRow'
 import { Card, CardContent } from '../ui/card'
 import type { Food } from '@/lib/foods'
 import { getNext7Days, formatDateKey, groupFoodsByDate } from '@/lib/utils'
@@ -11,8 +11,9 @@ interface WeekViewProps {
 }
 
 /**
- * WeekView - Calendar view showing foods expiring in the next 7 days
- * Organized by day with horizontal scroll on mobile, grid on desktop
+ * WeekView - Calendar agenda of foods expiring in the next 7 days.
+ * Days stack vertically (one scroll axis); each day is a DayRow with its
+ * count and urgency. Constrained width keeps line length readable on desktop.
  */
 export function WeekView({ foods, onEdit }: WeekViewProps) {
   // Filter foods to 7-day window (today + 6 days)
@@ -57,24 +58,20 @@ export function WeekView({ foods, onEdit }: WeekViewProps) {
   }
 
   return (
-    <div className="space-y-2">
-      {/* Week Grid Container */}
-      <div className="grid grid-flow-col auto-cols-[280px] sm:grid-cols-7 sm:auto-cols-fr gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 sm:px-0 pb-4 sm:pb-0">
-        {next7Days.map(date => {
-          const dateKey = formatDateKey(date)
-          const foodsForDay = foodsByDate.get(dateKey) || []
+    <div className="mx-auto max-w-2xl divide-y divide-border">
+      {next7Days.map(date => {
+        const dateKey = formatDateKey(date)
+        const foodsForDay = foodsByDate.get(dateKey) || []
 
-          return (
-            <div key={dateKey} className="snap-start">
-              <DayColumn
-                date={date}
-                foods={foodsForDay}
-                onEdit={onEdit}
-              />
-            </div>
-          )
-        })}
-      </div>
+        return (
+          <DayRow
+            key={dateKey}
+            date={date}
+            foods={foodsForDay}
+            onEdit={onEdit}
+          />
+        )
+      })}
     </div>
   )
 }

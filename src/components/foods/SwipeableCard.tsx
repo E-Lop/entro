@@ -155,26 +155,26 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
     <div className="relative overflow-hidden" ref={cardRef}>
       {/* Background layers that appear during swipe */}
 
-      {/* Edit background (green) - appears on swipe right */}
+      {/* Edit background (brand green) - appears on swipe right */}
       <div
         className={cn(
-          'absolute inset-0 bg-green-500 flex items-center justify-start px-6',
+          'absolute inset-0 bg-primary flex items-center justify-start px-6',
           'transition-opacity duration-200'
         )}
         style={{ opacity: swipeOffset > 0 ? getBackgroundOpacity() : 0 }}
       >
-        <Edit className="h-6 w-6 text-white" />
+        <Edit className="h-6 w-6 text-primary-foreground" />
       </div>
 
-      {/* Delete background (red) - appears on swipe left */}
+      {/* Delete background (destructive) - appears on swipe left */}
       <div
         className={cn(
-          'absolute inset-0 bg-red-500 flex items-center justify-end px-6',
+          'absolute inset-0 bg-destructive flex items-center justify-end px-6',
           'transition-opacity duration-200'
         )}
         style={{ opacity: swipeOffset < 0 ? getBackgroundOpacity() : 0 }}
       >
-        <Trash2 className="h-6 w-6 text-white" />
+        <Trash2 className="h-6 w-6 text-destructive-foreground" />
       </div>
 
       {/* Card content with swipe transform */}

@@ -14,6 +14,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Pagine di autenticazione (accesso, registrazione, conferma email) uniformate a uno stile coerente basato sui token del tema: rimosso lo sfondo a gradiente, layout e tipografia allineati alle pagine di recupero password e pronti per il tema scuro.
 - Dashboard e lista alimenti allineate all'identità verde del brand: lo stato selezionato delle statistiche rapide (Totali / In scadenza / Scaduti) usa ora il verde del brand invece del blu, e la card "Come funziona" passa da un tema blu a uno coerente col brand.
 - Form "Aggiungi/Modifica alimento": campi (nome, categoria, posizione, data, quantità) e pulsanti principali portati a un'area tattile di almeno 44px, più comoda da toccare con una mano.
+- Vista calendario ridisegnata ad agenda verticale: ora vedi l'intera settimana a colpo d'occhio in un'unica schermata, scorrendo in verticale, invece di scorrere di lato tra colonne quasi vuote. Ogni giorno mostra "Oggi"/"Domani", il numero di alimenti in scadenza e l'urgenza (oggi evidenziato in rosso, i giorni successivi in ambra).
+- Filtri e ricerca allineati all'identità verde del brand: il contatore dei filtri attivi usa ora il verde invece del blu; il campo di ricerca e i menu dei filtri sono portati a un'area tattile di almeno 44px, e l'etichetta "Cancella" è visibile anche su smartphone.
 
 ### Fixed
 - Accessibilità dei moduli di autenticazione: il pulsante mostra/nascondi password è ora raggiungibile da tastiera e annunciato dagli screen reader, i titoli di pagina sono heading semantici (`<h1>`) e gli stati di caricamento vengono annunciati.
@@ -26,6 +28,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Caricamento foto dell'alimento: il pulsante "Rimuovi" è ora sempre visibile su smartphone (prima compariva solo al passaggio del mouse, di fatto irraggiungibile da touch).
 - Tema scuro del form alimento: anteprima foto, riquadri di errore e testi di aiuto del caricamento immagine si adattano ora allo sfondo scuro usando i colori del tema; il banner "alimento modificato da un altro utente" usa l'ambra di sistema.
 - Accessibilità del form alimento: gli stati di caricamento (scanner, conversione foto, salvataggio) sono annunciati agli screen reader e il pulsante "Scansiona Barcode" è identificabile dal suo testo visibile, utile per i comandi vocali.
+- Vista calendario: gli alimenti sono ora raggiungibili e apribili da tastiera (prima erano selezionabili solo con tocco o mouse), con area tattile di almeno 44px e struttura per giorno leggibile dagli screen reader.
+- Coerenza in tema scuro dello sfondo che appare facendo swipe sulle card (verde "modifica" / rosso "elimina"): ora usa i colori del tema invece di tinte fisse.
 
 ## [1.6.3] - 2026-05-17
 

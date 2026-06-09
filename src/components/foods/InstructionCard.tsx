@@ -32,23 +32,25 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
         </CardHeader>
 
         <CardContent className="space-y-4 pb-4">
-          {/* Instructions */}
+          {/* Instructions: one bordered container with two rows (no nested cards) */}
           <div className="space-y-3 text-sm">
             <p className="text-muted-foreground text-xs font-medium">Su smartphone</p>
 
-            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-border">
-              <ArrowRight className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-foreground">Swipe verso destra</p>
-                <p className="text-muted-foreground text-xs mt-0.5">Modifica un alimento</p>
+            <div className="divide-y divide-border rounded-lg border border-border bg-card">
+              <div className="flex items-start gap-3 p-3">
+                <ArrowRight className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-foreground">Swipe verso destra</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">Modifica un alimento</p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-start gap-3 bg-card rounded-lg p-3 border border-border">
-              <ArrowLeft className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium text-foreground">Swipe verso sinistra</p>
-                <p className="text-muted-foreground text-xs mt-0.5">Elimina un alimento</p>
+              <div className="flex items-start gap-3 p-3">
+                <ArrowLeft className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-foreground">Swipe verso sinistra</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">Elimina un alimento</p>
+                </div>
               </div>
             </div>
           </div>
