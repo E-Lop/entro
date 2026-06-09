@@ -1,4 +1,3 @@
-import { Card, CardContent } from '../ui/card'
 import type { Food } from '@/lib/foods'
 
 interface CalendarFoodCardProps {
@@ -7,25 +6,31 @@ interface CalendarFoodCardProps {
 }
 
 /**
- * CalendarFoodCard - Ultra-compact card for calendar view
- * Shows only food name and quantity for maximum density
+ * CalendarFoodCard - Ultra-compact entry for calendar view.
+ * Shows only food name and quantity for maximum density.
+ * Rendered as a real <button> so it is operable by keyboard (WCAG 2.1.1).
  */
 export function CalendarFoodCard({ food, onEdit }: CalendarFoodCardProps) {
+  const hasQuantity = food.quantity && food.quantity_unit
+  const label = hasQuantity
+    ? `Modifica ${food.name}, ${food.quantity}${food.quantity_unit}`
+    : `Modifica ${food.name}`
+
   return (
-    <Card
+    <button
+      type="button"
       onClick={() => onEdit(food)}
-      className="cursor-pointer hover:bg-muted/50 transition-colors border-border"
+      aria-label={label}
+      className="flex min-h-[44px] w-full items-center rounded-xl border border-border bg-card p-2 text-left text-card-foreground shadow transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <CardContent className="p-2">
-        <p className="text-sm text-foreground truncate">
-          {food.name}
-          {food.quantity && food.quantity_unit && (
-            <span className="text-muted-foreground ml-1">
-              ({food.quantity}{food.quantity_unit})
-            </span>
-          )}
-        </p>
-      </CardContent>
-    </Card>
+      <span className="truncate text-sm text-foreground">
+        {food.name}
+        {hasQuantity && (
+          <span className="ml-1 text-muted-foreground">
+            ({food.quantity}{food.quantity_unit})
+          </span>
+        )}
+      </span>
+    </button>
   )
 }

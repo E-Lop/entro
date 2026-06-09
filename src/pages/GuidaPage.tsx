@@ -163,12 +163,12 @@ export function GuidaPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>Premi <strong className="text-foreground">"Calendario"</strong> (accanto a "Lista") per passare alla vista settimanale.</p>
+          <p>Premi <strong className="text-foreground">"Calendario"</strong> (accanto a "Lista") per vedere le scadenze come agenda della settimana.</p>
           <ul className="list-disc list-inside space-y-1">
-            <li><strong className="text-foreground">Mobile:</strong> scorri orizzontalmente per navigare i giorni</li>
-            <li><strong className="text-foreground">Desktop:</strong> tutti i 7 giorni sono visibili</li>
-            <li>Tocca un alimento nel calendario per modificarlo</li>
-            <li>Il badge su ogni giorno mostra quanti alimenti scadono</li>
+            <li>I giorni sono in ordine dall'alto: <strong className="text-foreground">"Oggi"</strong>, <strong className="text-foreground">"Domani"</strong>, poi il resto della settimana. Scorri in verticale per vederli tutti.</li>
+            <li>Ogni giorno mostra <strong className="text-foreground">quanti alimenti scadono</strong> e con quale urgenza (oggi in rosso, i giorni successivi in ambra).</li>
+            <li>I giorni senza scadenze restano visibili come riga "nessuna scadenza", così vedi a colpo d'occhio dove si concentrano.</li>
+            <li>Tocca un alimento (o selezionalo da tastiera) per modificarlo.</li>
           </ul>
         </CardContent>
       </Card>

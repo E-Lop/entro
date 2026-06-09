@@ -46,7 +46,7 @@ const guideItems = [
   {
     icon: Calendar,
     title: 'Vista calendario',
-    description: 'Passa alla vista settimanale per vedere le scadenze giorno per giorno',
+    description: 'Passa all’agenda della settimana: i prossimi 7 giorni uno sotto l’altro, con quanto scade in ciascuno',
   },
   {
     icon: Users,

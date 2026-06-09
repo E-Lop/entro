@@ -43,7 +43,7 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 - **Sync multi-device** — Aggiornamenti istantanei su desktop, iOS e Android tramite Supabase Realtime
 - **Supporto offline completo** — Cache persistente in IndexedDB, CRUD offline con coda mutazioni e sync automatica al ritorno della connessione
 - **Push notifications** — Avvisi giornalieri per alimenti in scadenza, personalizzabili per anticipo, ore silenziose e limite giornaliero
-- **Vista calendario** — Rolling 7 giorni con gli alimenti in scadenza, organizzati per giorno
+- **Vista calendario** — Agenda verticale dei prossimi 7 giorni: l'intera settimana a colpo d'occhio, ogni giorno con conteggio e urgenza delle scadenze
 - **Swipe gestures** — Swipe destro per modificare, sinistro per eliminare (mobile), con feedback aptico
 - **Feedback aptico** — Vibrazione tattile su swipe, creazione, modifica ed eliminazione alimenti (iOS Safari 17.4+ e Android)
 - **Dark mode** — Light, dark e automatico (segue il sistema)
@@ -79,8 +79,8 @@ src/
 ├── components/
 │   ├── auth/           # Login, signup, route protection
 │   ├── barcode/        # Scanner modale con ZXing
-│   ├── calendar/       # Vista calendario settimanale
-│   ├── foods/          # Card, form, lista, swipe gestures
+│   ├── calendar/       # (cartella placeholder)
+│   ├── foods/          # Card, form, lista, vista calendario (agenda), swipe gestures
 │   ├── guide/          # Guida rapida e help in-app
 │   ├── layout/         # Header, navigation, app shell
 │   ├── settings/       # Account, notifiche, export dati, eliminazione

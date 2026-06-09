@@ -70,6 +70,10 @@ export function FoodFilters({
 
   const currentSortValue = `${filters.sortBy || 'expiry_date'}-${filters.sortOrder || 'asc'}`
 
+  // Shared styling for the four filter selects (h-11 keeps the touch target ≥44px).
+  const selectClassName =
+    'flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -85,7 +89,7 @@ export function FoodFilters({
               <SlidersHorizontal className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
               <h3 className="font-semibold text-foreground">Filtri e Ricerca</h3>
               {activeFiltersCount > 0 && (
-                <span className="inline-flex items-center justify-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                   {activeFiltersCount}
                 </span>
               )}
@@ -104,7 +108,7 @@ export function FoodFilters({
                 aria-label="Cancella tutti i filtri"
               >
                 <X className="h-4 w-4 mr-1" aria-hidden="true" />
-                <span className="hidden sm:inline">Cancella</span>
+                <span>Cancella</span>
               </Button>
             )}
           </div>
@@ -123,7 +127,7 @@ export function FoodFilters({
                     placeholder="Cerca alimenti..."
                     value={filters.search || ''}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-11"
                   />
                 </div>
               </div>
@@ -137,7 +141,7 @@ export function FoodFilters({
                     id="category"
                     value={filters.category_id || ''}
                     onChange={(e) => handleCategoryChange(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className={selectClassName}
                   >
                     <option value="">Tutte le categorie</option>
                     {categories.map((category) => (
@@ -155,7 +159,7 @@ export function FoodFilters({
                     id="storage"
                     value={filters.storage_location || ''}
                     onChange={(e) => handleStorageChange(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className={selectClassName}
                   >
                     <option value="">Tutte le posizioni</option>
                     <option value="fridge">🧊 Frigo</option>
@@ -171,7 +175,7 @@ export function FoodFilters({
                     id="status"
                     value={filters.status || 'all'}
                     onChange={(e) => handleStatusChange(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className={selectClassName}
                   >
                     <option value="all">Tutti</option>
                     <option value="active">✅ Attivi</option>
@@ -187,7 +191,7 @@ export function FoodFilters({
                     id="sort"
                     value={currentSortValue}
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className={selectClassName}
                   >
                     <option value="expiry_date-asc">📅 Scadenza (prima i prossimi)</option>
                     <option value="expiry_date-desc">📅 Scadenza (prima i lontani)</option>
