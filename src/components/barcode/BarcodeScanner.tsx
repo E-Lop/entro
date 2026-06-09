@@ -17,6 +17,30 @@ interface BarcodeScannerProps {
 }
 
 /**
+ * Map raw camera/ZXing error strings (often English, e.g. "Not supported") to
+ * plain Italian guidance. Falls back to the original message when already localized.
+ */
+export function localizeScanError(message: string): string {
+  const m = message.toLowerCase()
+  if (m.includes('not supported') || m.includes('notsupported')) {
+    return 'Scanner non supportato su questo browser. Aggiornalo o usa un altro dispositivo.'
+  }
+  if (m.includes('not allowed') || m.includes('permission') || m.includes('denied')) {
+    return 'Permesso fotocamera negato. Abilitalo nelle impostazioni del browser e riprova.'
+  }
+  if (m.includes('not found') || m.includes('notfound')) {
+    return 'Nessuna fotocamera trovata sul dispositivo.'
+  }
+  if (m.includes('not readable') || m.includes('in use') || m.includes('notreadable')) {
+    return 'Fotocamera occupata da un\'altra app. Chiudila e riprova.'
+  }
+  if (m.includes('secure') || m.includes('https')) {
+    return 'Lo scanner richiede una connessione sicura (HTTPS).'
+  }
+  return message
+}
+
+/**
  * BarcodeScanner Component - Modal dialog for scanning barcodes
  * Uses @zxing/browser library to access device camera and scan EAN/UPC/QR barcodes
  */
@@ -112,9 +136,9 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
             {/* Loading state overlay */}
             {state === 'idle' && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center" role="status" aria-live="polite">
                 <div className="flex flex-col items-center gap-3 text-white">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <Loader2 className="h-8 w-8 animate-spin" aria-hidden="true" />
                   <p className="text-sm">Inizializzazione fotocamera...</p>
                 </div>
               </div>
@@ -122,9 +146,9 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
             {/* Processing overlay */}
             {isProcessing && (
-              <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center" role="status" aria-live="polite">
                 <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-2">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
                   <p className="text-sm font-medium">Elaborazione...</p>
                 </div>
               </div>
@@ -132,9 +156,9 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
             {/* Success overlay */}
             {isSuccess && scannedCode && (
-              <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center" role="status" aria-live="polite">
                 <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-2">
-                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                  <CheckCircle2 className="h-8 w-8 text-success" aria-hidden="true" />
                   <p className="text-sm font-medium">Codice riconosciuto!</p>
                   <p className="text-xs text-muted-foreground font-mono">{scannedCode}</p>
                 </div>
@@ -144,11 +168,11 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
           {/* Error message */}
           {isError && error && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm" role="alert">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <p className="font-medium">Errore</p>
-                <p className="text-xs mt-1">{error}</p>
+                <p className="text-xs mt-1">{localizeScanError(error)}</p>
               </div>
             </div>
           )}
@@ -160,7 +184,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
                 Posiziona il codice a barre all'interno del riquadro
               </p>
               <div className="flex items-center justify-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" aria-hidden="true" />
                 <p className="text-xs text-muted-foreground">Scanner attivo</p>
               </div>
             </div>
