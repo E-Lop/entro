@@ -42,6 +42,7 @@ export function DeleteAccountDialog() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [foodCount, setFoodCount] = useState<number | null>(null)
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch food count when dialog opens
   const handleOpenChange = async (isOpen: boolean) => {
@@ -57,24 +58,26 @@ export function DeleteAccountDialog() {
       setFoodCount(count || 0)
     }
 
-    // Reset password when closing
+    // Reset password and error when closing
     if (!isOpen) {
       setPassword('')
+      setError(null)
     }
   }
 
   const handleDelete = async () => {
     if (!user) {
-      toast.error('Utente non autenticato')
+      setError('Utente non autenticato')
       return
     }
 
     if (!password.trim()) {
-      toast.error('Inserisci la tua password per confermare')
+      setError('Inserisci la tua password per confermare')
       return
     }
 
     setIsDeleting(true)
+    setError(null)
     triggerHaptic('error')
 
     try {
@@ -141,79 +144,87 @@ export function DeleteAccountDialog() {
 
       // Navigate to a goodbye page or login
       navigate('/login', { replace: true })
-    } catch (error) {
-      console.error('Delete account error:', error)
-      toast.error('Errore durante l\'eliminazione dell\'account', {
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Si è verificato un errore. Riprova più tardi.',
-      })
+    } catch (err) {
+      // Tieni aperto il dialog e mostra l'errore inline sotto il campo password,
+      // così l'utente può correggere senza perdere il contesto della conferma.
+      console.error('Delete account error:', err)
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Si è verificato un errore. Riprova più tardi.'
+      )
     } finally {
       setIsDeleting(false)
-      setOpen(false)
     }
   }
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" className="w-full">
+        <Button variant="destructive" className="w-full h-11">
           <Trash2 className="mr-2 h-4 w-4" />
-          Elimina Account
+          Elimina account
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            <AlertDialogTitle>Elimina Account</AlertDialogTitle>
+            <AlertDialogTitle>Elimina account</AlertDialogTitle>
           </div>
-          <AlertDialogDescription className="space-y-2">
-            <p className="font-semibold text-destructive">
-              Attenzione: questa azione è irreversibile.
-            </p>
-            <p>Tutti i tuoi dati saranno eliminati permanentemente:</p>
-            <ul className="list-disc pl-5 space-y-1 text-sm text-left">
-              <li>Profilo utente</li>
-              <li>
-                Tutti gli alimenti{' '}
-                {foodCount !== null && (
-                  <span className="font-medium">({foodCount} totali)</span>
-                )}
-              </li>
-              <li>Immagini caricate</li>
-              <li>Liste condivise e appartenenze</li>
-              <li>Inviti pendenti</li>
-            </ul>
-
-            {/* Technical details collapsible */}
-            <button
-              type="button"
-              onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mt-3"
-            >
-              <Info className="h-3.5 w-3.5" />
-              <span>Dettagli tecnici</span>
-              {showTechnicalDetails ? (
-                <ChevronUp className="h-3.5 w-3.5" />
-              ) : (
-                <ChevronDown className="h-3.5 w-3.5" />
-              )}
-            </button>
-
-            {showTechnicalDetails && (
-              <div className="text-xs bg-muted/50 p-2.5 rounded-md space-y-1 border border-border/50">
-                <p className="font-medium">Modalità cancellazione:</p>
-                <ul className="space-y-0.5 pl-2">
-                  <li>• Eliminazione permanente dal database</li>
-                  <li>• Backup conservati max 6 mesi (policy provider)</li>
-                  <li>• Conforme GDPR Art. 17</li>
-                </ul>
-              </div>
-            )}
+          <AlertDialogDescription className="text-left font-semibold text-destructive">
+            Attenzione: questa azione è irreversibile.
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        {/* Contenuto rich fuori da AlertDialogDescription (è un <p>): qui può
+            contenere lista, disclosure e box senza nesting HTML non valido. */}
+        <div className="space-y-3 text-left text-sm">
+          <p>Tutti i tuoi dati saranno eliminati permanentemente:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>Profilo utente</li>
+            <li>
+              Tutti gli alimenti{' '}
+              {foodCount !== null && (
+                <span className="font-medium">({foodCount} totali)</span>
+              )}
+            </li>
+            <li>Immagini caricate</li>
+            <li>Liste condivise e appartenenze</li>
+            <li>Inviti pendenti</li>
+          </ul>
+
+          {/* Technical details collapsible */}
+          <button
+            type="button"
+            onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
+            aria-expanded={showTechnicalDetails}
+            aria-controls="delete-technical-details"
+            className="flex items-center gap-1.5 min-h-11 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Info className="h-3.5 w-3.5" />
+            <span>Dettagli tecnici</span>
+            {showTechnicalDetails ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </button>
+
+          {showTechnicalDetails && (
+            <div
+              id="delete-technical-details"
+              className="text-xs bg-muted/50 p-2.5 rounded-md space-y-1 border border-border/50"
+            >
+              <p className="font-medium">Modalità cancellazione:</p>
+              <ul className="space-y-0.5 pl-2">
+                <li>• Eliminazione permanente dal database</li>
+                <li>• Backup conservati max 6 mesi (policy provider)</li>
+                <li>• Conforme GDPR Art. 17</li>
+              </ul>
+            </div>
+          )}
+        </div>
 
         <div className="space-y-2 py-4">
           <Label htmlFor="password">Conferma con la tua password</Label>
@@ -222,20 +233,33 @@ export function DeleteAccountDialog() {
             type="password"
             placeholder="Inserisci password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (error) setError(null)
+            }}
             disabled={isDeleting}
+            className="h-11"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? 'delete-password-error' : undefined}
           />
+          {error && (
+            <p id="delete-password-error" role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Annulla</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting} className="h-11">
+            Annulla
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
               handleDelete()
             }}
             disabled={isDeleting || !password.trim()}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isDeleting ? 'Eliminazione...' : 'Capisco, elimina il mio account'}
           </AlertDialogAction>

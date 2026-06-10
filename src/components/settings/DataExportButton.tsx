@@ -44,10 +44,11 @@ export function DataExportButton() {
       onClick={handleExport}
       disabled={isExporting}
       variant="outline"
-      className="w-full"
+      className="w-full h-11"
+      aria-live="polite"
     >
       <Download className="mr-2 h-4 w-4" />
-      {isExporting ? 'Esportazione...' : 'Esporta i Miei Dati'}
+      {isExporting ? 'Esportazione...' : 'Esporta i miei dati'}
     </Button>
   )
 }

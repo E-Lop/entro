@@ -33,7 +33,7 @@ export function SettingsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
-            <CardTitle>Supporto</CardTitle>
+            <CardTitle as="h2">Supporto</CardTitle>
           </div>
           <CardDescription>
             Hai bisogno di aiuto o vuoi inviarci un suggerimento?
@@ -54,7 +54,7 @@ export function SettingsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            <CardTitle>Privacy & Dati</CardTitle>
+            <CardTitle as="h2">Privacy e dati</CardTitle>
           </div>
           <CardDescription>
             Gestisci i tuoi dati personali e le impostazioni sulla privacy
@@ -66,7 +66,7 @@ export function SettingsPage() {
             <div className="flex items-start gap-2">
               <Download className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-medium">Esporta i Tuoi Dati</h3>
+                <h3 className="font-medium">Esporta i tuoi dati</h3>
                 <p className="text-sm text-muted-foreground">
                   Scarica una copia di tutti i tuoi dati in formato JSON (GDPR Art. 20)
                 </p>
@@ -79,7 +79,7 @@ export function SettingsPage() {
 
           {/* Privacy Policy & Cookie Policy Links (Aruba LegalBlink) */}
           <div className="space-y-2">
-            <h3 className="font-medium">Documenti Legali</h3>
+            <h3 className="font-medium">Documenti legali</h3>
             <div className="flex flex-col gap-2 text-sm">
               <a
                 href="https://app.legalblink.it/api/documents/697e24efc95cff002359012c/privacy-policy-per-siti-web-o-e-commerce-it"
@@ -115,7 +115,7 @@ export function SettingsPage() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            <CardTitle className="text-destructive">Zona Pericolosa</CardTitle>
+            <CardTitle as="h2" className="text-destructive">Zona pericolosa</CardTitle>
           </div>
           <CardDescription>
             Azioni irreversibili che elimineranno permanentemente i tuoi dati
@@ -123,7 +123,7 @@ export function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <h3 className="font-medium">Elimina Account</h3>
+            <h3 className="font-medium">Elimina account</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Elimina permanentemente il tuo account e tutti i dati associati. Questa azione
               non può essere annullata.

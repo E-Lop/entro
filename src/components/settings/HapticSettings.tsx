@@ -23,7 +23,7 @@ export function HapticSettings() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Smartphone className="h-5 w-5 text-primary" />
-          <CardTitle>Feedback Aptico</CardTitle>
+          <CardTitle as="h2">Feedback aptico</CardTitle>
         </div>
         <CardDescription>
           Vibrazione tattile durante le interazioni principali
@@ -39,8 +39,9 @@ export function HapticSettings() {
           </div>
           <Button
             variant={enabled ? 'outline' : 'default'}
-            size="sm"
             onClick={handleToggle}
+            aria-pressed={enabled}
+            className="h-11"
           >
             {enabled ? 'Disattiva' : 'Attiva'}
           </Button>
