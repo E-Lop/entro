@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-06-10
+
 ### Added
 - Colori semantici per gli stati di scadenza ("in scadenza" ambra, "fresco" verde) come token del tema: ora gli stati si adattano correttamente al tema scuro e restano coerenti con l'identità dell'app.
 
@@ -363,7 +365,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.6.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/E-Lop/entro/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/E-Lop/entro/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/E-Lop/entro/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/E-Lop/entro/compare/v1.6.0...v1.6.1
