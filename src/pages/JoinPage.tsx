@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { AcceptInviteDialog } from '../components/sharing/AcceptInviteDialog'
+import { AppIcon } from '../components/ui/AppIcon'
 import { PageLoader } from '../components/ui/PageLoader'
 
 /**
@@ -55,15 +56,26 @@ export default function JoinPage() {
   }
 
   return (
-    <AcceptInviteDialog
-      open={showDialog}
-      onOpenChange={(open) => {
-        if (!open) {
-          handleClose()
-        }
-      }}
-      shortCode={code!.toUpperCase()}
-      onSuccess={handleSuccess}
-    />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
+      <AppIcon size={56} className="rounded-xl" />
+      <h1 className="mt-4 text-xl font-bold text-foreground">
+        Unisciti a una lista condivisa
+      </h1>
+      <p className="mt-2 max-w-xs text-sm text-muted-foreground">
+        Stai per unirti a una lista su entro. Conferma per vedere e gestire gli
+        alimenti insieme agli altri membri.
+      </p>
+
+      <AcceptInviteDialog
+        open={showDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleClose()
+          }
+        }}
+        shortCode={code!.toUpperCase()}
+        onSuccess={handleSuccess}
+      />
+    </div>
   )
 }

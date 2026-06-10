@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth'
 import { AppIcon } from '../ui/AppIcon'
 import { ThemeToggle } from './ThemeToggle'
 import { QuickGuideDialog } from '../guide/QuickGuideDialog'
-import { InviteButton } from '../sharing/InviteButton'
+import { InviteMenuItem } from '../sharing/InviteMenuItem'
 import { InviteDialog } from '../sharing/InviteDialog'
 import { InviteMenuDialog } from '../sharing/InviteMenuDialog'
 import { AcceptInviteFlowDialog } from '../sharing/AcceptInviteFlowDialog'
@@ -110,9 +110,7 @@ export function AppLayout() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <InviteButton onClick={() => setInviteMenuOpen(true)} />
-              </DropdownMenuItem>
+              <InviteMenuItem onSelect={() => setInviteMenuOpen(true)} />
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => navigate('/settings')}
