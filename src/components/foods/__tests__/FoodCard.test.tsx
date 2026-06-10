@@ -97,4 +97,11 @@ describe('FoodCard — accessibilità & identità', () => {
     const heading = screen.getByRole('heading', { level: 3, name: /Yogurt/ })
     expect(heading).toBeTruthy()
   })
+
+  it('evidenzia le note come contenuto neutro a token (no ambra grezza)', () => {
+    render(<FoodCard food={makeFood({ notes: 'Aprire entro 2 giorni' })} />)
+    const note = screen.getByText('Aprire entro 2 giorni')
+    expect(note.className).toContain('bg-muted')
+    expect(note.className).not.toMatch(/bg-amber/)
+  })
 })

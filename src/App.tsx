@@ -2,6 +2,8 @@ import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { useAuthStore } from './stores/authStore'
+import { ThemeProvider } from './components/theme/ThemeProvider'
+import { useTheme } from './hooks/useTheme'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import { OfflineBanner } from './components/pwa/OfflineBanner'
@@ -17,8 +19,16 @@ const TestConnection = lazy(() => import('./pages/TestConnection'))
 const JoinPage = lazy(() => import('./pages/JoinPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const GuidaPage = lazy(() => import('./pages/GuidaPage'))
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'))
-const TermsPage = lazy(() => import('./pages/TermsPage'))
+
+/**
+ * sonner Toaster wired to the brand: it follows the active theme (dark mode
+ * included) and drops `richColors` so toast accents come from our tokens
+ * (see the `[data-sonner-toast]` rules in index.css), not sonner's own palette.
+ */
+function AppToaster() {
+  const { effectiveTheme } = useTheme()
+  return <Toaster position="top-center" theme={effectiveTheme} />
+}
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize)
@@ -46,7 +56,7 @@ function App() {
   }, [])
 
   return (
-    <>
+    <ThemeProvider>
       <OfflineBanner />
       <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
@@ -58,8 +68,6 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/join/:code" element={<JoinPage />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
 
             {/* Protected routes */}
             <Route element={<ProtectedRoute />}>
@@ -74,8 +82,8 @@ function App() {
         </Suspense>
       </BrowserRouter>
 
-      <Toaster position="top-center" richColors />
-    </>
+      <AppToaster />
+    </ThemeProvider>
   )
 }
 

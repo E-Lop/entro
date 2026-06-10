@@ -44,17 +44,17 @@ export function NotificationPrompt({ foodCount }: NotificationPromptProps) {
           Vuoi ricevere notifiche quando i tuoi alimenti stanno per scadere?
         </p>
         <div className="flex gap-2 mt-3">
-          <Button size="sm" onClick={handleActivate} disabled={isLoading || status === 'loading'}>
+          <Button size="touch" onClick={handleActivate} disabled={isLoading || status === 'loading'}>
             {isLoading ? 'Attivazione...' : 'Attiva'}
           </Button>
-          <Button size="sm" variant="ghost" onClick={dismiss}>
+          <Button size="touch" variant="ghost" onClick={dismiss}>
             Non ora
           </Button>
         </div>
       </div>
       <button
         onClick={dismiss}
-        className="text-muted-foreground hover:text-foreground"
+        className="-mr-2 -mt-2 flex h-11 w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground"
         aria-label="Chiudi"
       >
         <X className="h-4 w-4" />
