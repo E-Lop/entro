@@ -11,35 +11,35 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta'
 export function PrivacyPolicyPage() {
   useDocumentMeta('Privacy Policy')
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen bg-muted p-4">
       <div className="max-w-4xl mx-auto py-8">
-        <Link to="/login">
-          <Button variant="ghost" className="mb-4">
+        <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
+          <Link to="/login">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Torna indietro
-          </Button>
-        </Link>
+          </Link>
+        </Button>
 
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <Shield className="h-8 w-8 text-primary" />
-              <CardTitle className="text-3xl">Privacy Policy</CardTitle>
+              <CardTitle as="h1" className="text-3xl">Privacy Policy</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="prose prose-slate max-w-none">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-amber-900 mt-0">
-                Documento in Preparazione
-              </h3>
-              <p className="text-amber-800 mb-0">
+          <CardContent className="max-w-none space-y-4 text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
+            <div className="bg-warning/10 border border-warning/30 rounded-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-warning mt-0">
+                Documento in preparazione
+              </h2>
+              <p className="text-foreground/80 mb-0">
                 La Privacy Policy sarà disponibile dopo l'attivazione del servizio Aruba
                 LegalBlink Advanced. Il documento sarà redatto da consulenti legali e
                 personalizzato per entro.
               </p>
             </div>
 
-            <h2>Cosa Raccoglie entro</h2>
+            <h2>Cosa raccoglie entro</h2>
             <p>
               L'app entro raccoglie e memorizza i seguenti dati personali:
             </p>
@@ -61,13 +61,13 @@ export function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h2>Base Legale del Trattamento</h2>
+            <h2>Base legale del trattamento</h2>
             <p>
               Il trattamento dei dati personali avviene sulla base del consenso
               dell'utente (GDPR Art. 6.1.a) per l'erogazione del servizio.
             </p>
 
-            <h2>I Tuoi Diritti GDPR</h2>
+            <h2>I tuoi diritti GDPR</h2>
             <p>In conformità al GDPR, hai diritto a:</p>
             <ul>
               <li>

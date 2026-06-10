@@ -11,28 +11,28 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta'
 export function TermsPage() {
   useDocumentMeta('Termini e Condizioni')
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
+    <div className="min-h-screen bg-muted p-4">
       <div className="max-w-4xl mx-auto py-8">
-        <Link to="/login">
-          <Button variant="ghost" className="mb-4">
+        <Button asChild variant="ghost" className="mb-4 min-h-[44px]">
+          <Link to="/login">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Torna indietro
-          </Button>
-        </Link>
+          </Link>
+        </Button>
 
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
               <FileText className="h-8 w-8 text-primary" />
-              <CardTitle className="text-3xl">Termini e Condizioni</CardTitle>
+              <CardTitle as="h1" className="text-3xl">Termini e condizioni</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="prose prose-slate max-w-none">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-amber-900 mt-0">
-                Documento in Preparazione
-              </h3>
-              <p className="text-amber-800 mb-0">
+          <CardContent className="max-w-none space-y-4 text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-6 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
+            <div className="bg-warning/10 border border-warning/30 rounded-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-warning mt-0">
+                Documento in preparazione
+              </h2>
+              <p className="text-foreground/80 mb-0">
                 I Termini e Condizioni saranno disponibili dopo l'attivazione del servizio
                 Aruba LegalBlink Advanced. Il documento sarà redatto da consulenti legali e
                 personalizzato per entro.
@@ -52,7 +52,7 @@ export function TermsPage() {
               <li>Funzionalità offline tramite Service Worker</li>
             </ul>
 
-            <h2>Account Utente</h2>
+            <h2>Account utente</h2>
             <p>
               Per utilizzare entro, devi creare un account fornendo:
             </p>
@@ -66,7 +66,7 @@ export function TermsPage() {
               tua password.
             </p>
 
-            <h2>Uso del Servizio</h2>
+            <h2>Uso del servizio</h2>
             <p>Utilizzando entro, accetti di:</p>
             <ul>
               <li>Fornire informazioni accurate e veritiere</li>
@@ -75,7 +75,7 @@ export function TermsPage() {
               <li>Rispettare i diritti degli altri utenti</li>
             </ul>
 
-            <h2>Limitazione di Responsabilità</h2>
+            <h2>Limitazione di responsabilità</h2>
             <p>
               entro è fornito "così com'è" senza garanzie di alcun tipo. Non siamo
               responsabili per eventuali danni derivanti dall'uso del servizio.
