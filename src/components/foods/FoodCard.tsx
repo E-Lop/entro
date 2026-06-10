@@ -195,7 +195,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
 
         {/* Notes - Highlighted as user content */}
         {food.notes && (
-          <div className="text-sm text-foreground/90 line-clamp-2 mt-2 bg-amber-100 dark:bg-amber-900/20 rounded-md px-3 py-2 border border-amber-200 dark:border-amber-800/30">
+          <div className="text-sm text-foreground/90 line-clamp-2 mt-2 bg-muted rounded-md px-3 py-2 border border-border">
             {food.notes}
           </div>
         )}

@@ -117,11 +117,19 @@ sono la loro resa sRGB.
 - **Bordo** (#e5e5e5): bordi card, input, divisori.
 
 ### Tertiary — Stati di scadenza (semantici)
-Il dominio richiede tre stati. Oggi sono resi con colori Tailwind grezzi (`orange-500/600`, `red-500/600`) e
-**non esistono ancora come token**: questa è la principale lacuna del sistema.
-- **OK / fresco**: verde brand (#16a34a).
-- **In scadenza**: ambra (target token `--warning`, oggi `orange-600` ≈ #ea580c).
-- **Scaduto**: rosso (token `--destructive` #ef4444).
+Il dominio richiede tre stati, ora resi da **token semantici** (CSS custom properties HSL in `src/index.css`,
+light + `.dark`, mappati in Tailwind come `bg-warning` / `text-success` / `bg-destructive` ecc.). I valori sono
+volutamente scuri e saturi, con foreground bianco, per superare AA anche come badge soft su tinte chiare.
+
+| Stato | Token | Light (HSL → ~sRGB) | Dark (HSL) | Foreground |
+|---|---|---|---|---|
+| **OK / fresco** | `--success` | `142 74% 26%` ≈ #117335 | `142 60% 62%` | `--success-foreground` (bianco) |
+| **In scadenza** | `--warning` | `25 90% 34%` ≈ #a54a0a | `40 96% 60%` | `--warning-foreground` (bianco) |
+| **Scaduto** | `--destructive` | `0 84% 60%` ≈ #ef4444 | `0 72% 50%` | `--destructive-foreground` (bianco) |
+
+Regola operativa: **mai colori Tailwind grezzi** (`orange-*`, `amber-*`, `red-*`, `green-*`) dove esiste un
+token; rompono il dark mode e l'identità. La banda "in scadenza" è **unica** (≤7gg = `--warning`), non sfumata
+su più tier.
 
 ### Named Rules
 **La regola Una Sola Voce.** L'unico accento cromatico è il verde del brand. Lo stato attivo, il focus, le
@@ -199,9 +207,11 @@ brand** (oggi alcuni stati usano `ring-blue-500`: fuori sistema, da correggere).
 ### Do:
 - **Do** usare il **verde brand (#16a34a)** per ogni azione primaria, stato attivo, selezione e focus ring.
 - **Do** comunicare lo stato di scadenza con **colore + icona + testo** insieme (regola Mai Solo Colore).
-- **Do** mantenere i target tattili **≥ 44×44px** su mobile.
+- **Do** mantenere i target tattili **≥ 44×44px** su mobile (le primitive condivise — `Button size="touch"`,
+  `AlertDialog`, chiusura `Dialog` — sono già a 44px; usa `touch`/`icon-touch` per i nuovi controlli tappabili).
 - **Do** tenere il testo secondario a **#737373 o più scuro** (mai grigi più tenui: scendono sotto 4.5:1).
-- **Do** usare token semantici; introdurre `--warning` / `--success` per gli stati di scadenza.
+- **Do** usare i token semantici `--warning` / `--success` / `--destructive` per gli stati di scadenza (già
+  definiti in `src/index.css`, light + dark; vedi §2).
 
 ### Don't:
 - **Don't** usare il **blu** (es. `ring-blue-500`) per stati attivi o accenti: il brand è verde, non blu.

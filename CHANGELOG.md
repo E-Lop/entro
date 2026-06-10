@@ -20,8 +20,17 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Condivisione e inviti: la schermata "Crea invito" indica ora per quanto è valido il codice ("Valido per 7 giorni"); i titoli e i testi degli inviti sono uniformati (es. "Crea invito") e l'icona della voce "Inviti" nel menu account è più riconoscibile.
 - Impostazioni: titoli e testi uniformati allo stile italiano del resto dell'app (es. "Esporta i tuoi dati", "Privacy e dati", "Zona pericolosa", "Feedback aptico"); i pulsanti di notifiche, feedback aptico, esportazione dati ed eliminazione account, le caselle degli avvisi e i menu a tendina delle notifiche sono portati a un'area tattile di almeno 44px.
 - Guida utente: le icone delle sezioni sono ora neutre e coerenti (prima ognuna aveva un colore diverso, fuori dall'identità verde dell'app), i titoli sono in stile italiano come il resto dell'app, e l'istruzione per aggiungere un alimento distingue ora tra smartphone (pulsante verde tondo in basso a destra) e computer; la voce è allineata all'etichetta corrente "Crea invito".
+- Tema scuro su tutte le pagine pubbliche: accesso, registrazione, conferma email, recupero password e adesione a una lista rispettano ora la preferenza di tema (chiaro / scuro / sistema). Prima queste pagine restavano sempre chiare anche con il tema scuro attivo.
+- Notifiche e messaggi temporanei (toast): i colori seguono ora l'identità dell'app e si adattano al tema scuro, invece di una palette fissa con accenti azzurri fuori dal brand.
+- Finestre di dialogo e conferme: i pulsanti di azione e annulla e il pulsante di chiusura (X) hanno ora un'area tattile di almeno 44px su tutta l'app; l'etichetta di chiusura è in italiano ("Chiudi").
+
+### Removed
+- Rimosse le pagine interne segnaposto Privacy (`/privacy`) e Termini (`/terms`): non erano collegate da nessuna parte dell'app (i link legali puntano già ai documenti ospitati su LegalBlink) e mostravano solo un avviso "documento in preparazione".
 
 ### Fixed
+- Avvisi "sei offline" e "sincronizzazione in corso": usano ora i colori del tema (ambra per offline, verde per la sincronizzazione) invece di tinte fisse fuori dall'identità, si adattano al tema scuro e vengono annunciati agli screen reader; l'icona di sincronizzazione rispetta la preferenza di sistema "riduci animazioni".
+- Invito ad attivare le notifiche: i pulsanti "Attiva"/"Non ora" e la X di chiusura hanno ora un'area tattile di almeno 44px.
+- Note degli alimenti: il riquadro delle note usa ora un colore neutro del tema, leggibile anche in tema scuro (prima un'ambra fissa fuori palette).
 - Accessibilità dei moduli di autenticazione: il pulsante mostra/nascondi password è ora raggiungibile da tastiera e annunciato dagli screen reader, i titoli di pagina sono heading semantici (`<h1>`) e gli stati di caricamento vengono annunciati.
 - Gli errori di accesso e registrazione restano visibili come messaggio sotto il modulo invece di comparire come notifica temporanea.
 - Risolto un raro reindirizzamento errato dalla pagina di conferma email alla registrazione.
@@ -37,7 +46,6 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Guida rapida: la voce sullo stato di scadenza ora spiega che ogni alimento mostra i giorni mancanti e un'etichetta colorata (verde oltre una settimana, ambra negli ultimi 7 giorni, rossa alla scadenza e dopo), invece di elencare colori che non corrispondevano all'app e che escludevano chi non distingue bene le tinte.
 - Guida utente, sezione "Stato di scadenza": ora mostra i tre stati reali dell'app con la stessa etichetta testuale e colorata che vedi sulle card ("5 giorni"/"3 giorni" su verde o ambra, "Scade oggi" e "Scaduto" su rosso), invece di elencare quattro colori — incluso giallo e arancione — che nell'app non esistono e che affidavano l'informazione al solo colore, escludendo chi non distingue bene le tinte.
 - Accessibilità della Guida utente: i titoli delle sezioni sono ora heading semantici (`<h2>`) per una navigazione più chiara con screen reader (prima erano semplici riquadri senza struttura).
-- Pagine Privacy e Termini e condizioni: ora si adattano al tema scuro (prima restavano un riquadro chiaro fisso, poco leggibile su sfondo scuro), usano i colori del tema al posto di tinte fisse, e hanno un titolo principale (`<h1>`) e intestazioni in stile italiano; il pulsante "Torna indietro" ha un'area tattile più ampia su smartphone.
 - Selettore del tema (Chiaro / Scuro / Sistema): l'opzione attiva è ora annunciata correttamente agli screen reader.
 - Schermata di caricamento a tutta pagina: ora viene annunciata agli screen reader e rispetta la preferenza di sistema "riduci animazioni".
 - Link legali nel footer (Privacy, Termini, Cookie): area tattile più ampia su smartphone e indicazione, per gli screen reader, che si aprono in una nuova scheda.

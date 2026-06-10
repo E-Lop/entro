@@ -10,16 +10,24 @@ export function OfflineBanner() {
 
   if (isOnline) {
     return (
-      <div className="fixed top-0 left-0 right-0 z-50 bg-blue-500 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-md">
-        <RefreshCw className="h-4 w-4 animate-spin" />
+      <div
+        role="status"
+        aria-live="polite"
+        className="fixed top-0 left-0 right-0 z-50 bg-primary text-primary-foreground px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-md"
+      >
+        <RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
         <span>Sincronizzazione in corso... ({pendingCount})</span>
       </div>
     )
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-md">
-      <WifiOff className="h-4 w-4" />
+    <div
+      role="status"
+      aria-live="polite"
+      className="fixed top-0 left-0 right-0 z-50 bg-warning text-warning-foreground px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-md"
+    >
+      <WifiOff className="h-4 w-4" aria-hidden="true" />
       <span>
         Sei offline
         {pendingCount > 0

@@ -250,7 +250,7 @@ export function DeleteAccountDialog() {
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} className="h-11">
+          <AlertDialogCancel disabled={isDeleting}>
             Annulla
           </AlertDialogCancel>
           <AlertDialogAction
@@ -259,7 +259,7 @@ export function DeleteAccountDialog() {
               handleDelete()
             }}
             disabled={isDeleting || !password.trim()}
-            className="h-11 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isDeleting ? 'Eliminazione...' : 'Capisco, elimina il mio account'}
           </AlertDialogAction>
