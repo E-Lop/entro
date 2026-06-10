@@ -12,7 +12,7 @@ export function AccountSection() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profilo</CardTitle>
+        <CardTitle as="h2">Profilo</CardTitle>
         <CardDescription>Informazioni del tuo account</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
