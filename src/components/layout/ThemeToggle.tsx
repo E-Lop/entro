@@ -4,13 +4,15 @@ import { Button } from '../ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 
 /**
  * Theme Toggle Component
- * Dropdown menu to switch between light, dark, and system themes
+ * Dropdown menu to switch between light, dark, and system themes.
+ * Uses a radio group so the current theme is announced to screen readers.
  */
 export function ThemeToggle() {
   const { theme, setTheme, effectiveTheme } = useTheme()
@@ -18,7 +20,7 @@ export function ThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-10 w-10 p-0">
+        <Button variant="ghost" className="h-11 w-11 p-0">
           {effectiveTheme === 'dark' ? (
             <Moon className="!h-7 !w-7" />
           ) : (
@@ -28,36 +30,23 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => setTheme('light')}
-          className="cursor-pointer"
+        <DropdownMenuRadioGroup
+          value={theme}
+          onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}
         >
-          <Sun className="mr-2 h-4 w-4" />
-          <span>Chiaro</span>
-          {theme === 'light' && (
-            <span className="ml-auto text-xs text-primary">✓</span>
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme('dark')}
-          className="cursor-pointer"
-        >
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Scuro</span>
-          {theme === 'dark' && (
-            <span className="ml-auto text-xs text-primary">✓</span>
-          )}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme('system')}
-          className="cursor-pointer"
-        >
-          <Monitor className="mr-2 h-4 w-4" />
-          <span>Sistema</span>
-          {theme === 'system' && (
-            <span className="ml-auto text-xs text-primary">✓</span>
-          )}
-        </DropdownMenuItem>
+          <DropdownMenuRadioItem value="light" className="cursor-pointer">
+            <Sun className="mr-2 h-4 w-4" />
+            <span>Chiaro</span>
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="dark" className="cursor-pointer">
+            <Moon className="mr-2 h-4 w-4" />
+            <span>Scuro</span>
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="system" className="cursor-pointer">
+            <Monitor className="mr-2 h-4 w-4" />
+            <span>Sistema</span>
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

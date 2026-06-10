@@ -35,8 +35,8 @@ const guideItems = [
   },
   {
     icon: Palette,
-    title: 'Colori scadenza',
-    description: 'Verde (7+ gg), Giallo (4-7), Arancione (1-3), Rosso (scaduto)',
+    title: 'Stato di scadenza',
+    description: 'Ogni alimento mostra i giorni che mancano e un’etichetta colorata: verde finché manca più di una settimana, ambra negli ultimi 7 giorni, rossa il giorno della scadenza e quando è già scaduto',
   },
   {
     icon: Search,
@@ -72,7 +72,7 @@ export function QuickGuideDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="h-10 w-10 p-0" aria-label="Guida rapida">
+        <Button variant="ghost" className="h-11 w-11 p-0" aria-label="Guida rapida">
           <CircleHelp className="!h-7 !w-7" />
         </Button>
       </DialogTrigger>

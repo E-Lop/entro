@@ -16,6 +16,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Form "Aggiungi/Modifica alimento": campi (nome, categoria, posizione, data, quantità) e pulsanti principali portati a un'area tattile di almeno 44px, più comoda da toccare con una mano.
 - Vista calendario ridisegnata ad agenda verticale: ora vedi l'intera settimana a colpo d'occhio in un'unica schermata, scorrendo in verticale, invece di scorrere di lato tra colonne quasi vuote. Ogni giorno mostra "Oggi"/"Domani", il numero di alimenti in scadenza e l'urgenza (oggi evidenziato in rosso, i giorni successivi in ambra).
 - Filtri e ricerca allineati all'identità verde del brand: il contatore dei filtri attivi usa ora il verde invece del blu; il campo di ricerca e i menu dei filtri sono portati a un'area tattile di almeno 44px, e l'etichetta "Cancella" è visibile anche su smartphone.
+- Intestazione dell'app uniformata: le icone di guida, tema e account hanno ora lo stesso stile (rimosso l'accento verde isolato sull'icona account) e un'area tattile di almeno 44px; la descrizione sotto il logo è in italiano ("Scadenze sotto controllo").
 
 ### Fixed
 - Accessibilità dei moduli di autenticazione: il pulsante mostra/nascondi password è ora raggiungibile da tastiera e annunciato dagli screen reader, i titoli di pagina sono heading semantici (`<h1>`) e gli stati di caricamento vengono annunciati.
@@ -30,8 +31,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Accessibilità del form alimento: gli stati di caricamento (scanner, conversione foto, salvataggio) sono annunciati agli screen reader e il pulsante "Scansiona Barcode" è identificabile dal suo testo visibile, utile per i comandi vocali.
 - Vista calendario: gli alimenti sono ora raggiungibili e apribili da tastiera (prima erano selezionabili solo con tocco o mouse), con area tattile di almeno 44px e struttura per giorno leggibile dagli screen reader.
 - Coerenza in tema scuro dello sfondo che appare facendo swipe sulle card (verde "modifica" / rosso "elimina"): ora usa i colori del tema invece di tinte fisse.
-
-## [1.6.3] - 2026-05-17
+- Guida rapida: la voce sullo stato di scadenza ora spiega che ogni alimento mostra i giorni mancanti e un'etichetta colorata (verde oltre una settimana, ambra negli ultimi 7 giorni, rossa alla scadenza e dopo), invece di elencare colori che non corrispondevano all'app e che escludevano chi non distingue bene le tinte.
+- Selettore del tema (Chiaro / Scuro / Sistema): l'opzione attiva è ora annunciata correttamente agli screen reader.
+- Schermata di caricamento a tutta pagina: ora viene annunciata agli screen reader e rispetta la preferenza di sistema "riduci animazioni".
+- Link legali nel footer (Privacy, Termini, Cookie): area tattile più ampia su smartphone e indicazione, per gli screen reader, che si aprono in una nuova scheda.
+- Pulsante di disconnessione nel menu account: usa ora il colore di pericolo del tema, leggibile anche in tema scuro.
 
 ### Security
 - Patch vulnerabilità `vite` (≤ 6.4.1): Arbitrary File Read via Dev Server WebSocket ([GHSA-p9ff-h696-f583](https://github.com/advisories/GHSA-p9ff-h696-f583), High) e Path Traversal in Optimized Deps `.map` Handling ([GHSA-4w7w-66w2-5vf9](https://github.com/advisories/GHSA-4w7w-66w2-5vf9), Moderate) — bump a `^6.4.2`
