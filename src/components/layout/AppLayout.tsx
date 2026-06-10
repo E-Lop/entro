@@ -75,10 +75,10 @@ export function AppLayout() {
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo / Brand */}
           <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <AppIcon size={40} className="rounded-lg" aria-label="Logo entro" />
+            <AppIcon size={40} className="rounded-lg" />
             <div>
               <div className="text-lg font-bold text-foreground">entro</div>
-              <p className="text-xs text-muted-foreground">Food Expiry Tracker</p>
+              <p className="text-xs text-muted-foreground">Scadenze sotto controllo</p>
             </div>
           </Link>
 
@@ -92,10 +92,10 @@ export function AppLayout() {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-10 w-10 rounded-full p-0"
+                  className="h-11 w-11 rounded-full p-0"
                   aria-label="Menu utente"
                 >
-                  <User className="!h-7 !w-7 text-primary" />
+                  <User className="!h-7 !w-7" />
                 </Button>
               </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -124,7 +124,7 @@ export function AppLayout() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
-                className="cursor-pointer text-red-600 focus:text-red-600"
+                className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Disconnetti</span>
