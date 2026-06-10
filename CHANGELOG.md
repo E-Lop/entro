@@ -17,6 +17,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Vista calendario ridisegnata ad agenda verticale: ora vedi l'intera settimana a colpo d'occhio in un'unica schermata, scorrendo in verticale, invece di scorrere di lato tra colonne quasi vuote. Ogni giorno mostra "Oggi"/"Domani", il numero di alimenti in scadenza e l'urgenza (oggi evidenziato in rosso, i giorni successivi in ambra).
 - Filtri e ricerca allineati all'identità verde del brand: il contatore dei filtri attivi usa ora il verde invece del blu; il campo di ricerca e i menu dei filtri sono portati a un'area tattile di almeno 44px, e l'etichetta "Cancella" è visibile anche su smartphone.
 - Intestazione dell'app uniformata: le icone di guida, tema e account hanno ora lo stesso stile (rimosso l'accento verde isolato sull'icona account) e un'area tattile di almeno 44px; la descrizione sotto il logo è in italiano ("Scadenze sotto controllo").
+- Condivisione e inviti: la schermata "Crea invito" indica ora per quanto è valido il codice ("Valido per 7 giorni"); i titoli e i testi degli inviti sono uniformati (es. "Crea invito") e l'icona della voce "Inviti" nel menu account è più riconoscibile.
 
 ### Fixed
 - Accessibilità dei moduli di autenticazione: il pulsante mostra/nascondi password è ora raggiungibile da tastiera e annunciato dagli screen reader, i titoli di pagina sono heading semantici (`<h1>`) e gli stati di caricamento vengono annunciati.
@@ -36,8 +37,10 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Schermata di caricamento a tutta pagina: ora viene annunciata agli screen reader e rispetta la preferenza di sistema "riduci animazioni".
 - Link legali nel footer (Privacy, Termini, Cookie): area tattile più ampia su smartphone e indicazione, per gli screen reader, che si aprono in una nuova scheda.
 - Pulsante di disconnessione nel menu account: usa ora il colore di pericolo del tema, leggibile anche in tema scuro.
-
-### Security
+- Accessibilità del menu account: la voce "Inviti" è ora una voce di menu standard, raggiungibile con la tastiera, che chiude il menu alla selezione (prima restava aperto dietro la finestra inviti); il codice invito appena creato viene annunciato agli screen reader.
+- Accetta invito: gli errori sul codice (campo vuoto, lunghezza diversa da 6 caratteri, codice non valido) compaiono ora come messaggio sotto il campo invece che come notifica temporanea, e restano visibili mentre correggi.
+- Apertura di un link d'invito (/join): la pagina mostra ora il logo e una breve spiegazione dietro la finestra di adesione, invece di una finestra su sfondo vuoto.
+- Le animazioni di caricamento delle finestre di condivisione rispettano ora la preferenza di sistema "riduci animazioni".
 - Patch vulnerabilità `vite` (≤ 6.4.1): Arbitrary File Read via Dev Server WebSocket ([GHSA-p9ff-h696-f583](https://github.com/advisories/GHSA-p9ff-h696-f583), High) e Path Traversal in Optimized Deps `.map` Handling ([GHSA-4w7w-66w2-5vf9](https://github.com/advisories/GHSA-4w7w-66w2-5vf9), Moderate) — bump a `^6.4.2`
 - Patch vulnerabilità `postcss` (< 8.5.10): XSS via Unescaped `</style>` in CSS Stringify Output ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), Moderate) — bump a `^8.5.10`
 - Patch vulnerabilità `fast-uri` (≤ 3.1.1) via npm override `^3.1.2`: path traversal via percent-encoded dot segments ([GHSA-q3j6-qgpj-74h6](https://github.com/advisories/GHSA-q3j6-qgpj-74h6), High) e host confusion via percent-encoded authority delimiters ([GHSA-v39h-62p7-jpjc](https://github.com/advisories/GHSA-v39h-62p7-jpjc), High) — transitiva da `vite-plugin-pwa` → `workbox-build` → `ajv`

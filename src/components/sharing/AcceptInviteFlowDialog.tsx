@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -27,17 +26,19 @@ export function AcceptInviteFlowDialog({
   const [shortCode, setShortCode] = useState('')
   const [isValidating, setIsValidating] = useState(false)
   const [validatedCode, setValidatedCode] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleValidate = async () => {
     const trimmedCode = shortCode.trim().toUpperCase()
+    setError(null)
 
     if (!trimmedCode) {
-      toast.error('Inserisci un codice invito')
+      setError('Inserisci un codice invito')
       return
     }
 
     if (trimmedCode.length !== 6) {
-      toast.error('Il codice deve essere di 6 caratteri')
+      setError('Il codice deve essere di 6 caratteri')
       return
     }
 
@@ -47,14 +48,14 @@ export function AcceptInviteFlowDialog({
       const result = await validateInvite(trimmedCode)
 
       if (result.error || !result.valid) {
-        toast.error(result.error?.message || 'Codice invito non valido')
+        setError(result.error?.message || 'Codice invito non valido')
         return
       }
 
       // Valid invite - proceed to acceptance dialog
       setValidatedCode(trimmedCode)
     } catch {
-      toast.error('Si è verificato un errore. Riprova.')
+      setError('Si è verificato un errore. Riprova.')
     } finally {
       setIsValidating(false)
     }
@@ -63,6 +64,7 @@ export function AcceptInviteFlowDialog({
   const handleClose = () => {
     setShortCode('')
     setValidatedCode(null)
+    setError(null)
     onOpenChange(false)
   }
 
@@ -89,21 +91,39 @@ export function AcceptInviteFlowDialog({
                   id="invite-code"
                   placeholder="ABC123"
                   value={shortCode}
-                  onChange={(e) => setShortCode(e.target.value.toUpperCase())}
+                  onChange={(e) => {
+                    setShortCode(e.target.value.toUpperCase())
+                    if (error) setError(null)
+                  }}
                   maxLength={6}
                   className="text-center text-xl tracking-widest font-mono h-14"
                   autoFocus
                   autoComplete="off"
                   inputMode="text"
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={error ? 'invite-code-error' : 'invite-code-hint'}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleValidate()
                     }
                   }}
                 />
-                <p className="text-xs text-muted-foreground text-center">
-                  Esempio: ABC123
-                </p>
+                {error ? (
+                  <p
+                    id="invite-code-error"
+                    role="alert"
+                    className="text-sm text-destructive text-center"
+                  >
+                    {error}
+                  </p>
+                ) : (
+                  <p
+                    id="invite-code-hint"
+                    className="text-xs text-muted-foreground text-center"
+                  >
+                    Esempio: ABC123
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -125,7 +145,7 @@ export function AcceptInviteFlowDialog({
             >
               {isValidating ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin motion-reduce:animate-none" />
                   Verifica...
                 </>
               ) : (

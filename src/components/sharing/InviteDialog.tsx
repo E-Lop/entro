@@ -102,7 +102,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
           // Schermata iniziale - NESSUN FORM
           <>
             <DialogHeader>
-              <DialogTitle>Invita membro</DialogTitle>
+              <DialogTitle>Crea invito</DialogTitle>
               <DialogDescription>
                 Crea un codice invito da condividere con chi vuoi.
                 Il codice può essere usato da chiunque per unirsi alla tua lista.
@@ -118,7 +118,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin motion-reduce:animate-none" />
                     Creazione codice...
                   </>
                 ) : (
@@ -151,12 +151,20 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
 
             <div className="py-6">
               {/* Codice grande e visibile */}
-              <div className="bg-primary/10 rounded-lg p-6 text-center">
+              <div
+                className="bg-primary/10 rounded-lg p-6 text-center"
+                role="status"
+                aria-live="polite"
+              >
                 <p className="text-sm text-muted-foreground mb-2">
                   Codice invito
                 </p>
                 <p className="text-4xl font-bold tracking-wider font-mono">
                   {inviteCode}
+                </p>
+                {/* Scadenza fissata a 7 giorni in create-invite/index.ts */}
+                <p className="mt-3 text-xs text-muted-foreground">
+                  Valido per 7 giorni
                 </p>
               </div>
 

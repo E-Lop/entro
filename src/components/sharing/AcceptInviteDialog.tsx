@@ -118,7 +118,7 @@ export function AcceptInviteDialog({
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin motion-reduce:animate-none" />
                     Caricamento...
                   </>
                 ) : (
@@ -180,11 +180,11 @@ export function AcceptInviteDialog({
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin motion-reduce:animate-none" />
                     Caricamento...
                   </>
                 ) : (
-                  'Conferma e Unisciti'
+                  'Conferma e unisciti'
                 )}
               </Button>
             </DialogFooter>

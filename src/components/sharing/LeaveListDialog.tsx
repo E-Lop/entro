@@ -111,7 +111,7 @@ export function LeaveListDialog({
           >
             {isLoading ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin motion-reduce:animate-none" />
                 Caricamento...
               </>
             ) : (
