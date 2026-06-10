@@ -33,7 +33,7 @@ export function GuidaPage() {
 
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Guida Utente</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Guida utente</h1>
         <p className="text-muted-foreground mt-2">
           Tutto quello che serve per usare entro al meglio
         </p>
@@ -41,16 +41,16 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5 text-green-600" />
-            Aggiungere Alimenti
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Plus className="h-5 w-5 text-muted-foreground" />
+            Aggiungere alimenti
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <h3 className="font-medium mb-2">Inserimento manuale</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Premi il pulsante verde <strong className="text-foreground">"+ Alimento"</strong> in alto a destra</li>
+              <li>Tocca il pulsante per aggiungere un alimento: su smartphone è il <strong className="text-foreground">pulsante verde tondo in basso a destra</strong>, su computer il pulsante <strong className="text-foreground">"+ Alimento"</strong> in alto a destra</li>
               <li>Compila i dati nella sezione <strong className="text-foreground">"Dati alimento"</strong>: nome, categoria, posizione, scadenza e quantità</li>
               <li>Per aggiungere foto o note, tocca <strong className="text-foreground">"Dettagli aggiuntivi"</strong></li>
               <li>Premi <strong className="text-foreground">"Aggiungi alimento"</strong></li>
@@ -74,9 +74,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Pencil className="h-5 w-5 text-blue-600" />
-            Gestire gli Alimenti
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Pencil className="h-5 w-5 text-muted-foreground" />
+            Gestire gli alimenti
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -103,35 +103,47 @@ export function GuidaPage() {
           <div>
             <h3 className="font-medium mb-2 flex items-center gap-2">
               <Palette className="h-4 w-4" />
-              Colori scadenza
+              Stato di scadenza
             </h3>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-green-500" />
-                <span className="text-muted-foreground">Verde: 7+ giorni</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-yellow-500" />
-                <span className="text-muted-foreground">Giallo: 4-7 giorni</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-orange-500" />
-                <span className="text-muted-foreground">Arancione: 1-3 giorni</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full bg-red-500" />
-                <span className="text-muted-foreground">Rosso: scaduto</span>
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Ogni alimento mostra un'etichetta con il colore e il testo dello stato, così lo riconosci
+              a colpo d'occhio anche senza distinguere i colori:
+            </p>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-3">
+                <span className="inline-flex shrink-0 items-center rounded-md border border-success/30 bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                  5 giorni
+                </span>
+                <span className="text-muted-foreground">Manca più di una settimana alla scadenza</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="inline-flex shrink-0 items-center rounded-md border border-warning/30 bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
+                  3 giorni
+                </span>
+                <span className="text-muted-foreground">Scade entro 7 giorni: consumalo presto</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="inline-flex shrink-0 items-center rounded-md border border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
+                  Scade oggi
+                </span>
+                <span className="text-muted-foreground">Scade in giornata</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="inline-flex shrink-0 items-center rounded-md border border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
+                  Scaduto
+                </span>
+                <span className="text-muted-foreground">La data di scadenza è già passata</span>
+              </li>
+            </ul>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5 text-purple-600" />
-            Filtri e Ricerca
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-muted-foreground" />
+            Filtri e ricerca
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -157,9 +169,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-indigo-600" />
-            Vista Calendario
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-muted-foreground" />
+            Vista calendario
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
@@ -175,9 +187,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-teal-600" />
-            Condividere la Lista
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-muted-foreground" />
+            Condividere la lista
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -188,7 +200,7 @@ export function GuidaPage() {
             </h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Apri il menu utente in alto a destra</li>
-              <li>Seleziona <strong className="text-foreground">"Invita membro"</strong></li>
+              <li>Seleziona <strong className="text-foreground">"Crea invito"</strong></li>
               <li>Genera un codice invito di 6 caratteri</li>
               <li>Condividi il codice via WhatsApp, Telegram, SMS o email</li>
             </ol>
@@ -221,9 +233,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5 text-orange-600" />
-            Notifiche Scadenza
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            Notifiche di scadenza
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -264,9 +276,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ScanBarcode className="h-5 w-5 text-amber-600" />
-            Scansione Barcode
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <ScanBarcode className="h-5 w-5 text-muted-foreground" />
+            Scansione barcode
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -291,9 +303,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5 text-pink-600" />
-            Installare l'App
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-muted-foreground" />
+            Installare l'app
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -326,9 +338,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <WifiOff className="h-5 w-5 text-gray-600" />
-            Utilizzo Offline
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <WifiOff className="h-5 w-5 text-muted-foreground" />
+            Utilizzo offline
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm text-muted-foreground">
@@ -365,7 +377,7 @@ export function GuidaPage() {
             </ul>
           </div>
 
-          <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 p-3">
+          <div className="rounded-lg border border-success/30 bg-success/10 p-3">
             <p className="text-foreground/80 font-medium text-xs">
               Per la migliore esperienza offline, installa l'app sulla schermata Home. Su iPhone è particolarmente importante per evitare la perdita dei dati in cache e abilitare le notifiche.
             </p>
@@ -397,9 +409,9 @@ export function GuidaPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CircleHelp className="h-5 w-5 text-sky-600" />
-            Domande Frequenti
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <CircleHelp className="h-5 w-5 text-muted-foreground" />
+            Domande frequenti
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
