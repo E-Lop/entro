@@ -7,6 +7,18 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-06-11
+
+### Security
+- Aggiornate le dipendenze per risolvere 8 segnalazioni di sicurezza Dependabot ancora aperte sul branch principale:
+  - `react-router` / `react-router-dom` da 7.12.0 a **7.16.0** — risolve 6 segnalazioni: una vulnerabilità di esecuzione di codice non autenticata (RCE) tramite il turbo-stream incluso, due cross-site scripting (XSS), un open redirect e due denial-of-service.
+  - `vitest` da 4.0.18 a **4.1.8** — risolve la segnalazione critica di lettura/esecuzione di file arbitrari quando il server della UI di test è in ascolto (solo ambiente di sviluppo).
+  - `ws` da 8.19.0 a **8.21.0** (tramite `overrides`, dipendenza transitiva di `@supabase/supabase-js`) — risolve la divulgazione di memoria non inizializzata.
+- `npm audit` ora riporta 0 vulnerabilità.
+
+### Removed
+- Rimossa la dipendenza inutilizzata `@radix-ui/react-toast`: dalla revisione UI il sistema di notifiche temporanee usa `sonner`, ma la libreria Radix era rimasta nel `package.json` senza alcun utilizzo nel codice.
+
 ## [1.7.0] - 2026-06-10
 
 ### Added
@@ -365,7 +377,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.1...HEAD
+[1.7.1]: https://github.com/E-Lop/entro/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/E-Lop/entro/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/E-Lop/entro/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/E-Lop/entro/compare/v1.6.1...v1.6.2
