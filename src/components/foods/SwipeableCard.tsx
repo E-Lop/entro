@@ -3,6 +3,7 @@ import { useSwipeable } from 'react-swipeable'
 import { Edit, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { triggerHaptic } from '@/lib/haptics'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 interface SwipeableCardProps {
   children: React.ReactNode
@@ -23,26 +24,13 @@ interface SwipeableCardProps {
  * - Works on iOS and Android
  */
 export function SwipeableCard({ children, onEdit, onDelete, className, showHintAnimation = false }: SwipeableCardProps) {
-  const [isMobile, setIsMobile] = useState(false)
+  const isMobile = useIsMobile()
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const thresholdTriggered = useRef(false)
 
   const HINT_ANIMATION_KEY = 'entro_hasSeenSwipeAnimation'
-
-  // Detect if device is touch-enabled (mobile)
-  useEffect(() => {
-    const checkMobile = () => {
-      const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-      const isMobileWidth = window.innerWidth < 768
-      setIsMobile(hasTouchScreen && isMobileWidth)
-    }
-
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
 
   // Animated hint: mini-swipe demonstration on first card (first time only)
   useEffect(() => {
