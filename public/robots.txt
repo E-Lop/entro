@@ -2,7 +2,6 @@ User-agent: *
 Allow: /login
 Allow: /signup
 Disallow: /settings
-Disallow: /test-connection
 Disallow: /verify-email
 Disallow: /forgot-password
 Disallow: /reset-password
