@@ -7,6 +7,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Removed
+- Rimossa la pagina di diagnostica `/test-connection`, un residuo del setup iniziale (verifica della connessione a Supabase): non era collegata da nessuna parte dell'app ma restava raggiungibile in produzione dagli utenti autenticati, mostrando dettagli tecnici interni.
+
 ## [1.7.2] - 2026-06-11
 
 ### Changed
