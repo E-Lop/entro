@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.7.2] - 2026-06-11
+
 ### Changed
 - Form "Aggiungi/Modifica alimento": la sezione richiudibile "Dettagli aggiuntivi", quando è chiusa, mostra ora uno sfondo neutro invece di una leggera velatura verde — il verde resta riservato agli elementi attivi dell'identità dell'app.
 - Liste di alimenti più leggere su smartphone: il rilevamento del dispositivo touch è ora condiviso da tutte le card con un'unica sottoscrizione, invece di registrarne una per ogni card della lista.
@@ -384,7 +386,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.2...HEAD
+[1.7.2]: https://github.com/E-Lop/entro/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/E-Lop/entro/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/E-Lop/entro/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/E-Lop/entro/compare/v1.6.2...v1.6.3
