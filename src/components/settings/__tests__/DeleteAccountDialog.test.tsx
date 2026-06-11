@@ -3,12 +3,13 @@ import { describe, it, expect, afterEach, vi } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
-const { signInWithPassword, signOut, rpc, navigateMock, clearAuthStorage } = vi.hoisted(() => ({
+const { signInWithPassword, signOut, rpc, navigateMock, clearAuthStorage, countIs } = vi.hoisted(() => ({
   signInWithPassword: vi.fn(),
   signOut: vi.fn(() => Promise.resolve({ error: null })),
   rpc: vi.fn(() => Promise.resolve({ error: null })),
   navigateMock: vi.fn(),
   clearAuthStorage: vi.fn(),
+  countIs: vi.fn(() => Promise.resolve({ count: 4 })),
 }))
 
 vi.mock('react-router-dom', () => ({ useNavigate: () => navigateMock }))
@@ -20,7 +21,7 @@ vi.mock('@/lib/supabase', () => ({
   supabase: {
     from: () => ({
       select: () => ({
-        is: () => Promise.resolve({ count: 4 }),
+        is: countIs,
         eq: () => ({ not: () => Promise.resolve({ data: [] }) }),
       }),
     }),
@@ -94,5 +95,26 @@ describe('DeleteAccountDialog — salvaguardie azione distruttiva', () => {
     const input = screen.getByPlaceholderText('Inserisci password')
     expect(input.getAttribute('aria-invalid')).toBe('true')
     expect(input.getAttribute('aria-describedby')).toBe('delete-password-error')
+  })
+
+  it('con 0 alimenti non rifà la fetch del conteggio alla riapertura del dialog', async () => {
+    // Con un totale reale di 0, il vecchio guard `!foodCount` rifaceva la query
+    // a ogni apertura. Con `foodCount === null` la fetch parte una volta sola.
+    countIs.mockResolvedValue({ count: 0 })
+    const user = setup()
+    render(<DeleteAccountDialog />)
+
+    // Prima apertura → parte la fetch, il conteggio (0) viene mostrato
+    await openDialog(user)
+    await screen.findByText(/0 totali/)
+    expect(countIs).toHaveBeenCalledTimes(1)
+
+    // Chiudi e riapri
+    await user.click(screen.getByRole('button', { name: 'Annulla' }))
+    await user.click(screen.getByRole('button', { name: 'Elimina account' }))
+    await screen.findByPlaceholderText('Inserisci password')
+
+    // Nessuna nuova fetch: il conteggio 0 è già in stato (non più null)
+    expect(countIs).toHaveBeenCalledTimes(1)
   })
 })

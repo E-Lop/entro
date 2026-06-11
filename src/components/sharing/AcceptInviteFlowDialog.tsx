@@ -13,6 +13,7 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { AcceptInviteDialog } from './AcceptInviteDialog'
 import { validateInvite } from '../../lib/invites'
+import { inlineErrorAttrs } from '@/lib/a11y'
 
 interface AcceptInviteFlowDialogProps {
   open: boolean
@@ -100,8 +101,7 @@ export function AcceptInviteFlowDialog({
                   autoFocus
                   autoComplete="off"
                   inputMode="text"
-                  aria-invalid={error ? true : undefined}
-                  aria-describedby={error ? 'invite-code-error' : 'invite-code-hint'}
+                  {...inlineErrorAttrs(!!error, 'invite-code-error', 'invite-code-hint')}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleValidate()

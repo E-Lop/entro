@@ -7,6 +7,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Changed
+- Form "Aggiungi/Modifica alimento": la sezione richiudibile "Dettagli aggiuntivi", quando è chiusa, mostra ora uno sfondo neutro invece di una leggera velatura verde — il verde resta riservato agli elementi attivi dell'identità dell'app.
+- Liste di alimenti più leggere su smartphone: il rilevamento del dispositivo touch è ora condiviso da tutte le card con un'unica sottoscrizione, invece di registrarne una per ogni card della lista.
+
+### Fixed
+- Eliminazione account: con una dispensa vuota (0 alimenti) la finestra non ripete più il conteggio degli alimenti a ogni apertura.
+
 ## [1.7.1] - 2026-06-11
 
 ### Security

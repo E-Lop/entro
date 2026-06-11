@@ -20,6 +20,7 @@ import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { triggerHaptic } from '@/lib/haptics'
+import { inlineErrorAttrs } from '@/lib/a11y'
 
 /**
  * Delete Account Dialog Component
@@ -48,7 +49,9 @@ export function DeleteAccountDialog() {
   const handleOpenChange = async (isOpen: boolean) => {
     setOpen(isOpen)
 
-    if (isOpen && !foodCount) {
+    // `foodCount === null` e non `!foodCount`: con un totale reale di 0 alimenti
+    // `!foodCount` resta truthy → la query veniva rifatta a ogni riapertura del dialog.
+    if (isOpen && foodCount === null) {
       // Fetch food count
       const { count } = await supabase
         .from('foods')
@@ -239,8 +242,7 @@ export function DeleteAccountDialog() {
             }}
             disabled={isDeleting}
             className="h-11"
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? 'delete-password-error' : undefined}
+            {...inlineErrorAttrs(!!error, 'delete-password-error')}
           />
           {error && (
             <p id="delete-password-error" role="alert" className="text-sm text-destructive">

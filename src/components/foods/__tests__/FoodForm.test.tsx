@@ -83,10 +83,11 @@ describe('FoodForm accordion sections', () => {
     const mainButton = document.querySelector('button[aria-controls="section-main"]')!
     const detailsButton = document.querySelector('button[aria-controls="section-details"]')!
 
-    // Closed section (details) should have background class
-    expect(detailsButton.className).toMatch(/bg-primary/)
+    // Closed section (details) gets a neutral highlight, not the brand green
+    expect(detailsButton.className).toMatch(/bg-muted/)
+    expect(detailsButton.className).not.toMatch(/bg-primary/)
     // Open section (main) should NOT have the closed background class
-    expect(mainButton.className).not.toMatch(/bg-primary/)
+    expect(mainButton.className).not.toMatch(/bg-muted/)
   })
 
   it('should swap background class when toggling sections', async () => {
@@ -96,16 +97,16 @@ describe('FoodForm accordion sections', () => {
     const mainButton = document.querySelector('button[aria-controls="section-main"]')!
     const detailsButton = document.querySelector('button[aria-controls="section-details"]')!
 
-    // Initially: main open (no bg), details closed (bg)
-    expect(mainButton.className).not.toMatch(/bg-primary/)
-    expect(detailsButton.className).toMatch(/bg-primary/)
+    // Initially: main open (no bg), details closed (neutral bg)
+    expect(mainButton.className).not.toMatch(/bg-muted/)
+    expect(detailsButton.className).toMatch(/bg-muted/)
 
     // Click details to open it (closes main)
     await user.click(detailsButton)
 
-    // Now: main closed (bg), details open (no bg)
-    expect(mainButton.className).toMatch(/bg-primary/)
-    expect(detailsButton.className).not.toMatch(/bg-primary/)
+    // Now: main closed (neutral bg), details open (no bg)
+    expect(mainButton.className).toMatch(/bg-muted/)
+    expect(detailsButton.className).not.toMatch(/bg-muted/)
   })
 
   it('barcode button accessible name contains its visible label (WCAG 2.5.3)', () => {
