@@ -15,7 +15,6 @@ const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
-const TestConnection = lazy(() => import('./pages/TestConnection'))
 const JoinPage = lazy(() => import('./pages/JoinPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const GuidaPage = lazy(() => import('./pages/GuidaPage'))
@@ -75,7 +74,6 @@ function App() {
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/guida" element={<GuidaPage />} />
-                <Route path="/test-connection" element={<TestConnection />} />
               </Route>
             </Route>
           </Routes>
