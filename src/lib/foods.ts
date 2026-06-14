@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { Database } from './supabase'
 import { deleteFoodImage } from './storage'
+import { EXPIRY_SOON_DAYS } from './expiry'
 
 /**
  * Foods Service Layer - Wrapper functions around Supabase Foods API
@@ -100,10 +101,10 @@ export async function getFoods(filters?: FilterParams): Promise<FoodsResponse> {
         // Expiry date is in the past
         query = query.lt('expiry_date', today)
       } else if (filters.status === 'expiring_soon') {
-        // Expiry date is within the next 7 days
-        const sevenDaysFromNow = new Date()
-        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
-        const futureDate = sevenDaysFromNow.toISOString().split('T')[0]
+        // Expiry date is within the "in scadenza" window (see EXPIRY_SOON_DAYS in @/lib/expiry)
+        const soonCutoff = new Date()
+        soonCutoff.setDate(soonCutoff.getDate() + EXPIRY_SOON_DAYS)
+        const futureDate = soonCutoff.toISOString().split('T')[0]
         query = query.gte('expiry_date', today).lte('expiry_date', futureDate)
       } else if (filters.status === 'active') {
         // Expiry date is in the future (not expired)

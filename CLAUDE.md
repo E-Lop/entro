@@ -93,4 +93,5 @@ Genera token da https://supabase.com/dashboard/account/tokens e **revocalo dopo 
 - `src/sw.ts` — service worker custom (push + offline)
 - `supabase/migrations/` — migrazioni recenti versionate
 - `migrations/` — migrazioni storiche (numerate 001-016 + helpers)
+- `docs/development/DOMAIN_GLOSSARY.md` — glossario di dominio (categorie, stati Food/Expiry, regole di business, incoerenze note)
 - `CHANGELOG.md` — Keep a Changelog in italiano, semver

@@ -22,7 +22,7 @@ const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import type { Food, FilterParams } from '@/lib/foods'
-import { differenceInDays } from 'date-fns'
+import { getExpiryStatus, isExpired, isExpiringSoon } from '@/lib/expiry'
 import { cn } from '@/lib/utils'
 
 /**
@@ -175,30 +175,22 @@ export function DashboardPage() {
     window.scrollTo({ top: 400, behavior: 'smooth' })
   }
 
-  // Calculate stats
-  // FIX: Normalize dates to midnight to avoid time-of-day calculation issues
+  // Calculate stats from the canonical expiry classification (see @/lib/expiry)
   const stats = useMemo(() => {
-    // Normalize now to midnight for accurate calendar day difference
     const now = new Date()
-    now.setHours(0, 0, 0, 0)
+    let expiringSoon = 0
+    let expired = 0
 
-    const expiringSoon = allFoods.filter((food) => {
-      const expiryDate = new Date(food.expiry_date)
-      expiryDate.setHours(0, 0, 0, 0)
-      const daysUntilExpiry = differenceInDays(expiryDate, now)
-      return daysUntilExpiry >= 0 && daysUntilExpiry <= 7
-    })
-    const expired = allFoods.filter((food) => {
-      const expiryDate = new Date(food.expiry_date)
-      expiryDate.setHours(0, 0, 0, 0)
-      const daysUntilExpiry = differenceInDays(expiryDate, now)
-      return daysUntilExpiry < 0
-    })
+    for (const food of allFoods) {
+      const status = getExpiryStatus(food.expiry_date, now)
+      if (isExpiringSoon(status)) expiringSoon++
+      if (isExpired(status)) expired++
+    }
 
     return {
       total: allFoods.length,
-      expiringSoon: expiringSoon.length,
-      expired: expired.length,
+      expiringSoon,
+      expired,
     }
   }, [allFoods])
 

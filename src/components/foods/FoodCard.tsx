@@ -1,10 +1,11 @@
-import { differenceInDays, format } from 'date-fns'
+import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Package, Trash2, Edit, MapPin, ImageIcon, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import type { Food, Category } from '@/lib/foods'
-import type { FoodWithRealtimeMetadata } from '@/types/food.types'
+import type { FoodWithRealtimeMetadata, ExpiryStatus } from '@/types/food.types'
+import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
 import { cn } from '@/lib/utils'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
 import { SwipeableCard } from './SwipeableCard'
@@ -18,34 +19,31 @@ interface FoodCardProps {
 }
 
 /**
- * Get expiry status and color based on days until expiry.
- * Normalizes dates to midnight for accurate calendar day difference.
+ * Map the canonical expiry status to the card's visual treatment (colors + Italian badge).
+ * Classification lives in @/lib/expiry; this only maps status → presentation.
  */
-function getExpiryStatus(expiryDate: string): {
-  status: 'expired' | 'critical' | 'warning' | 'good'
+function getExpiryPresentation(expiryDate: string): {
+  status: ExpiryStatus
   colorClasses: string
   badgeText: string
   daysUntilExpiry: number
 } {
   const now = new Date()
-  now.setHours(0, 0, 0, 0)
-
-  const expiry = new Date(expiryDate)
-  expiry.setHours(0, 0, 0, 0)
-
-  const daysUntilExpiry = differenceInDays(expiry, now)
+  const status = getExpiryStatus(expiryDate, now)
+  const daysUntilExpiry = getDaysUntilExpiry(expiryDate, now)
   const dayLabel = `${daysUntilExpiry} ${daysUntilExpiry === 1 ? 'giorno' : 'giorni'}`
 
-  if (daysUntilExpiry < 0) {
-    return { status: 'expired', colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scaduto', daysUntilExpiry }
+  switch (status) {
+    case 'expired':
+      return { status, colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scaduto', daysUntilExpiry }
+    case 'expires_today':
+      return { status, colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scade oggi', daysUntilExpiry }
+    case 'expires_soon':
+    case 'expires_this_week':
+      return { status, colorClasses: 'bg-warning/10 text-warning border-warning/30', badgeText: dayLabel, daysUntilExpiry }
+    case 'fresh':
+      return { status, colorClasses: 'bg-success/10 text-success border-success/30', badgeText: dayLabel, daysUntilExpiry }
   }
-  if (daysUntilExpiry === 0) {
-    return { status: 'critical', colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scade oggi', daysUntilExpiry }
-  }
-  if (daysUntilExpiry <= 7) {
-    return { status: 'warning', colorClasses: 'bg-warning/10 text-warning border-warning/30', badgeText: dayLabel, daysUntilExpiry }
-  }
-  return { status: 'good', colorClasses: 'bg-success/10 text-success border-success/30', badgeText: dayLabel, daysUntilExpiry }
 }
 
 const STORAGE_LABELS: Record<Food['storage_location'], string> = {
@@ -81,7 +79,7 @@ function getImageState(
  * FoodCard Component - Displays a single food item with expiry status
  */
 export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation = false }: FoodCardProps) {
-  const { status, colorClasses, badgeText, daysUntilExpiry } = getExpiryStatus(food.expiry_date)
+  const { status, colorClasses, badgeText, daysUntilExpiry } = getExpiryPresentation(food.expiry_date)
   const formattedExpiryDate = format(new Date(food.expiry_date), 'dd MMM yyyy', { locale: it })
 
   // Generate signed URL for private image
@@ -100,8 +98,8 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
       <Card
         className={cn(
           'hover:shadow-md transition-shadow',
-          (status === 'expired' || status === 'critical') && 'border-destructive/40',
-          status === 'warning' && daysUntilExpiry <= 3 && 'border-warning/50',
+          (status === 'expired' || status === 'expires_today') && 'border-destructive/40',
+          (status === 'expires_soon' || status === 'expires_this_week') && daysUntilExpiry <= 3 && 'border-warning/50',
           isRemoteUpdate && 'ring-2 ring-primary animate-pulse'
         )}
       >
