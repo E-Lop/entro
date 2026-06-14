@@ -93,5 +93,5 @@ Genera token da https://supabase.com/dashboard/account/tokens e **revocalo dopo 
 - `src/sw.ts` — service worker custom (push + offline)
 - `supabase/migrations/` — migrazioni recenti versionate
 - `migrations/` — migrazioni storiche (numerate 001-016 + helpers)
-- `docs/development/DOMAIN_GLOSSARY.md` — glossario di dominio (categorie, stati Food/Expiry, regole di business, incoerenze note)
+- `../entro-family/` — bundle conoscenza condiviso, **fonte unica** del dominio (core/) e dei pattern cross-prodotto (conventions/); consumato anche da entro-mobile e dalle future native. Ex `docs/development/DOMAIN_GLOSSARY.md` (ora stub)
 - `CHANGELOG.md` — Keep a Changelog in italiano, semver
