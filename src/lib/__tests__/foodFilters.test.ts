@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { Food, FilterParams } from '@/lib/foods'
-import { filterFoods } from '@/lib/foodFilters'
+import { filterFoods, sortFoods } from '@/lib/foodFilters'
 
 const NOW = new Date('2026-06-16T12:00:00')
 
@@ -70,5 +70,33 @@ describe('filterFoods - categoria / posizione / ricerca', () => {
   it('combina filtri: categoria + stato', () => {
     const names = filterFoods(foods, { status: 'expiring_soon', category_id: 'c1' }, NOW).map(f => f.name).sort()
     expect(names).toEqual(['Latte', 'Yogurt'])
+  })
+})
+
+describe('sortFoods', () => {
+  const items: Food[] = [
+    makeFood({ name: 'Banana', expiry_date: '2026-06-20', category_id: 'b', created_at: '2026-06-03T00:00:00Z' }),
+    makeFood({ name: 'ananas', expiry_date: '2026-06-10', category_id: null, created_at: '2026-06-01T00:00:00Z' }),
+    makeFood({ name: 'Cocco', expiry_date: '2026-06-15', category_id: 'a', created_at: '2026-06-02T00:00:00Z' }),
+  ]
+  it('expiry_date asc (default)', () => {
+    expect(sortFoods(items, 'expiry_date', 'asc').map(f => f.expiry_date)).toEqual(['2026-06-10', '2026-06-15', '2026-06-20'])
+  })
+  it('expiry_date desc', () => {
+    expect(sortFoods(items, 'expiry_date', 'desc').map(f => f.expiry_date)).toEqual(['2026-06-20', '2026-06-15', '2026-06-10'])
+  })
+  it('name asc case-insensitive', () => {
+    expect(sortFoods(items, 'name', 'asc').map(f => f.name)).toEqual(['ananas', 'Banana', 'Cocco'])
+  })
+  it('created_at desc', () => {
+    expect(sortFoods(items, 'created_at', 'desc').map(f => f.created_at)).toEqual(['2026-06-03T00:00:00Z', '2026-06-02T00:00:00Z', '2026-06-01T00:00:00Z'])
+  })
+  it('category_id: i null finiscono in fondo', () => {
+    expect(sortFoods(items, 'category_id', 'asc').map(f => f.category_id)).toEqual(['a', 'b', null])
+  })
+  it('non muta l\'array di input', () => {
+    const copy = [...items]
+    sortFoods(items, 'name', 'asc')
+    expect(items).toEqual(copy)
   })
 })

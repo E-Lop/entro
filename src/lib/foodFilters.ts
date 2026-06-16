@@ -20,3 +20,24 @@ export function filterFoods(foods: Food[], filters: FilterParams, now: Date = ne
     return true
   })
 }
+
+/** Ordina (copia) replicando l'ordinamento server-side; null in fondo. */
+export function sortFoods(
+  foods: Food[],
+  sortBy: FilterParams['sortBy'] = 'expiry_date',
+  sortOrder: FilterParams['sortOrder'] = 'asc',
+): Food[] {
+  const key = sortBy ?? 'expiry_date'
+  const dir = sortOrder === 'desc' ? -1 : 1
+  return [...foods].sort((a, b) => {
+    const av = a[key]
+    const bv = b[key]
+    if (av == null && bv == null) return 0
+    if (av == null) return 1
+    if (bv == null) return -1
+    const cmp = key === 'name'
+      ? av.localeCompare(bv, 'it', { sensitivity: 'base' })
+      : av < bv ? -1 : av > bv ? 1 : 0
+    return cmp * dir
+  })
+}
