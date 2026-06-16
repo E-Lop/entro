@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.7.4] - 2026-06-16
+
 ### Fixed
 - **Feedback aptico onesto su iOS**: WebKit non espone la Vibration API e il workaround `<input switch>` non vibra su trigger programmatico, quindi su iPhone/Safari (anche come PWA installata) il feedback aptico non può funzionare. L'impostazione "Feedback aptico" ora compare solo dove il browser supporta davvero la vibrazione (Android) e non viene più mostrata su iOS, dove prometteva qualcosa che non poteva mantenere.
 - **Movimento ridotto rispettato ovunque**: la preferenza di sistema "riduci movimento" (`prefers-reduced-motion`) è ora onorata globalmente per tutte le animazioni (spinner, swipe, transizioni, toast); la dimostrazione automatica dello swipe non parte più con il movimento ridotto.
@@ -398,7 +400,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.4...HEAD
+[1.7.4]: https://github.com/E-Lop/entro/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/E-Lop/entro/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/E-Lop/entro/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/E-Lop/entro/compare/v1.7.0...v1.7.1
