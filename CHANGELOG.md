@@ -7,6 +7,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Fixed
+- I filtri rapidi "In scadenza" e "Scaduti" ora funzionano anche offline e restano sempre coerenti con il conteggio delle card: filtro e ordinamento sono calcolati dai dati già in cache (stessa fonte dei conteggi), invece di una query separata che offline non era disponibile.
+
 ## [1.7.4] - 2026-06-16
 
 ### Fixed
