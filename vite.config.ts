@@ -54,23 +54,20 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          // React core
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          // React Query
-          'react-query': ['@tanstack/react-query'],
-          // Supabase
-          'supabase': ['@supabase/supabase-js'],
-          // Date utilities
-          'date-fns': ['date-fns'],
-          // ZXing barcode scanner (heavy)
-          'zxing': ['@zxing/browser', '@zxing/library'],
-          // Form libraries
-          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          // UI utilities
-          'ui-utils': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+        // Rolldown non supporta più manualChunks in forma oggetto:
+        // si usa advancedChunks.groups con regex sul path del modulo.
+        advancedChunks: {
+          groups: [
+            { name: 'react-vendor', test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom)[\\/]/ },
+            { name: 'react-query', test: /[\\/]node_modules[\\/]@tanstack[\\/]react-query[\\/]/ },
+            { name: 'supabase', test: /[\\/]node_modules[\\/]@supabase[\\/]/ },
+            { name: 'date-fns', test: /[\\/]node_modules[\\/]date-fns[\\/]/ },
+            { name: 'zxing', test: /[\\/]node_modules[\\/]@zxing[\\/](browser|library)[\\/]/ },
+            { name: 'forms', test: /[\\/]node_modules[\\/](react-hook-form|@hookform[\\/]resolvers|zod)[\\/]/ },
+            { name: 'ui-utils', test: /[\\/]node_modules[\\/](clsx|tailwind-merge|class-variance-authority)[\\/]/ },
+          ],
         },
       },
     },
