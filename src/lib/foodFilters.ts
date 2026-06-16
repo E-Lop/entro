@@ -41,3 +41,26 @@ export function sortFoods(
     return cmp * dir
   })
 }
+
+export interface DashboardData {
+  foods: Food[]
+  stats: { total: number; expiringSoon: number; expired: number }
+}
+
+/**
+ * Deriva lista mostrata + conteggi card dalla stessa lista in cache.
+ * I conteggi riflettono i filtri categoria/posizione/ricerca attivi (non lo stato);
+ * la lista applica anche lo stato e l'ordinamento.
+ */
+export function deriveDashboardData(allFoods: Food[], filters: FilterParams, now: Date = new Date()): DashboardData {
+  const scoped = filterFoods(allFoods, { ...filters, status: 'all' }, now)
+  let expiringSoon = 0
+  let expired = 0
+  for (const food of scoped) {
+    const status = getExpiryStatus(food.expiry_date, now)
+    if (isExpiringSoon(status)) expiringSoon++
+    if (isExpired(status)) expired++
+  }
+  const foods = sortFoods(filterFoods(scoped, { status: filters.status }, now), filters.sortBy, filters.sortOrder)
+  return { foods, stats: { total: scoped.length, expiringSoon, expired } }
+}

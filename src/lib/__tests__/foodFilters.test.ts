@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { Food, FilterParams } from '@/lib/foods'
-import { filterFoods, sortFoods } from '@/lib/foodFilters'
+import { filterFoods, sortFoods, deriveDashboardData } from '@/lib/foodFilters'
 
 const NOW = new Date('2026-06-16T12:00:00')
 
@@ -98,5 +98,22 @@ describe('sortFoods', () => {
     const copy = [...items]
     sortFoods(items, 'name', 'asc')
     expect(items).toEqual(copy)
+  })
+})
+
+describe('deriveDashboardData', () => {
+  it('stats riflettono i filtri non-stato; lista applica anche lo stato', () => {
+    const { foods: list, stats } = deriveDashboardData(foods, { status: 'expiring_soon', sortBy: 'expiry_date', sortOrder: 'asc' }, NOW)
+    expect(stats.total).toBe(5)
+    expect(stats.expiringSoon).toBe(3)
+    expect(stats.expired).toBe(1)
+    expect(list.map(f => f.name)).toEqual(['Latte', 'Yogurt', 'Pane'])
+    expect(list.length).toBe(stats.expiringSoon)
+  })
+  it('i conteggi rispettano un filtro categoria attivo', () => {
+    const { stats } = deriveDashboardData(foods, { status: 'all', category_id: 'c1' }, NOW)
+    expect(stats.total).toBe(3)
+    expect(stats.expiringSoon).toBe(2)
+    expect(stats.expired).toBe(1)
   })
 })
