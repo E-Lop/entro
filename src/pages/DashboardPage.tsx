@@ -22,7 +22,7 @@ const WeekView = lazy(() => import('../components/foods/WeekView').then(m => ({ 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import type { Food, FilterParams } from '@/lib/foods'
-import { getExpiryStatus, isExpired, isExpiringSoon } from '@/lib/expiry'
+import { deriveDashboardData } from '@/lib/foodFilters'
 import { cn } from '@/lib/utils'
 
 /**
@@ -96,16 +96,16 @@ export function DashboardPage() {
     }
   }, [filters, debouncedSearch])
 
-  // Filters for stats: same as current filters but always status='all'
-  // When status is already 'all', React Query reuses the same cache entry (no extra request)
-  const statsFilters = useMemo<FilterParams>(() => ({
-    ...debouncedFilters,
-    status: 'all',
-  }), [debouncedFilters])
+  // Una sola query non filtrata: chiave di cache stabile, caricata a ogni visita
+  // online → persistita e disponibile offline. Filtro/ordinamento/conteggi sono
+  // derivati client-side dagli stessi dati (vedi @/lib/foodFilters).
+  const { data: allFoods = [], isLoading: foodsLoading } = useFoods()
 
-  // Fetch data with filters
-  const { data: foods = [], isLoading: foodsLoading } = useFoods(debouncedFilters)
-  const { data: allFoods = [] } = useFoods(statsFilters)
+  const { foods, stats } = useMemo(
+    () => deriveDashboardData(allFoods, debouncedFilters),
+    [allFoods, debouncedFilters],
+  )
+
   const { data: categories = [] } = useCategories()
 
   // Food CRUD dialogs and handlers
@@ -174,25 +174,6 @@ export function DashboardPage() {
     // Scroll to foods section on mobile
     window.scrollTo({ top: 400, behavior: 'smooth' })
   }
-
-  // Calculate stats from the canonical expiry classification (see @/lib/expiry)
-  const stats = useMemo(() => {
-    const now = new Date()
-    let expiringSoon = 0
-    let expired = 0
-
-    for (const food of allFoods) {
-      const status = getExpiryStatus(food.expiry_date, now)
-      if (isExpiringSoon(status)) expiringSoon++
-      if (isExpired(status)) expired++
-    }
-
-    return {
-      total: allFoods.length,
-      expiringSoon,
-      expired,
-    }
-  }, [allFoods])
 
   // Get category for a food item
   const getCategoryForFood = (food: Food) => {

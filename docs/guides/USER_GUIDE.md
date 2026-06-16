@@ -152,6 +152,8 @@ Clicca sulle **card statistiche** in alto:
 - **"In scadenza"**: mostra solo quelli che scadono entro 7 giorni
 - **"Scaduti"**: mostra solo quelli già scaduti
 
+> **Nota**: i filtri rapidi funzionano anche offline. Il risultato mostrato è sempre coerente con il numero indicato sulla card, perché entrambi vengono calcolati dagli stessi dati in cache.
+
 ---
 
 ## Vista Calendario
