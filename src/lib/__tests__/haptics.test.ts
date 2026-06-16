@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, afterEach, vi } from 'vitest'
+import { makeLocalStorage } from '@/test/localStorage'
 
 // Mock web-haptics so constructing an instance has no DOM/audio side effects;
 // the spy lets us assert the preset is forwarded when (and only when) it should.
@@ -14,22 +15,6 @@ const IPHONE_UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1'
 const ANDROID_UA =
   'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36'
-
-// Minimal in-memory localStorage so the module's preference lookup works while
-// `navigator` is stubbed (the stub detaches jsdom's own storage binding).
-function makeLocalStorage(): Storage {
-  const store = new Map<string, string>()
-  return {
-    getItem: (k) => (store.has(k) ? store.get(k)! : null),
-    setItem: (k, v) => void store.set(k, String(v)),
-    removeItem: (k) => void store.delete(k),
-    clear: () => store.clear(),
-    key: (i) => [...store.keys()][i] ?? null,
-    get length() {
-      return store.size
-    },
-  } as Storage
-}
 
 // Reload the module with a fresh navigator + storage so the module-level
 // support/enabled caches start clean for each case.
