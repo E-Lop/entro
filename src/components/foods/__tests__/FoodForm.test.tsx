@@ -172,4 +172,33 @@ describe('FoodForm accordion sections', () => {
       expect(detailsSection).toHaveClass('hidden')
     })
   })
+
+  it('keeps the collapsed section out of the tab order and a11y tree (inert + hidden)', () => {
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    const mainSection = document.getElementById('section-main')!
+    const detailsSection = document.getElementById('section-details')!
+
+    // Open section: reachable, announced.
+    expect(mainSection).not.toHaveAttribute('inert')
+    expect(mainSection).not.toHaveClass('hidden')
+    // Collapsed section: inert (no focus) + hidden (no layout / not announced).
+    expect(detailsSection).toHaveAttribute('inert')
+    expect(detailsSection).toHaveClass('hidden')
+  })
+
+  it('reveals a section when opened: drops inert/hidden and flips aria-expanded', async () => {
+    const user = userEvent.setup()
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    const detailsButton = document.querySelector('button[aria-controls="section-details"]')!
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'false')
+
+    await user.click(detailsButton)
+
+    const detailsSection = document.getElementById('section-details')!
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'true')
+    expect(detailsSection).not.toHaveAttribute('inert')
+    expect(detailsSection).not.toHaveClass('hidden')
+  })
 })

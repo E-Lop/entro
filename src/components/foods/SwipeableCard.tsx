@@ -35,6 +35,9 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
   // Animated hint: mini-swipe demonstration on first card (first time only)
   useEffect(() => {
     if (!showHintAnimation || !isMobile) return
+    // Respect reduced motion: skip the auto-playing swipe demo entirely. We don't
+    // mark it as "seen" so it can still play if the user later allows motion.
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
 
     const hasSeenAnimation = localStorage.getItem(HINT_ANIMATION_KEY) === 'true'
     if (hasSeenAnimation) return
@@ -168,14 +171,12 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
       {/* Card content with swipe transform */}
       <div
         {...handlers}
-        className={cn(
-          'relative bg-card',
-          isAnimating ? 'transition-transform duration-200 ease-out' : '',
-          className
-        )}
+        className={cn('relative bg-card', className)}
         style={{
           transform: `translateX(${swipeOffset}px)`,
-          transition: isAnimating ? 'transform 0.2s ease-out' : 'none',
+          // The inline transition governs the swipe animation (it always wins over
+          // a Tailwind class); `none` while idle so dragging tracks the finger 1:1.
+          transition: isAnimating ? 'transform 0.2s var(--ease-out-quart)' : 'none',
         }}
       >
         {children}

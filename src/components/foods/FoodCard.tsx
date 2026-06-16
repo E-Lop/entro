@@ -100,7 +100,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
           'hover:shadow-md transition-shadow',
           (status === 'expired' || status === 'expires_today') && 'border-destructive/40',
           (status === 'expires_soon' || status === 'expires_this_week') && daysUntilExpiry <= 3 && 'border-warning/50',
-          isRemoteUpdate && 'ring-2 ring-primary animate-pulse'
+          isRemoteUpdate && 'ring-2 ring-primary animate-pulse motion-reduce:animate-none'
         )}
       >
         <CardHeader className="pb-3">
@@ -135,7 +135,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
               return (
                 <div className="w-full h-40 rounded-lg overflow-hidden bg-muted/20 mb-3 relative">
                   <div className="w-full h-full flex items-center justify-center">
-                    <Loader2 className="w-8 h-8 text-muted-foreground/70 animate-spin" />
+                    <Loader2 className="w-8 h-8 text-muted-foreground/70 animate-spin motion-reduce:animate-none" />
                   </div>
                 </div>
               )

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, lazy, Suspense } from 'react'
+import { useEffect, useState, useRef, lazy, Suspense, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
@@ -31,6 +31,45 @@ function getSubmitButtonText(mode: 'create' | 'edit', isSubmitting: boolean): st
     return mode === 'create' ? 'Creazione in corso...' : 'Salvataggio in corso...'
   }
   return mode === 'create' ? 'Aggiungi alimento' : 'Salva modifiche'
+}
+
+/**
+ * CollapsibleSection — accordion panel that animates open/closed via
+ * `grid-template-rows: 0fr → 1fr` (layout-safe: no animating of `height`).
+ *
+ * `hidden` (display:none) is applied only once the collapse transition ends, so
+ * the panel animates out before it leaves the layout (dropping the form's
+ * `space-y` gap) and the tab order / a11y tree. `inert` covers the brief window
+ * while it is collapsing-but-still-visible. The `hidden` flag starts matching
+ * `open`, so the first render is correct without a transition (jsdom, the test
+ * environment, never fires `transitionend`).
+ */
+function CollapsibleSection({ id, open, children }: { id: string; open: boolean; children: ReactNode }) {
+  const [hidden, setHidden] = useState(!open)
+
+  useEffect(() => {
+    if (open) setHidden(false) // reveal an opening section immediately
+  }, [open])
+
+  return (
+    <div
+      id={id}
+      data-testid={id}
+      inert={!open || undefined}
+      onTransitionEnd={(e) => {
+        if (e.propertyName === 'grid-template-rows' && !open) setHidden(true)
+      }}
+      className={cn(
+        'grid transition-[grid-template-rows] duration-200 ease-[var(--ease-out-quart)] motion-reduce:transition-none',
+        open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+        hidden && 'hidden'
+      )}
+    >
+      <div className="overflow-hidden">
+        <div className="space-y-4">{children}</div>
+      </div>
+    </div>
+  )
 }
 
 interface FoodFormProps {
@@ -267,7 +306,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
               role="status"
               aria-live="polite"
             >
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
               Caricamento scanner...
             </div>
           }
@@ -323,7 +362,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             )}
           </button>
 
-          <div id="section-main" data-testid="section-main" className={openSection !== 'main' ? 'hidden' : 'space-y-4'}>
+          <CollapsibleSection id="section-main" open={openSection === 'main'}>
             {/* Barcode Scanner Button - Only in create mode */}
             {mode === 'create' && (
               <div className="pb-2">
@@ -336,7 +375,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                 >
                   {isLoadingProduct ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                       Caricamento dati prodotto...
                     </>
                   ) : (
@@ -520,7 +559,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                 )}
               />
             </div>
-          </div>
+          </CollapsibleSection>
 
           {/* === ACCORDION SECTION: Dettagli aggiuntivi === */}
           <button
@@ -543,7 +582,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             )}
           </button>
 
-          <div id="section-details" data-testid="section-details" className={openSection !== 'details' ? 'hidden' : 'space-y-4'}>
+          <CollapsibleSection id="section-details" open={openSection === 'details'}>
             {/* Image Upload Field */}
             <FormField
               control={form.control}
@@ -583,7 +622,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                 </FormItem>
               )}
             />
-          </div>
+          </CollapsibleSection>
 
           {/* Form Actions - Always visible outside accordion sections */}
           <div className="flex gap-3 pt-4 border-t">

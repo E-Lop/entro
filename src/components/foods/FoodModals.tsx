@@ -22,7 +22,7 @@ const FoodForm = lazy(() => import('./FoodForm').then(m => ({ default: m.FoodFor
 
 const FormSpinner = () => (
   <div className="flex justify-center py-8" role="status" aria-live="polite">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden="true" />
+    <div className="h-8 w-8 animate-spin motion-reduce:animate-none rounded-full border-4 border-border border-t-primary" aria-hidden="true" />
     <span className="sr-only">Caricamento modulo...</span>
   </div>
 )

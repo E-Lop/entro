@@ -7,6 +7,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Fixed
+- **Feedback aptico onesto su iOS**: WebKit non espone la Vibration API e il workaround `<input switch>` non vibra su trigger programmatico, quindi su iPhone/Safari (anche come PWA installata) il feedback aptico non può funzionare. L'impostazione "Feedback aptico" ora compare solo dove il browser supporta davvero la vibrazione (Android) e non viene più mostrata su iOS, dove prometteva qualcosa che non poteva mantenere.
+- **Movimento ridotto rispettato ovunque**: la preferenza di sistema "riduci movimento" (`prefers-reduced-motion`) è ora onorata globalmente per tutte le animazioni (spinner, swipe, transizioni, toast); la dimostrazione automatica dello swipe non parte più con il movimento ridotto.
+
+### Changed
+- Le sezioni del modulo "aggiungi/modifica alimento" (accordion) ora si aprono e si chiudono con una transizione fluida invece di comparire e sparire di scatto.
+
 ## [1.7.3] - 2026-06-11
 
 ### Removed

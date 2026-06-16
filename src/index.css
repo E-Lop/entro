@@ -30,6 +30,9 @@
     --input: 0 0% 89.8%;
     --ring: 142.1 76.2% 36.3%;
     --radius: 0.5rem;
+    /* Motion: shared deceleration curve (calm, decisive) for swipe, accordion
+       and press feedback. */
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -87,6 +90,23 @@
   .dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
+  }
+}
+
+/* Accessibility: honour the OS "reduce motion" setting globally. Safety net so
+   any animation added without an explicit `motion-reduce:*` utility (swipe
+   transform, FAB press, the remote-update pulse, Sonner toasts) still calms
+   down. Per-element `motion-reduce:*` utilities are kept for intent + tests.
+   Durations are near-zero rather than 0s so `transitionend`/`animationend`
+   still fire — the food-form accordion relies on `onTransitionEnd`. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

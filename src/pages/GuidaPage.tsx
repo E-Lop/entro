@@ -83,7 +83,7 @@ export function GuidaPage() {
           <div>
             <h3 className="font-medium mb-2">Modificare</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><strong className="text-foreground">Mobile:</strong> swipe verso destra sulla card (vibrazione alla soglia)</li>
+              <li><strong className="text-foreground">Mobile:</strong> swipe verso destra sulla card (con vibrazione dove supportata)</li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Modifica"</li>
             </ul>
           </div>
@@ -93,11 +93,12 @@ export function GuidaPage() {
               Eliminare
             </h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><strong className="text-foreground">Mobile:</strong> swipe verso sinistra sulla card (vibrazione alla soglia)</li>
+              <li><strong className="text-foreground">Mobile:</strong> swipe verso sinistra sulla card (con vibrazione dove supportata)</li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Elimina"</li>
             </ul>
             <p className="text-xs text-muted-foreground mt-2">
-              Il feedback aptico si può disattivare da Impostazioni &gt; Feedback Aptico.
+              Il feedback aptico è disponibile dove il browser supporta la vibrazione (es. Android)
+              e si può disattivare da Impostazioni &gt; Feedback Aptico.
             </p>
           </div>
           <div>
