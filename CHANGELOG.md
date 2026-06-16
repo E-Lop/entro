@@ -7,8 +7,20 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.7.5] - 2026-06-16
+
 ### Fixed
 - I filtri rapidi "In scadenza" e "Scaduti" ora funzionano anche offline e restano sempre coerenti con il conteggio delle card: filtro e ordinamento sono calcolati dai dati già in cache (stessa fonte dei conteggi), invece di una query separata che offline non era disponibile.
+
+### Changed
+- Aggiornato **Vite da 6 a 8** (nuovo bundler Rolldown + transformer Oxc) con i plugin correlati (`vite-plugin-pwa` 1.3, `@vitejs/plugin-react-swc` 4.3); il raggruppamento dei chunk passa da `manualChunks` a `advancedChunks`. Nessun cambiamento funzionale per chi usa l'app.
+- Suite di test resa compatibile con Node 25+ (polyfill di `localStorage` per l'ambiente jsdom).
+
+### Security
+- Risolte le ultime 2 segnalazioni Dependabot:
+  - **esbuild** (GHSA-gv7w-rqvm-qjhr, severità alta): l'upgrade a Vite 8 rimuove esbuild dall'albero delle dipendenze (sostituito da Rolldown/Oxc).
+  - **js-yaml** (GHSA-h67p-54hq-rp68, DoS): forzato a 4.2.0 via `overrides` (dipendenza di sviluppo, tramite eslint).
+- `npm audit`: 0 vulnerabilità.
 
 ## [1.7.4] - 2026-06-16
 
@@ -403,7 +415,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.5...HEAD
+[1.7.5]: https://github.com/E-Lop/entro/compare/v1.7.4...v1.7.5
 [1.7.4]: https://github.com/E-Lop/entro/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/E-Lop/entro/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/E-Lop/entro/compare/v1.7.1...v1.7.2
