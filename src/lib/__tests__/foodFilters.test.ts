@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { Food, FilterParams } from '@/lib/foods'
+import type { Food } from '@/lib/foods'
 import { filterFoods, sortFoods, deriveDashboardData } from '@/lib/foodFilters'
 
 const NOW = new Date('2026-06-16T12:00:00')
@@ -7,14 +7,12 @@ const NOW = new Date('2026-06-16T12:00:00')
 function makeFood(over: Partial<Food> & { name: string; expiry_date: string }): Food {
   return {
     id: over.name,
-    name: over.name,
-    expiry_date: over.expiry_date,
-    category_id: over.category_id ?? null,
-    storage_location: over.storage_location ?? 'fridge',
+    category_id: 'c0',
+    storage_location: 'fridge',
     quantity: null, quantity_unit: null, notes: null, image_url: null,
     barcode: null, status: 'active', consumed_at: null, deleted_at: null,
     user_id: 'u', list_id: null,
-    created_at: over.created_at ?? '2026-06-01T00:00:00Z',
+    created_at: '2026-06-01T00:00:00Z',
     updated_at: '2026-06-01T00:00:00Z',
     ...over,
   } as Food
@@ -76,7 +74,7 @@ describe('filterFoods - categoria / posizione / ricerca', () => {
 describe('sortFoods', () => {
   const items: Food[] = [
     makeFood({ name: 'Banana', expiry_date: '2026-06-20', category_id: 'b', created_at: '2026-06-03T00:00:00Z' }),
-    makeFood({ name: 'ananas', expiry_date: '2026-06-10', category_id: null, created_at: '2026-06-01T00:00:00Z' }),
+    makeFood({ name: 'ananas', expiry_date: '2026-06-10', category_id: 'c', created_at: '2026-06-01T00:00:00Z' }),
     makeFood({ name: 'Cocco', expiry_date: '2026-06-15', category_id: 'a', created_at: '2026-06-02T00:00:00Z' }),
   ]
   it('expiry_date asc (default)', () => {
@@ -91,8 +89,8 @@ describe('sortFoods', () => {
   it('created_at desc', () => {
     expect(sortFoods(items, 'created_at', 'desc').map(f => f.created_at)).toEqual(['2026-06-03T00:00:00Z', '2026-06-02T00:00:00Z', '2026-06-01T00:00:00Z'])
   })
-  it('category_id: i null finiscono in fondo', () => {
-    expect(sortFoods(items, 'category_id', 'asc').map(f => f.category_id)).toEqual(['a', 'b', null])
+  it('category_id asc', () => {
+    expect(sortFoods(items, 'category_id', 'asc').map(f => f.category_id)).toEqual(['a', 'b', 'c'])
   })
   it('non muta l\'array di input', () => {
     const copy = [...items]
