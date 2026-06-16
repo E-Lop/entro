@@ -141,14 +141,14 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             {isLoadingPreview ? (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center" role="status" aria-live="polite">
                 <div className="text-white text-center">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" aria-hidden="true" />
+                  <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none mx-auto mb-2" aria-hidden="true" />
                   <p className="text-sm">Caricamento immagine...</p>
                 </div>
               </div>
             ) : isConverting ? (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center" role="status" aria-live="polite">
                 <div className="text-white text-center">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" aria-hidden="true" />
+                  <Loader2 className="w-8 h-8 animate-spin motion-reduce:animate-none mx-auto mb-2" aria-hidden="true" />
                   <p className="text-sm">Conversione immagine HEIC...</p>
                 </div>
               </div>

@@ -249,7 +249,7 @@ export function DashboardPage() {
       {foodsLoading ? (
         <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
           <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
+            <div className="h-8 w-8 animate-spin motion-reduce:animate-none rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
             <div className="text-muted-foreground">Caricamento alimenti...</div>
           </div>
         </div>
@@ -363,7 +363,7 @@ export function DashboardPage() {
           {viewMode === 'calendar' ? (
             <Suspense fallback={
               <div className="flex items-center justify-center py-12" role="status" aria-label="Caricamento calendario">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
+                <div className="h-8 w-8 animate-spin motion-reduce:animate-none rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
               </div>
             }>
               <WeekView
@@ -410,7 +410,7 @@ export function DashboardPage() {
       {/* Floating Action Button (FAB) - Mobile Only */}
       <button
         onClick={() => setIsAddDialogOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center sm:hidden"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 active:scale-95 transition-[transform,background-color] duration-150 ease-[var(--ease-out-quart)] flex items-center justify-center sm:hidden"
         aria-label="Aggiungi alimento"
       >
         <Plus className="h-6 w-6" />

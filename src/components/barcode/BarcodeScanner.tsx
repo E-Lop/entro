@@ -138,7 +138,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
             {state === 'idle' && (
               <div className="absolute inset-0 flex items-center justify-center" role="status" aria-live="polite">
                 <div className="flex flex-col items-center gap-3 text-white">
-                  <Loader2 className="h-8 w-8 animate-spin" aria-hidden="true" />
+                  <Loader2 className="h-8 w-8 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                   <p className="text-sm">Inizializzazione fotocamera...</p>
                 </div>
               </div>
@@ -148,7 +148,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
             {isProcessing && (
               <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center" role="status" aria-live="polite">
                 <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-2">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
+                  <Loader2 className="h-6 w-6 animate-spin motion-reduce:animate-none text-primary" aria-hidden="true" />
                   <p className="text-sm font-medium">Elaborazione...</p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
                 Posiziona il codice a barre all'interno del riquadro
               </p>
               <div className="flex items-center justify-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-primary animate-pulse" aria-hidden="true" />
+                <div className="h-2 w-2 rounded-full bg-primary animate-pulse motion-reduce:animate-none" aria-hidden="true" />
                 <p className="text-xs text-muted-foreground">Scanner attivo</p>
               </div>
             </div>

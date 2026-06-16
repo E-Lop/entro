@@ -8,21 +8,19 @@ let instance: WebHaptics | null = null
 let enabledCache: boolean | null = null
 
 /**
- * Check if haptic feedback can work on this device.
- * - Android/desktop: navigator.vibrate exists
- * - iOS Safari 17.4+: no vibrate API, but web-haptics uses a hidden
- *   <input type="checkbox" switch> workaround for native haptic feedback
+ * Check if haptic feedback can actually fire on this device.
+ *
+ * Only the standard Vibration API (`navigator.vibrate`) delivers reliable,
+ * programmatic haptics — that means Android (Chrome/Firefox/Edge). iOS/WebKit
+ * does NOT implement `navigator.vibrate`, and the `<input type="checkbox" switch>`
+ * trick only vibrates on a real user toggle of the control, never on a
+ * programmatic `trigger()`. So we report support strictly where the Vibration
+ * API exists; everywhere else (e.g. iPhone, Safari) the "Feedback aptico"
+ * setting stays hidden instead of promising feedback we can't deliver.
  */
 function canHaptics(): boolean {
   if (typeof navigator === 'undefined') return false
-  // Android / standard Vibration API
-  if (typeof navigator.vibrate === 'function') return true
-  // iOS Safari: no vibrate, but the checkbox switch workaround works
-  const ua = navigator.userAgent
-  if (/iPad|iPhone/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-    return true
-  }
-  return false
+  return typeof navigator.vibrate === 'function'
 }
 
 let supportedCache: boolean | null = null

@@ -107,7 +107,7 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 
 **Su Mobile:**
 - Fai uno **swipe verso destra** sulla card dell'alimento
-- Sentirai una vibrazione quando raggiungi la soglia di azione
+- Dove supportato (Android) sentirai una vibrazione quando raggiungi la soglia di azione
 
 ### Eliminare un Alimento
 
@@ -119,7 +119,7 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 - Fai uno **swipe verso sinistra** sulla card dell'alimento
 - Conferma l'eliminazione
 
-> **Feedback aptico**: su dispositivi supportati (iOS 17.4+, Android) riceverai una vibrazione tattile durante lo swipe e alla conferma delle azioni. Puoi disattivarlo da **Impostazioni > Feedback Aptico**.
+> **Feedback aptico**: su Android (dove il browser espone la vibrazione) riceverai una vibrazione tattile durante lo swipe e alla conferma delle azioni. Su iPhone/Safari il web non supporta questa funzione. Puoi disattivarlo da **Impostazioni > Feedback Aptico**.
 
 ### Capire i Colori
 
@@ -315,7 +315,7 @@ Le notifiche vengono inviate ogni giorno alle **10:00 (ora italiana)**. Ricevera
 
 ## Feedback Aptico
 
-Su dispositivi supportati (iOS 17.4+ e Android), Entro fornisce vibrazione tattile durante le interazioni principali:
+Su dispositivi il cui browser espone la Vibration API (Android), Entro fornisce vibrazione tattile durante le interazioni principali. Su iPhone/Safari il web non espone questa API, quindi il feedback aptico non è disponibile:
 
 - **Swipe**: vibrazione leggera quando raggiungi la soglia di azione, più intensa alla conferma
 - **Creazione/modifica alimento**: vibrazione di successo
@@ -326,7 +326,7 @@ Su dispositivi supportati (iOS 17.4+ e Android), Entro fornisce vibrazione tatti
 1. Vai in **Impostazioni**
 2. Nella sezione **Feedback Aptico**, premi **"Attiva"** o **"Disattiva"**
 
-> **Nota**: questa opzione appare solo su dispositivi che supportano il feedback aptico. Su desktop non è disponibile.
+> **Nota**: questa opzione appare solo su dispositivi che supportano il feedback aptico. Su desktop e su iPhone non è disponibile.
 
 ---
 
