@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+> _Modifiche già in produzione su [entroapp.it](https://entroapp.it) — deploy Netlify verificato il 2026-06-17: il bundle servito conferma `navigator.storage.persist()` attivo e il nuovo `isIOS()` (`userAgent` + `maxTouchPoints`), con il check deprecato `navigator.platform`/`MacIntel` rimosso._
+
 ### Fixed
 - `isIOS()` non usa più `navigator.platform` (API legacy, segnalata come deprecata da TypeScript): la detection iOS ora si basa su `userAgent` + `navigator.maxTouchPoints`. Verifica MDN: `navigator.userAgentData` è assente su Safari/iOS (quindi inutile per rilevare iOS), `maxTouchPoints` è supportato da iOS/Safari 13+. Riconoscimento di iPhone e iPadOS (che si presenta come "Macintosh") invariato, distinto da un Mac reale tramite il touch. (#47)
 
