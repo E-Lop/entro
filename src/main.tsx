@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, onlineManager } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { createIDBPersister } from './lib/queryPersister'
+import { createIDBPersister, requestPersistentStorage } from './lib/queryPersister'
 import { registerMutationDefaults } from './lib/mutationDefaults'
 import './index.css'
 import App from './App.tsx'
@@ -39,6 +39,11 @@ registerMutationDefaults(queryClient)
 
 // IndexedDB persister for cache + mutations
 const persister = createIDBPersister()
+
+// Chiede al browser di esentare la cache IndexedDB dall'eviction (best-effort;
+// vedi requestPersistentStorage per i limiti di piattaforma — in particolare la
+// cancellazione ~7 giorni di iOS per lo storage non-persistente).
+void requestPersistentStorage()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -87,6 +87,10 @@ self.addEventListener('push', (event: PushEvent) => {
     badge: payload.badge ?? '/icons/favicon-32x32.png',
     tag: payload.tag ?? 'entro-expiry',
     data: payload.data ?? { url: '/' },
+    // `vibrate` è sperimentale e onorato solo su Android Chromium
+    // (api.Notification.vibrate, verificato 2026-06-17); iOS/Firefox/Safari e
+    // tutte le WebView lo ignorano — iOS suona il proprio haptic di notifica.
+    // Innocuo dove non supportato.
     vibrate: [100, 50, 200],
     requireInteraction: true,
   }

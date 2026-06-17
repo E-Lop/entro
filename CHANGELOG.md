@@ -7,6 +7,12 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Added
+- **Storage persistente**: all'avvio l'app chiede al browser di esentare la cache offline (IndexedDB) dalla cancellazione automatica via `navigator.storage.persist()` (supportato su Chrome 55+, Firefox 57+, Safari/iOS 15.2+). Mitiga la perdita dei dati offline dovuta alla cancellazione ~7 giorni di iOS per lo storage non-persistente. Best-effort: su iOS Safari la concessione è euristica, installare l'app in schermata Home resta la garanzia migliore.
+
+### Documentation
+- Allineate alla realtà (verifica su MDN Browser Compatibility Data) le assunzioni di compatibilità di piattaforma in codice e documentazione: feedback aptico non attivo su Firefox (desktop rimosso in v129, Android lo no-op pur esponendo l'API), opzione `vibrate` delle notifiche limitata ad Android Chromium, detection PWA iOS che dipende da `navigator.standalone` (WebKit riporta `display-mode: fullscreen` per le PWA installate, webkit#264218), push iOS solo da 16.4+ con app in Home.
+
 ## [1.7.5] - 2026-06-16
 
 ### Fixed
