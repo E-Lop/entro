@@ -7,13 +7,15 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
-> _Modifiche già in produzione su [entroapp.it](https://entroapp.it) — deploy Netlify verificato il 2026-06-17: il bundle servito conferma `navigator.storage.persist()` attivo e il nuovo `isIOS()` (`userAgent` + `maxTouchPoints`), con il check deprecato `navigator.platform`/`MacIntel` rimosso._
+## [1.8.0] - 2026-06-17
 
-### Fixed
-- `isIOS()` non usa più `navigator.platform` (API legacy, segnalata come deprecata da TypeScript): la detection iOS ora si basa su `userAgent` + `navigator.maxTouchPoints`. Verifica MDN: `navigator.userAgentData` è assente su Safari/iOS (quindi inutile per rilevare iOS), `maxTouchPoints` è supportato da iOS/Safari 13+. Riconoscimento di iPhone e iPadOS (che si presenta come "Macintosh") invariato, distinto da un Mac reale tramite il touch. (#47)
+> _Modifiche già in produzione su [entroapp.it](https://entroapp.it) — deploy Netlify verificato il 2026-06-17: il bundle servito conferma `navigator.storage.persist()` attivo e il nuovo `isIOS()` (`userAgent` + `maxTouchPoints`), con il check deprecato `navigator.platform`/`MacIntel` rimosso._
 
 ### Added
 - **Storage persistente**: all'avvio l'app chiede al browser di esentare la cache offline (IndexedDB) dalla cancellazione automatica via `navigator.storage.persist()` (supportato su Chrome 55+, Firefox 57+, Safari/iOS 15.2+). Mitiga la perdita dei dati offline dovuta alla cancellazione ~7 giorni di iOS per lo storage non-persistente. Best-effort: su iOS Safari la concessione è euristica, installare l'app in schermata Home resta la garanzia migliore.
+
+### Fixed
+- `isIOS()` non usa più `navigator.platform` (API legacy, segnalata come deprecata da TypeScript): la detection iOS ora si basa su `userAgent` + `navigator.maxTouchPoints`. Verifica MDN: `navigator.userAgentData` è assente su Safari/iOS (quindi inutile per rilevare iOS), `maxTouchPoints` è supportato da iOS/Safari 13+. Riconoscimento di iPhone e iPadOS (che si presenta come "Macintosh") invariato, distinto da un Mac reale tramite il touch. (#47)
 
 ### Documentation
 - Allineate alla realtà (verifica su MDN Browser Compatibility Data) le assunzioni di compatibilità di piattaforma in codice e documentazione: feedback aptico non attivo su Firefox (desktop rimosso in v129, Android lo no-op pur esponendo l'API), opzione `vibrate` delle notifiche limitata ad Android Chromium, detection PWA iOS che dipende da `navigator.standalone` (WebKit riporta `display-mode: fullscreen` per le PWA installate, webkit#264218), push iOS solo da 16.4+ con app in Home.
@@ -426,7 +428,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.7.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/E-Lop/entro/compare/v1.7.5...v1.8.0
 [1.7.5]: https://github.com/E-Lop/entro/compare/v1.7.4...v1.7.5
 [1.7.4]: https://github.com/E-Lop/entro/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/E-Lop/entro/compare/v1.7.2...v1.7.3
