@@ -11,12 +11,23 @@ let enabledCache: boolean | null = null
  * Check if haptic feedback can actually fire on this device.
  *
  * Only the standard Vibration API (`navigator.vibrate`) delivers reliable,
- * programmatic haptics — that means Android (Chrome/Firefox/Edge). iOS/WebKit
- * does NOT implement `navigator.vibrate`, and the `<input type="checkbox" switch>`
- * trick only vibrates on a real user toggle of the control, never on a
- * programmatic `trigger()`. So we report support strictly where the Vibration
- * API exists; everywhere else (e.g. iPhone, Safari) the "Feedback aptico"
- * setting stays hidden instead of promising feedback we can't deliver.
+ * programmatic haptics. Per MDN browser-compat data (verified 2026-06-17,
+ * `api.Navigator.vibrate`) that means Chromium-based Android — Chrome, Edge,
+ * Opera, Samsung Internet. Gaps the bare `typeof` check below cannot see:
+ *   - iOS/WebKit (every iOS browser) never implements it.
+ *   - Firefox desktop removed `navigator.vibrate` in v129 → reads as
+ *     unsupported here, correctly.
+ *   - Firefox Android still EXPOSES `navigator.vibrate` but the engine no-ops
+ *     it (disabled for abuse, bugzil.la/1653318): it returns `true` yet nothing
+ *     vibrates. So on Firefox Android this gate reports "supported" and the
+ *     "Feedback aptico" setting shows, but triggers stay silent. Accepted: the
+ *     failure is harmless and UA-sniffing Firefox is more fragile than the gap.
+ *
+ * The `<input type="checkbox" switch>` trick in `web-haptics` only vibrates on a
+ * real user toggle, never on a programmatic `trigger()`, so it buys nothing. We
+ * report support strictly where the Vibration API exists; on iOS/Safari the
+ * "Feedback aptico" setting stays hidden instead of promising feedback we can't
+ * deliver.
  */
 function canHaptics(): boolean {
   if (typeof navigator === 'undefined') return false

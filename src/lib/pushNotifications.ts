@@ -36,6 +36,17 @@ export function isPushSupported(): boolean {
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 }
 
+/**
+ * Rileva se l'app gira come PWA installata.
+ *
+ * Il ramo `navigator.standalone` è load-bearing su iOS, non un semplice
+ * fallback: per una PWA installata con manifest `display: standalone`, iOS
+ * WebKit riporta `display-mode: fullscreen` (NON `standalone`) in matchMedia
+ * (webkit bug 264218; MDN `css.at-rules.media.display-mode`, verificato
+ * 2026-06-17). Senza `navigator.standalone` il guard push iOS qui sotto
+ * tratterebbe gli iPhone installati come "non installati" e non li farebbe mai
+ * iscrivere. Mantenere entrambi i rami.
+ */
 export function isPWAInstalled(): boolean {
   return window.matchMedia('(display-mode: standalone)').matches
     || (navigator as { standalone?: boolean }).standalone === true
