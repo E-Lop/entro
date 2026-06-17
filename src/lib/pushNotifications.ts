@@ -53,8 +53,13 @@ export function isPWAInstalled(): boolean {
 }
 
 export function isIOS(): boolean {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  const ua = navigator.userAgent
+  if (/iPad|iPhone|iPod/.test(ua)) return true
+  // iPadOS Safari si presenta come "Macintosh": lo distinguiamo da un Mac reale
+  // tramite il touch (i Mac non hanno touchscreen). Evita `navigator.platform`,
+  // deprecato (issue #47). Verifica MDN 2026-06-17: `userAgentData` è assente su
+  // Safari/iOS, `maxTouchPoints` è supportato da iOS/Safari 13+.
+  return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1
 }
 
 export function getPermissionState(): NotificationPermission {

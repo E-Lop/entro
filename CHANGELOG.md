@@ -7,6 +7,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Fixed
+- `isIOS()` non usa più `navigator.platform` (API legacy, segnalata come deprecata da TypeScript): la detection iOS ora si basa su `userAgent` + `navigator.maxTouchPoints`. Verifica MDN: `navigator.userAgentData` è assente su Safari/iOS (quindi inutile per rilevare iOS), `maxTouchPoints` è supportato da iOS/Safari 13+. Riconoscimento di iPhone e iPadOS (che si presenta come "Macintosh") invariato, distinto da un Mac reale tramite il touch. (#47)
+
 ### Added
 - **Storage persistente**: all'avvio l'app chiede al browser di esentare la cache offline (IndexedDB) dalla cancellazione automatica via `navigator.storage.persist()` (supportato su Chrome 55+, Firefox 57+, Safari/iOS 15.2+). Mitiga la perdita dei dati offline dovuta alla cancellazione ~7 giorni di iOS per lo storage non-persistente. Best-effort: su iOS Safari la concessione è euristica, installare l'app in schermata Home resta la garanzia migliore.
 
