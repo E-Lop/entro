@@ -4,6 +4,7 @@ import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { resubscribeOnChange } from './lib/pushResubscribe'
 
 declare let self: ServiceWorkerGlobalScope
 
@@ -115,20 +116,21 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
   )
 })
 
+// Quando il browser rinnova/revoca la subscription, ri-sottoscrive nel SW e
+// notifica i client (pattern canonico MDN), senza dipendere da una finestra
+// aperta. NB: iOS Safari NON emette mai questo evento (BCD safari_ios=false,
+// verificato 2026-06-26) → su iPhone il recupero avviene dal nudge in-app.
 self.addEventListener('pushsubscriptionchange', (event: Event) => {
   const pushEvent = event as ExtendableEvent & {
     oldSubscription?: PushSubscription
     newSubscription?: PushSubscription
   }
-
-  if (!pushEvent.newSubscription) return
-
-  const subscriptionJson = pushEvent.newSubscription.toJSON()
   pushEvent.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then((windowClients) => {
-      for (const client of windowClients) {
-        client.postMessage({ type: 'PUSH_SUBSCRIPTION_CHANGED', subscription: subscriptionJson })
-      }
-    })
+    resubscribeOnChange(
+      self.registration.pushManager,
+      pushEvent,
+      self.clients,
+      import.meta.env.VITE_VAPID_PUBLIC_KEY,
+    )
   )
 })

@@ -5,7 +5,7 @@ import {
   getCurrentSubscription, subscribeToPush, unsubscribeFromPush, syncSubscription,
 } from '@/lib/pushNotifications'
 
-export type PushStatus = 'unsupported' | 'ios-not-installed' | 'prompt' | 'subscribed' | 'denied' | 'loading'
+export type PushStatus = 'unsupported' | 'ios-not-installed' | 'prompt' | 'subscribed' | 'lost' | 'denied' | 'loading'
 
 function getInitialStatus(): PushStatus {
   if (!isPushSupported()) return 'unsupported'
@@ -22,14 +22,17 @@ export function usePushSubscription() {
 
   // Refine status by checking actual subscription (async, non-blocking)
   // If subscribed, silently re-register to ensure server has the current endpoint
-  // (handles pushsubscriptionchange events that fired while no window was open)
+  // (handles pushsubscriptionchange events that fired while no window was open).
+  // If permission is granted but no subscription exists, it was silently lost
+  // (e.g. iOS invalidates it without firing pushsubscriptionchange) → 'lost',
+  // which surfaces a re-enable nudge rather than the first-time upsell ('prompt').
   useEffect(() => {
     if (status !== 'subscribed') return
     let cancelled = false
     getCurrentSubscription().then((sub) => {
       if (cancelled) return
       if (!sub) {
-        setStatus('prompt')
+        setStatus('lost')
       } else {
         syncSubscription()
       }

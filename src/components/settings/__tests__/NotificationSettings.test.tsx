@@ -80,4 +80,13 @@ describe('NotificationSettings — toggle push', () => {
     expect(screen.getByRole('combobox', { name: 'Inizio ore silenziose' })).toBeTruthy()
     expect(screen.getByRole('combobox', { name: 'Fine ore silenziose' })).toBeTruthy()
   })
+
+  it('con subscription persa (status lost) mostra "Attiva" e avvisa che le notifiche si sono disattivate', () => {
+    prefsRef.current = basePrefs()
+    pushState.status = 'lost'
+    render(<NotificationSettings />)
+
+    expect(screen.getByRole('button', { name: 'Attiva' })).toBeTruthy()
+    expect(screen.getByText(/si sono disattivate/i)).toBeTruthy()
+  })
 })
