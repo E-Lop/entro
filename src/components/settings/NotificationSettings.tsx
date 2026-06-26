@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import { Bell, BellOff, Smartphone } from 'lucide-react'
-import { usePushSubscription } from '@/hooks/usePushSubscription'
+import { usePushSubscription, type PushStatus } from '@/hooks/usePushSubscription'
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '@/hooks/useNotificationPreferences'
 
 const INTERVAL_OPTIONS = [
@@ -25,6 +25,17 @@ function getToggleButtonLabel(isLoading: boolean, isSubscribed: boolean): string
   return 'Attiva'
 }
 
+function getToggleHintText(status: PushStatus): string {
+  switch (status) {
+    case 'subscribed':
+      return 'Riceverai avvisi sulle scadenze'
+    case 'lost':
+      return 'Le notifiche si sono disattivate, riattivale'
+    default:
+      return 'Attiva per ricevere avvisi'
+  }
+}
+
 export function NotificationSettings() {
   const { status, isLoading, subscribe, unsubscribe } = usePushSubscription()
   const { data: prefs } = useNotificationPreferences()
@@ -32,7 +43,7 @@ export function NotificationSettings() {
   const [showMinIntervalHint, setShowMinIntervalHint] = useState(false)
 
   const isSubscribed = status === 'subscribed'
-  const showToggle = status === 'prompt' || status === 'subscribed' || status === 'loading'
+  const showToggle = status === 'prompt' || status === 'subscribed' || status === 'lost' || status === 'loading'
 
   function handleIntervalToggle(interval: number): void {
     if (!prefs) return
@@ -97,8 +108,11 @@ export function NotificationSettings() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Notifiche push</p>
-              <p className="text-sm text-muted-foreground" aria-live="polite">
-                {isSubscribed ? 'Riceverai avvisi sulle scadenze' : 'Attiva per ricevere avvisi'}
+              <p
+                className={`text-sm ${status === 'lost' ? 'text-warning' : 'text-muted-foreground'}`}
+                aria-live="polite"
+              >
+                {getToggleHintText(status)}
               </p>
             </div>
             <Button
