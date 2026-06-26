@@ -7,6 +7,12 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Added
+- **Recupero notifiche disattivate**: se le notifiche push si spengono da sole (iOS invalida periodicamente la subscription senza preavviso), l'app ora se ne accorge e mostra un avviso "Le notifiche si sono disattivate. Riattivale" in home e nelle impostazioni — basta un tap per ripristinarle. Prima il permesso restava `granted` ma il dispositivo spariva dal server in silenzio, senza più notifiche. (#52)
+
+### Changed
+- Service worker: l'handler `pushsubscriptionchange` ri-sottoscrive seguendo il pattern canonico MDN (utile su Chrome/Firefox/Safari desktop quando il browser rinnova la subscription). Su iOS Safari l'evento non viene mai emesso (BCD `api.ServiceWorkerGlobalScope.pushsubscriptionchange_event` `safari_ios=false`, verificato 2026-06-26) → su iPhone il recupero passa dall'avviso in-app. (#52)
+
 ## [1.8.0] - 2026-06-17
 
 > _Modifiche già in produzione su [entroapp.it](https://entroapp.it) — deploy Netlify verificato il 2026-06-17: il bundle servito conferma `navigator.storage.persist()` attivo e il nuovo `isIOS()` (`userAgent` + `maxTouchPoints`), con il check deprecato `navigator.platform`/`MacIntel` rimosso._
