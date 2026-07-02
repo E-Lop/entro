@@ -1,59 +1,109 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
 import { useSwipeable } from 'react-swipeable'
 import { Edit, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { triggerHaptic } from '@/lib/haptics'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { useSwipeableCard } from '@/hooks/useSwipeableCardController'
 
 interface SwipeableCardProps {
   children: React.ReactNode
+  /** Id stabile per il coordinamento "una sola card aperta" (es. food.id). */
+  id?: string
   onEdit?: () => void
   onDelete?: () => void
+  /**
+   * Editor rapido mostrato quando la card si aggancia aperta (swipe → destra).
+   * Riceve `close` per riportare la card allo stato chiuso (es. dopo "Modifica completa").
+   * Se assente, lo swipe → destra ricade sul comportamento precedente (`onEdit`).
+   */
+  renderQuickEditor?: (api: { close: () => void }) => React.ReactNode
   className?: string
   showHintAnimation?: boolean
 }
 
+const SLIVER = 40 // px della card originale lasciati visibili a destra come appiglio
+const THRESHOLD = 80 // px per attivare azione/aggancio
+const DELETE_TRAVEL = 150 // px di scorrimento per la conferma delete
+const ANIM_MS = 200
+const HINT_ANIMATION_KEY = 'entro_hasSeenSwipeAnimation'
+
 /**
- * SwipeableCard - Wrapper component for swipe gestures on mobile devices
+ * SwipeableCard — gesti orizzontali sulle card (solo mobile).
  *
- * Features:
- * - Swipe right → Edit action (green background)
- * - Swipe left → Delete action (red background)
- * - Animated hint on first card (mini-swipe demonstration)
- * - Smooth animations with CSS transitions
- * - Works on iOS and Android
+ * - Swipe verso **sinistra** → Elimina (pannello rosso), invariato.
+ * - Swipe verso **destra**:
+ *   - con `renderQuickEditor`: la card si **aggancia aperta** lasciando uno spicchio a
+ *     destra e rivela l'editor rapido di quantità sullo stesso asse orizzontale;
+ *   - senza `renderQuickEditor`: apre la modifica completa (`onEdit`), come prima.
+ * - Una sola card aperta per volta + chiusura allo scroll (via `useSwipeableCard`).
+ * - `prefers-reduced-motion`: niente slide, transizione immediata.
  */
-export function SwipeableCard({ children, onEdit, onDelete, className, showHintAnimation = false }: SwipeableCardProps) {
+export function SwipeableCard({
+  children,
+  id,
+  onEdit,
+  onDelete,
+  renderQuickEditor,
+  className,
+  showHintAnimation = false,
+}: SwipeableCardProps) {
   const isMobile = useIsMobile()
-  const [swipeOffset, setSwipeOffset] = useState(0)
+  const generatedId = useId()
+  const cardId = id ?? generatedId
+  const { isOpen, open, close } = useSwipeableCard(cardId)
+
+  const [offset, setOffset] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [cardWidth, setCardWidth] = useState(0)
   const cardRef = useRef<HTMLDivElement>(null)
+  const editorRef = useRef<HTMLDivElement>(null)
+  const draggingRef = useRef(false)
   const thresholdTriggered = useRef(false)
 
-  const HINT_ANIMATION_KEY = 'entro_hasSeenSwipeAnimation'
+  const reduceMotion =
+    typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const hasQuickEditor = !!renderQuickEditor
+  const openOffset = Math.max(0, cardWidth - SLIVER)
+  const canOpen = hasQuickEditor && openOffset > 0
 
-  // Animated hint: mini-swipe demonstration on first card (first time only)
+  // Misura la larghezza della card per calcolare la posizione di aggancio.
   useEffect(() => {
-    if (!showHintAnimation || !isMobile) return
-    // Respect reduced motion: skip the auto-playing swipe demo entirely. We don't
-    // mark it as "seen" so it can still play if the user later allows motion.
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    if (!isMobile) return
+    const el = cardRef.current
+    if (!el) return
+    const measure = () => setCardWidth(el.getBoundingClientRect().width)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [isMobile])
 
-    const hasSeenAnimation = localStorage.getItem(HINT_ANIMATION_KEY) === 'true'
-    if (hasSeenAnimation) return
+  // Anima verso lo stato di riposo quando il controller cambia (aggancio, scroll,
+  // apertura di un'altra card, "Modifica completa").
+  useEffect(() => {
+    if (draggingRef.current) return
+    setIsAnimating(true)
+    setOffset(isOpen ? openOffset : 0)
+    const t = setTimeout(() => setIsAnimating(false), ANIM_MS)
+    return () => clearTimeout(t)
+  }, [isOpen, openOffset])
 
-    // Wait 2 seconds after page load, then show hint animation
+  // All'apertura porta il focus nell'editor (torna alla card alla chiusura via tap/scroll).
+  useEffect(() => {
+    if (isOpen) editorRef.current?.focus()
+  }, [isOpen])
+
+  // Hint animato: mini-swipe verso destra sulla prima card (una volta sola).
+  useEffect(() => {
+    if (!showHintAnimation || !isMobile || reduceMotion) return
+    if (localStorage.getItem(HINT_ANIMATION_KEY) === 'true') return
+
     const timer = setTimeout(() => {
       setIsAnimating(true)
-
-      // Swipe right 30px
-      setSwipeOffset(30)
-
-      // Hold for 400ms, then return to center
+      setOffset(30)
       setTimeout(() => {
-        setSwipeOffset(0)
-
-        // Mark animation as shown after it completes
+        setOffset(0)
         setTimeout(() => {
           setIsAnimating(false)
           localStorage.setItem(HINT_ANIMATION_KEY, 'true')
@@ -62,121 +112,133 @@ export function SwipeableCard({ children, onEdit, onDelete, className, showHintA
     }, 2000)
 
     return () => clearTimeout(timer)
-  }, [showHintAnimation, isMobile])
+  }, [showHintAnimation, isMobile, reduceMotion])
 
-  // Swipe handlers
-  const handlers = useSwipeable({
-    onSwiping: (eventData) => {
-      if (!isMobile) return
-
-      // Limit swipe distance to ±150px
-      const offset = Math.max(-150, Math.min(150, eventData.deltaX))
-      setSwipeOffset(offset)
-
-      // Haptic feedback when reaching the action threshold
-      if (Math.abs(offset) >= 80 && !thresholdTriggered.current) {
-        thresholdTriggered.current = true
-        triggerHaptic('nudge')
-      } else if (Math.abs(offset) < 80) {
-        thresholdTriggered.current = false
-      }
-    },
-    onSwiped: (eventData) => {
-      if (!isMobile) {
-        setSwipeOffset(0)
-        return
-      }
-
-      const threshold = 80 // pixels to trigger action
-
-      // Swipe right → Edit
-      if (eventData.deltaX > threshold && onEdit) {
-        triggerAction('edit')
-      }
-      // Swipe left → Delete
-      else if (eventData.deltaX < -threshold && onDelete) {
-        triggerAction('delete')
-      }
-      // Not enough swipe, reset
-      else {
-        resetSwipe()
-      }
-
-      thresholdTriggered.current = false
-    },
-    trackMouse: false, // Only track touch events
-    trackTouch: true,
-  })
+  const animateTo = (target: number) => {
+    setIsAnimating(true)
+    setOffset(target)
+    setTimeout(() => setIsAnimating(false), ANIM_MS)
+  }
 
   const triggerAction = (action: 'edit' | 'delete') => {
     triggerHaptic('buzz')
     setIsAnimating(true)
-
-    // Animate to full swipe
-    setSwipeOffset(action === 'edit' ? 150 : -150)
-
-    // Trigger action after animation
+    setOffset(action === 'edit' ? cardWidth || DELETE_TRAVEL : -DELETE_TRAVEL)
     setTimeout(() => {
-      if (action === 'edit' && onEdit) {
-        onEdit()
-      } else if (action === 'delete' && onDelete) {
-        onDelete()
+      if (action === 'edit') onEdit?.()
+      else onDelete?.()
+      animateTo(0)
+    }, ANIM_MS)
+  }
+
+  const handlers = useSwipeable({
+    onSwiping: (e) => {
+      if (!isMobile) return
+      draggingRef.current = true
+
+      const base = isOpen ? openOffset : 0
+      const upper = canOpen ? openOffset : onEdit ? DELETE_TRAVEL : 0
+      const lower = isOpen ? 0 : onDelete ? -DELETE_TRAVEL : 0
+      const raw = Math.max(lower, Math.min(upper, base + e.deltaX))
+      setOffset(raw)
+
+      const crossed = Math.abs(e.deltaX) >= THRESHOLD
+      if (crossed && !thresholdTriggered.current) {
+        thresholdTriggered.current = true
+        triggerHaptic('nudge')
+      } else if (!crossed) {
+        thresholdTriggered.current = false
       }
-      resetSwipe()
-    }, 200)
-  }
+    },
+    onSwiped: (e) => {
+      thresholdTriggered.current = false
+      draggingRef.current = false
+      if (!isMobile) {
+        setOffset(0)
+        return
+      }
 
-  const resetSwipe = () => {
-    setIsAnimating(true)
-    setSwipeOffset(0)
-    setTimeout(() => setIsAnimating(false), 200)
-  }
+      // Card già aperta: swipe a sinistra la chiude, altrimenti torna aperta.
+      if (isOpen) {
+        if (e.deltaX < -THRESHOLD) close()
+        else animateTo(openOffset)
+        return
+      }
 
-  // Calculate background opacity based on swipe distance
-  const getBackgroundOpacity = () => {
-    return Math.abs(swipeOffset) / 150
-  }
+      // Card chiusa.
+      if (e.deltaX > THRESHOLD) {
+        if (canOpen) open()
+        else if (onEdit) triggerAction('edit')
+        else animateTo(0)
+      } else if (e.deltaX < -THRESHOLD && onDelete) {
+        triggerAction('delete')
+      } else {
+        animateTo(0)
+      }
+    },
+    trackMouse: false,
+    trackTouch: true,
+  })
 
-  // If not mobile, render children without swipe functionality
+  // Desktop: nessuno swipe, i pulsanti nel footer gestiscono le azioni.
   if (!isMobile) {
     return <div className={className}>{children}</div>
   }
 
+  const deleteRevealOpacity = offset < 0 ? Math.min(1, Math.abs(offset) / DELETE_TRAVEL) : 0
+  const editRevealOpacity = !isOpen && offset > 0 ? Math.min(1, offset / DELETE_TRAVEL) : 0
+
   return (
     <div className="relative overflow-hidden" ref={cardRef}>
-      {/* Background layers that appear during swipe */}
-
-      {/* Edit background (brand green) - appears on swipe right */}
+      {/* Sfondo Elimina (destructive) — rivelato dallo swipe a sinistra */}
       <div
-        className={cn(
-          'absolute inset-0 bg-primary flex items-center justify-start px-6',
-          'transition-opacity duration-200'
-        )}
-        style={{ opacity: swipeOffset > 0 ? getBackgroundOpacity() : 0 }}
-      >
-        <Edit className="h-6 w-6 text-primary-foreground" />
-      </div>
-
-      {/* Delete background (destructive) - appears on swipe left */}
-      <div
-        className={cn(
-          'absolute inset-0 bg-destructive flex items-center justify-end px-6',
-          'transition-opacity duration-200'
-        )}
-        style={{ opacity: swipeOffset < 0 ? getBackgroundOpacity() : 0 }}
+        className="absolute inset-0 bg-destructive flex items-center justify-end px-6 transition-opacity duration-200"
+        style={{ opacity: deleteRevealOpacity }}
+        aria-hidden="true"
       >
         <Trash2 className="h-6 w-6 text-destructive-foreground" />
       </div>
 
-      {/* Card content with swipe transform */}
+      {/* Sfondo Modifica (verde) — affordance durante lo swipe a destra / fallback */}
+      {!isOpen && (
+        <div
+          className="absolute inset-0 bg-primary flex items-center justify-start px-6 transition-opacity duration-200"
+          style={{ opacity: editRevealOpacity }}
+          aria-hidden="true"
+        >
+          <Edit className="h-6 w-6 text-primary-foreground" />
+        </div>
+      )}
+
+      {/* Editor rapido — mostrato quando la card è agganciata aperta */}
+      {isOpen && renderQuickEditor && (
+        <div
+          ref={editorRef}
+          tabIndex={-1}
+          className="absolute inset-y-0 left-0 outline-none"
+          style={{ width: openOffset }}
+        >
+          {renderQuickEditor({ close })}
+        </div>
+      )}
+
+      {/* Contenuto della card, traslato orizzontalmente */}
       <div
         {...handlers}
-        className={cn('relative bg-card', className)}
+        onClick={isOpen ? () => close() : undefined}
+        className={cn(
+          'relative bg-card',
+          isOpen && 'cursor-pointer shadow-[-8px_0_16px_rgba(0,0,0,0.15)]',
+          className,
+        )}
         style={{
-          transform: `translateX(${swipeOffset}px)`,
-          // The inline transition governs the swipe animation (it always wins over
-          // a Tailwind class); `none` while idle so dragging tracks the finger 1:1.
-          transition: isAnimating ? 'transform 0.2s var(--ease-out-quart)' : 'none',
+          transform: `translateX(${offset}px)`,
+          // Idle/drag: nessuna transizione (tracking 1:1). Solo durante le animazioni
+          // di riposo/azione, e mai con reduced-motion (snap immediato).
+          transition:
+            !draggingRef.current && isAnimating && !reduceMotion
+              ? 'transform 0.2s var(--ease-out-quart)'
+              : 'none',
         }}
       >
         {children}

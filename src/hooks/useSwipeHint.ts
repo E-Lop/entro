@@ -30,7 +30,7 @@ export function useSwipeHint() {
     if (!hasSeenBefore && !hasShownHint) {
       // Wait 1 second after page load to show hint
       const timer = setTimeout(() => {
-        toast.info('💡 Tip: Fai swipe sulle card per modificare o eliminare', {
+        toast.info('💡 Tip: Fai swipe sulle card per cambiare la quantità o eliminare', {
           duration: 5000,
           position: 'top-center',
         })

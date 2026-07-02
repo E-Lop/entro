@@ -8,9 +8,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 ## [Unreleased]
 
 ### Added
+- **Modifica rapida della quantità**: lo swipe verso destra su una card apre al volo un editor di quantità (`−  valore  +`) *sulla card stessa*, sullo stesso asse orizzontale del gesto, lasciando visibile uno spicchio della card originale per richiuderla. Sotto lo stepper, un pulsante "Modifica completa" porta alla modifica estesa di prima. Salvataggio automatico e ottimistico (funziona anche offline), passo per unità (pz/confezioni di 1, kg/l di 0,1, g/ml di 10) e tocco sul numero per digitare un valore preciso. Una sola card aperta per volta; scorrere la lista la richiude. Pensato per l'azione più frequente in cucina, con una mano.
 - **Recupero notifiche disattivate**: se le notifiche push si spengono da sole (iOS invalida periodicamente la subscription senza preavviso), l'app ora se ne accorge e mostra un avviso "Le notifiche si sono disattivate. Riattivale" in home e nelle impostazioni — basta un tap per ripristinarle. Prima il permesso restava `granted` ma il dispositivo spariva dal server in silenzio, senza più notifiche. (#52)
 
 ### Changed
+- Lo **swipe verso destra** sulle card non apre più direttamente la modifica completa dell'alimento, ma il nuovo editor rapido di quantità (la modifica completa resta comunque a un tap). Lo swipe verso sinistra (elimina) è invariato.
 - Service worker: l'handler `pushsubscriptionchange` ri-sottoscrive seguendo il pattern canonico MDN (utile su Chrome/Firefox/Safari desktop quando il browser rinnova la subscription). Su iOS Safari l'evento non viene mai emesso (BCD `api.ServiceWorkerGlobalScope.pushsubscriptionchange_event` `safari_ios=false`, verificato 2026-06-26) → su iPhone il recupero passa dall'avviso in-app. (#52)
 
 ## [1.8.0] - 2026-06-17

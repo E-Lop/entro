@@ -9,6 +9,7 @@ import { useFoods, useCategories } from '../hooks/useFoods'
 import { useFoodFormDialog } from '../hooks/useFoodFormDialog'
 import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
+import { SwipeableCardProvider } from '../hooks/useSwipeableCardController'
 import { useRealtimeFoods } from '../hooks/useRealtimeFoods'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodFilters } from '../components/foods/FoodFilters'
@@ -353,18 +354,20 @@ export function DashboardPage() {
               />
             </Suspense>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {foods.map((food, index) => (
-                <FoodCard
-                  key={food.id}
-                  food={food}
-                  category={getCategoryForFood(food)}
-                  onEdit={handleEditClick}
-                  onDelete={handleDeleteClick}
-                  showHintAnimation={index === 0}
-                />
-              ))}
-            </div>
+            <SwipeableCardProvider>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {foods.map((food, index) => (
+                  <FoodCard
+                    key={food.id}
+                    food={food}
+                    category={getCategoryForFood(food)}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
+                    showHintAnimation={index === 0}
+                  />
+                ))}
+              </div>
+            </SwipeableCardProvider>
           )}
         </div>
       )}

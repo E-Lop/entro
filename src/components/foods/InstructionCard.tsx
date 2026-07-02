@@ -41,7 +41,7 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
                 <ArrowRight className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Swipe verso destra</p>
-                  <p className="text-muted-foreground text-xs mt-0.5">Modifica un alimento</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">Modifica la quantità</p>
                 </div>
               </div>
 

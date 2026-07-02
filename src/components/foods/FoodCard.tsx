@@ -9,6 +9,7 @@ import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
 import { cn } from '@/lib/utils'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
 import { SwipeableCard } from './SwipeableCard'
+import { QuickQuantityEditor } from './QuickQuantityEditor'
 
 interface FoodCardProps {
   food: Food | FoodWithRealtimeMetadata
@@ -91,8 +92,22 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
 
   return (
     <SwipeableCard
+      id={food.id}
       onEdit={onEdit ? () => onEdit(food) : undefined}
       onDelete={onDelete ? () => onDelete(food) : undefined}
+      renderQuickEditor={
+        onEdit
+          ? ({ close }) => (
+              <QuickQuantityEditor
+                food={food}
+                onOpenFullEdit={() => {
+                  close()
+                  onEdit(food)
+                }}
+              />
+            )
+          : undefined
+      }
       showHintAnimation={showHintAnimation}
     >
       <Card
