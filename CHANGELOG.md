@@ -7,6 +7,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-07-02
+
 ### Added
 - **Modifica rapida della quantità**: lo swipe verso destra su una card apre al volo un editor di quantità (`−  valore  +`) *sulla card stessa*, sullo stesso asse orizzontale del gesto, lasciando visibile uno spicchio della card originale per richiuderla. Sotto lo stepper, un pulsante "Modifica completa" porta alla modifica estesa di prima. Salvataggio automatico e ottimistico (funziona anche offline), passo per unità (pz/confezioni di 1, kg/l di 0,1, g/ml di 10) e tocco sul numero per digitare un valore preciso. Una sola card aperta per volta; scorrere la lista la richiude. Pensato per l'azione più frequente in cucina, con una mano.
 - **Recupero notifiche disattivate**: se le notifiche push si spengono da sole (iOS invalida periodicamente la subscription senza preavviso), l'app ora se ne accorge e mostra un avviso "Le notifiche si sono disattivate. Riattivale" in home e nelle impostazioni — basta un tap per ripristinarle. Prima il permesso restava `granted` ma il dispositivo spariva dal server in silenzio, senza più notifiche. (#52)
@@ -436,7 +438,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/E-Lop/entro/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/E-Lop/entro/compare/v1.7.5...v1.8.0
 [1.7.5]: https://github.com/E-Lop/entro/compare/v1.7.4...v1.7.5
 [1.7.4]: https://github.com/E-Lop/entro/compare/v1.7.3...v1.7.4
