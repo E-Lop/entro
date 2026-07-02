@@ -81,9 +81,16 @@ export function GuidaPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h3 className="font-medium mb-2">Modificare</h3>
+            <h3 className="font-medium mb-2">Modificare la quantità (veloce)</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><strong className="text-foreground">Mobile:</strong> swipe verso destra sulla card (con vibrazione dove supportata)</li>
+              <li><strong className="text-foreground">Mobile:</strong> swipe verso destra sulla card: si apre l'editor rapido con i pulsanti <strong className="text-foreground">−</strong> e <strong className="text-foreground">+</strong> (o tocca il numero per digitarlo). Resta uno spicchio della card a destra per richiuderla; scorrendo la lista si chiude da sola. Con vibrazione dove supportata</li>
+              <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Modifica" e cambia la quantità nel modulo</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Modificare tutto il resto</h3>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li><strong className="text-foreground">Mobile:</strong> nell'editor rapido tocca <strong className="text-foreground">"Modifica completa"</strong> per aprire il modulo (nome, scadenza, unità, categoria, foto…)</li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Modifica"</li>
             </ul>
           </div>

@@ -25,7 +25,8 @@ interface SwipeableCardProps {
 const SLIVER = 40 // px della card originale lasciati visibili a destra come appiglio
 const THRESHOLD = 80 // px per attivare azione/aggancio
 const DELETE_TRAVEL = 150 // px di scorrimento per la conferma delete
-const ANIM_MS = 200
+const OPEN_MS = 200 // durata di apertura/aggancio e delle azioni
+const CLOSE_MS = 320 // chiusura un po' più lenta, per accompagnare il ritorno della card
 const HINT_ANIMATION_KEY = 'entro_hasSeenSwipeAnimation'
 
 /**
@@ -55,6 +56,7 @@ export function SwipeableCard({
 
   const [offset, setOffset] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [animMs, setAnimMs] = useState(OPEN_MS)
   const [cardWidth, setCardWidth] = useState(0)
   const cardRef = useRef<HTMLDivElement>(null)
   const editorRef = useRef<HTMLDivElement>(null)
@@ -83,9 +85,11 @@ export function SwipeableCard({
   // apertura di un'altra card, "Modifica completa").
   useEffect(() => {
     if (draggingRef.current) return
+    const duration = isOpen ? OPEN_MS : CLOSE_MS
+    setAnimMs(duration)
     setIsAnimating(true)
     setOffset(isOpen ? openOffset : 0)
-    const t = setTimeout(() => setIsAnimating(false), ANIM_MS)
+    const t = setTimeout(() => setIsAnimating(false), duration)
     return () => clearTimeout(t)
   }, [isOpen, openOffset])
 
@@ -114,21 +118,23 @@ export function SwipeableCard({
     return () => clearTimeout(timer)
   }, [showHintAnimation, isMobile, reduceMotion])
 
-  const animateTo = (target: number) => {
+  const animateTo = (target: number, duration = OPEN_MS) => {
+    setAnimMs(duration)
     setIsAnimating(true)
     setOffset(target)
-    setTimeout(() => setIsAnimating(false), ANIM_MS)
+    setTimeout(() => setIsAnimating(false), duration)
   }
 
   const triggerAction = (action: 'edit' | 'delete') => {
     triggerHaptic('buzz')
+    setAnimMs(OPEN_MS)
     setIsAnimating(true)
     setOffset(action === 'edit' ? cardWidth || DELETE_TRAVEL : -DELETE_TRAVEL)
     setTimeout(() => {
       if (action === 'edit') onEdit?.()
       else onDelete?.()
       animateTo(0)
-    }, ANIM_MS)
+    }, OPEN_MS)
   }
 
   const handlers = useSwipeable({
@@ -237,7 +243,7 @@ export function SwipeableCard({
           // di riposo/azione, e mai con reduced-motion (snap immediato).
           transition:
             !draggingRef.current && isAnimating && !reduceMotion
-              ? 'transform 0.2s var(--ease-out-quart)'
+              ? `transform ${animMs}ms var(--ease-out-quart)`
               : 'none',
         }}
       >

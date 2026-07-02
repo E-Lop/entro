@@ -100,14 +100,21 @@ Se hai dimenticato la password, puoi reimpostarla facilmente:
 
 ## Gestire gli Alimenti
 
-### Modificare un Alimento
+### Modificare la Quantità (veloce)
+
+**Su Mobile:**
+- Fai uno **swipe verso destra** sulla card dell'alimento: si apre l'**editor rapido della quantità** direttamente sulla card
+- Usa i pulsanti **−** / **+** oppure tocca il numero per digitarlo (il passo si adatta all'unità: 1 per pezzi/confezioni, 0,1 per kg/l, 10 per g/ml)
+- La modifica si salva da sola (funziona anche offline). Resta uno **spicchio** della card a destra: toccalo o fai swipe indietro per richiuderla; anche scorrere la lista la richiude
+- Dove supportato (Android) sentirai una vibrazione quando raggiungi la soglia di azione
+
+### Modificare un Alimento (completo)
 
 **Su Desktop:**
 - Clicca il pulsante **"Modifica"** sulla card dell'alimento
 
 **Su Mobile:**
-- Fai uno **swipe verso destra** sulla card dell'alimento
-- Dove supportato (Android) sentirai una vibrazione quando raggiungi la soglia di azione
+- Nell'editor rapido tocca **"Modifica completa"** per aprire il modulo con nome, scadenza, unità, categoria, note e foto
 
 ### Eliminare un Alimento
 

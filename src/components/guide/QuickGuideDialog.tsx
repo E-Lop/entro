@@ -30,8 +30,8 @@ const guideItems = [
   },
   {
     icon: ArrowLeftRight,
-    title: 'Modifica ed elimina',
-    description: 'Swipe dx per modificare, sx per eliminare (su desktop usa i pulsanti)',
+    title: 'Quantità ed elimina',
+    description: 'Swipe destra per cambiare la quantità al volo (poi "Modifica completa" per il resto), sinistra per eliminare. Su desktop usa i pulsanti',
   },
   {
     icon: Palette,

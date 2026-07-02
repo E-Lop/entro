@@ -44,7 +44,7 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 - **Supporto offline completo** — Cache persistente in IndexedDB, CRUD offline con coda mutazioni e sync automatica al ritorno della connessione
 - **Push notifications** — Avvisi giornalieri per alimenti in scadenza, personalizzabili per anticipo, ore silenziose e limite giornaliero
 - **Vista calendario** — Agenda verticale dei prossimi 7 giorni: l'intera settimana a colpo d'occhio, ogni giorno con conteggio e urgenza delle scadenze
-- **Swipe gestures** — Swipe destro per modificare, sinistro per eliminare (mobile)
+- **Swipe gestures** — Swipe destro per la modifica rapida della quantità (con accesso alla modifica completa), sinistro per eliminare (mobile)
 - **Feedback aptico** — Vibrazione tattile su swipe, creazione, modifica ed eliminazione alimenti (su Android con browser basati su Chromium che implementano la Vibration API; non disponibile su iOS/Safari, e Firefox non la attiva)
 - **Dark mode** — Light, dark e automatico (segue il sistema)
 - **PWA installabile** — Installabile da browser su iOS e Android con esperienza offline nativa
