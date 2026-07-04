@@ -5,6 +5,8 @@ node_modules/
 
 # Testing
 /coverage
+/playwright-report
+/test-results
 
 # Production
 dist/
@@ -39,6 +41,7 @@ lerna-debug.log*
 
 # Supabase
 .supabase/
+supabase/.branches/
 
 # Temporary files
 *.tmp
