@@ -1,0 +1,38 @@
+name: Feature request
+description: Proponi una funzionalita' o un miglioramento.
+title: "feat: "
+labels: []
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema o opportunita'
+      description: Quale bisogno utente risolve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Descrivi il comportamento desiderato.
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approccio tecnico suggerito
+      description: File, API, dati o pattern rilevanti.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criteri di accettazione
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Note
+      description: Vincoli, rischi o riferimenti.

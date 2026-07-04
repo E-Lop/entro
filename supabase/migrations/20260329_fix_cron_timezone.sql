@@ -3,19 +3,33 @@
 -- pg_cron su Supabase non supporta timezone per-job, quindi usiamo 8:00 UTC
 -- che corrisponde a 10:00 CEST (estate) / 9:00 CET (inverno).
 
-SELECT cron.unschedule('send-expiry-notifications');
+DO $migration$
+BEGIN
+  IF to_regnamespace('cron') IS NULL THEN
+    RAISE NOTICE 'Skipping cron reschedule: pg_cron schema is not available in this environment.';
+    RETURN;
+  END IF;
 
-SELECT cron.schedule(
-  'send-expiry-notifications',
-  '0 8 * * *',
-  $$
-    SELECT net.http_post(
-      url := '<SUPABASE_URL>/functions/v1/send-expiry-notifications',
-      headers := jsonb_build_object(
-        'Content-Type', 'application/json',
-        'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'cron_secret' LIMIT 1)
-      ),
-      body := '{}'::jsonb
-    );
-  $$
-);
+  BEGIN
+    EXECUTE $unschedule$SELECT cron.unschedule('send-expiry-notifications')$unschedule$;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Existing cron job send-expiry-notifications was not unscheduled: %', SQLERRM;
+  END;
+
+  EXECUTE $cron$
+    SELECT cron.schedule(
+      'send-expiry-notifications',
+      '0 8 * * *',
+      $$
+        SELECT net.http_post(
+          url := '<SUPABASE_URL>/functions/v1/send-expiry-notifications',
+          headers := jsonb_build_object(
+            'Content-Type', 'application/json',
+            'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'cron_secret' LIMIT 1)
+          ),
+          body := '{}'::jsonb
+        );
+      $$
+    )
+  $cron$;
+END $migration$;

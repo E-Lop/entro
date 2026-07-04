@@ -100,7 +100,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
         const { members } = await getListMembers(list.id)
         listData.members = members.map((m) => ({
           userId: m.user_id,
-          joinedAt: m.joined_at,
+          joinedAt: m.joined_at ?? 'N/A',
         }))
       }
     } catch (listError) {
