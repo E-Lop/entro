@@ -25,6 +25,9 @@ CREATE POLICY "Users can manage own subscriptions"
 
 CREATE INDEX idx_push_subscriptions_user_id ON public.push_subscriptions(user_id);
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.push_subscriptions TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.push_subscriptions TO service_role;
+
 -- 2. Tabella notification_preferences
 CREATE TABLE public.notification_preferences (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -50,6 +53,9 @@ CREATE POLICY "Users can manage own preferences"
   FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notification_preferences TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notification_preferences TO service_role;
 
 -- 3. Funzione per il cron job
 CREATE OR REPLACE FUNCTION public.get_expiring_foods_for_notifications()
@@ -105,6 +111,8 @@ AS $$
     )
   ORDER BY lm.user_id, days_until_expiry ASC;
 $$;
+
+GRANT EXECUTE ON FUNCTION public.get_expiring_foods_for_notifications() TO service_role;
 
 -- 4. pg_cron schedule (eseguire DOPO deploy Edge Functions)
 -- Nota: abilitare pg_cron e pg_net dal Dashboard Supabase > Database > Extensions

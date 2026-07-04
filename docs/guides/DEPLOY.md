@@ -7,6 +7,27 @@ Guida passo-passo per deployare **entro** su Netlify.
 - Account Netlify (gratuito): https://app.netlify.com/signup
 - Progetto Supabase attivo con database configurato
 - Repository GitHub (opzionale ma consigliato)
+- Per sviluppo e verifica migration: Docker + Supabase CLI in locale
+
+## 🧪 Supabase locale per sviluppo
+
+Per validare migration e flussi database senza toccare la produzione:
+
+```bash
+supabase start
+supabase db reset
+npm run supabase:types
+```
+
+Poi configura `.env.local` con i valori locali stampati dalla CLI:
+
+```bash
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_ANON_KEY=<local-anon-key>
+VITE_APP_URL=http://localhost:5173
+```
+
+Lo staging remoto Supabase è opzionale: sul piano Free può consumare uno dei progetti attivi disponibili. Per default usare Supabase locale.
 
 ## 🔧 Step 1: Preparazione Environment Variables
 
@@ -43,7 +64,7 @@ git push origin main
    VITE_ENABLE_BARCODE_SCANNER=true
    VITE_ENABLE_SWIPE_GESTURES=true
    VITE_ENABLE_NOTIFICATIONS=true
-   VITE_ENABLE_SHARED_LISTS=false
+   VITE_ENABLE_SHARED_LISTS=true
    ```
 7. Click **"Deploy site"**
 
@@ -77,6 +98,9 @@ Se non l'hai fatto durante il deploy:
 1. Vai su **Site settings** → **Environment variables**
 2. Click **"Add a variable"**
 3. Aggiungi tutte le variabili necessarie (vedi Step 1)
+
+`VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` devono vivere nelle environment variables Netlify, non in `netlify.toml`.
+Le impostazioni non sensibili possono restare in `netlify.toml`: la documentazione Netlify conferma che il file puo' dichiarare environment variables di build e che, in caso di conflitto, la configurazione nel file sovrascrive la UI. Per valori sensibili o ruotabili, usare UI/CLI/API Netlify.
 
 **IMPORTANTE**: Dopo aver aggiunto le env vars, fai un **re-deploy**:
 - Vai su **Deploys** → **Trigger deploy** → **Clear cache and deploy site**

@@ -7,9 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "typecheck": "tsc -b",
+    "supabase:types": "supabase gen types typescript --local > src/lib/supabase.types.ts",
     "detect:design": "node scripts/detect-design.mjs",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:ci": "vitest run --no-file-parallelism --maxWorkers=1",
     "test:watch": "vitest"
   },
   "dependencies": {

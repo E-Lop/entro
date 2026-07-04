@@ -1,0 +1,44 @@
+name: Bug report
+description: Segnala un problema riproducibile in Entro.
+title: "fix: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie per la segnalazione. Scrivi in italiano o inglese. Per vulnerabilita' di sicurezza usa `SECURITY.md`, non una issue pubblica.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Descrizione
+      description: Cosa succede?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passi per riprodurre
+      placeholder: |
+        1. Vai a ...
+        2. Tocca ...
+        3. Osserva ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento atteso
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente
+      placeholder: "Browser, OS, device, installata come PWA si/no"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Note aggiuntive
+      description: Screenshot, log o contesto utile.

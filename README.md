@@ -1,5 +1,6 @@
 # entro
 
+[![CI](https://github.com/E-Lop/entro/actions/workflows/ci.yml/badge.svg)](https://github.com/E-Lop/entro/actions/workflows/ci.yml)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8439a7e9-1a8a-4401-83f1-37f349082a9b/deploy-status)](https://app.netlify.com/projects/entro-il/deploys)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
@@ -12,6 +13,12 @@
 Una Progressive Web App completa per il tracciamento delle scadenze alimentari, con scansione barcode, liste condivise in tempo reale e conformità GDPR. Pensata per famiglie e coinquilini che vogliono sprecare meno cibo.
 
 **[Prova l'app live &rarr;](https://entroapp.it)**
+
+## What is this?
+
+Entro is an open-source Italian PWA for tracking food expiry dates, reducing waste and sharing a household food list in real time. It is built as a production app and as a public portfolio project.
+
+**[Open the live app &rarr;](https://entroapp.it)**
 
 ---
 
@@ -58,7 +65,7 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 | Categoria | Tecnologia |
 |---|---|
 | **Frontend** | React 19, TypeScript 5.6 |
-| **Build Tool** | Vite 6 (SWC) |
+| **Build Tool** | Vite 8 (SWC) |
 | **Styling** | Tailwind CSS 3, shadcn/ui |
 | **State Management** | Zustand (client), TanStack Query (server) |
 | **Offline** | IndexedDB (idb-keyval), PersistQueryClient, mutation queue |

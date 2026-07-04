@@ -7,6 +7,21 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
 ## [Unreleased]
 
+### Added
+- Baseline Supabase ricostruttiva in `supabase/migrations/` per rendere `supabase db reset` riproducibile da clone pulito.
+- CI GitHub Actions con lint, typecheck, test e build su push/PR.
+- Documenti contributor/community: `CONTRIBUTING.md`, `SECURITY.md`, template issue e template PR.
+- Tipi Supabase generati in `src/lib/supabase.types.ts` con comando `npm run supabase:types`.
+
+### Changed
+- Il client Supabase ora usa i tipi generati come fonte unica invece dei tipi manuali incorporati in `src/lib/supabase.ts`.
+- La documentazione pubblica di deploy privilegia Supabase locale come ambiente di verifica, con staging remoto opzionale.
+- `netlify.toml` non contiene piu' URL/key Supabase pubblicabili: quei valori passano dalle environment variables Netlify.
+
+### Fixed
+- Aggiunti GRANT espliciti alle tabelle/funzione push notification nella migration dedicata, coerenti con il Data API hardening.
+- La migration cron notification ora e' difensiva quando `pg_cron` non e' disponibile in locale.
+
 ## [1.9.0] - 2026-07-02
 
 ### Added

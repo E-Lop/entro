@@ -22,7 +22,7 @@ export function filterFoods(foods: Food[], filters: FilterParams, now: Date = ne
 }
 
 /** Ordina (copia) lato client: collazione italiana per `name`, ordinamento
- *  lessicografico per date/id ISO. Tutti i campi ordinabili sono `string`. */
+ *  lessicografico per date/id ISO. */
 export function sortFoods(
   foods: Food[],
   sortBy: FilterParams['sortBy'] = 'expiry_date',
@@ -30,8 +30,8 @@ export function sortFoods(
 ): Food[] {
   const dir = sortOrder === 'desc' ? -1 : 1
   return [...foods].sort((a, b) => {
-    const av = a[sortBy]
-    const bv = b[sortBy]
+    const av = a[sortBy] ?? ''
+    const bv = b[sortBy] ?? ''
     const cmp = sortBy === 'name'
       ? av.localeCompare(bv, 'it', { sensitivity: 'base' })
       : av < bv ? -1 : av > bv ? 1 : 0

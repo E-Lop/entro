@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitest/config'
 import path from 'path'
 
+const nodeMajor = Number(process.versions.node.split('.')[0])
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -14,6 +16,6 @@ export default defineConfig({
     // its built-in `localStorage` resolves to `undefined` and shadows the one tests
     // expect (vitest#8757). Disabling it lets our setup own the global cleanly and
     // silences the `--localstorage-file` ExperimentalWarning.
-    execArgv: ['--no-experimental-webstorage'],
+    execArgv: nodeMajor >= 25 ? ['--no-experimental-webstorage'] : [],
   },
 })

@@ -129,9 +129,9 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         name: initialData.name,
         category_id: initialData.category_id,
         expiry_date: format(new Date(initialData.expiry_date), 'yyyy-MM-dd'),
-        storage_location: initialData.storage_location,
+        storage_location: initialData.storage_location as FoodFormData['storage_location'],
         quantity: initialData.quantity,
-        quantity_unit: initialData.quantity_unit,
+        quantity_unit: initialData.quantity_unit as FoodFormData['quantity_unit'],
         notes: initialData.notes,
         image_url: initialData.image_url,
       })
