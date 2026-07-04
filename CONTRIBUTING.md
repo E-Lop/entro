@@ -59,6 +59,23 @@ npm run build
 
 La CI GitHub esegue gli stessi controlli su push e pull request.
 
+## Test end-to-end
+
+I test Playwright usano Supabase locale e creano utenti temporanei con la service role key locale standard:
+
+```bash
+supabase start
+supabase db reset
+npx playwright install chromium
+npm run test:e2e
+```
+
+Se preferisci usare Chrome gia' installato invece del browser scaricato da Playwright:
+
+```bash
+E2E_BROWSER_CHANNEL=chrome npm run test:e2e
+```
+
 ## Regole database
 
 Ogni nuova tabella o funzione nello schema `public` deve includere:

@@ -49,3 +49,50 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_ANON_KEY: ${{ vars.LOCAL_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' }}
+      E2E_SUPABASE_URL: http://127.0.0.1:54321
+      E2E_SUPABASE_ANON_KEY: ${{ vars.LOCAL_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' }}
+      E2E_SUPABASE_SERVICE_ROLE_KEY: ${{ vars.LOCAL_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU' }}
+      VITE_APP_URL: http://127.0.0.1:5173
+      VITE_APP_NAME: entro
+      VITE_ENABLE_BARCODE_SCANNER: "true"
+      VITE_ENABLE_SWIPE_GESTURES: "true"
+      VITE_ENABLE_SHARED_LISTS: "true"
+      VITE_ENABLE_NOTIFICATIONS: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2.1.1
+        with:
+          version: 2.108.0
+
+      - name: Start Supabase local stack
+        run: supabase start
+
+      - name: Reset local database
+        run: supabase db reset
+
+      - name: Run Playwright E2E
+        run: npm run test:e2e
