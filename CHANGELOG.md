@@ -17,6 +17,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Il client Supabase ora usa i tipi generati come fonte unica invece dei tipi manuali incorporati in `src/lib/supabase.ts`.
 - La documentazione pubblica di deploy privilegia Supabase locale come ambiente di verifica, con staging remoto opzionale.
 - `netlify.toml` non contiene piu' URL/key Supabase pubblicabili: quei valori passano dalle environment variables Netlify.
+- `authStore.initialize()` non ricarica piu' l'intera pagina dopo accettazione invito o creazione lista personale: aggiorna la cache React Query e resta nel flusso SPA.
 
 ### Fixed
 - Aggiunti GRANT espliciti alle tabelle/funzione push notification nella migration dedicata, coerenti con il Data API hardening.

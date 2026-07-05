@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
 import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
 import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
+import { queryClient } from '../lib/queryClient'
 
 /**
  * Auth Store State
@@ -28,6 +29,10 @@ interface AuthActions {
  * Combined Auth Store
  */
 type AuthStore = AuthState & AuthActions
+
+async function refreshAuthenticatedData(): Promise<void> {
+  await queryClient.invalidateQueries()
+}
 
 /**
  * Zustand Auth Store with Supabase Auth Integration
@@ -109,11 +114,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
           const { success: inviteAccepted, listId, error } = await acceptInviteByEmail()
 
           if (inviteAccepted && listId) {
-            // Store flag to show toast after reload
+            // Store flag to show toast on the dashboard after cache refresh
             localStorage.setItem('show_welcome_toast', 'true')
-            // Refresh the page to load the new list data
-            // Note: We DON'T set the processed flag here - we'll check again after reload
-            window.location.reload()
+            await refreshAuthenticatedData()
+            sessionStorage.setItem(processedKey, 'true')
             return
           } else if (error) {
             console.error('[authStore] Failed to accept invite:', error.message)
@@ -124,9 +128,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
           const { success: listCreated, error: createError } = await createPersonalList()
 
           if (listCreated) {
-            // Refresh to load the new list
-            // Note: We DON'T set the processed flag here - we'll check again after reload
-            window.location.reload()
+            await refreshAuthenticatedData()
+            sessionStorage.setItem(processedKey, 'true')
           } else {
             console.error('[authStore] Failed to create personal list:', createError)
             // Mark as processed to prevent infinite retries

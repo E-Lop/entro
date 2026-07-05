@@ -1,9 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { QueryClient, onlineManager } from '@tanstack/react-query'
+import { onlineManager } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createIDBPersister, requestPersistentStorage } from './lib/queryPersister'
 import { registerMutationDefaults } from './lib/mutationDefaults'
+import { queryClient } from './lib/queryClient'
 import './index.css'
 import App from './App.tsx'
 
@@ -17,21 +18,6 @@ onlineManager.setEventListener((setOnline) => {
     window.removeEventListener('online', onlineHandler)
     window.removeEventListener('offline', offlineHandler)
   }
-})
-
-// Create React Query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours — keep data for offline use
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-    mutations: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours — keep paused mutations for offline sync
-    },
-  },
 })
 
 // Register mutation defaults so paused mutations can resume after page reload
