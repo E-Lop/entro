@@ -2,13 +2,10 @@
 // Generates short invite code for anonymous sharing
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { customAlphabet } from 'https://esm.sh/nanoid@4'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { handleCors, jsonResponse, errorResponse } from '../_shared/cors.ts'
+import { requireAuthenticatedUser } from '../_shared/auth.ts'
+import { createServiceClient } from '../_shared/supabase.ts'
 
 interface InviteRequest {
   listId: string  // SOLO questo, no email!
@@ -27,49 +24,21 @@ const generateToken = customAlphabet(
 )
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    )
+    const supabaseClient = createServiceClient()
 
-    // Get authenticated user
-    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-    if (!token) {
-      return new Response(
-        JSON.stringify({ error: 'Missing authorization token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token)
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    const userId = user.id
+    const auth = await requireAuthenticatedUser(req, supabaseClient)
+    if (auth instanceof Response) return auth
+    const userId = auth.user.id
 
     // Parse request - SOLO listId
     const { listId }: InviteRequest = await req.json()
 
     if (!listId) {
-      return new Response(
-        JSON.stringify({ error: 'listId is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return errorResponse(req, 'listId is required', 400)
     }
 
     // Check user is member of list
@@ -81,10 +50,7 @@ serve(async (req) => {
       .single()
 
     if (memberError || !memberData) {
-      return new Response(
-        JSON.stringify({ error: 'You are not a member of this list' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return errorResponse(req, 'You are not a member of this list', 403)
     }
 
     // Generate unique short code with collision handling
@@ -106,10 +72,7 @@ serve(async (req) => {
     }
 
     if (attempts === maxAttempts) {
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate unique code' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return errorResponse(req, 'Failed to generate unique code', 500)
     }
 
     // Set expiry (7 days)
@@ -133,27 +96,19 @@ serve(async (req) => {
 
     if (inviteError) {
       console.error('Error creating invite:', inviteError)
-      return new Response(
-        JSON.stringify({ error: 'Failed to create invite' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return errorResponse(req, 'Failed to create invite', 500)
     }
 
     // Return SOLO shortCode
-    return new Response(
-      JSON.stringify({
+    return jsonResponse(
+      req,
+      {
         success: true,
         shortCode: shortCode,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      },
     )
   } catch (error) {
     console.error('Unexpected error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return errorResponse(req, 'Internal server error', 500)
   }
 })

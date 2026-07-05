@@ -2,41 +2,24 @@
 // Validates invite by short code (public endpoint, no auth required)
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { handleCors, jsonResponse, errorResponse } from '../_shared/cors.ts'
+import { createServiceClient } from '../_shared/supabase.ts'
 
 interface ValidateRequest {
   shortCode: string
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
 
   try {
-    const supabaseService = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
-    )
+    const supabaseService = createServiceClient()
 
     const { shortCode }: ValidateRequest = await req.json()
 
     if (!shortCode) {
-      return new Response(
-        JSON.stringify({ error: 'Short code required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return errorResponse(req, 'Short code required', 400)
     }
 
     // Lookup invite
@@ -47,30 +30,26 @@ serve(async (req) => {
       .single()
 
     if (inviteError || !inviteData) {
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        req,
+        {
           valid: false,
           invite: null,
           error: 'Invite not found',
-        }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        },
+        { status: 404 },
       )
     }
 
     // Check status
     if (inviteData.status !== 'pending') {
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        req,
+        {
           valid: false,
           invite: null,
           error: 'Invite already used or expired',
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        },
       )
     }
 
@@ -85,15 +64,13 @@ serve(async (req) => {
         .update({ status: 'expired' })
         .eq('id', inviteData.id)
 
-      return new Response(
-        JSON.stringify({
+      return jsonResponse(
+        req,
+        {
           valid: false,
           invite: null,
           error: 'Invite expired',
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        },
       )
     }
 
@@ -119,24 +96,19 @@ serve(async (req) => {
     }
 
     // Return valid invite - NO email in response
-    return new Response(
-      JSON.stringify({
+    return jsonResponse(
+      req,
+      {
         valid: true,
         invite: {
           listName: listName,
           creatorName: creatorName,
           expiresAt: inviteData.expires_at,
         },
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      },
     )
   } catch (error) {
     console.error('Unexpected error:', error)
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return errorResponse(req, 'Internal server error', 500)
   }
 })
