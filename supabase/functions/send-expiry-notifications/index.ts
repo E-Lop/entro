@@ -1,17 +1,13 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { ApplicationServer, importVapidKeys } from '@negrel/webpush'
 import type { PushSubscription as WebPushSubscription } from '@negrel/webpush'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { handleCors, jsonResponse, errorResponse } from '../_shared/cors.ts'
+import { requireCronSecret } from '../_shared/auth.ts'
+import { createServiceClient } from '../_shared/supabase.ts'
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const corsResponse = handleCors(req)
+  if (corsResponse) return corsResponse
 
   /**
    * Autenticazione cron job: pg_cron → Vault → Edge Function
@@ -34,21 +30,11 @@ serve(async (req) => {
    * - Migration: supabase/migrations/20260228_push_notifications.sql (sezione 4)
    * - Vault setup: SELECT vault.create_secret('<secret>', 'cron_secret', '...')
    */
-  const authHeader = req.headers.get('Authorization') ?? ''
-  const token = authHeader.replace('Bearer ', '')
-  const cronSecret = Deno.env.get('CRON_SECRET') ?? ''
-
-  if (!cronSecret || token !== cronSecret) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-  }
+  const cronAuthError = requireCronSecret(req)
+  if (cronAuthError) return cronAuthError
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
+    const supabase = createServiceClient()
 
     // Inizializzare Web Push con VAPID keys (JWK format)
     const vapidKeysJson = JSON.parse(Deno.env.get('VAPID_KEYS') ?? '{}')
@@ -64,8 +50,7 @@ serve(async (req) => {
 
     if (queryError) throw queryError
     if (!expiringFoods || expiringFoods.length === 0) {
-      return new Response(JSON.stringify({ success: true, sent: 0 }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      return jsonResponse(req, { success: true, sent: 0 })
     }
 
     // 2. Raggruppare per utente
@@ -160,11 +145,9 @@ serve(async (req) => {
       await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint)
     }
 
-    return new Response(JSON.stringify({ success: true, sent: totalSent, staleRemoved: staleEndpoints.length }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return jsonResponse(req, { success: true, sent: totalSent, staleRemoved: staleEndpoints.length })
   } catch (error) {
     console.error('Cron job error:', error)
-    return new Response(JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    return errorResponse(req, 'Internal server error', 500)
   }
 })
