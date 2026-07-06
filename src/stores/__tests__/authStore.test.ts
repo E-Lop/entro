@@ -74,6 +74,8 @@ function installWindow(hash = '') {
     history: {
       replaceState: vi.fn(),
     },
+    // authStore signals the welcome toast via a window event (see welcomeToast.ts)
+    dispatchEvent: vi.fn(),
   })
   vi.stubGlobal('document', { title: 'entro' })
 }

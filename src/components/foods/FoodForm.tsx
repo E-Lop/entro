@@ -4,7 +4,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { foodFormSchema, type FoodFormData } from '@/lib/validations/food.schemas'
+import {
+  foodFormSchema,
+  storageLocationEnum,
+  quantityUnitEnum,
+  type FoodFormData,
+} from '@/lib/validations/food.schemas'
 import { useCategories } from '@/hooks/useFoods'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -129,9 +134,11 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         name: initialData.name,
         category_id: initialData.category_id,
         expiry_date: format(new Date(initialData.expiry_date), 'yyyy-MM-dd'),
-        storage_location: initialData.storage_location as FoodFormData['storage_location'],
+        // Narrow the DB text columns at runtime instead of casting blindly:
+        // values are constrained by CHECK, so parse only fails on real corruption.
+        storage_location: storageLocationEnum.parse(initialData.storage_location),
         quantity: initialData.quantity,
-        quantity_unit: initialData.quantity_unit as FoodFormData['quantity_unit'],
+        quantity_unit: quantityUnitEnum.nullable().parse(initialData.quantity_unit),
         notes: initialData.notes,
         image_url: initialData.image_url,
       })

@@ -3,6 +3,7 @@ import type { User, Session } from '@supabase/supabase-js'
 import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
 import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
 import { queryClient } from '../lib/queryClient'
+import { notifyWelcomeToast } from '../lib/welcomeToast'
 
 /**
  * Auth Store State
@@ -114,8 +115,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
           const { success: inviteAccepted, listId, error } = await acceptInviteByEmail()
 
           if (inviteAccepted && listId) {
-            // Store flag to show toast on the dashboard after cache refresh
-            localStorage.setItem('show_welcome_toast', 'true')
+            // Signal the dashboard to show the welcome toast. Works whether the
+            // dashboard is already mounted (event) or mounts later (flag).
+            notifyWelcomeToast()
             await refreshAuthenticatedData()
             sessionStorage.setItem(processedKey, 'true')
             return
