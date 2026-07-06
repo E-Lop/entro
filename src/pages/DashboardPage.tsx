@@ -1,9 +1,9 @@
-import { useState, useMemo, lazy, Suspense, useEffect } from 'react'
+import { useState, useMemo, lazy, Suspense } from 'react'
 import { FoodModals } from '../components/foods/FoodModals'
 import { useSearchParams } from 'react-router-dom'
-import { toast } from 'sonner'
 import { Plus, ShoppingBasket, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { useWelcomeToast } from '../hooks/useWelcomeToast'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { useFoods, useCategories } from '../hooks/useFoods'
 import { useFoodFormDialog } from '../hooks/useFoodFormDialog'
@@ -58,15 +58,7 @@ export function DashboardPage() {
   useRealtimeFoods()
 
   // Show welcome toast if user just accepted an invite
-  useEffect(() => {
-    const showWelcome = localStorage.getItem('show_welcome_toast')
-    if (showWelcome === 'true') {
-      localStorage.removeItem('show_welcome_toast')
-      toast.success('Benvenuto! Ora puoi vedere la lista condivisa', {
-        duration: 5000,
-      })
-    }
-  }, [])
+  useWelcomeToast()
 
   // Track instruction card visibility
   const [showInstructionCard, setShowInstructionCard] = useState(() => {

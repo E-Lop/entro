@@ -28,7 +28,7 @@ export interface ExportData {
     createdBy: string | null
     members: Array<{
       userId: string
-      joinedAt: string
+      joinedAt: string | null
     }>
   }
   note: string
@@ -86,7 +86,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
       listId: null as string | null,
       listName: null as string | null,
       createdBy: null as string | null,
-      members: [] as Array<{ userId: string; joinedAt: string }>,
+      members: [] as Array<{ userId: string; joinedAt: string | null }>,
     }
 
     try {
@@ -100,7 +100,8 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
         const { members } = await getListMembers(list.id)
         listData.members = members.map((m) => ({
           userId: m.user_id,
-          joinedAt: m.joined_at ?? 'N/A',
+          // Keep null explicit: this is a machine-readable GDPR export.
+          joinedAt: m.joined_at,
         }))
       }
     } catch (listError) {

@@ -5,7 +5,7 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
-## [Unreleased]
+## [1.10.0] - 2026-07-06
 
 ### Added
 - Baseline Supabase ricostruttiva in `supabase/migrations/` per rendere `supabase db reset` riproducibile da clone pulito.
@@ -14,6 +14,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - Tipi Supabase generati in `src/lib/supabase.types.ts` con comando `npm run supabase:types`.
 - E2E Playwright minimi in CI su stack Supabase locale.
 - Issue GitHub autosufficienti per backlog prodotto: demo mode (#54), API/MCP agenti (#51), report anti-spreco (#60), shelf-life (#61), OCR scadenza (#62), lista spesa (#63), PWA avanzata (#64), import dati (#65).
+- Test unit per gli helper auth/cron delle Edge Functions (`_shared/auth.ts`) e per il toast di benvenuto invito.
 
 ### Changed
 - Il client Supabase ora usa i tipi generati come fonte unica invece dei tipi manuali incorporati in `src/lib/supabase.ts`.
@@ -21,10 +22,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - `netlify.toml` non contiene piu' URL/key Supabase pubblicabili: quei valori passano dalle environment variables Netlify.
 - `authStore.initialize()` non ricarica piu' l'intera pagina dopo accettazione invito o creazione lista personale: aggiorna la cache React Query e resta nel flusso SPA.
 - Le Supabase Edge Functions condividono helper `_shared/` per CORS ristretto, risposte JSON, client service-role e validazione auth/cron secret.
+- `FoodForm` valida a runtime i valori DB `storage_location`/`quantity_unit` in modifica (parsing Zod) invece di cast senza controllo.
 
 ### Fixed
 - Aggiunti GRANT espliciti alle tabelle/funzione push notification nella migration dedicata, coerenti con il Data API hardening.
 - La migration cron notification ora e' difensiva quando `pg_cron` non e' disponibile in locale.
+- Il toast di benvenuto dopo l'accettazione di un invito compare anche quando la dashboard e' gia' montata (regressione introdotta rimuovendo il reload); prima poteva apparire solo alla visita successiva.
+- L'export dati GDPR mantiene `null` esplicito per `joined_at` mancante invece di sostituirlo con la stringa `'N/A'`.
 
 ## [1.9.0] - 2026-07-02
 
