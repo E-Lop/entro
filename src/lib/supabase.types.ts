@@ -367,6 +367,10 @@ export type Database = {
           list_id: string
         }[]
       }
+      register_pending_invite: {
+        Args: { p_email: string; p_short_code: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
