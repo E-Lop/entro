@@ -12,12 +12,15 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - CI GitHub Actions con lint, typecheck, test e build su push/PR.
 - Documenti contributor/community: `CONTRIBUTING.md`, `SECURITY.md`, template issue e template PR.
 - Tipi Supabase generati in `src/lib/supabase.types.ts` con comando `npm run supabase:types`.
+- E2E Playwright minimi in CI su stack Supabase locale.
+- Issue GitHub autosufficienti per backlog prodotto: demo mode (#54), API/MCP agenti (#51), report anti-spreco (#60), shelf-life (#61), OCR scadenza (#62), lista spesa (#63), PWA avanzata (#64), import dati (#65).
 
 ### Changed
 - Il client Supabase ora usa i tipi generati come fonte unica invece dei tipi manuali incorporati in `src/lib/supabase.ts`.
 - La documentazione pubblica di deploy privilegia Supabase locale come ambiente di verifica, con staging remoto opzionale.
 - `netlify.toml` non contiene piu' URL/key Supabase pubblicabili: quei valori passano dalle environment variables Netlify.
 - `authStore.initialize()` non ricarica piu' l'intera pagina dopo accettazione invito o creazione lista personale: aggiorna la cache React Query e resta nel flusso SPA.
+- Le Supabase Edge Functions condividono helper `_shared/` per CORS ristretto, risposte JSON, client service-role e validazione auth/cron secret.
 
 ### Fixed
 - Aggiunti GRANT espliciti alle tabelle/funzione push notification nella migration dedicata, coerenti con il Data API hardening.
