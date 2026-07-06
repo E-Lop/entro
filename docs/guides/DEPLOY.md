@@ -150,7 +150,7 @@ Le impostazioni non sensibili possono restare in `netlify.toml`: la documentazio
 ### Supabase Connection Error
 - Verifica `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
 - Controlla che il progetto Supabase sia attivo
-- Verifica le CORS policies su Supabase (dovrebbe essere `*` di default)
+- Verifica le Edge Functions: Entro usa CORS ristretto a `https://entroapp.it`, `https://www.entroapp.it`, localhost/127.0.0.1 e agli origin esplicitati in `ENTRO_ALLOWED_ORIGINS`. Non ripristinare `Access-Control-Allow-Origin: *`.
 
 ### 404 Errors on Refresh
 - Verifica che `netlify.toml` contenga il redirect rule

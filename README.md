@@ -101,7 +101,7 @@ src/
 ├── pages/              # Route pages
 ├── lib/                # Config Supabase, persistenza offline, push notifications
 ├── sw.ts               # Service worker custom (cache, push handlers)
-└── supabase/functions/ # Edge Functions (register-push, send-expiry-notifications)
+└── supabase/functions/ # Edge Functions + helper condivisi (_shared)
 ```
 
 ### Scelte tecniche
