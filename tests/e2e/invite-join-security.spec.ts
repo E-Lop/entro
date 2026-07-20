@@ -3,6 +3,9 @@ import {
   createE2EEmail,
   createE2EUser,
   deleteE2EUserByEmail,
+  listExists,
+  seedFoods,
+  seedPendingInviteByCode,
   seedPendingInviteByEmail,
   signInAsUser,
 } from './helpers/supabase'
@@ -61,4 +64,70 @@ test.describe('sicurezza join list_members', () => {
       await deleteE2EUserByEmail(attacker.email)
     }
   })
+})
+
+test('join_list_via_invite: codice valido, nessuna lista → join', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
+  try {
+    const { listId, shortCode } = await seedPendingInviteByCode(owner.id)
+    const client = await signInAsUser(joinerEmail, password)
+    const { data } = await client.rpc('join_list_via_invite', { p_short_code: shortCode })
+    const row = Array.isArray(data) ? data[0] : data
+    expect(row?.success).toBe(true)
+    expect(row?.requires_confirmation).toBe(false)
+    expect(row?.list_id).toBe(listId)
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
+  }
+})
+
+test('join_list_via_invite: codice inesistente → errore, nessun join', async () => {
+  const email = createE2EEmail(); const user = await createE2EUser(email, password)
+  try {
+    const client = await signInAsUser(email, password)
+    const { data } = await client.rpc('join_list_via_invite', { p_short_code: 'NOPE0000' })
+    const row = Array.isArray(data) ? data[0] : data
+    expect(row?.success).toBe(false)
+    expect(row?.error_message).toBeTruthy()
+  } finally { await deleteE2EUserByEmail(user.email) }
+})
+
+test('join_list_via_invite: utente con altra lista senza force → requires_confirmation + food_count', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
+  try {
+    // il joiner ha già una lista personale con 2 foods
+    const joinerClient = await signInAsUser(joinerEmail, password)
+    const { data: cpl } = await joinerClient.rpc('create_personal_list')
+    const joinerListId = (Array.isArray(cpl) ? cpl[0] : cpl)?.list_id as string
+    await seedFoods(joinerListId, joiner.id, 2)
+    const { shortCode } = await seedPendingInviteByCode(owner.id)
+    const { data } = await joinerClient.rpc('join_list_via_invite', { p_short_code: shortCode })
+    const row = Array.isArray(data) ? data[0] : data
+    expect(row?.requires_confirmation).toBe(true)
+    expect(row?.food_count).toBe(2)
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
+  }
+})
+
+test('join_list_via_invite: force → swap, e la vecchia lista senza membri viene cancellata (cascade foods)', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
+  try {
+    const joinerClient = await signInAsUser(joinerEmail, password)
+    const { data: cpl } = await joinerClient.rpc('create_personal_list')
+    const oldListId = (Array.isArray(cpl) ? cpl[0] : cpl)?.list_id as string
+    await seedFoods(oldListId, joiner.id, 1)
+    const { listId: newListId, shortCode } = await seedPendingInviteByCode(owner.id)
+    const { data } = await joinerClient.rpc('join_list_via_invite', { p_short_code: shortCode, p_force: true })
+    const row = Array.isArray(data) ? data[0] : data
+    expect(row?.success).toBe(true)
+    expect(row?.list_id).toBe(newListId)
+    // la vecchia lista (ultimo membro rimosso) è stata cancellata → foods in cascade
+    expect(await listExists(oldListId)).toBe(false)
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
+  }
 })

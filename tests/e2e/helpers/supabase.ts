@@ -147,3 +147,60 @@ export async function signInAsUser(email: string, password: string): Promise<Sup
   }
   return client
 }
+
+/** Crea una lista con owner e un invito pending con short_code noto. Ritorna { listId, shortCode }. */
+export async function seedPendingInviteByCode(ownerId: string): Promise<{ listId: string; shortCode: string }> {
+  const { data: list, error: listError } = await adminClient
+    .from('lists')
+    .insert({ created_by: ownerId, name: 'Lista codice E2E' })
+    .select('id')
+    .single()
+  if (listError || !list) throw new Error(`Impossibile creare la lista: ${listError?.message}`)
+  await adminClient.from('list_members').insert({ list_id: list.id, user_id: ownerId })
+  const shortCode = crypto.randomUUID().slice(0, 8).toUpperCase()
+  const { error } = await adminClient.from('invites').insert({
+    list_id: list.id,
+    token: `e2e-${crypto.randomUUID()}`,
+    short_code: shortCode,
+    created_by: ownerId,
+    status: 'pending',
+    expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+  })
+  if (error) throw new Error(`Impossibile creare l'invito: ${error.message}`)
+  return { listId: list.id, shortCode }
+}
+
+/** True se la lista esiste ancora (via service-role). */
+export async function listExists(listId: string): Promise<boolean> {
+  const { data } = await adminClient.from('lists').select('id').eq('id', listId).maybeSingle()
+  return data !== null
+}
+
+/**
+ * Aggiunge `n` foods a una lista (per testare food_count / cascade).
+ * `category_id` è FK obbligatoria verso `public.categories` (schema baseline
+ * 20260109): usiamo la categoria seed 'dairy'. `storage_location` accetta solo
+ * 'fridge' | 'freezer' | 'pantry' (check constraint), non le label italiane.
+ */
+export async function seedFoods(listId: string, ownerId: string, n: number): Promise<void> {
+  const { data: category, error: categoryError } = await adminClient
+    .from('categories')
+    .select('id')
+    .eq('name', 'dairy')
+    .single()
+  if (categoryError || !category) {
+    throw new Error(`Impossibile trovare la categoria seed 'dairy': ${categoryError?.message}`)
+  }
+  const rows = Array.from({ length: n }, (_, i) => ({
+    list_id: listId,
+    user_id: ownerId,
+    name: `Food E2E ${i}`,
+    category_id: category.id,
+    storage_location: 'fridge',
+    quantity: 1,
+    quantity_unit: 'pz',
+    expiry_date: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+  }))
+  const { error } = await adminClient.from('foods').insert(rows)
+  if (error) throw new Error(`Impossibile creare i foods: ${error.message}`)
+}
