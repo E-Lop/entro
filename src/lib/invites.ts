@@ -103,12 +103,12 @@ export async function registerPendingInvite(
     // Normalize email to lowercase for consistent matching
     const normalizedEmail = userEmail.toLowerCase().trim()
 
-    // Update invite with pending user email
-    const { error } = await supabase
-      .from('invites')
-      .update({ pending_user_email: normalizedEmail })
-      .eq('short_code', shortCode.toUpperCase())
-      .eq('status', 'pending')
+    // Runs during signup as the anon role: go through a SECURITY DEFINER RPC so
+    // anon needs no direct grant/RLS access to the invites table (issue #67).
+    const { error } = await supabase.rpc('register_pending_invite', {
+      p_short_code: shortCode.toUpperCase(),
+      p_email: normalizedEmail,
+    })
 
     if (error) {
       console.error('[registerPendingInvite] Error registering pending invite:', error)

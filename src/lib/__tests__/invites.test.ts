@@ -333,30 +333,19 @@ describe('acceptInviteWithConfirmation', () => {
 // ─── registerPendingInvite ─────────────────────────────────────────
 
 describe('registerPendingInvite', () => {
-  it('normalizes email (trim + lowercase)', async () => {
-    const updateMock = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: null }),
-      }),
-    })
-    mockFrom.mockReturnValue({ update: updateMock     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+  it('calls the register_pending_invite RPC with normalized email (trim + lowercase)', async () => {
+    mockRpc.mockResolvedValue({ data: true, error: null })
 
     await registerPendingInvite('ABCDEF', ' User@TEST.com ')
 
-    expect(mockFrom).toHaveBeenCalledWith('invites')
-    expect(updateMock).toHaveBeenCalledWith({ pending_user_email: 'user@test.com' })
+    expect(mockRpc).toHaveBeenCalledWith('register_pending_invite', {
+      p_short_code: 'ABCDEF',
+      p_email: 'user@test.com',
+    })
   })
 
-  it('returns success when update succeeds', async () => {
-    mockFrom.mockReturnValue({
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        }),
-      }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+  it('returns success when the RPC succeeds', async () => {
+    mockRpc.mockResolvedValue({ data: true, error: null })
 
     const result = await registerPendingInvite('ABCDEF', 'test@example.com')
 
@@ -364,16 +353,8 @@ describe('registerPendingInvite', () => {
     expect(result.error).toBeNull()
   })
 
-  it('returns error when supabase fails', async () => {
-    const supabaseError = { message: 'DB error', code: '42P01' }
-    mockFrom.mockReturnValue({
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: supabaseError }),
-        }),
-      }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any)
+  it('returns error when the RPC fails', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { message: 'permission denied', code: '42501' } })
 
     const result = await registerPendingInvite('ABCDEF', 'test@example.com')
 
