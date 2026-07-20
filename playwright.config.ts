@@ -23,6 +23,8 @@ export default defineConfig({
     env: {
       VITE_SUPABASE_URL: supabaseUrl,
       VITE_SUPABASE_ANON_KEY: supabaseAnonKey,
+      // Abilita l'UI di condivisione (menu inviti) per gli e2e che la esercitano.
+      VITE_ENABLE_SHARED_LISTS: 'true',
     },
   },
   projects: [
