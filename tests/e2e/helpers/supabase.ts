@@ -1,11 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 const LOCAL_SUPABASE_URL = 'http://127.0.0.1:54321'
 const LOCAL_SERVICE_ROLE_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
+const LOCAL_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
 
 const supabaseUrl = process.env.E2E_SUPABASE_URL ?? LOCAL_SUPABASE_URL
 const serviceRoleKey = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ?? LOCAL_SERVICE_ROLE_KEY
+const anonKey = process.env.E2E_SUPABASE_ANON_KEY ?? LOCAL_ANON_KEY
 
 const adminClient = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
@@ -91,4 +94,28 @@ export async function makeUserListShared(userId: string, coMemberPassword: strin
   }
 
   return coMember
+}
+
+/**
+ * Client anonimo (ruolo `anon`), senza persistenza di sessione: usato come
+ * base per l'autenticazione via password nei test e2e.
+ */
+export function anonClient(): SupabaseClient {
+  return createClient(supabaseUrl, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
+/**
+ * Autentica un client anonimo come l'utente indicato (email + password) e
+ * restituisce il client autenticato, da usare per esercitare RPC/RLS con i
+ * permessi reali dell'utente (non service-role).
+ */
+export async function signInAsUser(email: string, password: string): Promise<SupabaseClient> {
+  const client = anonClient()
+  const { error } = await client.auth.signInWithPassword({ email, password })
+  if (error) {
+    throw new Error(`Impossibile autenticarsi come ${email}: ${error.message}`)
+  }
+  return client
 }
