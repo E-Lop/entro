@@ -45,7 +45,7 @@ export function InviteMenuDialog({
           {/* Option 1: Create invite */}
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-2 p-4 text-left"
+            className="h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal"
             onClick={() => handleOptionClick(onCreateInvite)}
           >
             <div className="flex items-center gap-3 w-full">
@@ -62,7 +62,7 @@ export function InviteMenuDialog({
           {/* Option 2: Accept invite */}
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-2 p-4 text-left"
+            className="h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal"
             onClick={() => handleOptionClick(onAcceptInvite)}
           >
             <div className="flex items-center gap-3 w-full">
@@ -80,7 +80,7 @@ export function InviteMenuDialog({
           {isInSharedList && (
             <Button
               variant="outline"
-              className="h-auto flex-col items-start gap-2 p-4 text-left border-destructive/50 hover:bg-destructive/10"
+              className="h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal border-destructive/50 hover:bg-destructive/10"
               onClick={() => handleOptionClick(onLeaveList)}
             >
               <div className="flex items-center gap-3 w-full">

@@ -58,3 +58,37 @@ export async function deleteE2EUserByEmail(email: string): Promise<void> {
     throw new Error(`Impossibile eliminare l'utente E2E ${email}: ${deleteError.message}`)
   }
 }
+
+/**
+ * Rende condivisa la lista personale dell'utente aggiungendo un secondo membro
+ * (via service-role, bypassando RLS). Così l'app rileva `isInSharedList` e il
+ * menu inviti mostra anche l'opzione "Abbandona lista condivisa".
+ * Ritorna il co-membro creato, da eliminare nel teardown.
+ */
+export async function makeUserListShared(userId: string, coMemberPassword: string): Promise<E2EUser> {
+  // L'app crea la lista personale al primo login (RPC `create_personal_list`,
+  // idempotente). La pre-creiamo qui così possiamo aggiungere subito un secondo
+  // membro; al login l'app troverà la membership esistente e non la duplicherà.
+  const { data: list, error: listError } = await adminClient
+    .from('lists')
+    .insert({ created_by: userId, name: 'Lista E2E condivisa' })
+    .select('id')
+    .single()
+
+  if (listError || !list) {
+    throw new Error(`Impossibile creare la lista E2E: ${listError?.message}`)
+  }
+
+  const coMember = await createE2EUser(createE2EEmail(), coMemberPassword)
+
+  const { error: membersError } = await adminClient.from('list_members').insert([
+    { list_id: list.id, user_id: userId },
+    { list_id: list.id, user_id: coMember.id },
+  ])
+
+  if (membersError) {
+    throw new Error(`Impossibile aggiungere i membri alla lista E2E: ${membersError.message}`)
+  }
+
+  return coMember
+}

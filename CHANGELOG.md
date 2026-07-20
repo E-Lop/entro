@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.2] - 2026-07-20
+
+### Fixed
+- Il menu **Inviti** non sfora più il bordo dello schermo su mobile: le descrizioni delle opzioni (racchiuse nei pulsanti) ora vanno a capo invece di essere troncate a destra. La causa era il `whitespace-nowrap` di default del componente `Button`, che impediva l'a-capo del testo lungo dentro il dialog a larghezza fissa. (#59)
+
 ## [1.10.1] - 2026-07-20
 
 ### Security
