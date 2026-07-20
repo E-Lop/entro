@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.3] - 2026-07-20
+
+### Security
+- La membership a una lista è ora ottenibile solo tramite un invito valido, mediata da RPC `SECURITY DEFINER`: rimosso l'INSERT diretto client su `list_members` (un utente autenticato non può più auto-aggiungersi a liste altrui) e ristretta la lettura degli inviti (niente più harvest di `short_code` altrui). (#70, #71)
+
 ## [1.10.2] - 2026-07-20
 
 ### Fixed
