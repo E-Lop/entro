@@ -71,6 +71,13 @@ create policy "Authenticated can read pending or own-list invites"
 -- oppure modifica degli inviti delle proprie liste. WITH CHECK impedisce di
 -- lasciare l'invito in stato pending alterandone i campi (es. short_code) se
 -- non appartiene a una propria lista.
+--
+-- NB (invariante "join prima, accept dopo"): questa WITH CHECK NON impedisce a
+-- un non-membro di marcare accepted/expired un invito pending altrui (il ramo
+-- status ammette entrambi). L'ordine corretto dei flussi accept e' garantito
+-- dal CODICE, non da RLS: le UPDATE usano return=minimal (nessun RETURNING),
+-- quindi la SELECT policy non viene applicata alla riga nuova. Restringere il
+-- ramo status e' tracciato in #71 (non invertire l'ordine nel frattempo).
 create policy "Authenticated can update pending or own-list invites"
   on public.invites for update
   to authenticated
