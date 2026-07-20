@@ -334,6 +334,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_pending_invite_by_email: {
+        Args: Record<string, never>
+        Returns: {
+          error_message: string
+          list_id: string
+          success: boolean
+        }[]
+      }
       create_personal_list: {
         Args: never
         Returns: {
@@ -341,6 +349,10 @@ export type Database = {
           list_id: string
           success: boolean
         }[]
+      }
+      current_user_email: {
+        Args: Record<string, never>
+        Returns: string
       }
       delete_user: { Args: never; Returns: undefined }
       get_expiring_foods_for_notifications: {
@@ -365,6 +377,16 @@ export type Database = {
         Args: never
         Returns: {
           list_id: string
+        }[]
+      }
+      join_list_via_invite: {
+        Args: { p_force?: boolean; p_short_code: string }
+        Returns: {
+          error_message: string
+          food_count: number
+          list_id: string
+          requires_confirmation: boolean
+          success: boolean
         }[]
       }
       register_pending_invite: {

@@ -170,155 +170,24 @@ export async function acceptInvite(shortCode: string): Promise<AcceptInviteRespo
 /**
  * Accepts a pending invite by the authenticated user's email
  * Used when user confirms email after signup with invite
- * Direct database implementation to bypass Edge Function JWT issues
+ * Runs server-side via SECURITY DEFINER RPC (issue #70/#71) so the client
+ * needs no direct table access to `invites`/`list_members`.
  * @returns Response with success status and list ID
  */
 export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
   try {
-    // Get current user
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) {
-      console.error('[acceptInviteByEmail] User not authenticated')
-      throw new Error('Not authenticated')
+    const { data, error } = await supabase.rpc('accept_pending_invite_by_email')
+    if (error) {
+      console.error('[acceptInviteByEmail] RPC error:', error)
+      return { success: false, listId: null, error: new Error(error.message) }
     }
-
-    const userId = userData.user.id
-    const userEmail = userData.user.email
-
-    // Check if user has an email
-    if (!userEmail) {
-      console.warn('[acceptInviteByEmail] User has no email address')
-      return {
-        success: false,
-        listId: null,
-        error: null,
-      }
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row || !row.success) {
+      return { success: false, listId: null, error: row?.error_message ? new Error(row.error_message) : null }
     }
-
-    // Normalize email for matching
-    const normalizedEmail = userEmail.toLowerCase().trim()
-
-    // Find pending invite for this email (using pending_user_email field)
-    // Use ilike for case-insensitive email matching
-    const { data: inviteData, error: inviteError } = await supabase
-      .from('invites')
-      .select('*')
-      .ilike('pending_user_email', normalizedEmail)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-
-    if (inviteError) {
-      console.error('[acceptInviteByEmail] Error querying invites:', inviteError)
-      throw inviteError
-    }
-
-    if (!inviteData) {
-      return {
-        success: false,
-        listId: null,
-        error: null, // Not an error, just no invite
-      }
-    }
-
-    // Check if invite has expired
-    const expiresAt = new Date(inviteData.expires_at)
-    const now = new Date()
-
-    if (expiresAt < now) {
-      console.warn('[acceptInviteByEmail] Invite has expired:', {
-        expiresAt: expiresAt.toISOString(),
-        now: now.toISOString(),
-      })
-
-      // Update invite status to expired
-      await supabase
-        .from('invites')
-        .update({ status: 'expired' })
-        .eq('id', inviteData.id)
-
-      return {
-        success: false,
-        listId: null,
-        error: new Error('This invite has expired'),
-      }
-    }
-
-    // Check if user is already a member of this list
-    const { data: existingMember, error: memberCheckError } = await supabase
-      .from('list_members')
-      .select('*')
-      .eq('list_id', inviteData.list_id)
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (memberCheckError) {
-      console.error('[acceptInviteByEmail] Error checking existing membership:', memberCheckError)
-    }
-
-    if (existingMember) {
-      // User is already a member, just mark invite as accepted
-      await supabase
-        .from('invites')
-        .update({
-          status: 'accepted',
-          accepted_at: new Date().toISOString(),
-        })
-        .eq('id', inviteData.id)
-
-      return {
-        success: true,
-        listId: inviteData.list_id,
-        error: null,
-      }
-    }
-
-    // Add user to list_members
-    const { error: memberError } = await supabase
-      .from('list_members')
-      .insert({
-        list_id: inviteData.list_id,
-        user_id: userId,
-      })
-
-    if (memberError) {
-      console.error('[acceptInviteByEmail] Error adding member to list:', {
-        error: memberError,
-        code: memberError.code,
-        message: memberError.message,
-        details: memberError.details,
-        hint: memberError.hint,
-      })
-      throw memberError
-    }
-
-    // Update invite status to accepted
-    const { error: updateError } = await supabase
-      .from('invites')
-      .update({
-        status: 'accepted',
-        accepted_at: new Date().toISOString(),
-      })
-      .eq('id', inviteData.id)
-
-    if (updateError) {
-      console.error('[acceptInviteByEmail] Error updating invite status:', updateError)
-      // Don't fail if we can't update the status - the member was added successfully
-    }
-
-    return {
-      success: true,
-      listId: inviteData.list_id,
-      error: null,
-    }
+    return { success: true, listId: row.list_id, error: null }
   } catch (error) {
-    console.error('[acceptInviteByEmail] Failed to accept invite by email:', error)
-    return {
-      success: false,
-      listId: null,
-      error: error instanceof Error ? error : new Error('Unknown error'),
-    }
+    return { success: false, listId: null, error: error instanceof Error ? error : new Error('Unknown error') }
   }
 }
 
@@ -479,6 +348,8 @@ export async function createPersonalList(): Promise<{
  * Accepts an invite with confirmation logic for "Single List" approach
  * If user has an existing list, returns requiresConfirmation=true with food count
  * If forceAccept=true, removes user from old list and adds to new one
+ * Runs server-side via SECURITY DEFINER RPC (issue #70/#71) so the client
+ * needs no direct table access to `invites`/`list_members`/`lists`/`foods`.
  * @param shortCode - The invite short code
  * @param forceAccept - If true, bypasses confirmation and accepts invite
  * @returns Response with confirmation requirement or success
@@ -488,197 +359,26 @@ export async function acceptInviteWithConfirmation(
   forceAccept: boolean = false
 ): Promise<AcceptInviteConfirmationResponse> {
   try {
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) {
-      throw new Error('Not authenticated')
+    const { data, error } = await supabase.rpc('join_list_via_invite', {
+      p_short_code: shortCode.toUpperCase(),
+      p_force: forceAccept,
+    })
+    if (error) {
+      return { success: false, listId: null, requiresConfirmation: false, error: new Error(error.message) }
     }
-
-    const userId = userData.user.id
-    const upperShortCode = shortCode.toUpperCase()
-
-    // Step 1: Validate invite
-    const { data: inviteData, error: inviteError } = await supabase
-      .from('invites')
-      .select('*')
-      .eq('short_code', upperShortCode)
-      .eq('status', 'pending')
-      .maybeSingle()
-
-    if (inviteError) {
-      throw inviteError
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) {
+      return { success: false, listId: null, requiresConfirmation: false, error: new Error('Nessuna risposta') }
     }
-
-    if (!inviteData) {
-      throw new Error('Invito non valido o scaduto')
+    if (row.requires_confirmation) {
+      return { success: false, listId: null, requiresConfirmation: true, foodCount: row.food_count ?? 0, error: null }
     }
-
-    // Check if invite has expired
-    const expiresAt = new Date(inviteData.expires_at)
-    const now = new Date()
-
-    if (expiresAt < now) {
-      // Update invite status to expired
-      await supabase
-        .from('invites')
-        .update({ status: 'expired' })
-        .eq('id', inviteData.id)
-
-      throw new Error('Questo invito è scaduto')
+    if (!row.success) {
+      return { success: false, listId: null, requiresConfirmation: false, error: row.error_message ? new Error(row.error_message) : new Error('Accettazione non riuscita') }
     }
-
-    // Step 2: Check if user already has a list
-    const { data: currentMemberData, error: currentMemberError } = await supabase
-      .from('list_members')
-      .select('list_id')
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (currentMemberError) {
-      throw currentMemberError
-    }
-
-    // Step 3: If user has no list, just add them to the new list
-    if (!currentMemberData) {
-      // Add user to new list
-      const { error: memberError } = await supabase
-        .from('list_members')
-        .insert({
-          list_id: inviteData.list_id,
-          user_id: userId,
-        })
-
-      if (memberError) {
-        throw memberError
-      }
-
-      // Update invite status to accepted
-      await supabase
-        .from('invites')
-        .update({
-          status: 'accepted',
-          accepted_at: new Date().toISOString(),
-        })
-        .eq('id', inviteData.id)
-
-      return {
-        success: true,
-        listId: inviteData.list_id,
-        requiresConfirmation: false,
-        error: null,
-      }
-    }
-
-    // Step 4: User has a list - check if it's the same list
-    if (currentMemberData.list_id === inviteData.list_id) {
-      // User is already in this list
-      await supabase
-        .from('invites')
-        .update({
-          status: 'accepted',
-          accepted_at: new Date().toISOString(),
-        })
-        .eq('id', inviteData.id)
-
-      return {
-        success: true,
-        listId: inviteData.list_id,
-        requiresConfirmation: false,
-        error: null,
-      }
-    }
-
-    // Step 5: User has a different list - get food count
-    const { count: foodCount, error: foodCountError } = await supabase
-      .from('foods')
-      .select('*', { count: 'exact', head: true })
-      .eq('list_id', currentMemberData.list_id)
-
-    if (foodCountError) {
-      throw foodCountError
-    }
-
-    // Step 6: If not forcing, return confirmation required
-    if (!forceAccept) {
-      return {
-        success: false,
-        listId: null,
-        requiresConfirmation: true,
-        foodCount: foodCount || 0,
-        error: null,
-      }
-    }
-
-    // Step 7: Force accept - remove from old list and add to new one
-    const oldListId = currentMemberData.list_id
-
-    // Remove user from old list
-    const { error: removeError } = await supabase
-      .from('list_members')
-      .delete()
-      .eq('list_id', oldListId)
-      .eq('user_id', userId)
-
-    if (removeError) {
-      throw removeError
-    }
-
-    // Check if old list has any members left
-    const { count: remainingMembers, error: membersCountError } = await supabase
-      .from('list_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('list_id', oldListId)
-
-    if (membersCountError) {
-      throw membersCountError
-    }
-
-    // If old list has no members, delete it (CASCADE will delete foods)
-    if (remainingMembers === 0) {
-      const { error: deleteError } = await supabase
-        .from('lists')
-        .delete()
-        .eq('id', oldListId)
-
-      if (deleteError) {
-        console.error('Error deleting old list:', deleteError)
-        // Don't fail the whole operation if delete fails
-      }
-    }
-
-    // Add user to new list
-    const { error: newMemberError } = await supabase
-      .from('list_members')
-      .insert({
-        list_id: inviteData.list_id,
-        user_id: userId,
-      })
-
-    if (newMemberError) {
-      throw newMemberError
-    }
-
-    // Update invite status to accepted
-    await supabase
-      .from('invites')
-      .update({
-        status: 'accepted',
-        accepted_at: new Date().toISOString(),
-      })
-      .eq('id', inviteData.id)
-
-    return {
-      success: true,
-      listId: inviteData.list_id,
-      requiresConfirmation: false,
-      error: null,
-    }
+    return { success: true, listId: row.list_id, requiresConfirmation: false, error: null }
   } catch (error) {
-    return {
-      success: false,
-      listId: null,
-      requiresConfirmation: false,
-      error: error instanceof Error ? error : new Error('Unknown error'),
-    }
+    return { success: false, listId: null, requiresConfirmation: false, error: error instanceof Error ? error : new Error('Unknown error') }
   }
 }
 
