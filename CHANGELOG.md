@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.1] - 2026-07-20
+
+### Security
+- Chiuso l'accesso del ruolo `anon` alla tabella `public.invites` (#67): rimossi i GRANT legacy e le due policy `USING(true)` che permettevano a un client anonimo di leggere e aggiornare **tutti** gli inviti. L'unico accesso anonimo legittimo (registrazione email su invito pending durante il signup) passa ora dalla RPC `register_pending_invite` `SECURITY DEFINER`; le policy SELECT/UPDATE su `invites` sono ristrette a `authenticated`; revocati anche i privilegi di scrittura legacy di `anon` su `foods`/`lists`/`list_members`/`categories` (difesa in profondità). Migration additiva, deploy in produzione con backup preventivo e verifica end-to-end. (#69)
+
 ## [1.10.0] - 2026-07-06
 
 ### Added
