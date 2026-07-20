@@ -68,265 +68,38 @@ beforeEach(() => {
 // ─── acceptInviteByEmail ───────────────────────────────────────────
 
 describe('acceptInviteByEmail', () => {
-  it('returns failure when user is not authenticated', async () => {
-    mockAuth.getUser.mockResolvedValue({ data: { user: null } })
-
+  it('chiama la RPC accept_pending_invite_by_email e mappa il successo', async () => {
+    mockRpc.mockResolvedValue({ data: [{ list_id: 'list-1', success: true, error_message: null }], error: null })
     const result = await acceptInviteByEmail()
-
-    expect(result.success).toBe(false)
+    expect(mockRpc).toHaveBeenCalledWith('accept_pending_invite_by_email')
+    expect(result).toEqual({ success: true, listId: 'list-1', error: null })
   })
 
-  it('returns failure when user has no email', async () => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: null } },
-    })
-
+  it('ritorna no-op quando non c\'è invito', async () => {
+    mockRpc.mockResolvedValue({ data: [{ list_id: null, success: false, error_message: null }], error: null })
     const result = await acceptInviteByEmail()
-
     expect(result.success).toBe(false)
+    expect(result.listId).toBeNull()
     expect(result.error).toBeNull()
-  })
-
-  it('returns failure with no error when no pending invite found', async () => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'test@example.com' } },
-    })
-    mockBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
-
-    const result = await acceptInviteByEmail()
-
-    expect(result.success).toBe(false)
-    expect(result.error).toBeNull()
-  })
-
-  it('marks invite as expired when expires_at is in the past', async () => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'test@example.com' } },
-    })
-
-    const expiredInvite = {
-      id: 'inv1',
-      list_id: 'list1',
-      expires_at: '2020-01-01T00:00:00Z',
-      status: 'pending',
-      pending_user_email: 'test@example.com',
-    }
-
-    mockBuilder.maybeSingle.mockResolvedValueOnce({ data: expiredInvite, error: null })
-
-    const result = await acceptInviteByEmail()
-
-    expect(result.success).toBe(false)
-    expect(result.error).toBeTruthy()
-    expect(mockFrom).toHaveBeenCalledWith('invites')
-    expect(mockBuilder.update).toHaveBeenCalledWith({ status: 'expired' })
-  })
-
-  it('marks invite as accepted when user is already a member', async () => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'test@example.com' } },
-    })
-
-    const validInvite = {
-      id: 'inv1',
-      list_id: 'list1',
-      expires_at: '2030-01-01T00:00:00Z',
-      status: 'pending',
-      pending_user_email: 'test@example.com',
-    }
-
-    mockBuilder.maybeSingle
-      .mockResolvedValueOnce({ data: validInvite, error: null })
-      .mockResolvedValueOnce({ data: { list_id: 'list1', user_id: 'u1' }, error: null })
-
-    const result = await acceptInviteByEmail()
-
-    expect(result.success).toBe(true)
-    expect(result.listId).toBe('list1')
-    expect(mockBuilder.update).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'accepted' })
-    )
-  })
-
-  it('happy path: inserts member and accepts invite', async () => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'test@example.com' } },
-    })
-
-    const validInvite = {
-      id: 'inv1',
-      list_id: 'list1',
-      expires_at: '2030-01-01T00:00:00Z',
-      status: 'pending',
-      pending_user_email: 'test@example.com',
-    }
-
-    mockBuilder.maybeSingle
-      .mockResolvedValueOnce({ data: validInvite, error: null })
-      .mockResolvedValueOnce({ data: null, error: null })
-
-    mockBuilder.insert.mockReturnValue({ error: null })
-
-    const result = await acceptInviteByEmail()
-
-    expect(result.success).toBe(true)
-    expect(result.listId).toBe('list1')
-    expect(mockBuilder.insert).toHaveBeenCalledWith(
-      expect.objectContaining({ list_id: 'list1', user_id: 'u1' })
-    )
-  })
-
-  it('uses ilike for case-insensitive email matching', async () => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1', email: 'User@Test.COM' } },
-    })
-    mockBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
-
-    await acceptInviteByEmail()
-
-    expect(mockBuilder.ilike).toHaveBeenCalledWith('pending_user_email', 'user@test.com')
   })
 })
 
 // ─── acceptInviteWithConfirmation ──────────────────────────────────
 
 describe('acceptInviteWithConfirmation', () => {
-  beforeEach(() => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1' } },
-    })
+  it('chiama join_list_via_invite e propaga requires_confirmation + foodCount', async () => {
+    mockRpc.mockResolvedValue({ data: [{ list_id: null, success: false, requires_confirmation: true, food_count: 3, error_message: null }], error: null })
+    const result = await acceptInviteWithConfirmation('abc123')
+    expect(mockRpc).toHaveBeenCalledWith('join_list_via_invite', { p_short_code: 'ABC123', p_force: false })
+    expect(result.requiresConfirmation).toBe(true)
+    expect(result.foodCount).toBe(3)
   })
 
-  it('returns error when invite is not found', async () => {
-    mockBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
-
-    const result = await acceptInviteWithConfirmation('ABCDEF')
-
-    expect(result.success).toBe(false)
-    expect(result.error).toBeTruthy()
-  })
-
-  it('marks invite expired and returns error when expired', async () => {
-    const expiredInvite = {
-      id: 'inv1',
-      list_id: 'list1',
-      short_code: 'ABCDEF',
-      expires_at: '2020-01-01T00:00:00Z',
-      status: 'pending',
-    }
-    mockBuilder.maybeSingle.mockResolvedValueOnce({ data: expiredInvite, error: null })
-
-    const result = await acceptInviteWithConfirmation('ABCDEF')
-
-    expect(result.success).toBe(false)
-    expect(mockBuilder.update).toHaveBeenCalledWith({ status: 'expired' })
-  })
-
-  it('adds user directly when user has no list', async () => {
-    const invite = {
-      id: 'inv1',
-      list_id: 'list1',
-      short_code: 'ABCDEF',
-      expires_at: '2030-01-01T00:00:00Z',
-      status: 'pending',
-    }
-
-    mockBuilder.maybeSingle
-      .mockResolvedValueOnce({ data: invite, error: null })
-      .mockResolvedValueOnce({ data: null, error: null })
-
-    mockBuilder.insert.mockReturnValue({ error: null })
-
-    const result = await acceptInviteWithConfirmation('ABCDEF')
-
-    expect(result.success).toBe(true)
-    expect(result.listId).toBe('list1')
-  })
-
-  it('is idempotent when user is already in the same list', async () => {
-    const invite = {
-      id: 'inv1',
-      list_id: 'list1',
-      short_code: 'ABCDEF',
-      expires_at: '2030-01-01T00:00:00Z',
-      status: 'pending',
-    }
-
-    mockBuilder.maybeSingle
-      .mockResolvedValueOnce({ data: invite, error: null })
-      .mockResolvedValueOnce({ data: { list_id: 'list1' }, error: null })
-
-    const result = await acceptInviteWithConfirmation('ABCDEF')
-
-    expect(result.success).toBe(true)
-    expect(result.listId).toBe('list1')
-    expect(mockBuilder.insert).not.toHaveBeenCalled()
-  })
-
-  it('forceAccept: removes from old list and adds to new', async () => {
-    const invite = {
-      id: 'inv1',
-      list_id: 'new-list',
-      short_code: 'ABCDEF',
-      expires_at: '2030-01-01T00:00:00Z',
-      status: 'pending',
-    }
-
-    mockBuilder.maybeSingle
-      .mockResolvedValueOnce({ data: invite, error: null })
-      .mockResolvedValueOnce({ data: { list_id: 'old-list' }, error: null })
-
-    // After the two maybeSingle calls, the function does many from() calls.
-    // We use mockImplementation to return different builders per call.
-    let fromCallCount = 0
-    mockFrom.mockImplementation((() => {
-      fromCallCount++
-      if (fromCallCount <= 2) return mockBuilder // first 2 use maybeSingle
-      if (fromCallCount === 3) {
-        // foods count
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ count: 5, error: null }),
-          }),
-        }
-      }
-      if (fromCallCount === 4) {
-        // delete from list_members
-        return {
-          delete: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ error: null }),
-            }),
-          }),
-        }
-      }
-      if (fromCallCount === 5) {
-        // count remaining members
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ count: 2, error: null }),
-          }),
-        }
-      }
-      if (fromCallCount === 6) {
-        // insert new member
-        return {
-          insert: vi.fn().mockResolvedValue({ error: null }),
-        }
-      }
-      // update invite status
-      return {
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        }),
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }) as any)
-
-    const result = await acceptInviteWithConfirmation('ABCDEF', true)
-
-    expect(result.success).toBe(true)
-    expect(result.listId).toBe('new-list')
+  it('mappa il successo con list_id', async () => {
+    mockRpc.mockResolvedValue({ data: [{ list_id: 'list-9', success: true, requires_confirmation: false, food_count: null, error_message: null }], error: null })
+    const result = await acceptInviteWithConfirmation('abc123', true)
+    expect(mockRpc).toHaveBeenCalledWith('join_list_via_invite', { p_short_code: 'ABC123', p_force: true })
+    expect(result).toMatchObject({ success: true, listId: 'list-9', requiresConfirmation: false })
   })
 })
 
