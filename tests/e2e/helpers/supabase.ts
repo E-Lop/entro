@@ -97,6 +97,34 @@ export async function makeUserListShared(userId: string, coMemberPassword: strin
 }
 
 /**
+ * Crea una lista per `ownerId` e un invito pending indirizzato a `inviteeEmail`.
+ * Ritorna il list_id. Usa il service-role (bypassa RLS).
+ */
+export async function seedPendingInviteByEmail(ownerId: string, inviteeEmail: string): Promise<string> {
+  const { data: list, error: listError } = await adminClient
+    .from('lists')
+    .insert({ created_by: ownerId, name: 'Lista invito E2E' })
+    .select('id')
+    .single()
+  if (listError || !list) throw new Error(`Impossibile creare la lista invito: ${listError?.message}`)
+
+  await adminClient.from('list_members').insert({ list_id: list.id, user_id: ownerId })
+
+  const { error: inviteError } = await adminClient.from('invites').insert({
+    list_id: list.id,
+    email: inviteeEmail,
+    pending_user_email: inviteeEmail.toLowerCase(),
+    token: `e2e-${crypto.randomUUID()}`,
+    short_code: crypto.randomUUID().slice(0, 8).toUpperCase(),
+    created_by: ownerId,
+    status: 'pending',
+    expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+  })
+  if (inviteError) throw new Error(`Impossibile creare l'invito: ${inviteError.message}`)
+  return list.id
+}
+
+/**
  * Client anonimo (ruolo `anon`), senza persistenza di sessione: usato come
  * base per l'autenticazione via password nei test e2e.
  */
