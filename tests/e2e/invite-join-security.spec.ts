@@ -1,9 +1,13 @@
 import { expect, test } from '@playwright/test'
 import {
+  countListMemberships,
   createE2EEmail,
   createE2EUser,
   deleteE2EUserByEmail,
+  getInviteStatusByShortCode,
+  isMember,
   listExists,
+  seedAdditionalInviteForList,
   seedFoods,
   seedPendingInviteByCode,
   seedPendingInviteByEmail,
@@ -102,11 +106,62 @@ test('join_list_via_invite: utente con altra lista senza force → requires_conf
     const { data: cpl } = await joinerClient.rpc('create_personal_list')
     const joinerListId = (Array.isArray(cpl) ? cpl[0] : cpl)?.list_id as string
     await seedFoods(joinerListId, joiner.id, 2)
-    const { shortCode } = await seedPendingInviteByCode(owner.id)
+    const { listId: invitedListId, shortCode } = await seedPendingInviteByCode(owner.id)
     const { data } = await joinerClient.rpc('join_list_via_invite', { p_short_code: shortCode })
     const row = Array.isArray(data) ? data[0] : data
     expect(row?.requires_confirmation).toBe(true)
     expect(row?.food_count).toBe(2)
+    // il ramo "richiede conferma" deve essere read-only: nessun side effect finché
+    // l'utente non conferma esplicitamente con p_force
+    expect(await isMember(joinerListId, joiner.id)).toBe(true) // ancora membro della propria lista
+    expect(await isMember(invitedListId, joiner.id)).toBe(false) // non ancora membro della lista invitata
+    expect(await getInviteStatusByShortCode(shortCode)).toBe('pending') // invito non consumato
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
+  }
+})
+
+test('join_list_via_invite: codice scaduto → errore, invito marcato expired, nessun join', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
+  try {
+    const { listId, shortCode } = await seedPendingInviteByCode(owner.id, {
+      expiresAt: new Date(Date.now() - 60_000), // già scaduto
+    })
+    const client = await signInAsUser(joinerEmail, password)
+    const { data } = await client.rpc('join_list_via_invite', { p_short_code: shortCode })
+    const row = Array.isArray(data) ? data[0] : data
+    expect(row?.success).toBe(false)
+    expect(row?.error_message).toBeTruthy()
+    expect(await getInviteStatusByShortCode(shortCode)).toBe('expired') // marcato scaduto dalla RPC
+    expect(await isMember(listId, joiner.id)).toBe(false)
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
+  }
+})
+
+test('join_list_via_invite: già membro della lista dell\'invito → success, invito accettato, nessuna membership duplicata', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
+  try {
+    // il joiner entra nella lista tramite un primo invito (join diretto, nessuna lista precedente)
+    const { listId, shortCode: firstCode } = await seedPendingInviteByCode(owner.id)
+    const client = await signInAsUser(joinerEmail, password)
+    const first = await client.rpc('join_list_via_invite', { p_short_code: firstCode })
+    const firstRow = Array.isArray(first.data) ? first.data[0] : first.data
+    expect(firstRow?.success).toBe(true)
+
+    // un secondo invito pending, ancora valido, punta alla STESSA lista di cui è già membro
+    // (es. link duplicato/riutilizzato) → deve attivare il ramo "già membro"
+    const secondCode = await seedAdditionalInviteForList(listId, owner.id)
+    const second = await client.rpc('join_list_via_invite', { p_short_code: secondCode })
+    const secondRow = Array.isArray(second.data) ? second.data[0] : second.data
+    expect(secondRow?.success).toBe(true)
+    expect(secondRow?.list_id).toBe(listId)
+    expect(await getInviteStatusByShortCode(secondCode)).toBe('accepted')
+
+    // nessuna riga list_members duplicata per (utente, lista)
+    expect(await countListMemberships(listId, joiner.id)).toBe(1)
   } finally {
     await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
   }

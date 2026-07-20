@@ -148,8 +148,14 @@ export async function signInAsUser(email: string, password: string): Promise<Sup
   return client
 }
 
-/** Crea una lista con owner e un invito pending con short_code noto. Ritorna { listId, shortCode }. */
-export async function seedPendingInviteByCode(ownerId: string): Promise<{ listId: string; shortCode: string }> {
+/**
+ * Crea una lista con owner e un invito pending con short_code noto. Ritorna { listId, shortCode }.
+ * `options.expiresAt` permette di seedare un invito già scaduto (default: +7 giorni).
+ */
+export async function seedPendingInviteByCode(
+  ownerId: string,
+  options?: { expiresAt?: Date },
+): Promise<{ listId: string; shortCode: string }> {
   const { data: list, error: listError } = await adminClient
     .from('lists')
     .insert({ created_by: ownerId, name: 'Lista codice E2E' })
@@ -158,22 +164,81 @@ export async function seedPendingInviteByCode(ownerId: string): Promise<{ listId
   if (listError || !list) throw new Error(`Impossibile creare la lista: ${listError?.message}`)
   await adminClient.from('list_members').insert({ list_id: list.id, user_id: ownerId })
   const shortCode = crypto.randomUUID().slice(0, 8).toUpperCase()
+  const expiresAt = options?.expiresAt ?? new Date(Date.now() + 7 * 24 * 3600 * 1000)
   const { error } = await adminClient.from('invites').insert({
     list_id: list.id,
     token: `e2e-${crypto.randomUUID()}`,
     short_code: shortCode,
     created_by: ownerId,
     status: 'pending',
-    expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+    // il check constraint `valid_expiry` impone expires_at > created_at: per
+    // seedare un invito già scaduto retrodatiamo anche created_at.
+    created_at: expiresAt < new Date() ? new Date(expiresAt.getTime() - 3600_000).toISOString() : undefined,
+    expires_at: expiresAt.toISOString(),
   })
   if (error) throw new Error(`Impossibile creare l'invito: ${error.message}`)
   return { listId: list.id, shortCode }
+}
+
+/**
+ * Crea un ulteriore invito pending per una lista GIÀ esistente (stesso owner).
+ * Usato per simulare un secondo link di invito verso una lista di cui l'utente
+ * è già membro (es. link riutilizzato/duplicato). Ritorna lo short_code.
+ */
+export async function seedAdditionalInviteForList(
+  listId: string,
+  ownerId: string,
+  options?: { expiresAt?: Date },
+): Promise<string> {
+  const shortCode = crypto.randomUUID().slice(0, 8).toUpperCase()
+  const { error } = await adminClient.from('invites').insert({
+    list_id: listId,
+    token: `e2e-${crypto.randomUUID()}`,
+    short_code: shortCode,
+    created_by: ownerId,
+    status: 'pending',
+    expires_at: (options?.expiresAt ?? new Date(Date.now() + 7 * 24 * 3600 * 1000)).toISOString(),
+  })
+  if (error) throw new Error(`Impossibile creare l'invito aggiuntivo: ${error.message}`)
+  return shortCode
 }
 
 /** True se la lista esiste ancora (via service-role). */
 export async function listExists(listId: string): Promise<boolean> {
   const { data } = await adminClient.from('lists').select('id').eq('id', listId).maybeSingle()
   return data !== null
+}
+
+/** True se l'utente risulta membro della lista indicata (via service-role). */
+export async function isMember(listId: string, userId: string): Promise<boolean> {
+  const { data } = await adminClient
+    .from('list_members')
+    .select('id')
+    .eq('list_id', listId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  return data !== null
+}
+
+/** Numero di righe list_members per (lista, utente) — per verificare l'assenza di duplicati. */
+export async function countListMemberships(listId: string, userId: string): Promise<number> {
+  const { count, error } = await adminClient
+    .from('list_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('list_id', listId)
+    .eq('user_id', userId)
+  if (error) throw new Error(`Impossibile contare le membership: ${error.message}`)
+  return count ?? 0
+}
+
+/** Stato corrente dell'invito identificato da short_code (via service-role). */
+export async function getInviteStatusByShortCode(shortCode: string): Promise<string | null> {
+  const { data } = await adminClient
+    .from('invites')
+    .select('status')
+    .eq('short_code', shortCode)
+    .maybeSingle()
+  return data?.status ?? null
 }
 
 /**
