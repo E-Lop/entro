@@ -186,3 +186,29 @@ test('join_list_via_invite: force → swap, e la vecchia lista senza membri vien
     await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(joiner.email)
   }
 })
+
+test('SICUREZZA: insert diretto in list_members su lista altrui è negato', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const attackerEmail = createE2EEmail(); const attacker = await createE2EUser(attackerEmail, password)
+  try {
+    const { listId } = await seedPendingInviteByCode(owner.id) // lista altrui con invito pending
+    const attackerClient = await signInAsUser(attackerEmail, password)
+    const { error } = await attackerClient.from('list_members').insert({ list_id: listId, user_id: attacker.id })
+    expect(error).not.toBeNull() // negato da RLS/revoke (42501 o simile)
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(attacker.email)
+  }
+})
+
+test('SICUREZZA: un authenticated non legge lo short_code di un invito altrui', async () => {
+  const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
+  const attackerEmail = createE2EEmail(); const attacker = await createE2EUser(attackerEmail, password)
+  try {
+    await seedPendingInviteByCode(owner.id)
+    const attackerClient = await signInAsUser(attackerEmail, password)
+    const { data } = await attackerClient.from('invites').select('short_code,list_id').eq('status', 'pending')
+    expect(data ?? []).toHaveLength(0) // non vede inviti che non lo riguardano
+  } finally {
+    await deleteE2EUserByEmail(owner.email); await deleteE2EUserByEmail(attacker.email)
+  }
+})

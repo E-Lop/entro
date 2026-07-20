@@ -138,3 +138,24 @@ end;
 $$;
 
 grant execute on function public.join_list_via_invite(text, boolean) to authenticated, service_role;
+
+-- 4) Write hardening: niente insert diretto client su list_members
+drop policy if exists "Users can add themselves to a list via invite" on public.list_members;
+revoke insert on public.list_members from authenticated;
+-- Restano: SELECT (proprie liste) e DELETE (auth.uid()=user_id, self-leave).
+-- create_personal_list e le RPC sopra (SECURITY DEFINER) + edge accept-invite
+-- (service_role) continuano a funzionare.
+
+-- 5) Read hardening: niente harvest di short_code/inviti altrui
+drop policy if exists "Authenticated can read pending or own-list invites" on public.invites;
+create policy "Authenticated can read own-list or own-email invites"
+  on public.invites for select
+  to authenticated
+  using (
+    list_id in (select public.get_user_list_ids())
+    or lower(pending_user_email) = lower(public.current_user_email())
+  );
+
+-- L'accept passa dalle RPC: il client non aggiorna più invites.
+drop policy if exists "Authenticated can update pending or own-list invites" on public.invites;
+revoke update on public.invites from authenticated;
