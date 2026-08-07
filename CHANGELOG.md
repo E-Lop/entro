@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.4] - 2026-08-07
+
+### Fixed
+- I link di navigazione isolati delle schermate auth ("Password dimenticata?" e i tre "Torna al login") erano alti 17px, sotto i 24×24 px CSS richiesti da WCAG 2.2 SC 2.5.8 (AA): ora hanno un'area toccabile di almeno 44px, allineata alla soglia della app nativa. I link inline in una frase ("Non hai un account? **Registrati**") restano invariati, perché il criterio li esenta esplicitamente. Nuovo e2e che misura la geometria reale invece delle classi CSS.
+
 ## [1.10.3] - 2026-07-20
 
 ### Security

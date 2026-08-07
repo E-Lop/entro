@@ -115,7 +115,7 @@ export function LoginPage() {
             <div>
               <Link
                 to="/forgot-password"
-                className="font-medium text-muted-foreground hover:text-primary hover:underline"
+                className="inline-flex min-h-11 items-center font-medium text-muted-foreground hover:text-primary hover:underline"
               >
                 Password dimenticata?
               </Link>

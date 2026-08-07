@@ -187,7 +187,7 @@ export function VerifyEmailPage() {
             <div>
               <Link
                 to="/login"
-                className="font-medium text-primary hover:underline"
+                className="inline-flex min-h-11 items-center font-medium text-primary hover:underline"
               >
                 Torna al login
               </Link>
