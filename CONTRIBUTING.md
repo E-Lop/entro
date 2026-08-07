@@ -109,3 +109,26 @@ Prima di aprire una PR:
 - verifica le modifiche UI in viewport mobile.
 
 Usa Conventional Commits per i messaggi principali, per esempio `feat:`, `fix:`, `docs:`, `test:`, `chore:`.
+
+## Release
+
+Entro **non ha un commit di release separato**: la PR di feature porta anche il rilascio. Il tag punta poi al commit di squash-merge di quella stessa PR.
+
+Dentro la PR:
+
+- porta la versione secondo [Semantic Versioning](https://semver.org/lang/it/) con `npm version --no-git-tag-version X.Y.Z`, che aggiorna insieme `package.json` e `package-lock.json`;
+- aggiungi in cima a `CHANGELOG.md` la sezione `## [X.Y.Z] - AAAA-MM-GG`, con le intestazioni di [Keep a Changelog](https://keepachangelog.com/it/1.1.0/) in inglese (`Added`, `Changed`, `Fixed`, `Security`);
+- aggiungi in fondo allo stesso file la link reference `[X.Y.Z]: https://github.com/E-Lop/entro/compare/vPRECEDENTE...vX.Y.Z` e riporta `[Unreleased]` a partire dal nuovo tag. È il passaggio che sfugge più spesso: le definizioni si erano fermate a `[1.9.0]` per quattro release, lasciando i riferimenti nelle intestazioni non risolti.
+
+Dopo il merge:
+
+```bash
+git checkout main && git pull
+git tag -a vX.Y.Z -m "vX.Y.Z — descrizione breve"
+git push origin vX.Y.Z
+gh release create vX.Y.Z --title "vX.Y.Z — descrizione breve" --notes "..."
+```
+
+Le note della Release riprendono la sezione del CHANGELOG, con in più il contesto che a un lettore esterno non è ovvio: perché il difetto esisteva e come è stato verificato.
+
+> L'app nativa (`entro-mobile`) usa una convenzione **diversa**: un commit `chore: release vX.Y.Z` separato su `main` e lo script `scripts/bump-version.mjs`, che allinea anche `app.json`, `ios.buildNumber` e `android.versionCode`. Non trasferire questa procedura là.
