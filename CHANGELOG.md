@@ -481,7 +481,12 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.4...HEAD
+[1.10.4]: https://github.com/E-Lop/entro/compare/v1.10.3...v1.10.4
+[1.10.3]: https://github.com/E-Lop/entro/compare/v1.10.2...v1.10.3
+[1.10.2]: https://github.com/E-Lop/entro/compare/v1.10.1...v1.10.2
+[1.10.1]: https://github.com/E-Lop/entro/compare/v1.10.0...v1.10.1
+[1.10.0]: https://github.com/E-Lop/entro/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/E-Lop/entro/compare/v1.8.0...v1.9.0
 [1.8.0]: https://github.com/E-Lop/entro/compare/v1.7.5...v1.8.0
 [1.7.5]: https://github.com/E-Lop/entro/compare/v1.7.4...v1.7.5
