@@ -22,7 +22,8 @@ const REFRESH_TOKEN = 'eyJyZWZyZXNoIjoidG9rZW4ifQ.eyJleHAiOjk5OTk5OTk5fQ.Kx8sPqW
 // far fallire niente. Resta nell'elenco perché il giorno in cui si aggiunge un
 // flusso che ne maneggia una, il controllo c'è già.
 const PASSWORD = 'PasswordSegretissima!2026'
-const INVITE_CODE = 'ABCD1234'
+/** Sei caratteri alfanumerici, come i codici veri (`ABC123`). */
+const INVITE_CODE = 'ZK7Q2M'
 
 const SENTINELS = [TOKEN, REFRESH_TOKEN, PASSWORD, INVITE_CODE]
 
