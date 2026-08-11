@@ -24,7 +24,7 @@ export interface FoodFiltersProps {
  * - Search by name (debounced in parent component)
  * - Filter by category
  * - Filter by storage location
- * - Filter by status (active, expired, expiring soon)
+ * - Filter by expiry (not expired, expiring soon, expired)
  * - Sort by various fields
  * - Active filters badge
  * - Clear all filters button
@@ -53,10 +53,10 @@ export function FoodFilters({
     })
   }
 
-  const handleStatusChange = (value: string) => {
+  const handleExpiryChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      status: value ? (value as 'all' | 'active' | 'expired' | 'expiring_soon') : 'all',
+      expiry: value ? (value as NonNullable<FilterParams['expiry']>) : 'all',
     })
   }
 
@@ -168,17 +168,17 @@ export function FoodFilters({
                   </select>
                 </div>
 
-                {/* Status Filter */}
+                {/* Expiry Filter */}
                 <div className="space-y-2">
-                  <Label htmlFor="status">Stato</Label>
+                  <Label htmlFor="expiry">Scadenza</Label>
                   <select
-                    id="status"
-                    value={filters.status || 'all'}
-                    onChange={(e) => handleStatusChange(e.target.value)}
+                    id="expiry"
+                    value={filters.expiry || 'all'}
+                    onChange={(e) => handleExpiryChange(e.target.value)}
                     className={selectClassName}
                   >
                     <option value="all">Tutti</option>
-                    <option value="active">✅ Attivi</option>
+                    <option value="not_expired">✅ Non scaduti</option>
                     <option value="expiring_soon">⏰ In scadenza (7gg)</option>
                     <option value="expired">❌ Scaduti</option>
                   </select>

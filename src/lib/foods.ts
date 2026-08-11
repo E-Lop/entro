@@ -34,7 +34,9 @@ export interface CategoriesResponse {
 export interface FilterParams {
   category_id?: string
   storage_location?: 'fridge' | 'freezer' | 'pantry'
-  status?: 'all' | 'active' | 'expired' | 'expiring_soon'
+  /** Filtro sulla scadenza, derivata dalla data. Da non confondere con
+   *  `Food['status']`, che è l'esito scelto dall'utente. */
+  expiry?: 'all' | 'not_expired' | 'expiring_soon' | 'expired'
   search?: string
   sortBy?: 'expiry_date' | 'name' | 'created_at' | 'category_id'
   sortOrder?: 'asc' | 'desc'
@@ -93,20 +95,20 @@ export async function getFoods(filters?: FilterParams): Promise<FoodsResponse> {
       query = query.ilike('name', `%${filters.search.trim()}%`)
     }
 
-    // Apply status filter based on expiry date
-    if (filters?.status && filters.status !== 'all') {
+    // Apply expiry filter based on expiry date
+    if (filters?.expiry && filters.expiry !== 'all') {
       const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
 
-      if (filters.status === 'expired') {
+      if (filters.expiry === 'expired') {
         // Expiry date is in the past
         query = query.lt('expiry_date', today)
-      } else if (filters.status === 'expiring_soon') {
+      } else if (filters.expiry === 'expiring_soon') {
         // Expiry date is within the "in scadenza" window (see EXPIRY_SOON_DAYS in @/lib/expiry)
         const soonCutoff = new Date()
         soonCutoff.setDate(soonCutoff.getDate() + EXPIRY_SOON_DAYS)
         const futureDate = soonCutoff.toISOString().split('T')[0]
         query = query.gte('expiry_date', today).lte('expiry_date', futureDate)
-      } else if (filters.status === 'active') {
+      } else if (filters.expiry === 'not_expired') {
         // Expiry date is in the future (not expired)
         query = query.gte('expiry_date', today)
       }

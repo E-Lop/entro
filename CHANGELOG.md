@@ -5,6 +5,16 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.5] - 2026-08-11
+
+### Changed
+- Il filtro della dashboard non si chiama più «stato» ma «scadenza», nel codice e nell'interfaccia. Sulla tabella `foods` convivono due assi indipendenti: `deleted_at` («lo traccio ancora?») e `status` («com'è finita?», con i valori `active`/`consumed`/`expired`/`wasted`). Il filtro non ha mai letto la colonna `status` — confronta `expiry_date` con la data di oggi — e chiamarlo «stato» faceva sembrare collegate due cose che non lo sono. `FilterParams.status` diventa quindi `FilterParams.expiry`, con i valori `all | not_expired | expiring_soon | expired`.
+- Nell'interfaccia, l'etichetta del gruppo passa da «Stato» a «Scadenza» e l'opzione «✅ Attivi» diventa «✅ Non scaduti». È la metà visibile della stessa ambiguità: quell'opzione ha sempre filtrato per «non scaduto», mentre «Attivi» richiamava il valore `active` del ciclo di vita, che è un'altra cosa.
+- I link già salvati e condivisi continuano a funzionare: il vecchio parametro `?status=` resta accettato in lettura, e `status=active` viene tradotto in `expiry=not_expired` conservando il significato e non la parola. In scrittura l'URL usa solo il nome nuovo. La mappatura vive ora in `src/lib/foodFilterParams.ts`, estratta dalla dashboard perché una promessa verso link esterni va coperta da test senza dover montare l'intera pagina.
+
+### Fixed
+- Un parametro d'URL fuori vocabolario non svuota più la lista: `?storage=banana` finiva così com'era nel confronto con `food.storage_location` e non lasciava passare nessun alimento. Ora ogni parametro non riconosciuto (`storage`, `expiry`, `sortBy`, `sortOrder`) torna al proprio default. Per `sortBy` e `sortOrder` il valore non validato era finora innocuo a valle, ma passava comunque.
+
 ## [1.10.4] - 2026-08-07
 
 ### Fixed
@@ -481,7 +491,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.5...HEAD
+[1.10.5]: https://github.com/E-Lop/entro/compare/v1.10.4...v1.10.5
 [1.10.4]: https://github.com/E-Lop/entro/compare/v1.10.3...v1.10.4
 [1.10.3]: https://github.com/E-Lop/entro/compare/v1.10.2...v1.10.3
 [1.10.2]: https://github.com/E-Lop/entro/compare/v1.10.1...v1.10.2

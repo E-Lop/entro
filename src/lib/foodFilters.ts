@@ -4,18 +4,18 @@
 import type { Food, FilterParams } from '@/lib/foods'
 import { getExpiryStatus, isExpiringSoon, isExpired } from '@/lib/expiry'
 
-/** Applica categoria, posizione, ricerca (substring case-insensitive) e stato. */
+/** Applica categoria, posizione, ricerca (substring case-insensitive) e scadenza. */
 export function filterFoods(foods: Food[], filters: FilterParams, now: Date = new Date()): Food[] {
   const search = filters.search?.trim().toLowerCase()
   return foods.filter((food) => {
     if (filters.category_id && food.category_id !== filters.category_id) return false
     if (filters.storage_location && food.storage_location !== filters.storage_location) return false
     if (search && !food.name.toLowerCase().includes(search)) return false
-    if (filters.status && filters.status !== 'all') {
+    if (filters.expiry && filters.expiry !== 'all') {
       const status = getExpiryStatus(food.expiry_date, now)
-      if (filters.status === 'expired') return isExpired(status)
-      if (filters.status === 'expiring_soon') return isExpiringSoon(status)
-      if (filters.status === 'active') return !isExpired(status)
+      if (filters.expiry === 'expired') return isExpired(status)
+      if (filters.expiry === 'expiring_soon') return isExpiringSoon(status)
+      if (filters.expiry === 'not_expired') return !isExpired(status)
     }
     return true
   })
@@ -46,11 +46,11 @@ export interface DashboardData {
 
 /**
  * Deriva lista mostrata + conteggi card dalla stessa lista in cache.
- * I conteggi riflettono i filtri categoria/posizione/ricerca attivi (non lo stato);
- * la lista applica anche lo stato e l'ordinamento.
+ * I conteggi riflettono i filtri categoria/posizione/ricerca attivi (non la scadenza);
+ * la lista applica anche la scadenza e l'ordinamento.
  */
 export function deriveDashboardData(allFoods: Food[], filters: FilterParams, now: Date = new Date()): DashboardData {
-  const scoped = filterFoods(allFoods, { ...filters, status: 'all' }, now)
+  const scoped = filterFoods(allFoods, { ...filters, expiry: 'all' }, now)
   let expiringSoon = 0
   let expired = 0
   for (const food of scoped) {
@@ -58,6 +58,6 @@ export function deriveDashboardData(allFoods: Food[], filters: FilterParams, now
     if (isExpiringSoon(status)) expiringSoon++
     if (isExpired(status)) expired++
   }
-  const foods = sortFoods(filterFoods(scoped, { status: filters.status }, now), filters.sortBy, filters.sortOrder)
+  const foods = sortFoods(filterFoods(scoped, { expiry: filters.expiry }, now), filters.sortBy, filters.sortOrder)
   return { foods, stats: { total: scoped.length, expiringSoon, expired } }
 }

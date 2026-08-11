@@ -32,41 +32,41 @@ const foods: Food[] = [
   makeFood({ name: 'Ricotta', expiry_date: dExpired, category_id: 'c1', storage_location: 'fridge' }),
 ]
 
-describe('filterFoods - stato (business rule + confini)', () => {
+describe('filterFoods - scadenza (business rule + confini)', () => {
   it('all → tutti', () => {
-    expect(filterFoods(foods, { status: 'all' }, NOW)).toHaveLength(5)
+    expect(filterFoods(foods, { expiry: 'all' }, NOW)).toHaveLength(5)
   })
   it('expiring_soon → oggi/soon/this_week (0..7 giorni)', () => {
-    const names = filterFoods(foods, { status: 'expiring_soon' }, NOW).map(f => f.name).sort()
+    const names = filterFoods(foods, { expiry: 'expiring_soon' }, NOW).map(f => f.name).sort()
     expect(names).toEqual(['Latte', 'Pane', 'Yogurt'])
   })
   it('expired → solo passato', () => {
-    expect(filterFoods(foods, { status: 'expired' }, NOW).map(f => f.name)).toEqual(['Ricotta'])
+    expect(filterFoods(foods, { expiry: 'expired' }, NOW).map(f => f.name)).toEqual(['Ricotta'])
   })
-  it('active → tutto tranne lo scaduto', () => {
-    const names = filterFoods(foods, { status: 'active' }, NOW).map(f => f.name).sort()
+  it('not_expired → tutto tranne lo scaduto', () => {
+    const names = filterFoods(foods, { expiry: 'not_expired' }, NOW).map(f => f.name).sort()
     expect(names).toEqual(['Latte', 'Pane', 'Tonno', 'Yogurt'])
   })
   it('confine: +8 giorni è fresh, non expiring_soon', () => {
-    expect(filterFoods([makeFood({ name: 'X', expiry_date: dFresh })], { status: 'expiring_soon' }, NOW)).toHaveLength(0)
+    expect(filterFoods([makeFood({ name: 'X', expiry_date: dFresh })], { expiry: 'expiring_soon' }, NOW)).toHaveLength(0)
   })
 })
 
 describe('filterFoods - categoria / posizione / ricerca', () => {
   it('category_id match esatto', () => {
-    expect(filterFoods(foods, { status: 'all', category_id: 'c2' }, NOW).map(f => f.name).sort()).toEqual(['Pane', 'Tonno'])
+    expect(filterFoods(foods, { expiry: 'all', category_id: 'c2' }, NOW).map(f => f.name).sort()).toEqual(['Pane', 'Tonno'])
   })
   it('storage_location match esatto', () => {
-    expect(filterFoods(foods, { status: 'all', storage_location: 'pantry' }, NOW).map(f => f.name).sort()).toEqual(['Pane', 'Tonno'])
+    expect(filterFoods(foods, { expiry: 'all', storage_location: 'pantry' }, NOW).map(f => f.name).sort()).toEqual(['Pane', 'Tonno'])
   })
   it('search substring case-insensitive con trim', () => {
-    expect(filterFoods(foods, { status: 'all', search: '  YOG ' }, NOW).map(f => f.name)).toEqual(['Yogurt'])
+    expect(filterFoods(foods, { expiry: 'all', search: '  YOG ' }, NOW).map(f => f.name)).toEqual(['Yogurt'])
   })
   it('search vuota = nessun filtro', () => {
-    expect(filterFoods(foods, { status: 'all', search: '   ' }, NOW)).toHaveLength(5)
+    expect(filterFoods(foods, { expiry: 'all', search: '   ' }, NOW)).toHaveLength(5)
   })
-  it('combina filtri: categoria + stato', () => {
-    const names = filterFoods(foods, { status: 'expiring_soon', category_id: 'c1' }, NOW).map(f => f.name).sort()
+  it('combina filtri: categoria + scadenza', () => {
+    const names = filterFoods(foods, { expiry: 'expiring_soon', category_id: 'c1' }, NOW).map(f => f.name).sort()
     expect(names).toEqual(['Latte', 'Yogurt'])
   })
 })
@@ -100,8 +100,8 @@ describe('sortFoods', () => {
 })
 
 describe('deriveDashboardData', () => {
-  it('stats riflettono i filtri non-stato; lista applica anche lo stato', () => {
-    const { foods: list, stats } = deriveDashboardData(foods, { status: 'expiring_soon', sortBy: 'expiry_date', sortOrder: 'asc' }, NOW)
+  it('stats ignorano il filtro scadenza; la lista invece lo applica', () => {
+    const { foods: list, stats } = deriveDashboardData(foods, { expiry: 'expiring_soon', sortBy: 'expiry_date', sortOrder: 'asc' }, NOW)
     expect(stats.total).toBe(5)
     expect(stats.expiringSoon).toBe(3)
     expect(stats.expired).toBe(1)
@@ -109,7 +109,7 @@ describe('deriveDashboardData', () => {
     expect(list.length).toBe(stats.expiringSoon)
   })
   it('i conteggi rispettano un filtro categoria attivo', () => {
-    const { stats } = deriveDashboardData(foods, { status: 'all', category_id: 'c1' }, NOW)
+    const { stats } = deriveDashboardData(foods, { expiry: 'all', category_id: 'c1' }, NOW)
     expect(stats.total).toBe(3)
     expect(stats.expiringSoon).toBe(2)
     expect(stats.expired).toBe(1)

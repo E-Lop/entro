@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { FoodFilters } from '../FoodFilters'
 import type { FilterParams } from '@/lib/foods'
 
@@ -21,6 +21,38 @@ describe('FoodFilters — badge filtri attivi (identità brand)', () => {
     const badge = screen.getByText('2')
     expect(badge.className).not.toMatch(/blue/)
     expect(badge.className).toMatch(/primary/)
+  })
+})
+
+describe('FoodFilters — il filtro si chiama scadenza, non stato', () => {
+  it('etichetta il gruppo «Scadenza» e l\'opzione «Non scaduti»', () => {
+    // Il filtro guarda `expiry_date`, non la colonna `status` del ciclo di
+    // vita: «Attivi» richiamava il valore `active` di quest'ultima.
+    render(<FoodFilters {...baseProps} activeFiltersCount={0} isExpanded={true} />)
+
+    const select = screen.getByLabelText('Scadenza')
+    expect(screen.queryByLabelText('Stato')).toBeNull()
+    expect([...select.querySelectorAll('option')].map(o => o.textContent)).toEqual([
+      'Tutti',
+      '✅ Non scaduti',
+      '⏰ In scadenza (7gg)',
+      '❌ Scaduti',
+    ])
+  })
+
+  it('emette il filtro sotto la chiave `expiry`', () => {
+    const onFiltersChange = vi.fn()
+    render(
+      <FoodFilters
+        {...baseProps}
+        activeFiltersCount={0}
+        isExpanded={true}
+        onFiltersChange={onFiltersChange}
+      />
+    )
+
+    fireEvent.change(screen.getByLabelText('Scadenza'), { target: { value: 'not_expired' } })
+    expect(onFiltersChange).toHaveBeenCalledWith({ expiry: 'not_expired' })
   })
 })
 
