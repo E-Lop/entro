@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.6] - 2026-08-11
+
+### Security
+- Il logout pulisce lo storage anche quando Supabase rifiuta `signOut()`. La pulizia stava dentro il `try`, dopo il `throw` che segnalava l'errore, quindi non veniva mai eseguita: con una sessione già scaduta lato server l'utente premeva «esci» e i token `sb-*` restavano in `localStorage`, leggibili da chiunque aprisse i devtools. Su un browser condiviso — computer di famiglia, postazione in ufficio, portatile prestato — è la differenza fra un logout e un logout apparente. La pulizia è ora fuori dal percorso d'errore, e a sua volta protetta perché `localStorage` solleva quando il browser blocca lo storage: nessun wrapper di `src/lib/auth.ts` deve mai sollevare. L'errore riportato al chiamante resta quello di Supabase, che è la causa. (#78)
+
 ## [1.10.5] - 2026-08-11
 
 ### Changed
@@ -491,7 +496,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.6...HEAD
+[1.10.6]: https://github.com/E-Lop/entro/compare/v1.10.5...v1.10.6
 [1.10.5]: https://github.com/E-Lop/entro/compare/v1.10.4...v1.10.5
 [1.10.4]: https://github.com/E-Lop/entro/compare/v1.10.3...v1.10.4
 [1.10.3]: https://github.com/E-Lop/entro/compare/v1.10.2...v1.10.3
