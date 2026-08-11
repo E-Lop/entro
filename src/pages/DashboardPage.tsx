@@ -24,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button'
 import type { Food, FilterParams } from '@/lib/foods'
 import { deriveDashboardData } from '@/lib/foodFilters'
+import { parseFilterParams, buildSearchParams } from '@/lib/foodFilterParams'
 import { cn } from '@/lib/utils'
 
 /**
@@ -68,17 +69,9 @@ export function DashboardPage() {
   // View mode from URL params
   const viewMode = (searchParams.get('view') as 'list' | 'calendar') || 'list'
 
-  // Parse filters from URL query params
-  const filters = useMemo<FilterParams>(() => {
-    return {
-      category_id: searchParams.get('category') || undefined,
-      storage_location: (searchParams.get('storage') as FilterParams['storage_location']) || undefined,
-      status: (searchParams.get('status') as FilterParams['status']) || 'all',
-      search: searchParams.get('search') || undefined,
-      sortBy: (searchParams.get('sortBy') as FilterParams['sortBy']) || 'expiry_date',
-      sortOrder: (searchParams.get('sortOrder') as FilterParams['sortOrder']) || 'asc',
-    }
-  }, [searchParams])
+  // Filtri letti dall'URL: la mappatura, e con essa la retrocompatibilità del
+  // vecchio `?status=`, vive in @/lib/foodFilterParams.
+  const filters = useMemo<FilterParams>(() => parseFilterParams(searchParams), [searchParams])
 
   // Debounce search to avoid excessive API calls
   const debouncedSearch = useDebounce(filters.search, 300)
@@ -119,7 +112,7 @@ export function DashboardPage() {
     let count = 0
     if (filters.category_id) count++
     if (filters.storage_location) count++
-    if (filters.status && filters.status !== 'all') count++
+    if (filters.expiry && filters.expiry !== 'all') count++
     if (filters.search) count++
     // Don't count sort as active filter since it always has a value
     return count
@@ -127,16 +120,7 @@ export function DashboardPage() {
 
   // Handlers for filter changes
   const handleFiltersChange = (newFilters: FilterParams) => {
-    const params = new URLSearchParams()
-
-    if (newFilters.category_id) params.set('category', newFilters.category_id)
-    if (newFilters.storage_location) params.set('storage', newFilters.storage_location)
-    if (newFilters.status && newFilters.status !== 'all') params.set('status', newFilters.status)
-    if (newFilters.search) params.set('search', newFilters.search)
-    if (newFilters.sortBy) params.set('sortBy', newFilters.sortBy)
-    if (newFilters.sortOrder) params.set('sortOrder', newFilters.sortOrder)
-
-    setSearchParams(params)
+    setSearchParams(buildSearchParams(newFilters))
   }
 
   const handleClearFilters = () => {
@@ -154,16 +138,10 @@ export function DashboardPage() {
   }
 
   // Quick filter handlers for stats cards
-  const handleQuickFilter = (status: 'all' | 'expiring_soon' | 'expired') => {
-    if (status === 'all') {
-      // Clear all filters to show everything
-      setSearchParams({})
-    } else {
-      // Apply status filter
-      const params = new URLSearchParams()
-      params.set('status', status)
-      setSearchParams(params)
-    }
+  const handleQuickFilter = (expiry: 'all' | 'expiring_soon' | 'expired') => {
+    // Si riparte da un URL nuovo: la card azzera gli altri filtri. `all` non
+    // viene scritto, così l'URL torna pulito.
+    setSearchParams(buildSearchParams({ expiry }))
     // Scroll to foods section on mobile
     window.scrollTo({ top: 400, behavior: 'smooth' })
   }
@@ -202,7 +180,7 @@ export function DashboardPage() {
       </div>
 
       {/* Quick Stats - Compact Mobile Grid */}
-      <DashboardStats stats={stats} currentStatus={filters.status} onQuickFilter={handleQuickFilter} />
+      <DashboardStats stats={stats} currentExpiry={filters.expiry} onQuickFilter={handleQuickFilter} />
 
       {/* Notification Prompt */}
       <NotificationPrompt foodCount={stats.total} />
