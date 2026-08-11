@@ -1,8 +1,14 @@
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar, Package, Trash2, Edit, MapPin, ImageIcon, Loader2 } from 'lucide-react'
+import { Calendar, Package, Trash2, Edit, MapPin, ImageIcon, Loader2, MoreVertical } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
 import type { Food, Category } from '@/lib/foods'
 import type { FoodWithRealtimeMetadata, ExpiryStatus } from '@/types/food.types'
 import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
@@ -137,6 +143,51 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
             >
               {badgeText}
             </div>
+
+            {/* Alternativa allo swipe sotto i 640px, dove il footer non c'è.
+                I pulsanti del footer sono `hidden sm:flex`, e `display: none`
+                non è «nascosto visivamente»: toglie dall'albero di
+                accessibilità. Sotto i 640px lo swipe di SwipeableCard era
+                l'unico modo di modificare o eliminare, ed è `aria-hidden`.
+                Un gesto basato su percorso deve avere un'alternativa a
+                puntatore singolo (WCAG 2.5.1 Pointer Gestures, livello A).
+
+                `sm:hidden` è il complemento esatto di `hidden sm:flex` sul
+                footer: sotto i 640px c'è questo menu, sopra ci sono i
+                pulsanti, mai entrambi e mai nessuno dei due. È un invariante
+                fragile — due classi in due punti diversi — quindi c'è un test
+                che lo tiene fermo. */}
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11 shrink-0 -mr-2 -mt-1 sm:hidden"
+                    aria-label={`Azioni per ${food.name}`}
+                  >
+                    <MoreVertical className="h-5 w-5" aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onSelect={() => onEdit(food)} className="h-11">
+                      <Edit className="h-4 w-4 mr-2" aria-hidden="true" />
+                      Modifica
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem
+                      onSelect={() => onDelete(food)}
+                      className="h-11 text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                      Elimina
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </CardHeader>
 

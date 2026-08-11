@@ -9,7 +9,7 @@ import {
   type FoodUpdate,
   type FilterParams,
 } from '@/lib/foods'
-import { mutationKeys } from '@/lib/mutationDefaults'
+import { mutationKeys, type DeleteFoodVariables } from '@/lib/mutationDefaults'
 
 type PreviousListsContext = { previousLists: [unknown, Food[] | undefined][] }
 
@@ -180,7 +180,7 @@ export function useUpdateFood() {
 }
 
 /**
- * Delete a food item.
+ * Toglie un alimento dalla lista, registrandone l'esito quando c'è.
  *
  * Note: mutationFn is provided by registerMutationDefaults().
  */
@@ -189,19 +189,19 @@ export function useDeleteFood() {
 
   return useMutation({
     mutationKey: mutationKeys.deleteFood,
-    onMutate: async (deletedId: string) => {
+    onMutate: async ({ id }: DeleteFoodVariables) => {
       await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
 
       const previousLists = queryClient.getQueriesData<Food[]>({ queryKey: foodsKeys.lists() })
 
       queryClient.setQueriesData<Food[]>(
         { queryKey: foodsKeys.lists() },
-        (old) => old?.filter((food) => food.id !== deletedId),
+        (old) => old?.filter((food) => food.id !== id),
       )
 
       return { previousLists }
     },
-    onError: (error: Error, _deletedId: string, context) => {
+    onError: (error: Error, _variables: DeleteFoodVariables, context) => {
       restorePreviousLists(queryClient, context)
       toast.error(error.message || 'Errore nell\'eliminazione dell\'alimento')
     },

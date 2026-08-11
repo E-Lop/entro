@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { Database } from './supabase'
 import { deleteFoodImage } from './storage'
+import { isPendingUrl, deletePendingImage } from './pendingImages'
 import { EXPIRY_SOON_DAYS } from './expiry'
 
 /**
@@ -284,11 +285,59 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
 }
 
 /**
- * Delete a food item (hard delete)
- * For soft delete, use updateFood with deleted_at timestamp
- * Also deletes associated image from storage if exists
+ * Butta via l'immagine di un alimento, ovunque si trovi.
+ *
+ * Un'immagine ancora in coda (`pending://`) non è mai arrivata su Storage: sta
+ * in IndexedDB e va tolta da lì. Il fallimento non è un motivo per fermarsi —
+ * l'utente ha chiesto di togliere l'alimento, e un blob rimasto indietro è un
+ * problema di spazio, non una ragione per disobbedire.
  */
-export async function deleteFood(id: string): Promise<{ error: Error | null }> {
+async function discardFoodImage(imageUrl: string | null | undefined, userId: string): Promise<void> {
+  if (!imageUrl) return
+
+  try {
+    if (isPendingUrl(imageUrl)) {
+      await deletePendingImage(imageUrl)
+    } else {
+      await deleteFoodImage(imageUrl, userId)
+    }
+  } catch {
+    // Solo il contesto, senza l'oggetto errore: passarlo alla console ne
+    // stamperebbe le proprietà (vedi #79). Diventerà `logError` da @/lib/safeLog
+    // quando la #83 sarà mergiata, e allora il messaggio tornerà utile.
+    console.warn('Immagine non cancellata, l\'alimento viene tolto comunque')
+  }
+}
+
+/**
+ * L'esito di un alimento tolto dalla lista, quando l'utente lo dichiara.
+ *
+ * Scritto a mano e non derivato da `Food['status']`, che nei tipi generati è
+ * `string | null` e quindi non vincola niente: il vocabolario vero sta nel
+ * check constraint della tabella `foods` (`active`/`consumed`/`expired`/
+ * `wasted`). Qui restano solo i due valori che una persona può *scegliere* —
+ * `expired` si ricava dalla data e non è un esito che qualcuno dichiara.
+ */
+export type FoodOutcome = 'consumed' | 'wasted'
+
+/**
+ * Toglie un alimento dalla lista registrandone l'esito, in una sola scrittura.
+ *
+ * `deleted_at` risponde a «lo traccio ancora?», `status` a «com'è finita?»:
+ * sono due assi indipendenti, e `getFoods` filtra solo sul primo. Stanno nella
+ * stessa UPDATE perché separarli lascerebbe uno stato intermedio in cui
+ * l'esito è registrato ma l'alimento è ancora in lista — e offline due voci in
+ * coda che si possono separare per davvero.
+ *
+ * `outcome` omesso significa «toglilo e basta»: è l'errore di inserimento, e
+ * deve restare senza esito. Sporcare la metrica anti-spreco con gli errori la
+ * rende inutile quanto lasciarla vuota.
+ *
+ * L'immagine invece viene cancellata davvero: è un blob pesante, non serve a
+ * nessuna metrica, e tenerlo farebbe crescere lo Storage a ogni eliminazione.
+ * È l'unica parte irreversibile — la riga si può ripristinare, la foto no.
+ */
+export async function softDeleteFood(id: string, outcome?: FoodOutcome): Promise<FoodResponse> {
   try {
     const { data: { session }, error: authError } = await supabase.auth.getSession()
 
@@ -296,55 +345,33 @@ export async function deleteFood(id: string): Promise<{ error: Error | null }> {
       throw new Error('Utente non autenticato')
     }
 
-    const user = session.user
-
-    // First, get the food to check if it has an image
-    const { data: food, error: fetchError } = await supabase
+    const { data: existing } = await supabase
       .from('foods')
       .select('image_url')
       .eq('id', id)
       .single()
 
-    if (fetchError) {
-      throw new Error(fetchError.message)
+    await discardFoodImage(existing?.image_url, session.user.id)
+
+    // Un solo istante per tutta la scrittura: è un evento unico, e `consumed_at`
+    // non deve risultare successivo al `deleted_at` della stessa UPDATE.
+    const now = new Date().toISOString()
+
+    const updateData: FoodUpdate = {
+      deleted_at: now,
+      image_url: null,
     }
 
-    // Delete image from storage if exists
-    if (food?.image_url) {
-      try {
-        await deleteFoodImage(food.image_url, user.id)
-      } catch (imageError) {
-        console.warn('Failed to delete image, continuing with food deletion:', imageError)
-        // Continue with food deletion even if image deletion fails
+    if (outcome) {
+      updateData.status = outcome
+      if (outcome === 'consumed') {
+        updateData.consumed_at = now
       }
     }
 
-    // Delete food from database
-    const { error } = await supabase
-      .from('foods')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
-    return { error: null }
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error : new Error('Errore nell\'eliminazione dell\'alimento'),
-    }
-  }
-}
-
-/**
- * Soft delete a food item by setting deleted_at timestamp
- */
-export async function softDeleteFood(id: string): Promise<FoodResponse> {
-  try {
     const { data, error } = await supabase
       .from('foods')
-      .update({ deleted_at: new Date().toISOString() })
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()
