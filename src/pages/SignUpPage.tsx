@@ -10,6 +10,7 @@ import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { validateInvite, registerPendingInvite } from '../lib/invites'
+import { logError } from '../lib/safeLog'
 import { Loader2 } from 'lucide-react'
 
 function getSignUpDescription(
@@ -104,10 +105,14 @@ export function SignUpPage() {
     try {
       if (inviteCode && inviteValid && email) {
         // Register this email with the invite so it can be accepted after email confirmation
-        const { success, error } = await registerPendingInvite(inviteCode, email)
+        const { success } = await registerPendingInvite(inviteCode, email)
 
         if (!success) {
-          console.error('Failed to register pending invite:', error)
+          // Il messaggio del server non viene stampato: `register_pending_invite`
+          // riceve il codice invito fra i parametri, e un `RAISE EXCEPTION` che
+          // lo interpola lo farebbe finire in console. Qui non basta redigere,
+          // perché il segreto è il messaggio stesso.
+          console.error('Failed to register pending invite')
         }
       }
 
@@ -118,7 +123,7 @@ export function SignUpPage() {
         navigate('/verify-email')
       }
     } catch (error) {
-      console.error('Post-signup error:', error)
+      logError('Post-signup error:', error)
     }
   }
 

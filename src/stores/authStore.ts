@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
 import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
+import { logError, redactUrl } from '../lib/safeLog'
 import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
 import { queryClient } from '../lib/queryClient'
 import { notifyWelcomeToast } from '../lib/welcomeToast'
@@ -122,7 +123,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
             sessionStorage.setItem(processedKey, 'true')
             return
           } else if (error) {
-            console.error('[authStore] Failed to accept invite:', error.message)
+            logError('[authStore] Failed to accept invite:', error)
             // Don't return - try to create personal list as fallback
           }
 
@@ -133,12 +134,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
             await refreshAuthenticatedData()
             sessionStorage.setItem(processedKey, 'true')
           } else {
-            console.error('[authStore] Failed to create personal list:', createError)
+            logError('[authStore] Failed to create personal list:', createError)
             // Mark as processed to prevent infinite retries
             sessionStorage.setItem(processedKey, 'true')
           }
         } catch (error) {
-          console.error('[authStore] Error initializing user:', error)
+          logError('[authStore] Error initializing user:', error)
           // Mark as processed to prevent infinite retries on persistent errors
           sessionStorage.setItem(processedKey, 'true')
         }
@@ -181,7 +182,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
         if (isAutoLogin && !authorizedAutoLoginEvents.includes(event)) {
           console.warn('[authStore] ⚠️  SECURITY: Unexpected auto-login detected!', {
             event,
-            url: window.location.href,
+            // Origine e percorso, senza query né frammento: è proprio lì che
+            // starebbe il token che questo avviso sospetta.
+            url: redactUrl(window.location.href),
             email: user?.email,
             suggestion: 'This could be from a shared URL with auth token. User should logout if this was not intentional.',
           })
@@ -214,7 +217,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       return unsubscribe
     } catch (error) {
-      console.error('Error initializing auth:', error)
+      logError('Error initializing auth:', error)
       set({
         user: null,
         session: null,

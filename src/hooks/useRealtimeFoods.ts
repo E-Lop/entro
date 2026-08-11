@@ -12,6 +12,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
 import { getUserList } from '../lib/invites';
+import { logError, logWarn } from '../lib/safeLog';
 import {
   handleFoodRealtimeEvent,
   mutationTracker,
@@ -76,7 +77,7 @@ export function useRealtimeFoods() {
         if (!mounted) return;
 
         if (listError || !list) {
-          console.warn('[useRealtimeFoods] No list found for user:', listError);
+          logWarn('[useRealtimeFoods] No list found for user:', listError);
           setError('Nessuna lista trovata per questo utente');
           return;
         }
@@ -179,7 +180,7 @@ export function useRealtimeFoods() {
           });
       } catch (err) {
         if (!mounted) return;
-        console.error('[useRealtimeFoods] Error setting up subscription:', err);
+        logError('[useRealtimeFoods] Error setting up subscription:', err);
         setError('Errore nella configurazione del realtime');
       }
     }
@@ -234,7 +235,7 @@ export function useRealtimeFoods() {
             return;
           }
         } catch (err) {
-          console.error('[Realtime] Error refreshing session:', err);
+          logError('[Realtime] Error refreshing session:', err);
           return;
         }
 

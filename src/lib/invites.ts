@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { logError } from './safeLog'
 import type {
   CreateInviteResponse,
   ValidateInviteResponse,
@@ -111,7 +112,11 @@ export async function registerPendingInvite(
     })
 
     if (error) {
-      console.error('[registerPendingInvite] Error registering pending invite:', error)
+      // Il messaggio del server non viene stampato: `register_pending_invite`
+      // riceve il codice invito fra i parametri, quindi un `RAISE EXCEPTION`
+      // che lo interpola lo farebbe finire in console. Qui il segreto è il
+      // messaggio stesso, e redigerlo non basterebbe.
+      console.error('[registerPendingInvite] Error registering pending invite')
       throw error
     }
 
@@ -120,7 +125,7 @@ export async function registerPendingInvite(
       error: null,
     }
   } catch (error) {
-    console.error('[registerPendingInvite] Failed:', error)
+    console.error('[registerPendingInvite] Failed')
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
@@ -178,7 +183,7 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
   try {
     const { data, error } = await supabase.rpc('accept_pending_invite_by_email')
     if (error) {
-      console.error('[acceptInviteByEmail] RPC error:', error)
+      logError('[acceptInviteByEmail] RPC error:', error)
       return { success: false, listId: null, error: new Error(error.message) }
     }
     const row = Array.isArray(data) ? data[0] : data
@@ -211,12 +216,7 @@ export async function getUserList(): Promise<ListResponse> {
       .maybeSingle()
 
     if (memberError) {
-      console.error('[getUserList] Error querying list_members:', {
-        code: memberError.code,
-        message: memberError.message,
-        details: memberError.details,
-        hint: memberError.hint,
-      })
+      logError('[getUserList] Error querying list_members:', memberError)
     }
 
     if (memberError || !memberData) {
@@ -232,7 +232,7 @@ export async function getUserList(): Promise<ListResponse> {
       .maybeSingle()
 
     if (listError) {
-      console.error('[getUserList] Error querying lists:', listError)
+      logError('[getUserList] Error querying lists:', listError)
     }
 
     if (listError || !listData) {
@@ -245,7 +245,7 @@ export async function getUserList(): Promise<ListResponse> {
       error: null,
     }
   } catch (error) {
-    console.error('[getUserList] Failed to get user list:', error)
+    logError('[getUserList] Failed to get user list:', error)
     return {
       list: null,
       error: error instanceof Error ? error : new Error('Unknown error'),
@@ -311,7 +311,7 @@ export async function createPersonalList(): Promise<{
       .single()
 
     if (error) {
-      console.error('[createPersonalList] Error calling create_personal_list():', error)
+      logError('[createPersonalList] Error calling create_personal_list():', error)
       throw new Error(error.message)
     }
 
@@ -325,7 +325,7 @@ export async function createPersonalList(): Promise<{
 
     // Check the result from the function
     if (!result.success) {
-      console.error('[createPersonalList] Function returned error:', result.error_message)
+      logError('[createPersonalList] Function returned error:', result.error_message)
       throw new Error(result.error_message || 'Failed to create personal list')
     }
 
@@ -335,7 +335,7 @@ export async function createPersonalList(): Promise<{
       error: null,
     }
   } catch (error) {
-    console.error('[createPersonalList] Failed to create personal list:', error)
+    logError('[createPersonalList] Failed to create personal list:', error)
     return {
       success: false,
       listId: null,
@@ -405,7 +405,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       .maybeSingle()
 
     if (currentMemberError) {
-      console.error('[leaveSharedList] Error getting current list:', currentMemberError)
+      logError('[leaveSharedList] Error getting current list:', currentMemberError)
       throw currentMemberError
     }
 
@@ -423,7 +423,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       .eq('list_id', currentListId)
 
     if (memberCountError) {
-      console.error('[leaveSharedList] Error counting members:', memberCountError)
+      logError('[leaveSharedList] Error counting members:', memberCountError)
       throw memberCountError
     }
 
@@ -440,19 +440,14 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       .eq('user_id', userId)
 
     if (removeError) {
-      console.error('[leaveSharedList] Error removing user from list:', {
-        error: removeError,
-        code: removeError.code,
-        message: removeError.message,
-        details: removeError.details,
-      })
+      logError('[leaveSharedList] Error removing user from list:', removeError)
       throw removeError
     }
 
     // Step 4: Create new personal list
     const createResult = await createPersonalList()
     if (!createResult.success) {
-      console.error('[leaveSharedList] Failed to create personal list:', createResult.error)
+      logError('[leaveSharedList] Failed to create personal list:', createResult.error)
       throw createResult.error || new Error('Failed to create personal list')
     }
 
@@ -461,7 +456,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
       error: null,
     }
   } catch (error) {
-    console.error('[leaveSharedList] Leave list flow failed:', error)
+    logError('[leaveSharedList] Leave list flow failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Unknown error'),
