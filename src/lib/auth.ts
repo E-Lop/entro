@@ -128,24 +128,35 @@ export async function signIn(
  * Selectively clears auth-related storage while preserving app settings.
  */
 export async function signOut(): Promise<{ error: Error | null }> {
-  try {
-    // Best-effort push cleanup -- errors are ignored since the user is signing out
-    await unsubscribeFromPush().catch(() => {})
+  // Best-effort push cleanup -- errors are ignored since the user is signing out
+  await unsubscribeFromPush().catch(() => {})
 
+  let failure: Error | null = null
+
+  try {
     const { error } = await supabase.auth.signOut()
 
     if (error) {
-      throw new Error(error.message)
+      failure = new Error(error.message)
     }
-
-    clearAuthStorage()
-
-    return { error: null }
   } catch (error) {
-    return {
-      error: error instanceof Error ? error : new Error('Errore durante il logout'),
-    }
+    failure = error instanceof Error ? error : new Error('Errore durante il logout')
   }
+
+  // La pulizia non dipende dall'esito di Supabase. Il caso tipico è la sessione
+  // già scaduta lato server: la richiesta viene rifiutata, ma i token devono
+  // sparire dal browser lo stesso, altrimenti restano leggibili in localStorage
+  // su una macchina condivisa e il client può ricostruirci sopra una sessione.
+  // Guardata a sua volta perché accedere a `localStorage` solleva quando il
+  // browser blocca lo storage, e nessun wrapper di questo modulo deve sollevare.
+  try {
+    clearAuthStorage()
+  } catch (error) {
+    failure ??= error instanceof Error ? error : new Error('Errore durante la pulizia della sessione')
+  }
+
+  // L'errore di Supabase ha la precedenza: è la causa, la pulizia è la conseguenza.
+  return { error: failure }
 }
 
 /**
