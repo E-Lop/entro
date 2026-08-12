@@ -7,6 +7,7 @@ import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { supabase } from '../lib/supabase'
+import { logError } from '../lib/safeLog'
 import { Mail, CheckCircle2, Loader2 } from 'lucide-react'
 
 function getResendButtonContent(isResending: boolean, resendSuccess: boolean): ReactNode {
@@ -70,7 +71,7 @@ export function VerifyEmailPage() {
           return
         }
       } catch (error) {
-        console.error('Error getting user email:', error)
+        logError('Error getting user email:', error)
       }
 
       // If no email found anywhere, redirect to signup

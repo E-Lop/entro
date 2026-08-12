@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { unsubscribeFromPush } from './pushNotifications'
 import { clearPersistedCache } from './queryPersister'
+import { logError } from './safeLog'
 import type { User, Session } from '@supabase/supabase-js'
 
 /**
@@ -177,7 +178,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     if (error) {
       if (!isSessionMissingError(error.message ?? '')) {
-        console.error('Error getting current user:', error)
+        logError('Error getting current user:', error)
       }
       return null
     }
@@ -186,7 +187,7 @@ export async function getCurrentUser(): Promise<User | null> {
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
     if (!isSessionMissingError(message)) {
-      console.error('Error getting current user:', error)
+      logError('Error getting current user:', error)
     }
     return null
   }
@@ -201,7 +202,7 @@ export async function getSession(): Promise<Session | null> {
     if (error) throw new Error(error.message)
     return data.session
   } catch (error) {
-    console.error('Error getting session:', error)
+    logError('Error getting session:', error)
     return null
   }
 }

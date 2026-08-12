@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.10.7] - 2026-08-11
+
+### Security
+- I log dei percorsi auth non possono più contenere token di sessione né codici invito. Nessuna riga stampava un segreto di proposito: uscivano di rimbalzo, perché `console.error('contesto:', error)` stampa anche le **proprietà** dell'errore, e i client Supabase ci attaccano i dati della risposta — inclusa la sessione che stavano tentando di rinnovare. Nuovo modulo `src/lib/safeLog.ts`: `logError`/`logWarn` stampano il solo messaggio, ripulito dalle stringhe con la forma di un JWT, applicati in `auth.ts`, `authStore.ts`, `useRealtimeFoods.ts` e `SignUpPage.tsx`. Per il punto dell'invito non basta redigere e il messaggio del server non viene stampato affatto: `register_pending_invite` riceve il codice fra i parametri, quindi è il messaggio stesso a poterlo contenere. La PWA non ha Sentry — quei log restavano nella console del browser, non in un servizio esterno — ma erano comunque visibili a chiunque aprisse i devtools, su una macchina condivisa o durante una condivisione schermo. (#79)
+- Ripulito anche `src/lib/invites.ts`, che non era nell'elenco della issue e rendeva il resto aggirabile: `registerPendingInvite` stampava l'errore della RPC un frame sotto il punto già sistemato in `SignUpPage`, quindi il codice invito sarebbe finito in console lo stesso. Lì, come nel chiamante, il messaggio del server non viene stampato affatto; gli altri tredici punti del modulo passano da `logError`.
+- Anche `VerifyEmailPage` passa da `logError`: chiama `supabase.auth.getUser()` direttamente e stampava l'errore grezzo, quindi era un percorso auth a tutti gli effetti pur non comparendo nell'elenco della issue.
+- L'avviso di sicurezza sull'auto-login inatteso non logga più l'URL completo, ma solo origine e percorso. Era il punto più esposto e non era nell'elenco della issue: stampava `window.location.href` **proprio quando sospettava che l'URL contenesse un token di auth**, che è lo scenario descritto dall'avviso stesso. Query e frammento vengono scartati interi invece che ripuliti, perché il `refresh_token` di Supabase è opaco e nessun pattern lo intercetterebbe.
+
 ## [1.10.6] - 2026-08-11
 
 ### Security
@@ -496,7 +504,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.6...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.7...HEAD
+[1.10.7]: https://github.com/E-Lop/entro/compare/v1.10.6...v1.10.7
 [1.10.6]: https://github.com/E-Lop/entro/compare/v1.10.5...v1.10.6
 [1.10.5]: https://github.com/E-Lop/entro/compare/v1.10.4...v1.10.5
 [1.10.4]: https://github.com/E-Lop/entro/compare/v1.10.3...v1.10.4
