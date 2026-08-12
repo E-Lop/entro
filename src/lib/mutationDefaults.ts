@@ -2,11 +2,12 @@ import type { QueryClient } from '@tanstack/react-query'
 import {
   createFood,
   updateFood,
-  deleteFood,
+  softDeleteFood,
   updateFoodStatus,
   type Food,
   type FoodInsert,
   type FoodUpdate,
+  type FoodOutcome,
 } from './foods'
 import { mutationTracker } from './realtime'
 import { uploadFoodImage } from './storage'
@@ -20,6 +21,12 @@ export const mutationKeys = {
   updateFood: ['updateFood'] as const,
   deleteFood: ['deleteFood'] as const,
   updateFoodStatus: ['updateFoodStatus'] as const,
+}
+
+/** Cosa serve per togliere un alimento: quale, e com'è finita se l'utente lo dice. */
+export interface DeleteFoodVariables {
+  id: string
+  outcome?: FoodOutcome
 }
 
 /**
@@ -87,10 +94,11 @@ export function registerMutationDefaults(queryClient: QueryClient): void {
   })
 
   queryClient.setMutationDefaults(mutationKeys.deleteFood, {
-    mutationFn: async (id: string) => {
-      mutationTracker.track(id, 'DELETE')
-      const { error } = await deleteFood(id)
-      if (error) throw error
+    mutationFn: async (variables: DeleteFoodVariables) => {
+      // Una sola scrittura: `deleted_at` e l'esito insieme. La riga resta
+      // (serve alla metrica anti-spreco), l'immagine no.
+      mutationTracker.track(variables.id, 'UPDATE')
+      return unwrapFood(await softDeleteFood(variables.id, variables.outcome))
     },
   })
 

@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { onlineManager } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { useCreateFood, useUpdateFood, useDeleteFood } from './useFoods'
-import type { Food, FoodInsert, FoodUpdate } from '@/lib/foods'
+import type { Food, FoodInsert, FoodUpdate, FoodOutcome } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { triggerHaptic } from '@/lib/haptics'
 
@@ -115,10 +115,10 @@ export function useFoodFormDialog() {
     }
   }
 
-  const handleDeleteFood = () => {
+  const handleDeleteFood = (outcome?: FoodOutcome) => {
     if (!deletingFood) return
 
-    deleteMutation.mutate(deletingFood.id)
+    deleteMutation.mutate({ id: deletingFood.id, outcome })
     triggerHaptic('error')
     setDeletingFood(null)
 

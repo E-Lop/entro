@@ -5,6 +5,21 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.0] - 2026-08-12
+
+### Added
+- **L'eliminazione di un alimento ora chiede com'è finita.** La conferma non domanda più «sei sicuro?» — una domanda che non produce nessun dato, visto che l'utente ha già deciso premendo Elimina — ma offre tre uscite: «L'ho consumato», «L'ho buttato», «Toglilo e basta». La terza resta deliberatamente **senza esito**, perché è l'errore di inserimento: sporcare la metrica anti-spreco con gli errori la renderebbe inutile quanto lasciarla vuota. È la stessa interazione di prima, chiesta diversamente.
+- **Un menu azioni sempre presente sulle card.** Il pulsante ⋮ apre Modifica ed Elimina alle larghezze da telefono. I pulsanti in fondo alla card sono `hidden sm:flex`, e `display: none` non è «nascosto visivamente»: toglie dall'albero di accessibilità. Sotto i 640px lo swipe era l'unica strada, ed è `aria-hidden` — quindi su telefono con uno screen reader **non esisteva alcun modo di modificare o eliminare un alimento**. Un gesto basato su percorso deve avere un'alternativa a puntatore singolo: WCAG 2.5.1 *Pointer Gestures*, livello A. Il menu è `sm:hidden`, complemento esatto del footer: una sola strada a ogni larghezza. Lo swipe resta invariato per chi lo usa.
+
+### Changed
+- **Eliminare un alimento non distrugge più la riga.** Era una `DELETE` vera, quindi registrare l'esito e poi eliminare avrebbe scritto un dato e subito dopo l'avrebbe buttato: la metrica anti-spreco non avrebbe trovato niente. Ora è una sola `UPDATE` che imposta `deleted_at`, azzera `image_url` e registra l'esito — atomica, senza stati intermedi, e offline **una sola voce in coda** invece di due che si possono separare. `getFoods` già filtrava su `deleted_at IS NULL`, quindi per chi usa l'app la lista si comporta esattamente come prima.
+- **L'immagine invece viene cancellata davvero**, da Storage o da IndexedDB se era ancora in coda di caricamento. È un blob pesante che non serve a nessuna metrica, e tenerlo farebbe crescere lo spazio occupato a ogni eliminazione. È l'unica parte irreversibile: la riga si può ripristinare, la foto no. Se la cancellazione fallisce l'alimento esce comunque dalla lista — l'utente ha chiesto quello, e un blob rimasto indietro è un problema di spazio, non un motivo per disobbedire.
+
+- La cancellazione dell'immagine, quando fallisce, logga tramite `logError` (introdotto dalla 1.10.7) invece che con un messaggio muto: il branch era partito prima che quel modulo esistesse.
+
+### Removed
+- La funzione di eliminazione definitiva (`deleteFood`), rimasta senza chiamanti. Restava accanto a `softDeleteFood` come alternativa apparentemente equivalente, ed è esattamente il tipo di ambiguità che ha prodotto questa situazione: `softDeleteFood` e `useUpdateFoodStatus` esistevano da tempo e non erano mai state collegate a niente.
+
 ## [1.10.7] - 2026-08-11
 
 ### Security
@@ -504,7 +519,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.10.7...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/E-Lop/entro/compare/v1.10.7...v1.11.0
 [1.10.7]: https://github.com/E-Lop/entro/compare/v1.10.6...v1.10.7
 [1.10.6]: https://github.com/E-Lop/entro/compare/v1.10.5...v1.10.6
 [1.10.5]: https://github.com/E-Lop/entro/compare/v1.10.4...v1.10.5

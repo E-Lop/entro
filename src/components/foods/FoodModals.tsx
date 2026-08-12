@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { Check, Trash2, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog'
-import type { Food } from '@/lib/foods'
+import type { Food, FoodOutcome } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 
 const FoodForm = lazy(() => import('./FoodForm').then(m => ({ default: m.FoodForm })))
@@ -38,7 +39,7 @@ interface FoodModalsProps {
   isUpdating: boolean
   deletingFood: Food | null
   onDeleteDialogChange: (open: boolean) => void
-  onDeleteFood: () => void
+  onDeleteFood: (outcome?: FoodOutcome) => void
   isDeleting: boolean
 }
 
@@ -95,24 +96,50 @@ export function FoodModals({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Conferma eliminazione: chiede com'è finita, non «sei sicuro?» */}
       <AlertDialog open={!!deletingFood} onOpenChange={(open) => !open && onDeleteDialogChange(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Conferma Eliminazione</AlertDialogTitle>
+            <AlertDialogTitle>Com'è finita?</AlertDialogTitle>
             <AlertDialogDescription>
-              Sei sicuro di voler eliminare "{deletingFood?.name}"? Questa azione non può essere annullata.
+              «{deletingFood?.name}» esce dalla lista. Dirci come aiuta a capire quanto cibo
+              finisce nella spazzatura — se è stato un errore, puoi togliere e basta.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annulla</AlertDialogCancel>
+
+          {/* In colonna: sono tre scelte fra pari, non un'azione con due varianti.
+              Su telefono resta anche l'unica disposizione che tiene i bersagli larghi. */}
+          <div className="flex flex-col gap-2 py-2">
             <AlertDialogAction
-              onClick={onDeleteFood}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => onDeleteFood('consumed')}
               disabled={isDeleting}
+              className="h-11 w-full justify-start"
             >
-              {isDeleting ? 'Eliminazione...' : 'Elimina'}
+              <Check className="h-4 w-4 mr-2" aria-hidden="true" />
+              L'ho consumato
             </AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => onDeleteFood('wasted')}
+              disabled={isDeleting}
+              className="h-11 w-full justify-start bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+              L'ho buttato
+            </AlertDialogAction>
+            {/* Nessun esito: è l'errore di inserimento. Sporcare la metrica
+                anti-spreco con gli errori la rende inutile quanto lasciarla vuota. */}
+            <AlertDialogAction
+              onClick={() => onDeleteFood()}
+              disabled={isDeleting}
+              className="h-11 w-full justify-start bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              <X className="h-4 w-4 mr-2" aria-hidden="true" />
+              Toglilo e basta
+            </AlertDialogAction>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-11">Annulla</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
