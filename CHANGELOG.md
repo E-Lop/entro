@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.1] - 2026-08-12
+
+### Fixed
+- **La validazione della quantità accettava valori che il database rifiuta.** Lo schema Zod usava `min(0)` — «La quantità non può essere negativa» — mentre la colonna è `numeric(10,2)` con `check (quantity > 0)`: lo zero superava la validazione del form e faceva fallire la scrittura. Il minimo non è nemmeno «maggiore di zero» sul valore digitato, ma **0.01**, il più piccolo positivo che la colonna sa memorizzare: un 0,004 passerebbe un controllo `> 0` e diventerebbe `0.00` alla scrittura, dove il CHECK scatta comunque. `null` resta valido e continua a significare «quantità non tracciata», che è cosa diversa da zero — se non ne hai più, l'alimento va toglierlo dalla lista. L'editor rapido non ci cadeva, perché `src/lib/quantity.ts` colmava già il divario lato stepper; ci cadeva il form.
+
 ## [1.11.0] - 2026-08-12
 
 ### Added

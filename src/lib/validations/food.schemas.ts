@@ -35,9 +35,14 @@ export const foodFormSchema = z.object({
       return selectedDate >= today
     }, 'La data di scadenza non può essere nel passato'),
   storage_location: storageLocationEnum,
+  // La colonna è `numeric(10,2)` con `check (quantity > 0)`. Il minimo non è
+  // quindi «maggiore di zero» sul valore digitato, ma 0.01: il più piccolo
+  // valore positivo che la colonna sa memorizzare. Un 0.004 passerebbe un
+  // controllo `> 0` e diventerebbe 0.00 alla scrittura, dove il CHECK scatta.
+  // `null` resta valido e significa «quantità non tracciata».
   quantity: z
     .number()
-    .min(0, 'La quantità non può essere negativa')
+    .min(0.01, 'La quantità deve essere maggiore di zero')
     .nullable()
     .optional(),
   quantity_unit: quantityUnitEnum.nullable().optional(),
