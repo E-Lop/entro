@@ -15,6 +15,8 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 - **Eliminare un alimento non distrugge più la riga.** Era una `DELETE` vera, quindi registrare l'esito e poi eliminare avrebbe scritto un dato e subito dopo l'avrebbe buttato: la metrica anti-spreco non avrebbe trovato niente. Ora è una sola `UPDATE` che imposta `deleted_at`, azzera `image_url` e registra l'esito — atomica, senza stati intermedi, e offline **una sola voce in coda** invece di due che si possono separare. `getFoods` già filtrava su `deleted_at IS NULL`, quindi per chi usa l'app la lista si comporta esattamente come prima.
 - **L'immagine invece viene cancellata davvero**, da Storage o da IndexedDB se era ancora in coda di caricamento. È un blob pesante che non serve a nessuna metrica, e tenerlo farebbe crescere lo spazio occupato a ogni eliminazione. È l'unica parte irreversibile: la riga si può ripristinare, la foto no. Se la cancellazione fallisce l'alimento esce comunque dalla lista — l'utente ha chiesto quello, e un blob rimasto indietro è un problema di spazio, non un motivo per disobbedire.
 
+- La cancellazione dell'immagine, quando fallisce, logga tramite `logError` (introdotto dalla 1.10.7) invece che con un messaggio muto: il branch era partito prima che quel modulo esistesse.
+
 ### Removed
 - La funzione di eliminazione definitiva (`deleteFood`), rimasta senza chiamanti. Restava accanto a `softDeleteFood` come alternativa apparentemente equivalente, ed è esattamente il tipo di ambiguità che ha prodotto questa situazione: `softDeleteFood` e `useUpdateFoodStatus` esistevano da tempo e non erano mai state collegate a niente.
 

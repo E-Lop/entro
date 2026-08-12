@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 import type { Database } from './supabase'
 import { deleteFoodImage } from './storage'
 import { isPendingUrl, deletePendingImage } from './pendingImages'
+import { logError } from './safeLog'
 import { EXPIRY_SOON_DAYS } from './expiry'
 
 /**
@@ -301,11 +302,11 @@ async function discardFoodImage(imageUrl: string | null | undefined, userId: str
     } else {
       await deleteFoodImage(imageUrl, userId)
     }
-  } catch {
-    // Solo il contesto, senza l'oggetto errore: passarlo alla console ne
-    // stamperebbe le proprietà (vedi #79). Diventerà `logError` da @/lib/safeLog
-    // quando la #83 sarà mergiata, e allora il messaggio tornerà utile.
-    console.warn('Immagine non cancellata, l\'alimento viene tolto comunque')
+  } catch (error) {
+    // `logError` stampa il solo messaggio, ripulito: passare l'oggetto alla
+    // console ne stamperebbe le proprietà, dove i client Supabase mettono i
+    // dati della risposta (#79).
+    logError('Immagine non cancellata, l\'alimento viene tolto comunque:', error)
   }
 }
 
