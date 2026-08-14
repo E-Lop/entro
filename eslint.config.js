@@ -5,7 +5,11 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'playwright-report', 'test-results'] },
+  // `supabase/.temp/` è già in `.gitignore`, ma non basta: il flat config di
+  // ESLint **non** legge `.gitignore`, quindi va ripetuto qui. Dentro c'è il
+  // runtime generato dallo stack Supabase locale — un bundle minificato che a
+  // stack acceso produce ~190 errori e sommerge quelli veri.
+  { ignores: ['dist', 'playwright-report', 'test-results', 'supabase/.temp'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
