@@ -4,6 +4,7 @@ import { deleteFoodImage } from './storage'
 import { isPendingUrl, deletePendingImage } from './pendingImages'
 import { logError } from './safeLog'
 import { EXPIRY_SOON_DAYS } from './expiry'
+import type { StorageLocation } from './validations/food.schemas'
 
 /**
  * Foods Service Layer - Wrapper functions around Supabase Foods API
@@ -35,7 +36,7 @@ export interface CategoriesResponse {
  */
 export interface FilterParams {
   category_id?: string
-  storage_location?: 'fridge' | 'freezer' | 'pantry'
+  storage_location?: StorageLocation
   /** Filtro sulla scadenza, derivata dalla data. Da non confondere con
    *  `Food['status']`, che è l'esito scelto dall'utente. */
   expiry?: 'all' | 'not_expired' | 'expiring_soon' | 'expired'
@@ -313,13 +314,16 @@ async function discardFoodImage(imageUrl: string | null | undefined, userId: str
 /**
  * L'esito di un alimento tolto dalla lista, quando l'utente lo dichiara.
  *
- * Scritto a mano e non derivato da `Food['status']`, che nei tipi generati è
- * `string | null` e quindi non vincola niente: il vocabolario vero sta nel
- * check constraint della tabella `foods` (`active`/`consumed`/`expired`/
- * `wasted`). Qui restano solo i due valori che una persona può *scegliere* —
- * `expired` si ricava dalla data e non è un esito che qualcuno dichiara.
+ * Derivato da `Food['status']`, che ora porta il vocabolario del check
+ * constraint invece del `string | null` dei tipi generati. Restano i valori che
+ * una persona può *scegliere*: `active` è lo stato di chi non ha ancora un
+ * esito, ed `expired` si ricava dalla data — nessuno lo dichiara.
+ *
+ * Derivarlo, invece di riscriverlo, fa sì che un cambio di vocabolario si
+ * presenti come errore di compilazione qui, dove va deciso se il valore nuovo è
+ * un esito dichiarabile.
  */
-export type FoodOutcome = 'consumed' | 'wasted'
+export type FoodOutcome = Exclude<NonNullable<Food['status']>, 'active' | 'expired'>
 
 /**
  * Toglie un alimento dalla lista registrandone l'esito, in una sola scrittura.

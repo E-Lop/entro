@@ -1,12 +1,31 @@
 import { z } from 'zod'
 
-// Storage location enum
+/**
+ * Il vocabolario delle tre colonne `text` + `CHECK` della tabella `foods`.
+ *
+ * Questi enum sono la **fonte unica lato TypeScript**: `types/food.types.ts` li
+ * riesporta e `lib/supabase.overrides.ts` li usa per restringere le righe che
+ * il generatore di tipi consegna come `string`. Non ridichiarare queste liste
+ * altrove — il compilatore non se ne accorgerebbe.
+ *
+ * Il vincolo vero resta il `CHECK` in Postgres, che è l'unico punto a rifiutare
+ * davvero una scrittura, anche da un client che non è questo. Che le due liste
+ * restino uguali lo tiene fermo `lib/__tests__/foodVocabulary.test.ts`.
+ */
+
 export const storageLocationEnum = z.enum(['fridge', 'freezer', 'pantry'])
 
-// Quantity unit enum (must match database constraint)
 export const quantityUnitEnum = z.enum(['pz', 'kg', 'g', 'l', 'ml', 'confezioni'])
 
-// Status enum
+/**
+ * `expired` è **deprecato**: resta nella lista perché il CHECK lo ammette e
+ * perché esistono righe che lo portano, ma non va usato in flussi nuovi — la
+ * scadenza si deriva dalla data, non si dichiara. Vedi `core/food-lifecycle.md`
+ * nel bundle condiviso.
+ *
+ * La nota vive qui e non su un tipo derivato perché ogni derivazione la
+ * perderebbe: `FoodOutcome` in `lib/foods.ts` lo esclude proprio per questo.
+ */
 export const statusEnum = z.enum(['active', 'consumed', 'expired', 'wasted'])
 
 // Food form schema for create/edit operations

@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.2] - 2026-08-14
+
+### Changed
+- **Il vocabolario delle colonne `text` + `CHECK` ha una sola fonte in TypeScript, e i tipi lo fanno rispettare.** `foods.status`, `foods.storage_location` e `foods.quantity_unit` non sono `enum` di Postgres: sono `text` con un `CHECK`, e il generatore di tipi Supabase non legge i check constraint. Da `supabase gen types` uscivano quindi come `string` e `string | null`, così `updateFoodStatus(id, 'banana')` compilava e lo sbaglio si manifestava come 400 a runtime invece che come errore del compilatore. Gli enum Zod di `validations/food.schemas.ts` diventano la fonte unica lato TypeScript — sono gli unici dei punti che ridichiaravano quelle liste a validare davvero qualcosa — e un nuovo `lib/supabase.overrides.ts` li usa per restringere le righe generate. Passando dal punto in cui il client viene costruito, il restringimento vale anche per le scritture. Sono sparite sei copie inline del vocabolario, sparse fra `lib/foods.ts`, `types/openfoodfacts.types.ts` e tre componenti.
+
+### Added
+- **Un test tiene ferma la cucitura fra il `CHECK` e gli enum Zod.** Ridurre il numero di definizioni non basta: le due che restano — il constraint, unico punto che rifiuta davvero una scrittura, e gli enum — possono ancora divergere, e lo farebbero in silenzio. `lib/__tests__/foodVocabulary.test.ts` legge i valori ammessi dal DDL delle migrazioni e li confronta con gli enum, e fallisce anche se una migrazione successiva ridefinisce quei constraint, perché a quel punto starebbe leggendo una riga di SQL superata.
+
 ## [1.11.1] - 2026-08-12
 
 ### Fixed
@@ -524,7 +532,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.2...HEAD
+[1.11.2]: https://github.com/E-Lop/entro/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/E-Lop/entro/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/E-Lop/entro/compare/v1.10.7...v1.11.0
 [1.10.7]: https://github.com/E-Lop/entro/compare/v1.10.6...v1.10.7

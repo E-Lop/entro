@@ -7,7 +7,6 @@ import { QuantityStepper } from './QuantityStepper'
 import { useUpdateFood } from '@/hooks/useFoods'
 import { triggerHaptic } from '@/lib/haptics'
 import type { Food } from '@/lib/foods'
-import type { QuantityUnit } from '@/types/food.types'
 
 interface QuickQuantityEditorProps {
   food: Food
@@ -28,7 +27,7 @@ const PERSIST_DEBOUNCE_MS = 600
  */
 export function QuickQuantityEditor({ food, onOpenFullEdit }: QuickQuantityEditorProps) {
   const updateMutation = useUpdateFood()
-  const unit = food.quantity_unit as QuantityUnit | null
+  const unit = food.quantity_unit
 
   const [value, setValue] = useState<number | null>(food.quantity)
   const pendingRef = useRef<number | null>(food.quantity)

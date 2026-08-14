@@ -259,7 +259,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       }
 
       if (mappedData.quantity_unit) {
-        form.setValue('quantity_unit', mappedData.quantity_unit as 'pz' | 'kg' | 'g' | 'l' | 'ml' | 'confezioni')
+        form.setValue('quantity_unit', mappedData.quantity_unit)
       }
 
       if (mappedData.notes) {

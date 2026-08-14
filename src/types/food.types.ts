@@ -1,9 +1,18 @@
 // Core types for food items
-export type StorageLocation = 'fridge' | 'freezer' | 'pantry'
 
-export type FoodStatus = 'active' | 'consumed' | 'expired' | 'wasted'
+/**
+ * Il vocabolario non si ridichiara qui: la fonte unica lato TypeScript sono
+ * gli enum Zod di `validations/food.schemas.ts`, che sono anche l'unica delle
+ * definizioni a validare qualcosa a runtime. Il vincolo vero resta il `CHECK`
+ * in Postgres, l'unico punto che rifiuta una scrittura sbagliata.
+ */
+import type {
+  StorageLocation,
+  FoodStatus,
+  QuantityUnit,
+} from '@/lib/validations/food.schemas'
 
-export type QuantityUnit = 'pz' | 'kg' | 'g' | 'l' | 'ml' | 'confezioni'
+export type { StorageLocation, FoodStatus, QuantityUnit }
 
 export interface Food {
   id: string
