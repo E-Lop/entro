@@ -27,18 +27,34 @@ const INVITE_CODE = 'ZK7Q2M'
 
 const SENTINELS = [TOKEN, REFRESH_TOKEN, PASSWORD, INVITE_CODE]
 
-const { mockAuth, mockRpc } = vi.hoisted(() => ({
+/**
+ * Un `image_url` all'antica: in DB alcune righe tengono l'URL firmato intero
+ * invece del solo percorso d'archivio, e un URL firmato di Supabase Storage
+ * porta il token **nella query**. È il valore che `getSignedImageUrls` passa a
+ * `getSignedImageUrl`, e che finiva interpolato nel messaggio di errore.
+ */
+const LEGACY_SIGNED_URL = `https://rmbmmwcxtnanacxbkihc.supabase.co/storage/v1/object/sign/food-images/utente/foto.jpg?token=${TOKEN}`
+
+const { mockAuth, mockRpc, mockCreateSignedUrl } = vi.hoisted(() => ({
   mockAuth: {
     getUser: vi.fn(),
     getSession: vi.fn(),
   },
   mockRpc: vi.fn(),
+  mockCreateSignedUrl: vi.fn(),
 }))
 
-vi.mock('@/lib/supabase', () => ({ supabase: { auth: mockAuth, rpc: mockRpc } }))
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    auth: mockAuth,
+    rpc: mockRpc,
+    storage: { from: () => ({ createSignedUrl: mockCreateSignedUrl }) },
+  },
+}))
 
 import { getCurrentUser, getSession } from '@/lib/auth'
 import { registerPendingInvite } from '@/lib/invites'
+import { getSignedImageUrl, getSignedImageUrls } from '@/lib/storage'
 import { redactSecrets, redactUrl, logError } from '@/lib/safeLog'
 
 const METHODS = ['log', 'info', 'warn', 'error', 'debug'] as const
@@ -74,6 +90,8 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })
 
 /** Tutto quello che è finito in console, in un'unica stringa. */
@@ -242,6 +260,91 @@ describe('flusso invito — il codice non finisce in console', () => {
     mockRpc.mockRejectedValue(new Error(`invito ${INVITE_CODE} non valido`))
 
     await registerPendingInvite(INVITE_CODE, 'utente@example.com')
+
+    expectNoSentinels()
+  })
+})
+
+describe('flusso signed URL — il token non finisce in console', () => {
+  it('getSignedImageUrl con un errore che si porta dietro la sessione', async () => {
+    mockCreateSignedUrl.mockResolvedValue({
+      data: null,
+      error: supabaseErrorWithSession('Errore interno del server'),
+    })
+
+    await expect(getSignedImageUrl('utente/foto.jpg')).rejects.toThrow()
+
+    expectNoSentinels()
+  })
+
+  it('getSignedImageUrls non interpola nel messaggio il percorso, che può essere un URL firmato', async () => {
+    // Qui il segreto non arriva dall'errore: arriva dal *percorso*. Alcune
+    // righe in DB tengono l'URL firmato intero come `image_url`, e quel valore
+    // finiva interpolato nel contesto del log — token nella query compreso.
+    mockCreateSignedUrl.mockResolvedValue({
+      data: null,
+      error: supabaseErrorWithSession('Errore interno del server'),
+    })
+
+    const urls = await getSignedImageUrls([LEGACY_SIGNED_URL])
+
+    expect(urls.size).toBe(0)
+    expectNoSentinels()
+  })
+
+  it('getSignedImageUrls tiene il percorso normale nel log, che è il motivo per cui lo si logga', async () => {
+    // Redigere è utile finché non cancella la diagnosi: un percorso d'archivio
+    // non è un URL e deve restare leggibile.
+    mockCreateSignedUrl.mockResolvedValue({
+      data: null,
+      error: new Error('Errore interno del server'),
+    })
+
+    await getSignedImageUrls(['utente/foto.jpg'])
+
+    expect(output()).toContain('utente/foto.jpg')
+  })
+})
+
+describe('flusso push — il token non finisce in console', () => {
+  /**
+   * `subscribeToPush` gira solo con Push API, service worker e permesso
+   * notifiche presenti: qui si montano i minimi indispensabili perché il flusso
+   * arrivi davvero fino alla `subscribe` che fallisce.
+   */
+  async function loadPushWithFailingSubscribe(failure: Error) {
+    vi.stubEnv('VITE_VAPID_PUBLIC_KEY', 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U')
+    vi.stubGlobal('PushManager', class {})
+    vi.stubGlobal('Notification', { permission: 'granted', requestPermission: vi.fn().mockResolvedValue('granted') })
+    vi.stubGlobal('navigator', {
+      onLine: true,
+      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+      maxTouchPoints: 0,
+      serviceWorker: {
+        ready: Promise.resolve({ pushManager: { subscribe: vi.fn().mockRejectedValue(failure) } }),
+      },
+    })
+    vi.resetModules()
+    return import('@/lib/pushNotifications')
+  }
+
+  it('subscribeToPush quando la subscribe fallisce con la sessione appesa addosso', async () => {
+    const { subscribeToPush } = await loadPushWithFailingSubscribe(
+      supabaseErrorWithSession('Registrazione push rifiutata')
+    )
+
+    const result = await subscribeToPush()
+
+    expect(result.success).toBe(false)
+    expectNoSentinels()
+  })
+
+  it('subscribeToPush quando il token sta nel messaggio stesso', async () => {
+    const { subscribeToPush } = await loadPushWithFailingSubscribe(
+      new Error(`Registrazione push rifiutata per ${TOKEN}`)
+    )
+
+    await subscribeToPush()
 
     expectNoSentinels()
   })

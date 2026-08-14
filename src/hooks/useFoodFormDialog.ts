@@ -6,6 +6,7 @@ import { useCreateFood, useUpdateFood, useDeleteFood } from './useFoods'
 import type { Food, FoodInsert, FoodUpdate, FoodOutcome } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { triggerHaptic } from '@/lib/haptics'
+import { logError } from '@/lib/safeLog'
 
 /**
  * Upload or persist an image File depending on online/offline state.
@@ -22,7 +23,7 @@ async function resolveImageFile(
       const { uploadFoodImage } = await import('@/lib/storage')
       return await uploadFoodImage(file, userId)
     } catch (error) {
-      console.error('Image upload failed:', error)
+      logError('Image upload failed:', error)
       return fallback
     }
   }
@@ -32,7 +33,7 @@ async function resolveImageFile(
     const { savePendingImage } = await import('@/lib/pendingImages')
     return await savePendingImage(file)
   } catch (error) {
-    console.error('Failed to save pending image:', error)
+    logError('Failed to save pending image:', error)
     return fallback
   }
 }

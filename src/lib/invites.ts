@@ -236,7 +236,7 @@ export async function getUserList(): Promise<ListResponse> {
     }
 
     if (listError || !listData) {
-      console.error('[getUserList] List not found for id:', memberData.list_id)
+      console.error(`[getUserList] List not found for id: ${memberData.list_id}`)
       throw new Error(listError?.message || 'List not found')
     }
 

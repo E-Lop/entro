@@ -2,7 +2,7 @@ import { supabase } from './supabase'
 import type { Database } from './supabase'
 import { deleteFoodImage } from './storage'
 import { isPendingUrl, deletePendingImage } from './pendingImages'
-import { logError } from './safeLog'
+import { logError, logWarn } from './safeLog'
 import { EXPIRY_SOON_DAYS } from './expiry'
 import type { StorageLocation } from './validations/food.schemas'
 
@@ -257,7 +257,7 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
         try {
           await deleteFoodImage(oldFood.image_url, user.id)
         } catch (imageError) {
-          console.warn('Failed to delete old image, continuing with update:', imageError)
+          logWarn('Failed to delete old image, continuing with update:', imageError)
           // Continue with update even if image deletion fails
         }
       }

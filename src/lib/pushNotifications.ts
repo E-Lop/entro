@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { logError } from './safeLog'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY
 const PUSH_ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/register-push`
@@ -155,7 +156,7 @@ export async function subscribeToPush(): Promise<{
     }
     return { success: true, subscription }
   } catch (error) {
-    console.error('[pushNotifications] Subscribe error:', error)
+    logError('[pushNotifications] Subscribe error:', error)
     return { success: false, error: formatError(error) }
   }
 }
@@ -203,7 +204,7 @@ export async function unsubscribeFromPush(): Promise<{ success: boolean; error?:
     await subscription.unsubscribe()
     return { success: true }
   } catch (error) {
-    console.error('[pushNotifications] Unsubscribe error:', error)
+    logError('[pushNotifications] Unsubscribe error:', error)
     return { success: false, error: formatError(error) }
   }
 }

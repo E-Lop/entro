@@ -5,6 +5,16 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.3] - 2026-08-14
+
+### Security
+- **I `console.*` con un secondo argomento non stampano più le proprietà degli errori, in nessun punto rimasto.** `console.error('contesto:', error)` non stampa solo il messaggio: stampa anche le **proprietà** dell'oggetto, ed è lì che i client Supabase attaccano i dati della risposta — la sessione compresa. Nessuna riga stampava un segreto di proposito: uscivano di rimbalzo. La [v1.10.7](#1107---2026-08-11) aveva coperto i percorsi auth; qui passano gli altri **30 punti in 15 file**, da `logError`/`logWarn` di `lib/safeLog.ts`. I due che potevano portarsi dietro un token sono la creazione di un signed URL e la sottoscrizione push, e sono i due che il test esegue davvero invece di limitarsi a rileggerli.
+- **Il percorso immagine non finisce più intero nel messaggio di errore dei signed URL.** `getSignedImageUrls` interpolava il percorso nel testo del log, e per le righe più vecchie quel «percorso» è l'URL firmato completo — che porta il token nella query. Ora passa da `redactUrl`, che tiene origine e percorso e butta la query. Un percorso d'archivio normale (`utente/foto.jpg`) resta invece leggibile: sapere *quale* immagine è fallita è l'unico motivo per cui quel log esiste.
+
+### Added
+- **Una regola eslint impedisce al difetto di rientrare.** Finora niente lo impediva meccanicamente: il prossimo `console.error('contesto:', error)` scritto per abitudine lo reintrodurrebbe, e la v1.10.7 ha dimostrato che a rileggere il codice a occhio non si vede. `no-restricted-syntax` ora rifiuta come **errore** qualunque `console.error/warn/log/info/debug` con più di un argomento. L'ambito è tutto `src/`, non solo `lib/` e `stores/`: due dei punti più a rischio — `hooks/useSignedUrl.ts` e `components/settings/DeleteAccountDialog.tsx` — stanno fuori da entrambe quelle cartelle, e un ambito che esclude i punti pericolosi è peggio di nessun ambito, perché sembra copertura. Le tre eccezioni (i due `console.*` dentro `safeLog.ts`, che sono il punto d'uscita autorizzato, e l'avviso di sicurezza strutturato di `authStore.ts`) sono marcate una per una con la motivazione.
+- **Il test dei log esegue i due flussi che possono perdere un token.** `lib/__tests__/noSecretsInLogs.test.ts` fa fallire davvero la creazione di un signed URL e la `subscribe` push, con un JWT sentinella appeso all'errore, e verifica che in console non finisca. Un caso in più tiene ferma la direzione opposta: che il percorso d'archivio normale resti nel log, perché una redazione che cancella a caso smette di servire a diagnosticare.
+
 ## [1.11.2] - 2026-08-14
 
 ### Changed
@@ -532,7 +542,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.3...HEAD
+[1.11.3]: https://github.com/E-Lop/entro/compare/v1.11.2...v1.11.3
 [1.11.2]: https://github.com/E-Lop/entro/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/E-Lop/entro/compare/v1.11.0...v1.11.1
 [1.11.0]: https://github.com/E-Lop/entro/compare/v1.10.7...v1.11.0

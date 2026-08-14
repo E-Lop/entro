@@ -57,10 +57,16 @@ function messageOf(error: unknown): string {
  * punto di questo modulo.
  */
 export function logError(context: string, error: unknown): void {
+  // L'unico secondo argomento consentito in tutto `src/`: qui è già una
+  // stringa ripulita, non l'oggetto errore. È il punto d'uscita che la regola
+  // `no-restricted-syntax` esiste per rendere obbligatorio.
+  // eslint-disable-next-line no-restricted-syntax
   console.error(context, redactSecrets(messageOf(error)))
 }
 
 /** Come `logError`, per le condizioni che non sono errori. */
 export function logWarn(context: string, error: unknown): void {
+  // Stringa già ripulita, come in `logError`.
+  // eslint-disable-next-line no-restricted-syntax
   console.warn(context, redactSecrets(messageOf(error)))
 }

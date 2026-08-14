@@ -2,6 +2,7 @@ import { useState, useRef, ChangeEvent, useEffect } from 'react'
 import { Upload, X, Image as ImageIcon, Loader2, Camera } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
+import { logError } from '@/lib/safeLog'
 
 interface ImageUploadProps {
   /** Current image: File (new upload), string (existing path), or null */
@@ -85,7 +86,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
         )
         setIsConverting(false)
       } catch (conversionError) {
-        console.error('HEIC conversion error:', conversionError)
+        logError('HEIC conversion error:', conversionError)
         setError('Errore nella conversione dell\'immagine HEIC. Riprova con un\'altra foto.')
         setIsConverting(false)
         return

@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import imageCompression from 'browser-image-compression'
+import { logError, redactUrl } from './safeLog'
 
 /**
  * Storage service for uploading and managing food images
@@ -47,7 +48,7 @@ export async function compressImage(file: File): Promise<File> {
     const compressedFile = await imageCompression(file, options)
     return compressedFile
   } catch (error) {
-    console.error('Error compressing image:', error)
+    logError('Error compressing image:', error)
     throw new Error('Errore durante la compressione dell\'immagine')
   }
 }
@@ -92,7 +93,7 @@ export async function uploadFoodImage(file: File, userId: string): Promise<strin
     })
 
   if (error) {
-    console.error('Upload error:', error)
+    logError('Upload error:', error)
     throw new Error('Errore durante l\'upload dell\'immagine')
   }
 
@@ -120,16 +121,29 @@ export async function deleteFoodImage(imagePathOrUrl: string, userId: string): P
       .remove([imagePath])
 
     if (error) {
-      console.error('Delete error:', error)
+      logError('Delete error:', error)
       throw new Error('Errore durante l\'eliminazione dell\'immagine')
     }
   } catch (error) {
-    console.error('Error deleting image:', error)
+    logError('Error deleting image:', error)
     // Non propaghiamo l'errore se l'immagine non esiste più
     if (error instanceof Error && !error.message.includes('not found')) {
       throw error
     }
   }
+}
+
+/**
+ * Un riferimento a immagine come si può scrivere in un log.
+ *
+ * Un percorso d'archivio (`utente/foto.jpg`) resta com'è: sapere *quale*
+ * immagine è fallita è tutto il motivo per cui lo si logga. Un URL firmato —
+ * che alcune righe in DB tengono ancora al posto del percorso, vedi
+ * `extractPathFromUrlOrPath` — porta invece il token nella query, e va ridotto
+ * a origine e percorso prima di uscire.
+ */
+function safeImageRef(pathOrUrl: string): string {
+  return pathOrUrl.startsWith('http') ? redactUrl(pathOrUrl) : pathOrUrl
 }
 
 /**
@@ -156,7 +170,7 @@ export async function getSignedImageUrl(imagePath: string, expiresIn: number = 3
     }
 
     // For other errors, log and throw
-    console.error('Error creating signed URL:', error)
+    logError(`Error creating signed URL for ${safeImageRef(imagePath)}:`, error)
     throw new Error('Errore durante il recupero dell\'immagine')
   }
 
@@ -181,7 +195,7 @@ export async function getSignedImageUrls(
       const signedUrl = await getSignedImageUrl(path, expiresIn)
       urlMap.set(path, signedUrl)
     } catch (error) {
-      console.error(`Failed to generate signed URL for ${path}:`, error)
+      logError(`Failed to generate signed URL for ${safeImageRef(path)}:`, error)
       // Don't add to map if failed
     }
   })

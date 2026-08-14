@@ -3,6 +3,7 @@ import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '../ui/button'
 import { exportUserData } from '../../lib/dataExport'
+import { logError } from '@/lib/safeLog'
 
 /**
  * Data Export Button Component
@@ -27,7 +28,7 @@ export function DataExportButton() {
         throw error || new Error('Esportazione fallita')
       }
     } catch (error) {
-      console.error('Export error:', error)
+      logError('Export error:', error)
       toast.error('Errore durante l\'esportazione', {
         description:
           error instanceof Error

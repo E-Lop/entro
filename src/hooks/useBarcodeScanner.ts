@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { BrowserMultiFormatReader, BrowserCodeReader, IScannerControls } from '@zxing/browser'
 import { NotFoundException } from '@zxing/library'
+import { logError, logWarn } from '@/lib/safeLog'
 
 export type ScannerState = 'idle' | 'scanning' | 'processing' | 'success' | 'error'
 
@@ -103,7 +104,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
 
           // Ignore NotFoundException - it's normal when no code is in view
           if (error && !(error instanceof NotFoundException)) {
-            console.debug('Scan error:', error.message)
+            console.debug(`Scan error: ${error.message}`)
           }
         }
       )
@@ -123,7 +124,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         // Torch detection not supported
       }
     } catch (err) {
-      console.error('Error starting scanner:', err)
+      logError('Error starting scanner:', err)
       const errorMsg =
         err instanceof Error ? err.message : 'Impossibile avviare la fotocamera. Controlla i permessi.'
       setState('error')
@@ -144,7 +145,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         try {
           controlsRef.current.stop()
         } catch (err) {
-          console.warn('Error stopping scanner controls:', err)
+          logWarn('Error stopping scanner controls:', err)
         }
         controlsRef.current = null
       }
@@ -162,7 +163,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       try {
         BrowserCodeReader.releaseAllStreams()
       } catch (err) {
-        console.warn('Error releasing streams:', err)
+        logWarn('Error releasing streams:', err)
       }
 
       // Clean video element source
@@ -170,7 +171,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
         try {
           BrowserCodeReader.cleanVideoSource(videoRef.current)
         } catch (err) {
-          console.warn('Error cleaning video source:', err)
+          logWarn('Error cleaning video source:', err)
         }
       }
 
@@ -186,7 +187,7 @@ export function useBarcodeScanner({ onScanSuccess, onScanError }: UsBarcodeScann
       setState('idle')
       setError(null)
     } catch (err) {
-      console.error('Error stopping scanner:', err)
+      logError('Error stopping scanner:', err)
       const errorMsg = err instanceof Error ? err.message : 'Errore durante la chiusura dello scanner'
       setError(errorMsg)
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getSignedImageUrl } from '@/lib/storage'
 import { getPendingImage, isPendingUrl } from '@/lib/pendingImages'
+import { logError } from '@/lib/safeLog'
 
 /**
  * Hook to generate and manage signed URL for a storage path.
@@ -52,7 +53,7 @@ export function useSignedUrl(storagePath: string | null | undefined, expiresIn: 
         if (!isCancelled) {
           const wrapped = err instanceof Error ? err : new Error('Errore nel caricamento dell\'immagine')
           if (wrapped.message !== 'IMAGE_NOT_FOUND') {
-            console.error('Error loading image URL:', wrapped)
+            logError('Error loading image URL:', wrapped)
           }
           setError(wrapped)
         }

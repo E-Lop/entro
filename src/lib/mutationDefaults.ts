@@ -10,6 +10,7 @@ import {
   type FoodOutcome,
 } from './foods'
 import { mutationTracker } from './realtime'
+import { logWarn } from './safeLog'
 import { uploadFoodImage } from './storage'
 import { isPendingUrl, pendingImageToFile, deletePendingImage } from './pendingImages'
 
@@ -54,7 +55,7 @@ async function resolvePendingImage(
     await deletePendingImage(imageUrl)
     return storagePath
   } catch (error) {
-    console.warn('Pending image upload failed, creating food without image:', error)
+    logWarn('Pending image upload failed, creating food without image:', error)
     await deletePendingImage(imageUrl).catch(() => {})
     return null
   }
