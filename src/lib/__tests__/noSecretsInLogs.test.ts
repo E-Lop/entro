@@ -24,8 +24,19 @@ const REFRESH_TOKEN = 'eyJyZWZyZXNoIjoidG9rZW4ifQ.eyJleHAiOjk5OTk5OTk5fQ.Kx8sPqW
 const PASSWORD = 'PasswordSegretissima!2026'
 /** Sei caratteri alfanumerici, come i codici veri (`ABC123`). */
 const INVITE_CODE = 'ZK7Q2M'
+/**
+ * Un segreto **opaco**, senza forma riconoscibile: è così che è fatto davvero
+ * il `refresh_token` di Supabase, come dice `redactUrl` in `safeLog.ts`.
+ *
+ * Serve una sentinella di questa forma perché le altre hanno struttura di JWT,
+ * e `redactSecrets` le toglie comunque: un test che usasse solo quelle
+ * proverebbe il redattore, non il punto in cui il segreto non sarebbe dovuto
+ * arrivare. Su un valore opaco nessun pattern può salvarci — o non lo si
+ * stampa, o esce.
+ */
+const OPAQUE_SECRET = 'v1V7v3RUdmpxSGtBLW5vdC1hLWp3dA'
 
-const SENTINELS = [TOKEN, REFRESH_TOKEN, PASSWORD, INVITE_CODE]
+const SENTINELS = [TOKEN, REFRESH_TOKEN, PASSWORD, INVITE_CODE, OPAQUE_SECRET]
 
 /**
  * Un `image_url` all'antica: in DB alcune righe tengono l'URL firmato intero
@@ -194,6 +205,94 @@ describe('logError', () => {
   it('mantiene il contesto, che è il motivo per cui si logga', () => {
     logError('[authStore] Errore:', new Error('qualcosa'))
     expect(output()).toContain('[authStore] Errore:')
+  })
+})
+
+describe('quando il messaggio È un oggetto serializzato', () => {
+  /**
+   * L'assunto «stampare solo `error.message` è sicuro» non regge.
+   *
+   * `_getErrorMessage` di `@supabase/auth-js` (v2.98.0,
+   * `dist/main/lib/fetch.js`) prova `msg`, `message`, `error_description`,
+   * `error` e — se nessuno di quei campi c'è — ripiega su
+   * `JSON.stringify(err)`. Quello che arriva a noi come *messaggio* può quindi
+   * essere l'oggetto intero, URL con query e corpo compresi.
+   *
+   * Su una `Response` nativa la ricaduta è innocua (i suoi campi sono getter
+   * sul prototipo, quindi `JSON.stringify` dà `{}`), ma il ripiego scatta per
+   * *qualunque* oggetto privo di quei quattro campi — e un oggetto qualunque
+   * le proprietà proprie ce le ha.
+   */
+  const RESPONSE_URL = 'http://127.0.0.1:54321/auth/v1/logout?scope=global'
+  const BLOB_ID = 'a1b2c3d4-blob-handle'
+
+  /** La forma osservata davvero, con `JSON.stringify` già applicato. */
+  function serializedResponse(): string {
+    return JSON.stringify({
+      type: 'default',
+      status: 502,
+      ok: false,
+      headers: { map: { via: 'kong/2.8.1', authorization: `Bearer ${TOKEN}` } },
+      url: RESPONSE_URL,
+      _bodyInit: { _data: { blobId: BLOB_ID } },
+    })
+  }
+
+  it('di una risposta serializzata tiene lo stato HTTP e butta tutto il resto', () => {
+    const error = Object.assign(new Error(serializedResponse()), { status: 502 })
+
+    logError('[test] logout fallito:', error)
+
+    const logged = output()
+    // Lo stato è la parte diagnostica, ed è un numero: non può portarsi dietro
+    // né URL né corpo né header.
+    expect(logged).toContain('502')
+    expect(logged).not.toContain('headers')
+    expect(logged).not.toContain(RESPONSE_URL)
+    expect(logged).not.toContain('127.0.0.1')
+    expect(logged).not.toContain(BLOB_ID)
+    expect(logged).not.toContain('kong')
+    expectNoSentinels()
+  })
+
+  it('senza uno status numerico ripiega su una stringa fissa', () => {
+    logError('[test] fallito:', new Error(JSON.stringify({ url: RESPONSE_URL, token: TOKEN })))
+
+    expect(output()).not.toContain(RESPONSE_URL)
+    expectNoSentinels()
+  })
+
+  it('non tocca un messaggio normale che comincia per parentesi graffa', () => {
+    // La guardia è «sembra JSON *e* si parsa»: un messaggio che comincia per
+    // `{` ma non è JSON resta intero, altrimenti si perde diagnosi per niente.
+    logError('[test] contesto:', new Error('{non è JSON} query fallita'))
+    expect(output()).toContain('{non è JSON} query fallita')
+  })
+})
+
+describe('quando l\'errore non è un Error', () => {
+  it('un array non viene serializzato dal String() implicito', () => {
+    // `String([...])` non dà `[object Object]`: unisce gli elementi, quindi il
+    // contenuto esce per intero. Qui il valore è opaco di proposito —
+    // `redactSecrets` non ha nessun pattern con cui rimediare a valle.
+    logError('[test] contesto:', [OPAQUE_SECRET])
+    expectNoSentinels()
+  })
+
+  it('un oggetto con toString() personalizzato non può decidere cosa stampiamo', () => {
+    logError('[test] contesto:', { toString: () => `sessione ${OPAQUE_SECRET}` })
+    expectNoSentinels()
+  })
+
+  it('una stringa passa, che è l\'unico caso in cui il valore è già un messaggio', () => {
+    logError('[test] contesto:', 'connessione rifiutata')
+    expect(output()).toContain('connessione rifiutata')
+  })
+
+  it('di un valore non testuale resta il tipo, che è quanto si può dire', () => {
+    logError('[test] contesto:', { access_token: TOKEN })
+    expect(output()).toContain('object')
+    expectNoSentinels()
   })
 })
 

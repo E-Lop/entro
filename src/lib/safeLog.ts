@@ -45,9 +45,55 @@ export function redactUrl(href: string): string {
   }
 }
 
-/** Il messaggio di un errore, qualunque cosa sia arrivata. */
+/**
+ * Un messaggio che in realtà è un oggetto serializzato.
+ *
+ * `_getErrorMessage` di `@supabase/auth-js` (v2.98.0,
+ * `dist/main/lib/fetch.js`) prova `msg`, `message`, `error_description`,
+ * `error` e — se nessuno di quei campi c'è — ripiega su `JSON.stringify(err)`.
+ * Quello che arriva qui come *messaggio* può quindi essere un oggetto intero,
+ * URL con query e corpo compresi.
+ *
+ * La guardia è «sembra JSON **e** si parsa»: il solo prefisso non basta,
+ * perché un messaggio che comincia per graffa senza essere JSON è normale e
+ * buttarlo sarebbe perdere diagnosi per niente.
+ */
+function looksLikeSerializedObject(message: string): boolean {
+  const trimmed = message.trim()
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return false
+  try {
+    JSON.parse(trimmed)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Il messaggio di un errore, qualunque cosa sia arrivata.
+ *
+ * Non basta prendere `error.message`: l'assunto «il messaggio è testo scritto
+ * da qualcuno» non regge (vedi `looksLikeSerializedObject`). Quando il
+ * messaggio è un oggetto, di diagnostico resta lo **stato HTTP** — un numero,
+ * l'unica parte che non può portarsi dietro URL, header o corpo.
+ *
+ * E non basta `String()` sul resto: su un array unisce gli elementi, e un
+ * oggetto con `toString()` proprio decide da sé cosa stampiamo. Di un valore
+ * che non è già testo si dice il tipo e basta.
+ */
 function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
+  if (error instanceof Error) {
+    if (!looksLikeSerializedObject(error.message)) return error.message
+
+    const status = (error as { status?: unknown }).status
+    return typeof status === 'number'
+      ? `[risposta non leggibile, HTTP ${status}]`
+      : '[risposta non leggibile]'
+  }
+
+  if (typeof error === 'string') return error
+
+  return `[errore non testuale: ${typeof error}]`
 }
 
 /**
