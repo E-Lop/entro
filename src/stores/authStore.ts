@@ -180,6 +180,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         // Security check: warn about unexpected auto-login
         if (isAutoLogin && !authorizedAutoLoginEvents.includes(event)) {
+          // Il secondo argomento non è un errore ma un oggetto costruito a
+          // mano campo per campo, con l'URL già ridotto da `redactUrl`: non
+          // c'è nessuna proprietà di provenienza Supabase che possa uscire di
+          // rimbalzo, ed è un avviso che serve strutturato.
+          // eslint-disable-next-line no-restricted-syntax
           console.warn('[authStore] ⚠️  SECURITY: Unexpected auto-login detected!', {
             event,
             // Origine e percorso, senza query né frammento: è proprio lì che

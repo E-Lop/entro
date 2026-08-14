@@ -11,6 +11,7 @@ import { InviteMenuDialog } from '../sharing/InviteMenuDialog'
 import { AcceptInviteFlowDialog } from '../sharing/AcceptInviteFlowDialog'
 import { LeaveListDialog } from '../sharing/LeaveListDialog'
 import { getUserList, getListMembers } from '../../lib/invites'
+import { logError } from '@/lib/safeLog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +45,7 @@ export function AppLayout() {
         const { members } = await getListMembers(list.id)
         setIsInSharedList(members.length > 1)
       } catch (error) {
-        console.error('Error checking shared list:', error)
+        logError('Error checking shared list:', error)
       }
     }
 

@@ -2,6 +2,7 @@ import { getCurrentUser } from './auth'
 import { getFoods } from './foods'
 import { getUserList, getListMembers } from './invites'
 import { getSignedImageUrls } from './storage'
+import { logError, logWarn } from './safeLog'
 import type { Food } from './foods'
 
 /**
@@ -65,7 +66,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
         // Generate signed URLs valid for 24 hours (86400 seconds)
         imageUrlMap = await getSignedImageUrls(imagePaths, 86400)
       } catch (error) {
-        console.warn('Failed to generate some signed URLs:', error)
+        logWarn('Failed to generate some signed URLs:', error)
         // Continue with export even if some images fail
       }
     }
@@ -106,7 +107,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
       }
     } catch (listError) {
       // If user has no list, continue with empty list data
-      console.warn('No list found for user:', listError)
+      logWarn('No list found for user:', listError)
     }
 
     // 6. Build export data object
@@ -128,7 +129,7 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
 
     return { success: true, error: null }
   } catch (error) {
-    console.error('Error exporting user data:', error)
+    logError('Error exporting user data:', error)
     return {
       success: false,
       error: error instanceof Error ? error : new Error('Errore durante l\'esportazione dati'),

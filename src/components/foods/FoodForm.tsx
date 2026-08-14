@@ -22,6 +22,7 @@ import { ScanLine, Loader2, AlertTriangle, ChevronDown, ChevronUp, ClipboardList
 import { supabase } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { mutationTracker } from '@/lib/realtime'
+import { logError } from '@/lib/safeLog'
 
 // Lazy load BarcodeScanner (heavy: includes ZXing library)
 const BarcodeScanner = lazy(() => import('../barcode/BarcodeScanner').then(m => ({ default: m.BarcodeScanner })))
@@ -207,7 +208,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             // Channel subscribed for conflict detection
           })
       } catch (err) {
-        console.error('[FoodForm] Error setting up conflict detection:', err)
+        logError('[FoodForm] Error setting up conflict detection:', err)
       }
     }
 
@@ -271,7 +272,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
       setIsLoadingProduct(false)
     } catch (err) {
-      console.error('Error loading product:', err)
+      logError('Error loading product:', err)
       setProductError('Errore durante il caricamento dei dati del prodotto')
       setIsLoadingProduct(false)
     }

@@ -21,6 +21,7 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { triggerHaptic } from '@/lib/haptics'
 import { inlineErrorAttrs } from '@/lib/a11y'
+import { logError } from '@/lib/safeLog'
 
 /**
  * Delete Account Dialog Component
@@ -150,7 +151,7 @@ export function DeleteAccountDialog() {
     } catch (err) {
       // Tieni aperto il dialog e mostra l'errore inline sotto il campo password,
       // così l'utente può correggere senza perdere il contesto della conferma.
-      console.error('Delete account error:', err)
+      logError('Delete account error:', err)
       setError(
         err instanceof Error
           ? err.message

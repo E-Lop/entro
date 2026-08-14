@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner'
+import { logError } from '@/lib/safeLog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -71,7 +72,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
       onOpenChange(false)
     },
     onScanError: (err) => {
-      console.error('Barcode scan error:', err)
+      logError('Barcode scan error:', err)
     },
   })
 
