@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from './supabase.types'
+// Non da `supabase.types`: la versione ristretta rimette il vocabolario che il
+// generatore perde. Passando di qui vale per tutti i consumatori e per il
+// client stesso, che così rifiuta anche le scritture fuori vocabolario.
+import type { Database } from './supabase.overrides'
 
-export type { Database } from './supabase.types'
+export type { Database } from './supabase.overrides'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY

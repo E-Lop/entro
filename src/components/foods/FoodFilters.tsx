@@ -5,6 +5,7 @@ import { Button } from '../ui/button'
 import { Card, CardContent } from '../ui/card'
 import type { FilterParams } from '@/lib/foods'
 import type { Category } from '@/lib/foods'
+import type { StorageLocation } from '@/lib/validations/food.schemas'
 
 export interface FoodFiltersProps {
   filters: FilterParams
@@ -49,7 +50,7 @@ export function FoodFilters({
   const handleStorageChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      storage_location: value ? (value as 'fridge' | 'freezer' | 'pantry') : undefined,
+      storage_location: value ? (value as StorageLocation) : undefined,
     })
   }
 

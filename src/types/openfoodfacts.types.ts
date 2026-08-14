@@ -2,6 +2,7 @@
  * Open Food Facts API Types
  * Documentation: https://openfoodfacts.github.io/openfoodfacts-server/api/
  */
+import type { QuantityUnit, StorageLocation } from '@/lib/validations/food.schemas'
 
 /**
  * Main product response from Open Food Facts API
@@ -47,9 +48,9 @@ export interface MappedProductData {
   name: string
   category_id?: string
   suggestedCategory?: string
-  storage_location?: 'fridge' | 'freezer' | 'pantry'
+  storage_location?: StorageLocation
   quantity?: number
-  quantity_unit?: string
+  quantity_unit?: QuantityUnit
   image_url?: string
   notes?: string
 }
@@ -60,6 +61,6 @@ export interface MappedProductData {
 export interface CategoryMapping {
   offTags: string[]
   categoryNameIt: string
-  storageLocation: 'fridge' | 'freezer' | 'pantry'
+  storageLocation: StorageLocation
   shelfLifeDays?: number
 }

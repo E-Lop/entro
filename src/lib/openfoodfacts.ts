@@ -228,6 +228,11 @@ function formatProductName(name: string, brands?: string): string {
 
 /**
  * Parse quantity string to number and unit
+ *
+ * L'unità qui è **volutamente più stretta** di `QuantityUnit` e non va derivata
+ * da lì: la regex qui sotto non riconosce `confezioni`, perché Open Food Facts
+ * non le codifica in quel campo. Restituire un tipo che comprende un valore che
+ * la funzione non può produrre sposterebbe il controllo su chi la chiama.
  */
 function parseQuantity(quantityString?: string): {
   quantity: number | undefined
