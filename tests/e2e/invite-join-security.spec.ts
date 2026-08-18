@@ -9,6 +9,7 @@ import {
   listExists,
   seedAdditionalInviteForList,
   seedFoods,
+  removeUserList,
   seedPendingInviteByCode,
   seedPendingInviteByEmail,
   signInAsUser,
@@ -74,6 +75,10 @@ test('join_list_via_invite: codice valido, nessuna lista → join', async () => 
   const ownerEmail = createE2EEmail(); const owner = await createE2EUser(ownerEmail, password)
   const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
   try {
+    // Dalla #94 ogni utente nasce con una lista, quindi lo scenario «senza
+    // lista» va ricreato di proposito: ci si arriva dopo uno swap, e l'RPC
+    // continua a doverlo gestire.
+    await removeUserList(joiner.id)
     const { listId, shortCode } = await seedPendingInviteByCode(owner.id)
     const client = await signInAsUser(joinerEmail, password)
     const { data } = await client.rpc('join_list_via_invite', { p_short_code: shortCode })
@@ -145,6 +150,7 @@ test('join_list_via_invite: già membro della lista dell\'invito → success, in
   const joinerEmail = createE2EEmail(); const joiner = await createE2EUser(joinerEmail, password)
   try {
     // il joiner entra nella lista tramite un primo invito (join diretto, nessuna lista precedente)
+    await removeUserList(joiner.id)
     const { listId, shortCode: firstCode } = await seedPendingInviteByCode(owner.id)
     const client = await signInAsUser(joinerEmail, password)
     const first = await client.rpc('join_list_via_invite', { p_short_code: firstCode })

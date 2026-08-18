@@ -187,20 +187,31 @@ export async function createFood(
 
     const user = session.user
 
-    // Get user's list ID (for shared lists feature)
-    let listId: string | null = null
-    try {
-      const { data: listMemberData } = await supabase
-        .from('list_members')
-        .select('list_id')
-        .eq('user_id', user.id)
-        .single()
+    // La lista dell'utente. Dalla #94 la crea un trigger su `auth.users`, quindi
+    // qui deve esserci: se manca, qualcosa è andato storto prima.
+    //
+    // Prima si proseguiva con `list_id: null`, commentandolo come «personal
+    // food». Non era una degradazione elegante: la policy di inserimento
+    // pretende `list_id is not null` con appartenenza, quindi quel percorso
+    // finiva **sempre** nel rifiuto della RLS — con il messaggio di Postgres
+    // mostrato all'utente. Meglio fermarsi qui, dove si può dire cosa è
+    // successo, che tentare una scrittura che non può riuscire.
+    const { data: listMemberData, error: listError } = await supabase
+      .from('list_members')
+      .select('list_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
 
-      listId = listMemberData?.list_id || null
-    } catch {
-      // If user has no list yet (shouldn't happen with auto-creation trigger),
-      // continue with list_id = null (personal food)
-      console.warn('No list found for user, creating personal food')
+    if (listError) {
+      logError('[createFood] Errore leggendo la lista dell\'utente:', listError)
+    }
+
+    const listId = listMemberData?.list_id ?? null
+
+    if (!listId) {
+      throw new Error(
+        'Il tuo account non risulta collegato a una lista. Ricarica la pagina e riprova.'
+      )
     }
 
     const { data, error } = await supabase
@@ -215,7 +226,11 @@ export async function createFood(
       .single()
 
     if (error) {
-      throw new Error(error.message)
+      // Il testo di Postgres non arriva a schermo: è in inglese, cita il nome
+      // della tabella e non dice all'utente niente che possa usare. Resta nei
+      // log, dove serve. Vedi #94.
+      logError('[createFood] Scrittura rifiutata:', error)
+      throw new Error('Non è stato possibile salvare l\'alimento. Riprova.')
     }
 
     return {
