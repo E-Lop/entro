@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { ThemeContext } from '@/components/theme/ThemeProvider'
+import { ThemeContext } from '@/components/theme/themeContext'
 
 /**
  * Read and control the app theme (light/dark/system).

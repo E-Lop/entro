@@ -1,12 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-
-interface SwipeableCardControllerValue {
-  openId: string | null
-  open: (id: string) => void
-  close: () => void
-}
-
-const SwipeableCardContext = createContext<SwipeableCardControllerValue | null>(null)
+import { useCallback, useEffect, useState } from 'react'
+import { SwipeableCardContext } from './swipeableCardContext'
 
 /**
  * Coordina le card apribili (editor rapido di quantità) di una lista:
@@ -37,27 +30,4 @@ export function SwipeableCardProvider({ children }: { children: React.ReactNode 
       {children}
     </SwipeableCardContext.Provider>
   )
-}
-
-/**
- * Stato apertura di una singola card. Se usata fuori da `SwipeableCardProvider`
- * (es. `InstructionCard`) ricade su uno stato locale, senza coordinamento globale.
- */
-export function useSwipeableCard(id: string) {
-  const ctx = useContext(SwipeableCardContext)
-  const [localOpen, setLocalOpen] = useState(false)
-
-  if (!ctx) {
-    return {
-      isOpen: localOpen,
-      open: () => setLocalOpen(true),
-      close: () => setLocalOpen(false),
-    }
-  }
-
-  return {
-    isOpen: ctx.openId === id,
-    open: () => ctx.open(id),
-    close: ctx.close,
-  }
 }
