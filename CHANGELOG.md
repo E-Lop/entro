@@ -5,6 +5,12 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.4] - 2026-08-18
+
+### Fixed
+- **Il logout lasciava l'utente dentro l'app quando Supabase rifiutava `signOut`.** `AppLayout` navigava al login solo sul percorso felice: se la chiamata falliva non succedeva nulla oltre a un toast rosso, e l'utente restava sulla dashboard a guardare i propri alimenti serviti dalla cache di React Query — con i token già rimossi da `localStorage` dalla [v1.11.0](#1110---2026-08-13). Fino al ricaricamento della pagina l'app mostrava i dati di una sessione che non esisteva più. La domanda che decideva la forma del rimedio — se supabase-js emetta `SIGNED_OUT` anche sul percorso d'errore — non è stata risolta leggendo la documentazione ma montando il client vero con `fetch` sotto controllo (`lib/__tests__/supabaseSignOutEvents.test.ts`): `_signOut` **ingoia** 401, 403 e 404 e prosegue fino a `_removeSession()`, mentre su ogni altro errore ritorna **prima** di rimuoverla. Quindi la sessione scaduta lato server — il caso che sembrava il più probabile — era già gestita, e il difetto si manifesta davvero quando la **rete cade**: lì nessun evento viene emesso, `authStore` resta pieno e `ProtectedRoute` non interviene. `signOut()` ora ritorna anche `localSessionCleared`, ed è quello il discriminante: se i token locali sono spariti l'utente **è** uscito da questo browser e va portato al login, che Supabase abbia risposto o no. Se invece è la pulizia a fallire — `localStorage` bloccato dal browser — l'utente non viene buttato fuori, perché i token possono essere ancora lì e mandarlo al login mentirebbe sullo stato del dispositivo.
+- **L'avviso di logout fallito non è più il messaggio del server.** `useAuth` mostrava `error.message` così com'era: testo in inglese, e per la sessione scaduta contiene l'identificativo di sessione (`Session from session_id claim in JWT does not exist`). Un avviso a schermo non è più innocuo di una riga di log — uno screenshot lo porta più lontano. Ora il messaggio è nostro e dice la sola cosa che serve, distinguendo i due casi: uscito da qui ma forse ancora dentro altrove, oppure disconnessione non completata. Il dettaglio tecnico resta nei log, via `logError`.
+
 ## [1.11.3] - 2026-08-14
 
 ### Fixed
@@ -545,7 +551,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.4...HEAD
+[1.11.4]: https://github.com/E-Lop/entro/compare/v1.11.3...v1.11.4
 [1.11.3]: https://github.com/E-Lop/entro/compare/v1.11.2...v1.11.3
 [1.11.2]: https://github.com/E-Lop/entro/compare/v1.11.1...v1.11.2
 [1.11.1]: https://github.com/E-Lop/entro/compare/v1.11.0...v1.11.1

@@ -56,7 +56,15 @@ export function AppLayout() {
 
   const handleLogout = async () => {
     const result = await signOut()
-    if (result.success) {
+
+    // Il discriminante è la pulizia locale, non la risposta di Supabase: se i
+    // token sono spariti da questo browser l'utente **è** uscito da qui, anche
+    // quando il server ha rifiutato. supabase-js in quel caso non emette
+    // `SIGNED_OUT`, quindi senza questa navigazione resterebbe sulla dashboard
+    // a guardare i dati di una sessione che non esiste più. Se invece la
+    // pulizia è fallita — storage bloccato dal browser — i token possono essere
+    // ancora lì e mandarlo al login mentirebbe sullo stato del dispositivo.
+    if (result.localSessionCleared) {
       navigate('/login', { replace: true })
     }
   }
