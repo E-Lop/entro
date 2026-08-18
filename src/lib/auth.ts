@@ -125,10 +125,25 @@ export async function signIn(
 }
 
 /**
+ * Esito di `signOut()`.
+ *
+ * I due campi rispondono a domande diverse e non vanno confusi: `error` dice
+ * se qualcosa è andato storto, `localSessionCleared` se su questo dispositivo
+ * l'utente è effettivamente uscito. Chi decide dove mandare l'utente deve
+ * guardare il secondo — un logout rifiutato dal server con la pulizia locale
+ * riuscita è comunque un logout, qui.
+ */
+export type SignOutResult = {
+  error: Error | null
+  /** True quando i token locali sono spariti davvero. */
+  localSessionCleared: boolean
+}
+
+/**
  * Sign out the current user and clear session.
  * Selectively clears auth-related storage while preserving app settings.
  */
-export async function signOut(): Promise<{ error: Error | null }> {
+export async function signOut(): Promise<SignOutResult> {
   // Best-effort push cleanup -- errors are ignored since the user is signing out
   await unsubscribeFromPush().catch(() => {})
 
@@ -150,14 +165,17 @@ export async function signOut(): Promise<{ error: Error | null }> {
   // su una macchina condivisa e il client può ricostruirci sopra una sessione.
   // Guardata a sua volta perché accedere a `localStorage` solleva quando il
   // browser blocca lo storage, e nessun wrapper di questo modulo deve sollevare.
+  let localSessionCleared = true
+
   try {
     clearAuthStorage()
   } catch (error) {
+    localSessionCleared = false
     failure ??= error instanceof Error ? error : new Error('Errore durante la pulizia della sessione')
   }
 
   // L'errore di Supabase ha la precedenza: è la causa, la pulizia è la conseguenza.
-  return { error: failure }
+  return { error: failure, localSessionCleared }
 }
 
 /**

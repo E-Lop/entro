@@ -133,4 +133,37 @@ describe('signOut', () => {
     expect(error).toBeNull()
     expect(localStorage.getItem('sb-rmbmmwcxtnanacxbkihc-auth-token')).toBeNull()
   })
+  it('segnala la pulizia locale riuscita anche quando Supabase rifiuta', async () => {
+    // È il discriminante di chi chiama: su questo dispositivo l'utente è
+    // fuori, quindi va portato al login comunque. Non lo si può dedurre da
+    // `error`, che qui è valorizzato.
+    seedSession()
+    mockSignOut.mockRejectedValue(new Error('Failed to fetch'))
+
+    const { error, localSessionCleared } = await signOut()
+
+    expect(error?.message).toBe('Failed to fetch')
+    expect(localSessionCleared).toBe(true)
+  })
+
+  it('segnala la pulizia locale fallita quando lo storage è bloccato', async () => {
+    // Qui i token possono essere rimasti: chi chiama non deve dare per
+    // scontato che l'utente sia uscito da questo dispositivo.
+    seedSession()
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('Storage disabilitato')
+    })
+
+    const { localSessionCleared } = await signOut()
+
+    expect(localSessionCleared).toBe(false)
+  })
+
+  it('segnala la pulizia locale riuscita sul percorso felice', async () => {
+    seedSession()
+
+    const { localSessionCleared } = await signOut()
+
+    expect(localSessionCleared).toBe(true)
+  })
 })
