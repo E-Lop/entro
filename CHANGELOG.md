@@ -5,6 +5,12 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.5] - 2026-08-18
+
+### Changed
+- **Fast Refresh non perde più lo stato dei componenti a ogni salvataggio.** I cinque warning `react-refresh/only-export-components` non erano rumore: un modulo che esporta insieme un componente e qualcos'altro non è ricaricabile a caldo, quindi salvando quel file l'albero viene rimontato e lo stato locale sparisce — un costo pagato a ogni modifica di `BarcodeScanner`, `ThemeProvider` e delle card apribili. `localizeScanError` esce da `BarcodeScanner.tsx`, `ThemeContext` e i suoi tipi escono da `ThemeProvider.tsx`, e contesto e hook escono dal file di `SwipeableCardProvider`. Nessun comportamento toccato: gli spostamenti sono meccanici e i test lo verificano.
+- **La regola di Fast Refresh non si applica più a `src/components/ui/`.** Quei componenti sono **vendorizzati**: li genera la CLI di shadcn e li riscrive `shadcn add` a ogni aggiornamento. Che `button.tsx` esporti `buttonVariants` accanto a `Button`, e `form.tsx` esporti `useFormField`, è la convenzione dell'upstream: spostare quegli export li farebbe divergere, e il primo aggiornamento li rimetterebbe com'erano. La regola resta accesa ovunque altrove, ed è stata rispettata spostando il codice, non zittendola.
+
 ## [1.11.4] - 2026-08-18
 
 ### Fixed
@@ -551,7 +557,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.5...HEAD
+[1.11.5]: https://github.com/E-Lop/entro/compare/v1.11.4...v1.11.5
 [1.11.4]: https://github.com/E-Lop/entro/compare/v1.11.3...v1.11.4
 [1.11.3]: https://github.com/E-Lop/entro/compare/v1.11.2...v1.11.3
 [1.11.2]: https://github.com/E-Lop/entro/compare/v1.11.1...v1.11.2
