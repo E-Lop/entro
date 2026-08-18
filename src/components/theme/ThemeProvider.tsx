@@ -1,16 +1,7 @@
-import { createContext, useEffect, useState, type ReactNode } from 'react'
-
-export type Theme = 'light' | 'dark' | 'system'
+import { useEffect, useState, type ReactNode } from 'react'
+import { ThemeContext, type Theme } from './themeContext'
 
 const THEME_STORAGE_KEY = 'entro-theme'
-
-export interface ThemeContextValue {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  effectiveTheme: 'light' | 'dark'
-}
-
-export const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 /**
  * Resolve the effective light/dark value from the user preference.

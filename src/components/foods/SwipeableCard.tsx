@@ -4,7 +4,7 @@ import { Edit, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { triggerHaptic } from '@/lib/haptics'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { useSwipeableCard } from '@/hooks/useSwipeableCardController'
+import { useSwipeableCard } from '@/hooks/useSwipeableCard'
 
 interface SwipeableCardProps {
   children: React.ReactNode

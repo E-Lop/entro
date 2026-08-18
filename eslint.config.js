@@ -29,6 +29,18 @@ export default tseslint.config(
       ],
     },
   },
+  // I componenti di `src/components/ui/` sono **vendorizzati**: li genera la CLI
+  // di shadcn e li riscrive `shadcn add` a ogni aggiornamento. Che `button.tsx`
+  // esporti `buttonVariants` accanto a `Button`, e `form.tsx` esporti
+  // `useFormField`, è la loro convenzione, non una nostra scelta: spostare
+  // quegli export li farebbe divergere dall'upstream e il primo aggiornamento
+  // li rimetterebbe com'erano. Qui la regola di Fast Refresh si spegne; per i
+  // componenti nostri resta accesa, ed è stata rispettata spostando il codice.
+  {
+    files: ['src/components/ui/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
+
   // Niente segreti in console (issue #79, #84).
   //
   // `console.error('contesto:', error)` stampa anche le *proprietà*

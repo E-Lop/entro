@@ -2,7 +2,8 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { SwipeableCardProvider, useSwipeableCard } from '../useSwipeableCardController'
+import { SwipeableCardProvider } from '../useSwipeableCardController'
+import { useSwipeableCard } from '../useSwipeableCard'
 
 afterEach(cleanup)
 

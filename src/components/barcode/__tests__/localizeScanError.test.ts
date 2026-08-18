@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { localizeScanError } from '../BarcodeScanner'
+import { localizeScanError } from '../localizeScanError'
 
 describe('localizeScanError', () => {
   it('maps the raw "Not supported" browser error to Italian guidance', () => {
