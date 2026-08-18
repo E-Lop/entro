@@ -63,37 +63,75 @@ export async function deleteE2EUserByEmail(email: string): Promise<void> {
 }
 
 /**
+ * Quanti alimenti ha davvero **nel database** l'utente con quella email.
+ *
+ * Serve perché entro persiste la cache di React Query: dopo un ricaricamento
+ * una card inserita in modo ottimistico ricompare dal `localStorage` anche se
+ * la scrittura è stata rifiutata. Vedere la card a schermo non prova che il
+ * dato ci sia; solo questa interrogazione lo prova.
+ */
+export async function countFoodsByUserEmail(email: string): Promise<number> {
+  const { data, error } = await adminClient.auth.admin.listUsers()
+  if (error) throw new Error(`Impossibile leggere gli utenti E2E: ${error.message}`)
+
+  const user = data.users.find((candidate) => candidate.email === email)
+  if (!user) return 0
+
+  const { count, error: countError } = await adminClient
+    .from('foods')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  if (countError) throw new Error(`Impossibile contare i foods: ${countError.message}`)
+  return count ?? 0
+}
+
+/**
  * Rende condivisa la lista personale dell'utente aggiungendo un secondo membro
  * (via service-role, bypassando RLS). Così l'app rileva `isInSharedList` e il
  * menu inviti mostra anche l'opzione "Abbandona lista condivisa".
  * Ritorna il co-membro creato, da eliminare nel teardown.
  */
 export async function makeUserListShared(userId: string, coMemberPassword: string): Promise<E2EUser> {
-  // L'app crea la lista personale al primo login (RPC `create_personal_list`,
-  // idempotente). La pre-creiamo qui così possiamo aggiungere subito un secondo
-  // membro; al login l'app troverà la membership esistente e non la duplicherà.
-  const { data: list, error: listError } = await adminClient
-    .from('lists')
-    .insert({ created_by: userId, name: 'Lista E2E condivisa' })
-    .select('id')
-    .single()
-
-  if (listError || !list) {
-    throw new Error(`Impossibile creare la lista E2E: ${listError?.message}`)
-  }
+  // Dalla #94 la lista personale la crea il trigger `on_auth_user_created`:
+  // qui si riusa quella, invece di crearne una seconda. Due appartenenze per
+  // lo stesso utente farebbero fallire `getUserList`, che usa `maybeSingle()`.
+  const listId = await createListForUser(userId)
 
   const coMember = await createE2EUser(createE2EEmail(), coMemberPassword)
+  // Chi entra in una lista altrui lascia la propria, come fa lo swap del
+  // percorso di invito: senza questo il co-membro ne avrebbe due.
+  await removeUserList(coMember.id)
 
-  const { error: membersError } = await adminClient.from('list_members').insert([
-    { list_id: list.id, user_id: userId },
-    { list_id: list.id, user_id: coMember.id },
-  ])
+  const { error: membersError } = await adminClient
+    .from('list_members')
+    .insert({ list_id: listId, user_id: coMember.id })
 
   if (membersError) {
     throw new Error(`Impossibile aggiungere i membri alla lista E2E: ${membersError.message}`)
   }
 
   return coMember
+}
+
+/**
+ * Toglie a un utente la lista che il trigger gli ha dato.
+ *
+ * Serve ai test dello scenario «utente senza lista», che l'RPC di join
+ * continua a supportare — ci si arriva dopo uno swap — ma che dalla #94 non è
+ * più lo stato iniziale di un utente appena creato.
+ */
+export async function removeUserList(userId: string): Promise<void> {
+  const { data: membership } = await adminClient
+    .from('list_members')
+    .select('list_id')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (!membership?.list_id) return
+
+  await adminClient.from('list_members').delete().eq('user_id', userId)
+  await adminClient.from('lists').delete().eq('id', membership.list_id)
 }
 
 /**
@@ -156,17 +194,12 @@ export async function seedPendingInviteByCode(
   ownerId: string,
   options?: { expiresAt?: Date },
 ): Promise<{ listId: string; shortCode: string }> {
-  const { data: list, error: listError } = await adminClient
-    .from('lists')
-    .insert({ created_by: ownerId, name: 'Lista codice E2E' })
-    .select('id')
-    .single()
-  if (listError || !list) throw new Error(`Impossibile creare la lista: ${listError?.message}`)
-  await adminClient.from('list_members').insert({ list_id: list.id, user_id: ownerId })
+  // La lista dell'owner esiste già: gliela dà il trigger alla creazione (#94).
+  const listId = await createListForUser(ownerId)
   const shortCode = crypto.randomUUID().slice(0, 8).toUpperCase()
   const expiresAt = options?.expiresAt ?? new Date(Date.now() + 7 * 24 * 3600 * 1000)
   const { error } = await adminClient.from('invites').insert({
-    list_id: list.id,
+    list_id: listId,
     token: `e2e-${crypto.randomUUID()}`,
     short_code: shortCode,
     created_by: ownerId,
@@ -177,7 +210,7 @@ export async function seedPendingInviteByCode(
     expires_at: expiresAt.toISOString(),
   })
   if (error) throw new Error(`Impossibile creare l'invito: ${error.message}`)
-  return { listId: list.id, shortCode }
+  return { listId, shortCode }
 }
 
 /**
@@ -248,13 +281,23 @@ export async function getInviteStatusByShortCode(shortCode: string): Promise<str
  * 'fridge' | 'freezer' | 'pantry' (check constraint), non le label italiane.
  */
 /**
- * Crea la lista personale di un utente e ce lo iscrive.
+ * La lista personale di un utente, creandola se non c'è.
  *
- * Serve ai test che partono da una dashboard già popolata: l'app la crea da sé
- * al primo accesso, ma non subito, e un inserimento che arriva prima viene
- * rifiutato dalla RLS (`new row violates row-level security policy`).
+ * Dalla #94 la crea il trigger `on_auth_user_created`, quindi per un utente
+ * appena creato **esiste già**: crearne un'altra darebbe due appartenenze allo
+ * stesso utente, e `getUserList` — che usa `maybeSingle()` — fallirebbe con
+ * «multiple rows». Resta il ramo che la crea, perché chi ha un invito pendente
+ * dal trigger non la riceve.
  */
 export async function createListForUser(ownerId: string): Promise<string> {
+  const { data: existing } = await adminClient
+    .from('list_members')
+    .select('list_id')
+    .eq('user_id', ownerId)
+    .maybeSingle()
+
+  if (existing?.list_id) return existing.list_id
+
   const { data: list, error } = await adminClient
     .from('lists')
     .insert({ created_by: ownerId, name: 'Lista E2E' })

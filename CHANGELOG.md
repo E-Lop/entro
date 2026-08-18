@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.7] - 2026-08-18
+
+### Fixed
+- **La lista personale nasce con l'utente, nel database.** `public.create_default_list_for_user()` esisteva dalla migrazione baseline — completa, con tanto di rispetto per gli inviti pendenti — ma **nessun trigger la chiamava**: era una funzione orfana, e `git log -S "on auth.users"` non trova quel collegamento in nessun punto della storia. Nel frattempo la lista la creava il client dopo l'accesso, con la RPC `create_personal_list`. Funziona quasi sempre, ed è per questo che il buco è passato inosservato per mesi. Ma è asincrona: finché non risponde l'utente non ha una lista, e la policy di inserimento su `foods` pretende `list_id is not null` con appartenenza — quindi ogni salvataggio in quella finestra veniva rifiutato. Se poi la RPC **fallisce**, `authStore` marca il tentativo come fatto per non rientrare e l'utente resta senza lista per l'intera sessione: non una finestra, uno stato. Ora la creazione avviene nel database alla registrazione, dove non può correre con l'interfaccia, e vale anche per `entro-mobile`, che condivide questo backend. Il percorso client resta come rete di sicurezza. Chiude [#94](https://github.com/E-Lop/entro/issues/94).
+
+### Security
+- **`create_default_list_for_user` ha `set search_path = ''`.** Era `security definer` senza, dalla migrazione baseline: la convenzione condivisa [`security-definer-rpc-gating`](https://github.com/E-Lop/entro-family/blob/main/conventions/security-definer-rpc-gating.md) lo vieta perché senza `search_path` una definer è un vettore di privilege escalation. Collegarla a un trigger senza sistemarla avrebbe messo in esercizio un difetto che finora era inerte perché la funzione non veniva mai eseguita.
+
+### Changed
+- **`createFood` non tenta più una scrittura che non può riuscire.** Quando la lista mancava, il codice proseguiva con `list_id: null` e un commento che lo descriveva come «personal food», citando un trigger di auto-creazione **che non esisteva**. La policy pretende `list_id is not null`: quel percorso finiva sempre nel rifiuto della RLS. Ora si ferma prima e dice all'utente cosa fare.
+- **Il messaggio di Postgres non arriva più a schermo.** L'utente vedeva `new row violates row-level security policy for table "foods"` — in inglese, col nome della tabella dentro. Il dettaglio tecnico resta nei log, dove serve.
+- **Un backfill dà una lista a chi non l'ha mai avuta.** Il trigger vale da adesso in avanti; chi è passato da un fallimento della RPC era rimasto senza, e l'app non lo diceva.
+
 ## [1.11.6] - 2026-08-18
 
 ### Fixed
@@ -564,7 +577,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.6...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.7...HEAD
+[1.11.7]: https://github.com/E-Lop/entro/compare/v1.11.6...v1.11.7
 [1.11.6]: https://github.com/E-Lop/entro/compare/v1.11.5...v1.11.6
 [1.11.5]: https://github.com/E-Lop/entro/compare/v1.11.4...v1.11.5
 [1.11.4]: https://github.com/E-Lop/entro/compare/v1.11.3...v1.11.4
