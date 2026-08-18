@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useRef, type RefObject } from 'react'
 import { Check, Trash2, X } from 'lucide-react'
 import {
   Dialog,
@@ -16,6 +16,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog'
+import {
+  actionsIndexOf,
+  moveFocusAfterRemoval,
+  restoreFocusToOpener,
+} from '@/lib/focusAfterRemoval'
 import type { Food, FoodOutcome } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 
@@ -41,6 +46,8 @@ interface FoodModalsProps {
   onDeleteDialogChange: (open: boolean) => void
   onDeleteFood: (outcome?: FoodOutcome) => void
   isDeleting: boolean
+  /** Chi ha aperto la conferma: dove torna il fuoco se l'utente annulla. */
+  deleteOpener?: RefObject<HTMLElement | null>
 }
 
 export function FoodModals({
@@ -56,7 +63,29 @@ export function FoodModals({
   onDeleteDialogChange,
   onDeleteFood,
   isDeleting,
+  deleteOpener,
 }: FoodModalsProps) {
+  // Posizione della card che sta per uscire dalla lista, letta prima che
+  // l'aggiornamento ottimistico la tolga. `null` significa «il dialogo non è
+  // stato chiuso confermando», ed è il valore che distingue Annulla ed Esc.
+  const removedIndexRef = useRef<number | null>(null)
+
+  // L'id serve al percorso di annullamento, dove `deletingFood` è già tornato
+  // a `null` quando il dialogo si chiude.
+  const lastFoodIdRef = useRef<string | null>(null)
+  if (deletingFood) lastFoodIdRef.current = deletingFood.id
+
+  const confirmDelete = (outcome?: FoodOutcome) => {
+    // Va letta adesso: `onDeleteFood` avvia la mutazione, il cui `onMutate`
+    // filtra la card fuori dalla cache. Fra un istante non sarà più nel DOM.
+    removedIndexRef.current = deletingFood ? actionsIndexOf(deletingFood.id) : -1
+
+    // `onDeleteFood()` e `onDeleteFood(undefined)` non sono la stessa chiamata
+    // per chi la osserva: «toglilo e basta» è l'assenza di esito.
+    if (outcome === undefined) onDeleteFood()
+    else onDeleteFood(outcome)
+  }
+
   return (
     <>
       {/* Add Food Dialog */}
@@ -98,7 +127,28 @@ export function FoodModals({
 
       {/* Conferma eliminazione: chiede com'è finita, non «sei sicuro?» */}
       <AlertDialog open={!!deletingFood} onOpenChange={(open) => !open && onDeleteDialogChange(false)}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onCloseAutoFocus={(event) => {
+            const removedIndex = removedIndexRef.current
+            removedIndexRef.current = null
+
+            if (removedIndex !== null) {
+              event.preventDefault()
+              moveFocusAfterRemoval(removedIndex)
+              return
+            }
+
+            // Annullato o chiuso con Esc: la card c'è ancora, e il fuoco deve
+            // tornare a chi ha aperto il dialogo. Radix dovrebbe farlo da sé e
+            // qui **non lo fa** — il dialogo è controllato, senza
+            // `AlertDialogTrigger` — e il fuoco finisce su `document.body`,
+            // misurato su Chromium. È un difetto preesistente, fratello di
+            // quello della #87 su un percorso che la issue dava per sano.
+            if (restoreFocusToOpener(deleteOpener?.current ?? null, lastFoodIdRef.current)) {
+              event.preventDefault()
+            }
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>Com'è finita?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -111,7 +161,7 @@ export function FoodModals({
               Su telefono resta anche l'unica disposizione che tiene i bersagli larghi. */}
           <div className="flex flex-col gap-2 py-2">
             <AlertDialogAction
-              onClick={() => onDeleteFood('consumed')}
+              onClick={() => confirmDelete('consumed')}
               disabled={isDeleting}
               className="h-11 w-full justify-start"
             >
@@ -119,7 +169,7 @@ export function FoodModals({
               L'ho consumato
             </AlertDialogAction>
             <AlertDialogAction
-              onClick={() => onDeleteFood('wasted')}
+              onClick={() => confirmDelete('wasted')}
               disabled={isDeleting}
               className="h-11 w-full justify-start bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -129,7 +179,7 @@ export function FoodModals({
             {/* Nessun esito: è l'errore di inserimento. Sporcare la metrica
                 anti-spreco con gli errori la rende inutile quanto lasciarla vuota. */}
             <AlertDialogAction
-              onClick={() => onDeleteFood()}
+              onClick={() => confirmDelete()}
               disabled={isDeleting}
               className="h-11 w-full justify-start bg-secondary text-secondary-foreground hover:bg-secondary/80"
             >

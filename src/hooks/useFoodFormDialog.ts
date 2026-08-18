@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { onlineManager } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
@@ -7,6 +7,7 @@ import type { Food, FoodInsert, FoodUpdate, FoodOutcome } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { triggerHaptic } from '@/lib/haptics'
 import { logError } from '@/lib/safeLog'
+import { restoreFocusTo } from '@/lib/focusAfterRemoval'
 
 /**
  * Upload or persist an image File depending on online/offline state.
@@ -116,10 +117,25 @@ export function useFoodFormDialog() {
     }
   }
 
+  const deleteOpenerRef = useRef<HTMLElement | null>(null)
+
   const handleDeleteFood = (outcome?: FoodOutcome) => {
     if (!deletingFood) return
 
-    deleteMutation.mutate({ id: deletingFood.id, outcome })
+    // Obbligo simmetrico a quello della chiusura del dialogo: se la scrittura
+    // fallisce, `onError` ripristina la lista e la card **ricompare** — il
+    // fuoco deve tornarci, altrimenti resta dove l'aveva messo la rimozione,
+    // cioè su una riga che ora non è più quella che l'utente stava guardando.
+    // È il caso in cui l'utente è già disorientato dall'errore.
+    const removedId = deletingFood.id
+    deleteMutation.mutate(
+      { id: removedId, outcome },
+      {
+        // Al frame successivo: `onError` ripristina la cache, ma la card torna
+        // nel DOM solo dopo il re-render di React.
+        onError: () => requestAnimationFrame(() => restoreFocusTo(removedId)),
+      }
+    )
     triggerHaptic('error')
     setDeletingFood(null)
 
@@ -133,6 +149,9 @@ export function useFoodFormDialog() {
   }
 
   const handleDeleteClick = (food: Food) => {
+    // Il fuoco è ancora sul pulsante che è stato appena premuto: è l'unico
+    // momento in cui si può sapere a chi restituirlo se l'utente annulla.
+    deleteOpenerRef.current = document.activeElement as HTMLElement | null
     setDeletingFood(food)
   }
 
@@ -148,6 +167,7 @@ export function useFoodFormDialog() {
     handleCreateFood,
     handleUpdateFood,
     handleDeleteFood,
+    deleteOpenerRef,
     handleEditClick,
     handleDeleteClick,
     // Mutation state
