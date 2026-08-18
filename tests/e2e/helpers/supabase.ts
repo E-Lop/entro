@@ -247,6 +247,25 @@ export async function getInviteStatusByShortCode(shortCode: string): Promise<str
  * 20260109): usiamo la categoria seed 'dairy'. `storage_location` accetta solo
  * 'fridge' | 'freezer' | 'pantry' (check constraint), non le label italiane.
  */
+/**
+ * Crea la lista personale di un utente e ce lo iscrive.
+ *
+ * Serve ai test che partono da una dashboard già popolata: l'app la crea da sé
+ * al primo accesso, ma non subito, e un inserimento che arriva prima viene
+ * rifiutato dalla RLS (`new row violates row-level security policy`).
+ */
+export async function createListForUser(ownerId: string): Promise<string> {
+  const { data: list, error } = await adminClient
+    .from('lists')
+    .insert({ created_by: ownerId, name: 'Lista E2E' })
+    .select('id')
+    .single()
+  if (error || !list) throw new Error(`Impossibile creare la lista: ${error?.message}`)
+
+  await adminClient.from('list_members').insert({ list_id: list.id, user_id: ownerId })
+  return list.id
+}
+
 export async function seedFoods(listId: string, ownerId: string, n: number): Promise<void> {
   const { data: category, error: categoryError } = await adminClient
     .from('categories')

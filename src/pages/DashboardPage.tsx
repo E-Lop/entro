@@ -1,5 +1,6 @@
 import { useState, useMemo, lazy, Suspense } from 'react'
 import { FoodModals } from '../components/foods/FoodModals'
+import { LIST_HEADING_ATTR } from '@/lib/focusAfterRemoval'
 import { useSearchParams } from 'react-router-dom'
 import { Plus, ShoppingBasket, X, List, Calendar } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -100,6 +101,7 @@ export function DashboardPage() {
     editingFood, setEditingFood,
     deletingFood, setDeletingFood,
     handleCreateFood, handleUpdateFood, handleDeleteFood,
+    deleteOpenerRef,
     handleEditClick, handleDeleteClick,
     isCreating, isUpdating, isDeleting,
   } = useFoodFormDialog()
@@ -197,7 +199,19 @@ export function DashboardPage() {
       />
 
       {/* Foods Grid */}
-      <h2 className="sr-only">I tuoi alimenti</h2>
+      {/* Ripiego del fuoco quando la card eliminata era l'ultima (entro#87).
+          `tabIndex={-1}` la rende raggiungibile per via programmatica; il
+          `focus:not-sr-only` è lo stesso trattamento del link «vai al
+          contenuto» in AppLayout, e serve perché un'intestazione riservata
+          agli screen reader lascerebbe senza indicatore visibile chi naviga
+          da tastiera guardando lo schermo. */}
+      <h2
+        {...{ [LIST_HEADING_ATTR]: '' }}
+        tabIndex={-1}
+        className="sr-only focus:not-sr-only focus:mb-2 focus:inline-block focus:rounded-md focus:px-2 focus:py-1 focus:text-lg focus:font-semibold focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        I tuoi alimenti
+      </h2>
       {foodsLoading ? (
         <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
           <div className="flex flex-col items-center gap-3">
@@ -355,6 +369,7 @@ export function DashboardPage() {
         deletingFood={deletingFood}
         onDeleteDialogChange={() => setDeletingFood(null)}
         onDeleteFood={handleDeleteFood}
+        deleteOpener={deleteOpenerRef}
         isDeleting={isDeleting}
       />
 

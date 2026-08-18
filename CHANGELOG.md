@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.6] - 2026-08-18
+
+### Fixed
+- **Dopo un'eliminazione il fuoco ripartiva dall'inizio del documento.** La rimozione è ottimistica: la card sparisce dalla lista *prima* che il dialogo di conferma finisca di chiudersi, e Radix prova a restituire il fuoco al pulsante di una card che non esiste più. Il fuoco cadeva su `document.body`, quindi il primo `Tab` ripartiva dall'inizio della pagina — dopo **ogni** eliminazione, anche a rete perfetta: su una lista di venti alimenti chi ne elimina tre ripercorre la lista tre volte. Ora va sulla card che ha preso il posto di quella rimossa, e sull'intestazione della lista quando la rimossa era l'ultima o la lista resta vuota. L'intestazione, che era riservata agli screen reader, diventa visibile quando riceve il fuoco — stesso trattamento del link «vai al contenuto» — perché un'intestazione `sr-only` lascerebbe senza indicatore chi naviga da tastiera guardando lo schermo. La destinazione non è una scelta di questo client: è la convenzione condivisa [`fuoco-dopo-una-rimozione`](https://github.com/E-Lop/entro-family/blob/main/conventions/fuoco-dopo-una-rimozione.md), che entro-mobile applica con `AccessibilityInfo.setAccessibilityFocus`. Chiude [#87](https://github.com/E-Lop/entro/issues/87).
+- **Anche annullare la conferma perdeva il fuoco.** Difetto **preesistente e distinto** dalla #87, che dava quel percorso per sano: il dialogo è controllato — nessun `AlertDialogTrigger`, apertura da stato — e Radix non riportava il fuoco al pulsante che l'aveva aperto. Misurato su Chromium: finiva su `document.body` esattamente come dopo un'eliminazione. Non è emerso dai test di componente ma dalla verifica su browser, scritta proprio perché la issue nasceva da una misura del fuoco e non da jsdom.
+- **Il fuoco torna sulla card quando l'eliminazione fallisce.** `onError` ripristina la lista e la card ricompare: senza questo, il fuoco restava dove l'aveva messo la rimozione, cioè su una riga che non è più quella che l'utente stava guardando, e nel momento in cui è già disorientato dall'errore. È l'obbligo simmetrico che la issue non menzionava.
+
 ## [1.11.5] - 2026-08-18
 
 ### Changed
@@ -557,7 +564,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.6...HEAD
+[1.11.6]: https://github.com/E-Lop/entro/compare/v1.11.5...v1.11.6
 [1.11.5]: https://github.com/E-Lop/entro/compare/v1.11.4...v1.11.5
 [1.11.4]: https://github.com/E-Lop/entro/compare/v1.11.3...v1.11.4
 [1.11.3]: https://github.com/E-Lop/entro/compare/v1.11.2...v1.11.3

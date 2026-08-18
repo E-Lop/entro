@@ -13,6 +13,7 @@ import type { Food, Category } from '@/lib/foods'
 import type { FoodWithRealtimeMetadata, ExpiryStatus } from '@/types/food.types'
 import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
 import { cn } from '@/lib/utils'
+import { FOOD_ACTIONS_ATTR } from '@/lib/focusAfterRemoval'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
 import { SwipeableCard } from './SwipeableCard'
 import { QuickQuantityEditor } from './QuickQuantityEditor'
@@ -121,8 +122,19 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
           'hover:shadow-md transition-shadow',
           (status === 'expired' || status === 'expires_today') && 'border-destructive/40',
           (status === 'expires_soon' || status === 'expires_this_week') && daysUntilExpiry <= 3 && 'border-warning/50',
-          isRemoteUpdate && 'ring-2 ring-primary animate-pulse motion-reduce:animate-none'
+          isRemoteUpdate && 'ring-2 ring-primary animate-pulse motion-reduce:animate-none',
+          // Il fuoco può atterrare qui dopo l'eliminazione della card
+          // precedente: senza un anello si sposterebbe in silenzio.
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
         )}
+        // Bersaglio del fuoco dopo una rimozione (entro#87). Marca la **riga**
+        // e non un suo pulsante perché i controlli cambiano col breakpoint —
+        // il ⋮ è `sm:hidden`, i pulsanti del footer sono `hidden sm:flex` — e
+        // `.focus()` su un elemento con `display: none` non fa nulla.
+        // `tabIndex={-1}` la rende raggiungibile per via programmatica senza
+        // aggiungerla all'ordine di tabulazione.
+        {...{ [FOOD_ACTIONS_ATTR]: food.id }}
+        tabIndex={-1}
       >
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
