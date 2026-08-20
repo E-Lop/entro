@@ -110,6 +110,8 @@ Prima di aprire una PR:
 
 Usa Conventional Commits per i messaggi principali, per esempio `feat:`, `fix:`, `docs:`, `test:`, `chore:`.
 
+**La parola chiave che chiude una issue va scritta in inglese**, anche in un messaggio per il resto in italiano: `Closes #123`, non «Chiude #123». GitHub riconosce solo `close/closes/closed`, `fix/fixes/fixed`, `resolve/resolves/resolved`, e ignora in silenzio qualunque altra cosa — quindi la issue resta aperta e non c'è nessun errore che lo segnali. La convenzione «documentazione in italiano» non si applica qui: quelle parole non sono prosa, sono l'interfaccia con cui la PR parla al tracker.
+
 ## Release
 
 Entro **non ha un commit di release separato**: la PR di feature porta anche il rilascio. Il tag punta poi al commit di squash-merge di quella stessa PR.
