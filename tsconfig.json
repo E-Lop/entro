@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    /* ES2022 per `Error.cause` (BCD `javascript.builtins.Error.cause`, verificato
+       il 2026-08-20: Chrome 93, Firefox 91, Safari e Safari iOS 15 — tutti da
+       fine 2021, ben sotto il minimo che questa PWA già richiede). */
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
 
