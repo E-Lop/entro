@@ -8,6 +8,7 @@ import type {
   ListResponse,
   ListMembersResponse,
 } from '../types/invite.types'
+import { userFacingError } from './userFacingError'
 
 /**
  * Invites Service Layer - Functions to manage shared lists and invitations
@@ -25,7 +26,7 @@ export async function createInvite(
   try {
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) {
-      throw new Error('Not authenticated')
+      throw new Error('Sessione scaduta. Accedi di nuovo.')
     }
 
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-invite`, {
@@ -40,7 +41,7 @@ export async function createInvite(
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to create invite')
+      throw userFacingError('Non è stato possibile creare l\'invito. Riprova.', data.error)
     }
 
     return {
@@ -52,7 +53,7 @@ export async function createInvite(
     return {
       success: false,
       shortCode: null,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile creare l\'invito. Riprova.'),
     }
   }
 }
@@ -75,7 +76,7 @@ export async function validateInvite(
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to validate invite')
+      throw userFacingError('Non è stato possibile verificare il codice. Riprova.', data.error)
     }
 
     return {
@@ -87,7 +88,7 @@ export async function validateInvite(
     return {
       valid: false,
       invite: null,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile verificare il codice. Riprova.'),
     }
   }
 }
@@ -128,7 +129,7 @@ export async function registerPendingInvite(
     console.error('[registerPendingInvite] Failed')
     return {
       success: false,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile registrare l\'invito. Riprova.'),
     }
   }
 }
@@ -140,7 +141,7 @@ export async function acceptInvite(shortCode: string): Promise<AcceptInviteRespo
   try {
     const { data: sessionData } = await supabase.auth.getSession()
     if (!sessionData.session) {
-      throw new Error('Not authenticated')
+      throw new Error('Sessione scaduta. Accedi di nuovo.')
     }
 
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/accept-invite`, {
@@ -155,7 +156,7 @@ export async function acceptInvite(shortCode: string): Promise<AcceptInviteRespo
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to accept invite')
+      throw userFacingError('Non è stato possibile accettare l\'invito. Riprova.', data.error)
     }
 
     return {
@@ -167,7 +168,7 @@ export async function acceptInvite(shortCode: string): Promise<AcceptInviteRespo
     return {
       success: false,
       listId: null,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile accettare l\'invito. Riprova.'),
     }
   }
 }
@@ -184,7 +185,7 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     const { data, error } = await supabase.rpc('accept_pending_invite_by_email')
     if (error) {
       logError('[acceptInviteByEmail] RPC error:', error)
-      return { success: false, listId: null, error: new Error(error.message) }
+      return { success: false, listId: null, error: userFacingError('Non è stato possibile accettare l\'invito. Riprova.', error) }
     }
     const row = Array.isArray(data) ? data[0] : data
     if (!row || !row.success) {
@@ -192,7 +193,7 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     }
     return { success: true, listId: row.list_id, error: null }
   } catch (error) {
-    return { success: false, listId: null, error: error instanceof Error ? error : new Error('Unknown error') }
+    return { success: false, listId: null, error: error instanceof Error ? error : new Error('Non è stato possibile accettare l\'invito. Riprova.') }
   }
 }
 
@@ -205,7 +206,7 @@ export async function getUserList(): Promise<ListResponse> {
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
       console.error('[getUserList] User not authenticated')
-      throw new Error('Not authenticated')
+      throw new Error('Sessione scaduta. Accedi di nuovo.')
     }
 
     // First, get the list_member record for this user
@@ -221,7 +222,7 @@ export async function getUserList(): Promise<ListResponse> {
 
     if (memberError || !memberData) {
       console.warn('[getUserList] User is not a member of any list')
-      throw new Error(memberError?.message || 'User is not a member of any list')
+      throw userFacingError('Non è stato possibile caricare la tua lista. Riprova.', memberError)
     }
 
     // Then, get the list details
@@ -237,7 +238,7 @@ export async function getUserList(): Promise<ListResponse> {
 
     if (listError || !listData) {
       console.error(`[getUserList] List not found for id: ${memberData.list_id}`)
-      throw new Error(listError?.message || 'List not found')
+      throw userFacingError('Non è stato possibile caricare la tua lista. Riprova.', listError)
     }
 
     return {
@@ -248,7 +249,7 @@ export async function getUserList(): Promise<ListResponse> {
     logError('[getUserList] Failed to get user list:', error)
     return {
       list: null,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile caricare la tua lista. Riprova.'),
     }
   }
 }
@@ -268,7 +269,7 @@ export async function getListMembers(
       .eq('list_id', listId)
 
     if (error) {
-      throw new Error(error.message)
+      throw userFacingError('Non è stato possibile caricare i membri della lista. Riprova.', error)
     }
 
     return {
@@ -278,7 +279,7 @@ export async function getListMembers(
   } catch (error) {
     return {
       members: [],
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile caricare i membri della lista. Riprova.'),
     }
   }
 }
@@ -312,12 +313,12 @@ export async function createPersonalList(): Promise<{
 
     if (error) {
       logError('[createPersonalList] Error calling create_personal_list():', error)
-      throw new Error(error.message)
+      throw userFacingError('Non è stato possibile creare la tua lista. Riprova.', error)
     }
 
     if (!data) {
       console.error('[createPersonalList] No data returned from create_personal_list()')
-      throw new Error('No data returned from create_personal_list()')
+      throw userFacingError('Non è stato possibile creare la tua lista. Riprova.', 'create_personal_list() non ha restituito dati')
     }
 
     // Type assertion for the RPC response
@@ -326,7 +327,7 @@ export async function createPersonalList(): Promise<{
     // Check the result from the function
     if (!result.success) {
       logError('[createPersonalList] Function returned error:', result.error_message)
-      throw new Error(result.error_message || 'Failed to create personal list')
+      throw userFacingError('Non è stato possibile creare la tua lista. Riprova.', result.error_message)
     }
 
     return {
@@ -339,7 +340,7 @@ export async function createPersonalList(): Promise<{
     return {
       success: false,
       listId: null,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile creare la tua lista. Riprova.'),
     }
   }
 }
@@ -364,7 +365,7 @@ export async function acceptInviteWithConfirmation(
       p_force: forceAccept,
     })
     if (error) {
-      return { success: false, listId: null, requiresConfirmation: false, error: new Error(error.message) }
+      return { success: false, listId: null, requiresConfirmation: false, error: userFacingError('Non è stato possibile accettare l\'invito. Riprova.', error) }
     }
     const row = Array.isArray(data) ? data[0] : data
     if (!row) {
@@ -378,7 +379,7 @@ export async function acceptInviteWithConfirmation(
     }
     return { success: true, listId: row.list_id, requiresConfirmation: false, error: null }
   } catch (error) {
-    return { success: false, listId: null, requiresConfirmation: false, error: error instanceof Error ? error : new Error('Unknown error') }
+    return { success: false, listId: null, requiresConfirmation: false, error: error instanceof Error ? error : new Error('Non è stato possibile accettare l\'invito. Riprova.') }
   }
 }
 
@@ -392,7 +393,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) {
       console.error('[leaveSharedList] User not authenticated')
-      throw new Error('Not authenticated')
+      throw new Error('Sessione scaduta. Accedi di nuovo.')
     }
 
     const userId = userData.user.id
@@ -406,7 +407,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
 
     if (currentMemberError) {
       logError('[leaveSharedList] Error getting current list:', currentMemberError)
-      throw currentMemberError
+      throw userFacingError('Non è stato possibile abbandonare la lista. Riprova.', currentMemberError)
     }
 
     if (!currentMemberData) {
@@ -424,7 +425,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
 
     if (memberCountError) {
       logError('[leaveSharedList] Error counting members:', memberCountError)
-      throw memberCountError
+      throw userFacingError('Non è stato possibile abbandonare la lista. Riprova.', memberCountError)
     }
 
     if (memberCount === null || memberCount <= 1) {
@@ -441,14 +442,14 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
 
     if (removeError) {
       logError('[leaveSharedList] Error removing user from list:', removeError)
-      throw removeError
+      throw userFacingError('Non è stato possibile abbandonare la lista. Riprova.', removeError)
     }
 
     // Step 4: Create new personal list
     const createResult = await createPersonalList()
     if (!createResult.success) {
       logError('[leaveSharedList] Failed to create personal list:', createResult.error)
-      throw createResult.error || new Error('Failed to create personal list')
+      throw createResult.error || userFacingError('Non è stato possibile abbandonare la lista. Riprova.', null)
     }
 
     return {
@@ -459,7 +460,7 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
     logError('[leaveSharedList] Leave list flow failed:', error)
     return {
       success: false,
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      error: error instanceof Error ? error : new Error('Non è stato possibile abbandonare la lista. Riprova.'),
     }
   }
 }
