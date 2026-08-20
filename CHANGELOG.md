@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.8] - 2026-08-20
+
+### Fixed
+- **Il messaggio di Postgres non arriva a schermo, stavolta da tutte le strade.** La v1.11.7 lo dichiarava già, ma valeva per la sola `createFood`: le altre sei funzioni di `foods.ts` — `getCategories`, `getFoods`, `getFoodById`, `updateFood`, `softDeleteFood` e `updateFoodStatus` — rilanciavano ancora `new Error(error.message)`, e `useFoods` passa `error.message` a `toast.error`. Chi provava a togliere un alimento con la scrittura rifiutata leggeva `permission denied for table foods`: inglese, col nome della tabella dentro. È la stessa decisione già applicata su `entro-mobile` ([#23](https://github.com/E-Lop/entro-mobile/pull/23)), dove la copia condivisa di queste funzioni era stata sistemata due giorni prima — quindi i due client dicevano cose diverse sullo stesso errore. Ora l'utente legge un messaggio in italiano e il `PostgrestError` originale resta in `Error.cause`, disponibile a chi diagnostica ma su nessun percorso che porti a schermo.
+- **Un test fissava il difetto invece di impedirlo.** `foodsSoftDelete.test.ts` asseriva `expect(error?.message).toBe('permission denied for table foods')`: verde, e verde *perché* la fuga c'era. Ora asserisce il messaggio italiano e la presenza dell'originale in `cause`.
+
+### Changed
+- **`lib` di TypeScript passa da ES2020 a ES2022**, che è ciò che serve per `Error.cause`. Verificato sulla BCD MDN `javascript.builtins.Error.cause` il 2026-08-20: Chrome 93, Firefox 91, Safari e Safari iOS 15, tutti da fine 2021 — sotto il minimo che questa PWA già richiede. Nessun altro codice cambia comportamento.
+
 ## [1.11.7] - 2026-08-18
 
 ### Fixed
@@ -577,7 +586,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.7...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.8...HEAD
+[1.11.8]: https://github.com/E-Lop/entro/compare/v1.11.7...v1.11.8
 [1.11.7]: https://github.com/E-Lop/entro/compare/v1.11.6...v1.11.7
 [1.11.6]: https://github.com/E-Lop/entro/compare/v1.11.5...v1.11.6
 [1.11.5]: https://github.com/E-Lop/entro/compare/v1.11.4...v1.11.5
