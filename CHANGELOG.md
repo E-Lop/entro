@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.9] - 2026-08-20
+
+### Fixed
+- **Il messaggio del server non arriva a schermo nemmeno dagli inviti.** La v1.11.8 aveva chiuso `foods.ts`; `invites.ts` restava intatto, con **quattro** percorsi che arrivano all'utente — «genera codice invito», «verifica codice», «accetta invito» e «abbandona lista condivisa». Il difetto aveva due forme distinte, e provarne una sola avrebbe lasciato credere di aver provato l'altra. **Fuga**: `createInvite`, `validateInvite` e `acceptInvite` rilanciavano il campo `error` che una Edge Function restituisce nel corpo, quindi a schermo finiva testo del server intatto — misurato, `JWT expired at 1755000000`. **Lingua**: `leaveSharedList` faceva `throw removeError`, e poiché un `PostgrestError` **non è** un'istanza di `Error` il ramo `error instanceof Error ? … : new Error('Unknown error')` cadeva sul ripiego, mostrando `Unknown error`. Ora tutti e dieci i percorsi di `invites.ts` dicono una frase italiana, e l'originale resta in `Error.cause`.
+- **Le stringhe inglesi scritte da noi sparivano dietro lo stesso sintomo.** `'Unknown error'` (dieci volte), `'Not authenticated'` (quattro), `'Failed to create invite'`, `'List not found'`, `'No data returned from create_personal_list()'`: non erano messaggi del server, ma per chi legge erano indistinguibili da una fuga. Tradotte insieme, perché correggere solo la fuga avrebbe lasciato lo stesso effetto a schermo.
+
+### Changed
+- **`userFacingError` esce da `foods.ts` e diventa `src/lib/userFacingError.ts`**, condiviso con `invites.ts`. Nel farlo cambia nome: nella v1.11.8 si chiamava `erroreUtente` ed era l'**unico identificatore italiano** di tutto `src/lib` — la convenzione di fatto del progetto è codice in inglese e prosa in italiano.
+
 ## [1.11.8] - 2026-08-20
 
 ### Fixed
@@ -586,7 +595,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.8...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.9...HEAD
+[1.11.9]: https://github.com/E-Lop/entro/compare/v1.11.8...v1.11.9
 [1.11.8]: https://github.com/E-Lop/entro/compare/v1.11.7...v1.11.8
 [1.11.7]: https://github.com/E-Lop/entro/compare/v1.11.6...v1.11.7
 [1.11.6]: https://github.com/E-Lop/entro/compare/v1.11.5...v1.11.6

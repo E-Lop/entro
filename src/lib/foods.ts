@@ -5,6 +5,7 @@ import { isPendingUrl, deletePendingImage } from './pendingImages'
 import { logError, logWarn } from './safeLog'
 import { EXPIRY_SOON_DAYS } from './expiry'
 import type { StorageLocation } from './validations/food.schemas'
+import { userFacingError } from './userFacingError'
 
 /**
  * Foods Service Layer - Wrapper functions around Supabase Foods API
@@ -46,26 +47,6 @@ export interface FilterParams {
 }
 
 /**
- * Errore destinato all'utente, con l'originale conservato per la diagnosi.
- *
- * Il messaggio che Supabase restituisce è in inglese, cita il nome della
- * tabella e può contenere identificativi: `useFoods` lo mostra in un toast, e
- * uno screenshot lo porta più lontano di un log. Quello che l'utente legge è
- * `message`; il dettaglio tecnico resta in `cause`, che nessun percorso
- * dell'app porta a schermo ma che resta disponibile a chi diagnostica.
- *
- * (Da non estendere a «`cause` non finisce nei log»: dalla BCD
- * `javascript.builtins.Error.cause`, il logging predefinito della console non
- * lo stampa su Safari, ma lo stampa su Chrome dalla 125.)
- *
- * Stessa decisione già applicata su entro-mobile (#23), sulla copia condivisa
- * di queste funzioni.
- */
-function erroreUtente(messaggio: string, causa: unknown): Error {
-  return new Error(messaggio, { cause: causa })
-}
-
-/**
  * Fetch all categories
  */
 export async function getCategories(): Promise<CategoriesResponse> {
@@ -76,7 +57,7 @@ export async function getCategories(): Promise<CategoriesResponse> {
       .order('name', { ascending: true })
 
     if (error) {
-      throw erroreUtente('Non è stato possibile caricare le categorie. Riprova.', error)
+      throw userFacingError('Non è stato possibile caricare le categorie. Riprova.', error)
     }
 
     return {
@@ -145,7 +126,7 @@ export async function getFoods(filters?: FilterParams): Promise<FoodsResponse> {
     const { data, error } = await query
 
     if (error) {
-      throw erroreUtente('Non è stato possibile caricare gli alimenti. Riprova.', error)
+      throw userFacingError('Non è stato possibile caricare gli alimenti. Riprova.', error)
     }
 
     return {
@@ -173,7 +154,7 @@ export async function getFoodById(id: string): Promise<FoodResponse> {
       .single()
 
     if (error) {
-      throw erroreUtente('Non è stato possibile caricare l\'alimento. Riprova.', error)
+      throw userFacingError('Non è stato possibile caricare l\'alimento. Riprova.', error)
     }
 
     return {
@@ -306,7 +287,7 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
       .single()
 
     if (error) {
-      throw erroreUtente('Non è stato possibile salvare l\'alimento. Riprova.', error)
+      throw userFacingError('Non è stato possibile salvare l\'alimento. Riprova.', error)
     }
 
     return {
@@ -417,7 +398,7 @@ export async function softDeleteFood(id: string, outcome?: FoodOutcome): Promise
       .single()
 
     if (error) {
-      throw erroreUtente('Non è stato possibile togliere l\'alimento dalla lista. Riprova.', error)
+      throw userFacingError('Non è stato possibile togliere l\'alimento dalla lista. Riprova.', error)
     }
 
     return {
@@ -455,7 +436,7 @@ export async function updateFoodStatus(
       .single()
 
     if (error) {
-      throw erroreUtente('Non è stato possibile salvare l\'alimento. Riprova.', error)
+      throw userFacingError('Non è stato possibile salvare l\'alimento. Riprova.', error)
     }
 
     return {
