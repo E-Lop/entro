@@ -58,7 +58,13 @@ const { mockAuth, mockFrom, mockRpc, setResult } = vi.hoisted(() => {
   return {
     mockAuth: { getSession: vi.fn(), getUser: vi.fn() },
     mockFrom: vi.fn(() => builder),
-    mockRpc: vi.fn(() => Promise.resolve(result)),
+    // `rpc` restituisce il builder incatenabile, non una promessa:
+    // `createPersonalList` chiama `supabase.rpc(...).single()`, e un oggetto
+    // semplice la farebbe fallire con un TypeError **prima** del punto che si
+    // vuole provare — verde su codice vecchio e nuovo insieme, cioè nessuna
+    // prova. Il builder è comunque `then`-abile, quindi le chiamate che fanno
+    // `await supabase.rpc(...)` continuano a funzionare.
+    mockRpc: vi.fn(() => builder),
     setResult: (value: unknown) => {
       result = value
     },
@@ -72,6 +78,7 @@ vi.mock('@/lib/supabase', () => ({
 import {
   createInvite,
   validateInvite,
+  registerPendingInvite,
   acceptInvite,
   acceptInviteByEmail,
   getUserList,
@@ -102,6 +109,7 @@ beforeEach(() => {
 const casi: [string, () => Promise<{ error: Error | null }>][] = [
   ['createInvite', () => createInvite('list-1')],
   ['validateInvite', () => validateInvite('ABC123')],
+  ['registerPendingInvite', () => registerPendingInvite('ABC123', 'a@b.it')],
   ['acceptInvite', () => acceptInvite('ABC123')],
   ['acceptInviteByEmail', () => acceptInviteByEmail()],
   ['getUserList', () => getUserList()],
