@@ -3,8 +3,27 @@ name: CI
 on:
   push:
     branches: [main]
+    # Le modifiche di sola documentazione non possono rompere test o build, e
+    # aprivano comunque l'intero gate E2E: stack Supabase, `db reset` e 19 test
+    # per una riga di Markdown. `main` non è un ramo protetto, quindi saltare i
+    # check non lascia nessuna PR in attesa di uno stato che non arriverà.
+    # NB: la lista è ripetuta di proposito sotto `pull_request`. Gli anchor YAML
+    # sarebbero il modo naturale di non duplicarla, ma GitHub Actions non li
+    # supporta: il file resterebbe YAML valido e verrebbe rifiutato dal parser,
+    # e il sintomo — nessun check che parte — è indistinguibile da un
+    # `paths-ignore` che funziona. Meglio quattro righe in più.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -53,7 +72,9 @@ jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Un'esecuzione sana dura ~4 minuti: 25 erano cinque volte il normale, e
+    # quel margine è stato pagato per intero due volte in attese inutili.
+    timeout-minutes: 15
     env:
       VITE_SUPABASE_URL: http://127.0.0.1:54321
       VITE_SUPABASE_ANON_KEY: ${{ vars.LOCAL_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' }}
@@ -80,8 +101,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # I browser pesano ~177 MiB e non cambiano se non cambia Playwright:
+      # la chiave è la sua versione, letta dal pacchetto installato.
+      - name: Versione di Playwright
+        id: playwright-version
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache dei browser Playwright
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
+      # Il passo che si è bloccato due volte, consumando l'intero budget del
+      # job. In condizioni normali dura ~1m12s: a cinque minuti è patologico, e
+      # fallire subito è un'informazione mentre aspettare venti minuti non lo è.
       - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
         run: npx playwright install --with-deps chromium
+
+      # Con la cache i binari ci sono già, ma le librerie di sistema no: stanno
+      # fuori da `~/.cache/ms-playwright` e vanno installate lo stesso.
+      - name: Dipendenze di sistema (cache presente)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v2.1.1
