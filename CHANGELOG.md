@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.10] - 2026-08-22
+
+### Security
+- **Chiuse tutte e 21 le segnalazioni Dependabot aperte.** Una sola riguarda il codice che gira nel browser degli utenti — `react-router`, con cinque avvisi; le altre sedici vivono nell'albero di sviluppo (test, lint, build degli asset) e non finiscono nel bundle. La distinzione conta per la fretta, non per la decisione: sono state chiuse tutte insieme perché lasciarne aperta una parte avrebbe fatto perdere il segnale sulle prossime.
+  - **`react-router` / `react-router-dom` da 7.16.0 a 7.18.2** (dipendenza di esercizio) — cinque avvisi: denial of service non autenticato per route matching inefficiente ([GHSA-chx6-hx7r-mcp5](https://github.com/advisories/GHSA-chx6-hx7r-mcp5), alta), bypass CSRF in modalità RSC ([GHSA-qwww-vcr4-c8h2](https://github.com/advisories/GHSA-qwww-vcr4-c8h2), alta), open redirect via backslash in `<Link>` e `useNavigate` ([GHSA-337j-9hxr-rhxg](https://github.com/advisories/GHSA-337j-9hxr-rhxg)), constructor injection in `deserializeErrors()` ([GHSA-h8fp-f39c-q6mh](https://github.com/advisories/GHSA-h8fp-f39c-q6mh)) e XSS in `RSCErrorHandler` ([GHSA-wrjc-x8rr-h8h6](https://github.com/advisories/GHSA-wrjc-x8rr-h8h6)). Entro non usa né RSC né SSR, quindi tre dei cinque erano inerti qui; il DoS sul route matching e l'open redirect no.
+  - **`undici` a 7.29.0** via `overrides` (transitiva da `jsdom`, ambiente dei test) — cinque avvisi tra divulgazione di informazioni cross-utente nella cache ([GHSA-4cwx-7wf7-3272](https://github.com/advisories/GHSA-4cwx-7wf7-3272), alta), CRLF injection, cookie attribute injection e desincronizzazione delle risposte nell'interceptor di retry.
+  - **`fast-uri` da 3.1.2 a 3.1.5** via `overrides` (transitiva da `vite-plugin-pwa` → `workbox-build` → `ajv`) — tre avvisi di host confusion, tutti per varianti del backslash e della canonicalizzazione IDN ([GHSA-4c8g-83qw-93j6](https://github.com/advisories/GHSA-4c8g-83qw-93j6), [GHSA-v2hh-gcrm-f6hx](https://github.com/advisories/GHSA-v2hh-gcrm-f6hx), [GHSA-7p8r-x3mc-p8w7](https://github.com/advisories/GHSA-7p8r-x3mc-p8w7), alte).
+  - **`brace-expansion` a 1.1.18 / 2.1.4 / 5.0.9** — un solo avviso ([GHSA-3jxr-9vmj-r5cp](https://github.com/advisories/GHSA-3jxr-9vmj-r5cp), alta: DoS per espansione esponenziale di gruppi `{}` consecutivi) che conta per tre perché l'albero contiene tre major incompatibili tra loro; gli `overrides` per-parente già in essere sono stati alzati, non aggiunti.
+  - **`js-yaml` da 4.2.0 a 4.3.1** via `overrides` (transitiva da `eslint`) — due avvisi di consumo quadratico di CPU: catene di merge key ([GHSA-52cp-r559-cp3m](https://github.com/advisories/GHSA-52cp-r559-cp3m)) e risoluzione di `!!omap` ([GHSA-5p4m-2wfm-xmqj](https://github.com/advisories/GHSA-5p4m-2wfm-xmqj)), entrambe alte. Resta sulla major 4 perché è quella che `eslint` si aspetta.
+  - **`postcss` da 8.5.15 a 8.5.26** — path traversal nel caricamento automatico della source map precedente ([GHSA-r28c-9q8g-f849](https://github.com/advisories/GHSA-r28c-9q8g-f849), alta) e il suo fix incompleto ([GHSA-fxqj-rqcc-2cmp](https://github.com/advisories/GHSA-fxqj-rqcc-2cmp)). Aggiunto anche come `override` perché `tailwindcss` se lo porta dietro per conto suo.
+  - **`sharp` da 0.34.5 a 0.35.3** (usata solo da `scripts/generate-icons.js`) — quattro CVE ereditate da libvips ([GHSA-f88m-g3jw-g9cj](https://github.com/advisories/GHSA-f88m-g3jw-g9cj), alta).
+- `npm audit`: 0 vulnerabilità. Verificati typecheck, lint, 392 test unitari, build di produzione e i 22 e2e Playwright contro Supabase locale — quest'ultimo è l'unico banco che esercita il routing reale dopo il salto di `react-router`.
+
 ## [1.11.9] - 2026-08-20
 
 ### Fixed
