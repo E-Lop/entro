@@ -78,6 +78,7 @@ Per nuove API molto sensibili considerare uno schema dedicato (`api`, `internal`
 - **Mobile-first**: ogni feature va testata in browser mobile/iOS prima di considerarsi completa.
 - **Code simplifier**: invocare la skill `code-simplifier:code-simplifier` dopo ogni feature significativa, prima di committare.
 - **Test automatici**: per ogni feature, coprire validation + authorization + business rules + destructive action safeguards (vedi `~/.claude/CLAUDE.md`).
+- **Dominio**: il glossario è `../entro-family/core/`; non creare un `CONTEXT.md` in questo repo. Regole di consumo del bundle e collocazione degli ADR in `docs/agents/domain.md`.
 
 ## Edge Functions deploy
 
