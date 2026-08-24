@@ -96,3 +96,19 @@ Genera token da https://supabase.com/dashboard/account/tokens e **revocalo dopo 
 - `migrations/` — migrazioni storiche (numerate 001-016 + helpers)
 - `../entro-family/` — bundle conoscenza condiviso, **fonte unica** del dominio (core/) e dei pattern cross-prodotto (conventions/); consumato anche da entro-mobile e dalle future native. Ex `docs/development/DOMAIN_GLOSSARY.md` (ora stub)
 - `CHANGELOG.md` — Keep a Changelog in italiano, semver
+
+## Agent skills
+
+Il set `mattpocock-skills` legge i tre file in `docs/agents/`. Si modificano a mano: rilanciare `/setup-matt-pocock-skills` serve solo per cambiare tracker o ricominciare da zero.
+
+### Issue tracker
+
+GitHub Issues di `E-Lop/entro`, via la CLI `gh`; le PR non sono una superficie di triage. Vedi `docs/agents/issue-tracker.md`.
+
+### Etichette di triage
+
+I cinque ruoli canonici con i nomi di default, tabella identità. Vedi `docs/agents/triage-labels.md`.
+
+### Documentazione di dominio
+
+Single-context, ma il glossario **non** vive in questo repo: è `../entro-family/core/`. Vedi `docs/agents/domain.md`.
