@@ -13,6 +13,7 @@ import type { Food, Category } from '@/lib/foods'
 import type { FoodWithRealtimeMetadata, ExpiryStatus } from '@/types/food.types'
 import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
 import { getExpiryLabel } from '@/lib/expiryLabels'
+import { STORAGE_LABELS } from '@/lib/storageLabels'
 import { cn } from '@/lib/utils'
 import { FOOD_ACTIONS_ATTR } from '@/lib/focusAfterRemoval'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
@@ -55,12 +56,6 @@ function getExpiryPresentation(expiryDate: string): {
     case 'fresh':
       return { status, colorClasses: 'bg-success/10 text-success border-success/30', badgeText, daysUntilExpiry }
   }
-}
-
-const STORAGE_LABELS: Record<Food['storage_location'], string> = {
-  fridge: 'Frigo',
-  freezer: 'Freezer',
-  pantry: 'Dispensa',
 }
 
 /**

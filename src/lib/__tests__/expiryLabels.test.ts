@@ -19,60 +19,19 @@
  * Qui l'assenza del bundle è un **errore**, con il percorso cercato nel
  * messaggio. In CI la cartella si impone con `ENTRO_FAMILY_DIR`.
  */
-import { existsSync, readFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { etichetteDellaPagina, paginaDelBundle } from './bundleDiFamiglia'
 import type { ExpiryStatus } from '@/types/food.types'
 import { EXPIRY_LABELS, formatDaysLabel, getExpiryLabel } from '@/lib/expiryLabels'
 
-/**
- * Il bundle vive affiancato ai repo in `~/Documents/`. In CI quel percorso non
- * esiste: il workflow lo clona e punta qui con `ENTRO_FAMILY_DIR`.
- */
-const CARTELLA_BUNDLE = process.env.ENTRO_FAMILY_DIR
-  ? resolve(process.env.ENTRO_FAMILY_DIR)
-  : join(__dirname, '..', '..', '..', '..', 'entro-family')
+const PAGINA = 'expiry-status'
 
-function paginaStatiDiScadenza(): string {
-  const percorso = join(CARTELLA_BUNDLE, 'core', 'expiry-status.md')
-  if (!existsSync(percorso)) {
-    throw new Error(
-      `Bundle di famiglia non trovato in ${percorso}. Le etichette sono dominio e ` +
-        'vivono lì: clona `E-Lop/entro-family` affiancato a questo repo, oppure ' +
-        'indica la cartella con ENTRO_FAMILY_DIR.'
-    )
-  }
-  return readFileSync(percorso, 'utf8')
-}
-
-/**
- * Le righe della tabella «Le parole che l'utente legge», come coppie
- * `stato → etichetta`. L'etichetta è la stringa fra apici inversi quando lo
- * stato ha una parola propria, e `null` quando il bundle dice *conteggio*.
- */
-function etichetteDelBundle(): Map<string, string | null> {
-  const testo = paginaStatiDiScadenza()
-  const inizio = testo.indexOf("## Le parole che l'utente legge")
-  if (inizio === -1) throw new Error('Sezione «Le parole che l’utente legge» non trovata nel bundle')
-
-  // Delimitare la sezione non è pignoleria: la stessa pagina porta più sopra
-  // una tabella `ExpiryStatus | Condizione` con gli stessi stati nella prima
-  // colonna, e una lettura su tutto il file prenderebbe quella.
-  const fine = testo.indexOf('\n## ', inizio + 1)
-  const sezione = testo.slice(inizio, fine === -1 ? undefined : fine)
-
-  const righe = new Map<string, string | null>()
-  for (const m of sezione.matchAll(/^\|\s*`([a-z_]+)`\s*\|\s*(.+?)\s*\|$/gm)) {
-    const cella = m[2]
-    const conParola = cella.match(/^`(.+)`$/)
-    righe.set(m[1], conParola ? conParola[1] : null)
-  }
-  return righe
-}
+/** Le righe della tabella, dal helper condiviso con `storageLabels.test.ts`. */
+const etichetteDelBundle = () => etichetteDellaPagina(PAGINA)
 
 /** Il formato del conteggio, sempre dal bundle. */
 function formeDelConteggio(): { singolare: string; plurale: string } {
-  const m = paginaStatiDiScadenza().match(/`1 (\w+)` al singolare, `N (\w+)` altrimenti/)
+  const m = paginaDelBundle(PAGINA).match(/`1 (\w+)` al singolare, `N (\w+)` altrimenti/)
   if (!m) throw new Error('Il bundle non dichiara più le due forme del conteggio')
   return { singolare: m[1], plurale: m[2] }
 }
