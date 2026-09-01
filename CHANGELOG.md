@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.12] - 2026-09-01
+
+### Changed
+- **Le etichette dello stato di scadenza diventano una fonte sola, e c'è un guardiano che lo prova.** «Scaduto», «Scade oggi» e il conteggio dei giorni erano scritti a mano dentro `FoodCard.tsx`, accoppiati alle classi Tailwind, e di nuovo sul client nativo. Coincidevano per copia manuale, e **niente avrebbe fatto rumore se avessero smesso**: la classificazione era già fonte unica (`expiry.ts`), la sua traduzione in parole no ([entro-mobile#44](https://github.com/E-Lop/entro-mobile/issues/44)).
+
+  A schermo non cambia niente: le parole sono le stesse. Cambia dove vivono e cosa succede se divergono.
+
+  Il testo è **dominio** e sta nel bundle di famiglia, `core/expiry-status.md`, sezione «Le parole che l'utente legge»; da lì lo trascrive `src/lib/expiryLabels.ts`, identico sui due client. I **colori** restano nel componente, ed è deliberato: `bg-destructive` qui e `bg-scaduto-fondo` di NativeWind non devono essere la stessa cosa. La linea passa fra la parola e il colore.
+
+  Spostare le stringhe in un modulo per parte non le renderebbe uniche, solo ordinate: due moduli scritti a mano divergono come due componenti. A renderle una fonte sola è `src/lib/__tests__/expiryLabels.test.ts`, che **legge la tabella del bundle** e fa fallire il codice se dice altro. Provato che rompe in tutte e tre le direzioni: codice divergente → rosso, bundle divergente → rosso, bundle assente → **errore**, non verde — perché un test che si salta quando non trova la sorgente passa esattamente quando non sta guardando niente.
+
 ## [1.11.11] - 2026-09-01
 
 ### Fixed
@@ -617,7 +628,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.11...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.12...HEAD
+[1.11.12]: https://github.com/E-Lop/entro/compare/v1.11.11...v1.11.12
 [1.11.11]: https://github.com/E-Lop/entro/compare/v1.11.10...v1.11.11
 [1.11.10]: https://github.com/E-Lop/entro/compare/v1.11.9...v1.11.10
 [1.11.9]: https://github.com/E-Lop/entro/compare/v1.11.8...v1.11.9

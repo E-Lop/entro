@@ -43,10 +43,34 @@ jobs:
       VITE_ENABLE_SWIPE_GESTURES: "true"
       VITE_ENABLE_SHARED_LISTS: "true"
       VITE_ENABLE_NOTIFICATIONS: "true"
+      ENTRO_FAMILY_DIR: ${{ github.workspace }}/.entro-family
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      # `src/lib/__tests__/expiryLabels.test.ts` confronta le etichette dello
+      # stato di scadenza con la tabella di `core/expiry-status.md` nel bundle
+      # di famiglia: il testo che l'utente legge è dominio, e prima viveva
+      # copiato a mano qui e sul client nativo (entro-mobile#44).
+      #
+      # `entro-family` è **privato**, quindi serve `ENTRO_FAMILY_TOKEN`, un PAT
+      # fine-grained con il solo permesso *Contents: read* su quel repo.
+      #
+      # ⚠️ Questo repo è **pubblico**, e i secret non vengono passati alle PR
+      # che arrivano da un fork: lì lo step fallisce e la CI è rossa. È una
+      # conseguenza accettata, non una svista — il test non degrada a verde
+      # quando non trova il bundle, perché un controllo che passa mentre non
+      # guarda niente non è un controllo. Se un giorno arriveranno contributi
+      # esterni, la via d'uscita è rendere pubblico il bundle, non ammorbidire
+      # il test.
+      - name: Checkout entro-family (solo il dominio)
+        uses: actions/checkout@v5
+        with:
+          repository: E-Lop/entro-family
+          token: ${{ secrets.ENTRO_FAMILY_TOKEN }}
+          path: .entro-family
+          sparse-checkout: core
 
       - name: Setup Node
         uses: actions/setup-node@v5
