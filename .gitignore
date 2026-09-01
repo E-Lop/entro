@@ -73,3 +73,6 @@ PRODUCT.md
 
 # Impeccable: snapshot critique interni (rigenerabili, findings già pubblici nelle issue)
 .impeccable/
+
+# Clone del bundle di famiglia fatto dalla CI per il guardiano delle etichette.
+.entro-family/

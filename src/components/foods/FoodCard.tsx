@@ -12,6 +12,7 @@ import {
 import type { Food, Category } from '@/lib/foods'
 import type { FoodWithRealtimeMetadata, ExpiryStatus } from '@/types/food.types'
 import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
+import { getExpiryLabel } from '@/lib/expiryLabels'
 import { cn } from '@/lib/utils'
 import { FOOD_ACTIONS_ATTR } from '@/lib/focusAfterRemoval'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
@@ -39,18 +40,20 @@ function getExpiryPresentation(expiryDate: string): {
   const now = new Date()
   const status = getExpiryStatus(expiryDate, now)
   const daysUntilExpiry = getDaysUntilExpiry(expiryDate, now)
-  const dayLabel = `${daysUntilExpiry} ${daysUntilExpiry === 1 ? 'giorno' : 'giorni'}`
+  // Il testo arriva dal modulo condiviso: è dominio, e viveva scritto a mano
+  // qui e sul client nativo (entro-mobile#44). Qui restano i colori, che
+  // dominio non sono.
+  const badgeText = getExpiryLabel(status, daysUntilExpiry)
 
   switch (status) {
     case 'expired':
-      return { status, colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scaduto', daysUntilExpiry }
     case 'expires_today':
-      return { status, colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText: 'Scade oggi', daysUntilExpiry }
+      return { status, colorClasses: 'bg-destructive text-destructive-foreground border-transparent', badgeText, daysUntilExpiry }
     case 'expires_soon':
     case 'expires_this_week':
-      return { status, colorClasses: 'bg-warning/10 text-warning border-warning/30', badgeText: dayLabel, daysUntilExpiry }
+      return { status, colorClasses: 'bg-warning/10 text-warning border-warning/30', badgeText, daysUntilExpiry }
     case 'fresh':
-      return { status, colorClasses: 'bg-success/10 text-success border-success/30', badgeText: dayLabel, daysUntilExpiry }
+      return { status, colorClasses: 'bg-success/10 text-success border-success/30', badgeText, daysUntilExpiry }
   }
 }
 
