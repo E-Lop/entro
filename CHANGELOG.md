@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.13] - 2026-09-01
+
+### Changed
+- **Anche «Frigo», «Freezer» e «Dispensa» passano dal bundle, con il loro guardiano.** Erano scritte a mano in `FoodCard.tsx` qui e sul client nativo — la stessa forma della v1.11.12.
+
+  Con una differenza che cambia cosa si stava correggendo: **quelle parole erano già nel bundle**, in fondo alla riga di `StorageLocation`, e i due client le copiavano di lì **correttamente**. Il difetto non era la divergenza, era la sua invisibilità: la fonte era **prosa**, e nessun test può leggere la prosa. La corrispondenza era giusta e niente avrebbe fatto rumore se avesse smesso di esserlo.
+
+  Il lavoro è stato renderle **leggibili da una macchina** — una tabella in `core/storage-and-units.md`, nella forma adottata da `expiry-status.md` — e metterci il guardiano: `src/lib/__tests__/storageLabels.test.ts`.
+
+  **Il tipo si stringe** a `Record<StorageLocation, string>` e il modulo esce dal componente. Il test confronta la tabella con l'**enum Zod**, già allineato al `CHECK` del database: la catena diventa DDL → enum → bundle → codice, con un test per anello, e un luogo nuovo non può arrivare a schermo senza parola.
+
+  Nasce `src/lib/__tests__/bundleDiFamiglia.ts`: la lettura del bundle era scritta dentro il test delle etichette di scadenza, e il secondo guardiano avrebbe dovuto ricopiarla — la duplicazione che queste fette esistono per togliere, riprodotta nei test che la sorvegliano.
+
 ## [1.11.12] - 2026-09-01
 
 ### Changed
@@ -628,7 +641,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.12...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.13...HEAD
+[1.11.13]: https://github.com/E-Lop/entro/compare/v1.11.12...v1.11.13
 [1.11.12]: https://github.com/E-Lop/entro/compare/v1.11.11...v1.11.12
 [1.11.11]: https://github.com/E-Lop/entro/compare/v1.11.10...v1.11.11
 [1.11.10]: https://github.com/E-Lop/entro/compare/v1.11.9...v1.11.10
