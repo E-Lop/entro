@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.11] - 2026-09-01
+
+### Fixed
+- **Le categorie si mostravano in italiano ma erano ordinate per il nome inglese.** `getCategories` ordinava per `name`, la colonna canonica, mentre a schermo compare `name_it`: l'elenco era alfabetico davvero, ma in una lingua che l'utente non vede mai, e si apriva con «Pane e Pasta, Bevande, Condimenti, Latticini». Il difetto non ha sintomi — l'elenco è completo e persino ordinato — e non lo prendeva nessun test, perché `getCategories` non era coperta. Scoperto a schermo sul client nativo ([entro-mobile#47](https://github.com/E-Lop/entro-mobile/issues/47)), dove `getCategories` è lo **stesso** codice: il difetto era identico qui, e correggerne uno solo è la premessa che ha prodotto la convenzione `expiry-status-ssot`.
+
+  **La collazione è stata misurata invece che temuta.** Il database è `en_US.UTF-8` con provider ICU e `name_it` è `text not null` senza `COLLATE`, ma gli undici nomi del seed sono ASCII con iniziale maiuscola uniforme: `order by name_it` e `order by name_it collate "it-IT-x-icu"` restituiscono la **stessa** sequenza. Una delle prove nuove tiene ferma quella precondizione e fallirà quando entrerà un accento, una minuscola iniziale o una categoria definita dall'utente — perché allora la correzione non sarà più nel client: la sintassi `order` di PostgREST porta colonna, direzione e posizione dei null e **non sa trasportare un `COLLATE`**. Servirebbe una collazione sulla colonna o una vista, cioè una migrazione.
+
+  Cinque prove nuove (`src/lib/__tests__/foodsCategories.test.ts`), che sono tre cose diverse: che la query chieda la colonna mostrata; che sul vocabolario vero — letto dal seed nelle migrazioni, non da una lista riscritta accanto al test — i due nomi ordinino davvero diverso (`bakery`/`beverages` si inverte in «Pane e Pasta»/«Bevande»); e la precondizione sulla collazione. Nessuna vede l'ordine vero, perché l'ordinamento lo fa Postgres: la sequenza è stata verificata con una query diretta e attraverso PostgREST con la query esatta che manda il codice. Fissato come convenzione di famiglia in `ordinamento-sulla-colonna-mostrata`.
+
 ## [1.11.10] - 2026-08-22
 
 ### Security
@@ -608,7 +617,9 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.9...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.11...HEAD
+[1.11.11]: https://github.com/E-Lop/entro/compare/v1.11.10...v1.11.11
+[1.11.10]: https://github.com/E-Lop/entro/compare/v1.11.9...v1.11.10
 [1.11.9]: https://github.com/E-Lop/entro/compare/v1.11.8...v1.11.9
 [1.11.8]: https://github.com/E-Lop/entro/compare/v1.11.7...v1.11.8
 [1.11.7]: https://github.com/E-Lop/entro/compare/v1.11.6...v1.11.7

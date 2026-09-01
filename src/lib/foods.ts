@@ -47,14 +47,29 @@ export interface FilterParams {
 }
 
 /**
- * Fetch all categories
+ * Fetch all categories, ordered by the name the user actually reads.
+ *
+ * Si ordina per `name_it` e non per `name`: `name` è il nome **inglese**, e
+ * ordinarci sopra un elenco che a schermo compare in italiano produce una
+ * sequenza che sembra casuale — «Pane e Pasta, Bevande, Condimenti,
+ * Latticini». Scoperto sul client nativo (E-Lop/entro-mobile#47), dove
+ * `getCategories` è lo stesso codice: il difetto era identico qui.
+ *
+ * La collazione resta quella di database: `name_it` è dichiarata `text not
+ * null` senza `COLLATE`, e sugli undici nomi del seed — ASCII, iniziale
+ * maiuscola uniforme, nessun accento — `C`, `en_US.UTF-8` e `it-IT-x-icu`
+ * danno lo stesso ordine. La precondizione è tenuta ferma da un test.
+ *
+ * Il giorno in cui non varrà più, la correzione non sarà qui: la sintassi
+ * `order` di PostgREST porta colonna, direzione e posizione dei null, e non sa
+ * esprimere un `COLLATE`. Servirebbe una collazione sulla colonna o una vista.
  */
 export async function getCategories(): Promise<CategoriesResponse> {
   try {
     const { data, error } = await supabase
       .from('categories')
       .select('*')
-      .order('name', { ascending: true })
+      .order('name_it', { ascending: true })
 
     if (error) {
       throw userFacingError('Non è stato possibile caricare le categorie. Riprova.', error)
