@@ -1,4 +1,5 @@
 import type { QuantityUnit } from '@/types/food.types'
+import { unitLabel } from '@/lib/unitLabels'
 
 /**
  * Quantity helpers for the quick-quantity editor (swipe → destra sulle food card).
@@ -75,8 +76,17 @@ export function decrementQuantity(
   return round2(value - stepForUnit(unit))
 }
 
-/** Resa testuale "valore unità" (es. "1 confezioni"); `—` quando la quantità manca. */
+/**
+ * Resa testuale "valore unità" (es. "1 confezione", "2 confezioni"); `—`
+ * quando la quantità manca.
+ *
+ * L'unità non si compone più col valore che arriva dal database: quello è il
+ * vocabolario (`confezioni`, già plurale), e concatenarlo dava «1 confezioni»
+ * (entro-mobile#43). La forma da leggere la decide `unitLabel`, cioè la tabella
+ * del bundle, perché è **dominio**: se la decidessero i due client,
+ * divergerebbero.
+ */
 export function formatQuantity(value: number | null | undefined, unit: QuantityUnit | null | undefined): string {
   if (value == null) return '—'
-  return `${value} ${unit ?? DEFAULT_QUANTITY_UNIT}`
+  return `${value} ${unitLabel(value, unit ?? DEFAULT_QUANTITY_UNIT)}`
 }

@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.14] - 2026-09-02
+
+### Fixed
+- **«1 confezioni»: l'unità arriva dal database al plurale e nessuno la accordava col numero.** Visto in produzione sulle card — «Petto di pollo (1 confezioni)» accanto a «Prosciutto cotto (2 confezioni)», dove la seconda è corretta per caso ([entro-mobile#43](https://github.com/E-Lop/entro-mobile/issues/43)).
+
+  Non lo prendeva nessun test perché i test asserivano **la stringa che il codice produce**, non la sua correttezza: `expect(...).toBe('2 confezioni')` è verde anche accanto a «1 confezioni». I nuovi asseriscono la regola — 1 e 2 della stessa unità danno forme **diverse** — e falliscono sulla composizione vecchia (provato rimettendola).
+
+  **Non serviva un motore di plurali, e sapere perché è metà del lavoro.** Delle sei unità cinque sono **simboli** invariabili (`pz`, `kg`, `g`, `l`, `ml`) e una sola è un sostantivo italiano finito in un elenco di simboli. La categoria CLDR `one` per l'italiano è `i = 1 and v = 0`, e l'unica unità che varia è **intera**: `v = 0` sempre, quindi `one` coincide esattamente con `value === 1`. `Intl.NumberFormat` con `style: 'unit'` non conosce `confezioni` — coprirebbe i cinque casi che già funzionavano e lascerebbe scoperto l'unico rotto.
+
+  La tabella delle forme è **dominio** e vive nel bundle (`core/storage-and-units.md`), non in due mappe scritte a mano: `src/lib/unitLabels.ts` la trascrive e `src/lib/__tests__/unitLabels.test.ts` fa fallire il codice se dice altro — compreso il giorno in cui a variare fossero **due** unità, che è l'assunzione su cui poggia tutto il resto. Corretto nella stessa passata sui due client, come vuole `expiry-status-ssot`.
+
+  **Tre punti componevano la quantità a mano**, e solo uno passava da `formatQuantity`: la card (`FoodCard.tsx`), la card compatta del calendario — dove l'unità era per giunta **attaccata** al numero, «1confezioni», dentro la frase che uno screen reader legge — e lo stepper. Ora tutti e tre.
+
 ## [1.11.13] - 2026-09-01
 
 ### Changed
@@ -642,6 +655,7 @@ Lancio pubblico di Entro su LinkedIn.
 - CRUD completo gestione alimenti con React Query
 
 [Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.13...HEAD
+[1.11.14]: https://github.com/E-Lop/entro/compare/v1.11.13...v1.11.14
 [1.11.13]: https://github.com/E-Lop/entro/compare/v1.11.12...v1.11.13
 [1.11.12]: https://github.com/E-Lop/entro/compare/v1.11.11...v1.11.12
 [1.11.11]: https://github.com/E-Lop/entro/compare/v1.11.10...v1.11.11

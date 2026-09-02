@@ -14,6 +14,7 @@ import type { FoodWithRealtimeMetadata, ExpiryStatus } from '@/types/food.types'
 import { getExpiryStatus, getDaysUntilExpiry } from '@/lib/expiry'
 import { getExpiryLabel } from '@/lib/expiryLabels'
 import { STORAGE_LABELS } from '@/lib/storageLabels'
+import { formatQuantity } from '@/lib/quantity'
 import { cn } from '@/lib/utils'
 import { FOOD_ACTIONS_ATTR } from '@/lib/focusAfterRemoval'
 import { useSignedUrl } from '@/hooks/useSignedUrl'
@@ -141,7 +142,11 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
                 {food.name}
                 {food.quantity && (
                   <span className="font-normal text-muted-foreground ml-1">
-                    ({food.quantity} {food.quantity_unit || 'pz'})
+                    {/* La composizione passa da `formatQuantity`, che accorda
+                        l'unità col numero: scritta a mano qui dava «Petto di
+                        pollo (1 confezioni)», visto in produzione
+                        (entro-mobile#43). */}
+                    ({formatQuantity(food.quantity, food.quantity_unit)})
                   </span>
                 )}
               </CardTitle>
