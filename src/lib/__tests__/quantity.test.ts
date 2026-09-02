@@ -10,6 +10,7 @@ import {
   formatQuantity,
   DEFAULT_QUANTITY_UNIT,
 } from '../quantity'
+import type { QuantityUnit } from '@/types/food.types'
 
 describe('quantity — step e tipo per unità', () => {
   it('usa step 1 per le unità intere (pz, confezioni)', () => {
@@ -110,4 +111,29 @@ describe('quantity — formato', () => {
     expect(formatQuantity(0.1, 'kg')).toBe('0.1 kg')
     expect(formatQuantity(1, null)).toBe('1 pz')
   })
+
+  // Il difetto visto in produzione sulle card («Petto di pollo (1 confezioni)»)
+  // si chiude qui, e il test non asserisce «la stringa è quella»: asserisce che
+  // 1 e 2 della stessa unità producono forme **diverse**. Con la sola stringa
+  // attesa sarebbe verde anche il codice che concatena e basta — è così che «1
+  // confezioni» è sopravvissuto a una suite intera (entro-mobile#43).
+  it("accorda col numero l'unica unità che varia", () => {
+    expect(formatQuantity(1, 'confezioni')).toBe('1 confezione')
+    expect(formatQuantity(2, 'confezioni')).toBe('2 confezioni')
+
+    // La regola, non le due stringhe: stessa unità, parola diversa.
+    const [, aUno] = formatQuantity(1, 'confezioni').split(' ')
+    const [, aDue] = formatQuantity(2, 'confezioni').split(' ')
+    expect(aUno).not.toBe(aDue)
+  })
+
+  // Le altre cinque sono simboli: `kg` resta `kg` a qualsiasi numero, e
+  // pluralizzarli sarebbe il difetto opposto.
+  it.each(['pz', 'kg', 'g', 'l', 'ml'] as QuantityUnit[])(
+    '«%s» è un simbolo e non cambia fra 1 e 2',
+    (unita) => {
+      expect(formatQuantity(1, unita)).toBe(`1 ${unita}`)
+      expect(formatQuantity(2, unita)).toBe(`2 ${unita}`)
+    }
+  )
 })

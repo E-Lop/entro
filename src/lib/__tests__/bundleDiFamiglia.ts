@@ -65,3 +65,34 @@ export function etichetteDellaPagina(nome: string): Map<string, string | null> {
   }
   return righe
 }
+
+/**
+ * Le righe della tabella «Le forme leggibili delle unità» di una pagina, come
+ * coppie `unità → { one, other }`.
+ *
+ * Due colonne di parole invece di una, quindi non è la tabella di
+ * `etichetteDellaPagina` con una colonna in più: `one` e `other` sono le
+ * categorie cardinali CLDR, e la cella vuota qui non esiste — un'unità che non
+ * dichiarasse entrambe le forme è un difetto del bundle, e la riga
+ * semplicemente non entra nella mappa, dove il confronto col vocabolario la fa
+ * mancare.
+ *
+ * Vale la stessa ragione di delimitare la sezione: la pagina porta più sopra
+ * la tabella degli step per unità, con le stesse chiavi nella prima colonna.
+ */
+export function formeDelleUnita(nome: string): Map<string, { one: string; other: string }> {
+  const testo = paginaDelBundle(nome)
+  const inizio = testo.indexOf('## Le forme leggibili delle unità')
+  if (inizio === -1) {
+    throw new Error(`Sezione «Le forme leggibili delle unità» non trovata in core/${nome}.md`)
+  }
+
+  const fine = testo.indexOf('\n## ', inizio + 1)
+  const sezione = testo.slice(inizio, fine === -1 ? undefined : fine)
+
+  const righe = new Map<string, { one: string; other: string }>()
+  for (const m of sezione.matchAll(/^\|\s*`([a-z]+)`\s*\|\s*`(.+?)`\s*\|\s*`(.+?)`\s*\|$/gm)) {
+    righe.set(m[1], { one: m[2], other: m[3] })
+  }
+  return righe
+}

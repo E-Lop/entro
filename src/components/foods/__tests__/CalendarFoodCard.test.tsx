@@ -45,4 +45,19 @@ describe('CalendarFoodCard — accessibilità (WCAG 2.1.1 tastiera)', () => {
     )
     expect(screen.getByRole('button', { name: /Riso.*500.*g/ })).toBeTruthy()
   })
+
+  // La frase che uno screen reader legge diceva «1confezioni»: unità al plurale
+  // accanto a un 1, e per giunta attaccata al numero (entro-mobile#43). Il test
+  // guarda il nome accessibile perché è lì che il difetto si sente.
+  it("accorda l'unità col numero nel nome accessibile", () => {
+    render(
+      <CalendarFoodCard
+        food={makeFood({ name: 'Tonno', quantity: 1, quantity_unit: 'confezioni' })}
+        onEdit={() => {}}
+      />
+    )
+    const bottone = screen.getByRole('button', { name: /Tonno/ })
+
+    expect(bottone.getAttribute('aria-label')).toBe('Modifica Tonno, 1 confezione')
+  })
 })

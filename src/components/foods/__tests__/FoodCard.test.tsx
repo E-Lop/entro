@@ -84,6 +84,32 @@ describe('FoodCard — pluralizzazione giorni', () => {
   })
 })
 
+// I giorni si accordavano già; l'unità no, e sulla stessa card. «Petto di pollo
+// (1 confezioni)» è stato visto in produzione (entro-mobile#43): la card
+// componeva la stringa a mano invece di passare da `formatQuantity`.
+describe('FoodCard — accordo dell’unità', () => {
+  it('dice "1 confezione" al singolare', () => {
+    render(<FoodCard food={makeFood({ quantity: 1, quantity_unit: 'confezioni' })} />)
+    expect(screen.getByText('(1 confezione)')).toBeTruthy()
+    expect(screen.queryByText('(1 confezioni)')).toBeNull()
+  })
+
+  it('dice "2 confezioni" al plurale', () => {
+    render(<FoodCard food={makeFood({ quantity: 2, quantity_unit: 'confezioni' })} />)
+    expect(screen.getByText('(2 confezioni)')).toBeTruthy()
+  })
+
+  it('lascia intatti i simboli, che non si pluralizzano', () => {
+    render(<FoodCard food={makeFood({ quantity: 1, quantity_unit: 'kg' })} />)
+    expect(screen.getByText('(1 kg)')).toBeTruthy()
+  })
+
+  it('senza unità tratta la quantità come pezzi', () => {
+    render(<FoodCard food={makeFood({ quantity: 3, quantity_unit: null })} />)
+    expect(screen.getByText('(3 pz)')).toBeTruthy()
+  })
+})
+
 describe('FoodCard — accessibilità & identità', () => {
   it('annuncia lo stato di scadenza con role=status + testo (mai solo colore)', () => {
     render(<FoodCard food={makeFood({ expiry_date: daysFromNow(2) })} />)
