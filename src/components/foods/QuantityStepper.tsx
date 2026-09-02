@@ -13,6 +13,7 @@ import {
   formatQuantity,
   DEFAULT_QUANTITY_UNIT,
 } from '@/lib/quantity'
+import { unitLabel } from '@/lib/unitLabels'
 
 interface QuantityStepperProps {
   value: number | null
@@ -35,7 +36,15 @@ export function QuantityStepper({ value, unit, onChange, disabled = false, class
   const [draft, setDraft] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const displayUnit = unit ?? DEFAULT_QUANTITY_UNIT
+  /**
+   * L'unità si accorda col numero, e la parola esce dalla tabella del bundle.
+   *
+   * Lo stepper impila numero e unità in due `span`, quindi non passa da
+   * `formatQuantity` ed era rimasto fuori dalla v1.11.14: a schermo restava «1
+   * / confezioni». Stesso punto scoperto anche sul client nativo
+   * (entro-mobile#43), e corretto nella stessa passata.
+   */
+  const displayUnit = unitLabel(value, unit ?? DEFAULT_QUANTITY_UNIT)
   const decrementAllowed = !disabled && canDecrement(value, unit)
 
   useEffect(() => {

@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.11.15] - 2026-09-02
+
+### Fixed
+- **«1 confezioni» era rimasto nello stepper, che la v1.11.14 non aveva raggiunto.** La correzione precedente passava da `formatQuantity`, e i tre punti che la usano sono a posto. Lo stepper però **impila** numero e unità in due `span` separati (`QuantityStepper.tsx`, `displayUnit`), quindi quella funzione non la tocca: a schermo restava «1» sopra «confezioni».
+
+  Trovato guardando il **client nativo**, dove lo stesso componente ha lo stesso difetto nello stesso punto — e trovato solo perché una verifica a schermo ha aperto il foglio della quantità, che la fetta precedente non aveva aperto. Le prove nuove partono dal singolare, che è il caso che sbagliava; quelle vecchie asserivano il plurale ed erano verdi in tutti e due i mondi.
+
+  La parola esce ora dalla tabella del bundle come ovunque (`unitLabel`). Corretto nella stessa passata sul nativo, come vuole `expiry-status-ssot`.
+
 ## [1.11.14] - 2026-09-02
 
 ### Fixed
@@ -655,6 +664,7 @@ Lancio pubblico di Entro su LinkedIn.
 - CRUD completo gestione alimenti con React Query
 
 [Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.13...HEAD
+[1.11.15]: https://github.com/E-Lop/entro/compare/v1.11.14...v1.11.15
 [1.11.14]: https://github.com/E-Lop/entro/compare/v1.11.13...v1.11.14
 [1.11.13]: https://github.com/E-Lop/entro/compare/v1.11.12...v1.11.13
 [1.11.12]: https://github.com/E-Lop/entro/compare/v1.11.11...v1.11.12

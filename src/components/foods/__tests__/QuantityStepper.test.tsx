@@ -96,3 +96,36 @@ describe('QuantityStepper — accessibilità', () => {
     expect(live?.textContent).toContain('2')
   })
 })
+
+/**
+ * Lo stepper impila numero e unità in due `span`, quindi non passa da
+ * `formatQuantity` e la v1.11.14 non l'aveva raggiunto: a schermo restava «1 /
+ * confezioni». Trovato sul client nativo, che ha lo stesso difetto nello stesso
+ * punto (entro-mobile#43).
+ */
+describe('QuantityStepper — accordo dell’unità', () => {
+  it('al singolare dice «confezione», non «confezioni»', () => {
+    render(<QuantityStepper value={1} unit="confezioni" onChange={vi.fn()} />)
+
+    expect(screen.getByText('confezione')).toBeTruthy()
+    expect(screen.queryByText('confezioni')).toBeNull()
+  })
+
+  it('al plurale la lascia com’è', () => {
+    render(<QuantityStepper value={2} unit="confezioni" onChange={vi.fn()} />)
+
+    expect(screen.getByText('confezioni')).toBeTruthy()
+  })
+
+  it('i simboli non si accordano: «kg» resta «kg» anche a 1', () => {
+    render(<QuantityStepper value={1} unit="kg" onChange={vi.fn()} />)
+
+    expect(screen.getByText('kg')).toBeTruthy()
+  })
+
+  it('senza unità tratta la quantità come pezzi', () => {
+    render(<QuantityStepper value={1} unit={null} onChange={vi.fn()} />)
+
+    expect(screen.getByText('pz')).toBeTruthy()
+  })
+})
