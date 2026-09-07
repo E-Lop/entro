@@ -91,12 +91,22 @@ interface FoodFormProps {
   onSubmit: (data: FoodFormData, barcode: string | null) => Promise<void>
   onCancel?: () => void
   isSubmitting?: boolean
+  /**
+   * Riporta a chi monta il dialogo se ci sono modifiche non salvate.
+   *
+   * Il form non può difendersi da solo: le tre uscite — Esc, click fuori e la X
+   * di `ui/dialog.tsx` — le governa il `Dialog`, che gli sta **sopra**. Quindi
+   * il form dice cosa sa (`isDirty` di react-hook-form, che torna falso da sé
+   * se l'utente rimette tutto com'era) e la decisione la prende chi può
+   * fermare la chiusura. Vedi `useUnsavedChangesGuard`.
+   */
+  onDirtyChange?: (isDirty: boolean) => void
 }
 
 /**
  * FoodForm Component - Form for creating and editing food items
  */
-export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting = false }: FoodFormProps) {
+export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting = false, onDirtyChange }: FoodFormProps) {
   const { data: categories = [], isLoading: categoriesLoading } = useCategories()
 
   // Accordion state: which section is open ('main' = food data, 'details' = optional extras)
@@ -157,6 +167,20 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
       image_url: null,
     },
   })
+
+  /**
+   * Riporta lo stato sporco a chi monta il dialogo.
+   *
+   * `formState.isDirty` va **letto** dentro il render perché react-hook-form
+   * sottoscrive i campi di `formState` che qualcuno legge: leggerlo solo dentro
+   * l'effetto lo lascerebbe fermo al valore iniziale (`Proxy` di
+   * `formState`, documentato). Da qui la costante, che è la lettura.
+   */
+  const { isDirty } = form.formState
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
 
   // Populate form with initial data for edit mode
   useEffect(() => {
