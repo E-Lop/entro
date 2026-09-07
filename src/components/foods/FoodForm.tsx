@@ -17,6 +17,7 @@ import { Textarea } from '../ui/textarea'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { ImageUpload } from './ImageUpload'
 import { fetchProductByBarcode, mapProductToFormData } from '@/lib/openfoodfacts'
+import { storageLocationForCategory } from '@/lib/foodDefaults'
 import type { Food } from '@/lib/foods'
 import { ScanLine, Loader2, AlertTriangle, ChevronDown, ChevronUp, ClipboardList, ImagePlus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -81,7 +82,13 @@ function CollapsibleSection({ id, open, children }: { id: string; open: boolean;
 interface FoodFormProps {
   mode: 'create' | 'edit'
   initialData?: Food
-  onSubmit: (data: FoodFormData) => Promise<void>
+  /**
+   * Il secondo argomento è il **barcode**, che non è un campo del form: non lo
+   * digita nessuno, arriva dallo scanner o dalla riga che si sta modificando.
+   * Sta fuori da `FoodFormData` — e quindi fuori dallo schema Zod — perché lo
+   * schema descrive ciò che l'utente compila e valida.
+   */
+  onSubmit: (data: FoodFormData, barcode: string | null) => Promise<void>
   onCancel?: () => void
   isSubmitting?: boolean
 }
@@ -112,6 +119,29 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   useEffect(() => {
     onCancelRef.current = onCancel
   }, [onCancel])
+
+  /**
+   * Se l'utente ha toccato il selettore del luogo, almeno una volta.
+   *
+   * Non basta `dirtyFields.storage_location` di react-hook-form: quello dice
+   * «il valore è diverso dal predefinito», e chi sceglie a mano proprio il
+   * luogo che la categoria avrebbe proposto ha comunque deciso. Un ref e non
+   * uno stato perché nessuna resa dipende da questo valore.
+   */
+  const storageTouchedRef = useRef(false)
+
+  /**
+   * L'ultimo barcode scansionato, o quello che la riga già portava in modifica.
+   *
+   * Fino al 7 set 2026 il codice si perdeva: lo scanner compilava i campi da
+   * Open Food Facts e poi `useFoodFormDialog` scriveva `barcode: null` fisso,
+   * quindi la colonna — che esiste e ha un indice — restava vuota per ogni
+   * riga mai creata. In modifica si parte dal valore esistente, o salvare
+   * senza riscansionare lo cancellerebbe.
+   */
+  const scannedBarcodeRef = useRef<string | null>(
+    mode === 'edit' ? (initialData?.barcode ?? null) : null
+  )
 
   // Setup form with validation
   const form = useForm<FoodFormData>({
@@ -225,6 +255,11 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
   // Handle barcode scan success
   const handleBarcodeScanned = async (barcode: string) => {
+    // Si registra **prima** della chiamata a Open Food Facts, e di proposito:
+    // un prodotto sconosciuto al catalogo ha comunque un codice, e quel codice
+    // è il dato che l'utente ha raccolto. Registrarlo solo in caso di successo
+    // farebbe perdere proprio i casi in cui serve di più.
+    scannedBarcodeRef.current = barcode
     setIsLoadingProduct(true)
     setProductError(null)
 
@@ -288,16 +323,30 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
     try {
       isSubmittingRef.current = true
 
-      // Convert date to ISO string for database
       const submitData: FoodFormData = {
         ...data,
-        expiry_date: new Date(data.expiry_date).toISOString(),
+        // `expiry_date` si invia **così com'è**, `yyyy-MM-dd`, che è già il
+        // formato del valore di un `<input type="date">` e quello della
+        // colonna `date`. La conversione che stava qui — `new Date(x)
+        // .toISOString()` — produceva un datetime ISO in UTC e non poteva che
+        // perdere informazione.
+        //
+        // ⚠️ Misurato il 7 set 2026, perché entro#117 lo dava per rotto e non
+        // lo era: `new Date('2026-09-04')` dà `2026-09-04T00:00:00.000Z` in
+        // Europe/Rome, Pacific/Kiritimati e America/Los_Angeles — una stringa
+        // di sola data è UTC **per specifica**, quindi il fuso del browser non
+        // la sposta — e Postgres tronca il letterale senza convertirlo. Lo
+        // slittamento di un giorno descritto nella issue **non avveniva**.
+        // Resta corretto toglierla: qualunque `Date` o stringa con ora che
+        // arrivasse qui domani slitterebbe davvero, e la conversione non dava
+        // niente in cambio del rischio.
+        expiry_date: data.expiry_date,
         // Convert empty strings to null
         quantity_unit: data.quantity_unit || null,
         notes: data.notes?.trim() || null,
       }
 
-      await onSubmit(submitData)
+      await onSubmit(submitData, scannedBarcodeRef.current)
     } finally {
       isSubmittingRef.current = false
     }
@@ -433,6 +482,28 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                       className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                       disabled={isSubmitting || categoriesLoading}
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e)
+                        // La categoria pre-compila il **luogo**, e non la data:
+                        // vedi `foodDefaults.ts` per il perché.
+                        const category = categories.find((c) => c.id === e.target.value)
+                        // `default_storage` arriva come `string` dai tipi
+                        // generati: si restringe a runtime, come già fa il
+                        // `reset` in modifica. Qui però `safeParse` e non
+                        // `parse`: una categoria corrotta in tabella non deve
+                        // far esplodere il form mentre l'utente lo compila —
+                        // al massimo resta senza suggerimento, che è il
+                        // comportamento che c'era prima di questa modifica.
+                        const parsed = category
+                          ? storageLocationEnum.safeParse(category.default_storage)
+                          : undefined
+                        const next = storageLocationForCategory(parsed?.success ? { default_storage: parsed.data } : undefined, {
+                          current: form.getValues('storage_location'),
+                          touched: storageTouchedRef.current,
+                          isCreate: mode === 'create',
+                        })
+                        if (next) form.setValue('storage_location', next)
+                      }}
                     >
                       <option value="">Seleziona una categoria</option>
                       {categories.map((category) => (
@@ -459,6 +530,10 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                       className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                       disabled={isSubmitting}
                       {...field}
+                      onChange={(e) => {
+                        storageTouchedRef.current = true
+                        field.onChange(e)
+                      }}
                     >
                       <option value="fridge">Frigo</option>
                       <option value="freezer">Freezer</option>

@@ -52,7 +52,7 @@ export function useFoodFormDialog() {
   const [editingFood, setEditingFood] = useState<Food | null>(null)
   const [deletingFood, setDeletingFood] = useState<Food | null>(null)
 
-  const handleCreateFood = async (data: FoodFormData) => {
+  const handleCreateFood = async (data: FoodFormData, barcode: string | null = null) => {
     const isOnline = onlineManager.isOnline()
 
     let imagePath: string | null = null
@@ -71,7 +71,9 @@ export function useFoodFormDialog() {
       status: 'active',
       user_id: user!.id,
       list_id: null, // Will be set by createFood()
-      barcode: null,
+      // Il codice scansionato, se c'è. Era `null` fisso: la colonna esiste e
+      // ha un indice, ma nessuna riga l'ha mai portata (entro#115).
+      barcode,
       consumed_at: null,
       deleted_at: null,
     }
@@ -88,7 +90,7 @@ export function useFoodFormDialog() {
     }
   }
 
-  const handleUpdateFood = async (data: FoodFormData) => {
+  const handleUpdateFood = async (data: FoodFormData, barcode: string | null = null) => {
     if (!editingFood) return
     const isOnline = onlineManager.isOnline()
 
@@ -106,6 +108,7 @@ export function useFoodFormDialog() {
     const foodData: FoodUpdate = {
       ...dataWithoutImage,
       image_url: imagePath,
+      barcode,
     }
 
     updateMutation.mutate({ id: editingFood.id, data: foodData })

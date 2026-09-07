@@ -36,11 +36,11 @@ const FormSpinner = () => (
 interface FoodModalsProps {
   isAddDialogOpen: boolean
   onAddDialogChange: (open: boolean) => void
-  onCreateFood: (data: FoodFormData) => Promise<void>
+  onCreateFood: (data: FoodFormData, barcode: string | null) => Promise<void>
   isCreating: boolean
   editingFood: Food | null
   onEditDialogChange: (open: boolean) => void
-  onUpdateFood: (data: FoodFormData) => Promise<void>
+  onUpdateFood: (data: FoodFormData, barcode: string | null) => Promise<void>
   isUpdating: boolean
   deletingFood: Food | null
   onDeleteDialogChange: (open: boolean) => void
