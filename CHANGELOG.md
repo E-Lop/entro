@@ -5,6 +5,26 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.0] - 2026-09-07
+
+### Changed
+- **Una data di scadenza nel passato è ora valida.** Il `refine` che la rifiutava esce dallo schema condiviso. Non è un allentamento: `core/food-lifecycle.md` del bundle tratta «scaduto» come uno stato **derivato dalla data**, non dichiarato, quindi la validazione non aveva titolo per rifiutarla — e il divieto rendeva impossibile anche solo correggere il nome di un alimento già scaduto, perché la modifica rivalidava tutto il form e falliva su un campo che l'utente non aveva toccato.
+
+  Deciso il 4 set 2026 sulla spec della Fase 3 nativa e applicato ai **due client nella stessa finestra** ([entro-mobile#99](https://github.com/E-Lop/entro-mobile/issues/99)), perché i due `food.schemas.ts` sono due copie in due percorsi diversi: il guardiano di parità di entro-mobile confronta ogni vincolo dello schema e sarebbe diventato rosso con un lato solo corretto. Lo è diventato, in prova, ed è la ragione per cui esiste.
+
+- **La categoria pre-compila il luogo di conservazione**, e solo finché l'utente non lo ha toccato. Prima era fisso a «Frigo» per ogni alimento. La regola vive in `src/lib/foodDefaults.ts`, condivisa con il client nativo. Chi sceglie a mano proprio il luogo che la categoria avrebbe proposto ha comunque deciso: un cambio di categoria successivo non lo scavalca.
+
+  La **shelf-life media resta fuori**: non pre-compila la data di scadenza, e non lo farà. Il bundle diceva il contrario ed è stato corretto il 4 set.
+
+### Fixed
+- **Il codice a barre scansionato non si perdeva più.** Lo scanner compilava i campi da Open Food Facts e poi il codice veniva buttato: `useFoodFormDialog` scriveva `barcode: null` fisso, quindi la colonna — che esiste e ha un indice — era vuota per **ogni riga mai creata**. Ora arriva alla riga, in creazione e in modifica.
+
+  Il codice si registra **prima** della chiamata a Open Food Facts: un prodotto sconosciuto al catalogo ha comunque un codice, ed è lì che salvarlo serve di più. In modifica si parte dal valore che la riga già portava, o salvare un cambio di nome lo cancellerebbe.
+
+- **`expiry_date` si invia come `yyyy-MM-dd`**, senza passare per `Date`. Era `new Date(x).toISOString()`, un datetime ISO in UTC per una colonna `date`.
+
+  ⚠️ Misurato prima di correggere, perché la segnalazione lo dava per rotto e **non lo era**: `new Date('2026-09-04')` dà `2026-09-04T00:00:00.000Z` in Europe/Rome, Pacific/Kiritimati e America/Los_Angeles — una stringa di sola data è UTC per specifica, quindi il fuso del browser non la sposta — e Postgres tronca il letterale senza convertirlo. Lo slittamento di un giorno descritto nella issue non avveniva. La conversione va tolta lo stesso: qualunque `Date` o stringa con ora che arrivasse lì domani slitterebbe davvero, e non dava niente in cambio del rischio.
+
 ## [1.11.15] - 2026-09-02
 
 ### Fixed
@@ -664,6 +684,7 @@ Lancio pubblico di Entro su LinkedIn.
 - CRUD completo gestione alimenti con React Query
 
 [Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.13...HEAD
+[1.12.0]: https://github.com/E-Lop/entro/compare/v1.11.15...v1.12.0
 [1.11.15]: https://github.com/E-Lop/entro/compare/v1.11.14...v1.11.15
 [1.11.14]: https://github.com/E-Lop/entro/compare/v1.11.13...v1.11.14
 [1.11.13]: https://github.com/E-Lop/entro/compare/v1.11.12...v1.11.13

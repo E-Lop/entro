@@ -44,15 +44,17 @@ export const foodFormSchema = z.object({
       // Validate ISO date format
       const parsed = new Date(date)
       return !isNaN(parsed.getTime())
-    }, 'Data non valida')
-    .refine((date) => {
-      // Ensure date is not in the past (allow today)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const selectedDate = new Date(date)
-      selectedDate.setHours(0, 0, 0, 0)
-      return selectedDate >= today
-    }, 'La data di scadenza non può essere nel passato'),
+    }, 'Data non valida'),
+  // Una data **nel passato è valida**, e non è una dimenticanza: il ciclo di
+  // vita del bundle tratta «scaduto» come uno stato normale, derivato dalla
+  // data e non dichiarato, quindi lo schema non ha titolo per rifiutarlo.
+  // Il divieto che stava qui rendeva impossibile anche solo correggere il
+  // nome di un alimento già scaduto — la modifica rivalidava tutto il form e
+  // falliva su un campo che l'utente non aveva toccato.
+  // Deciso il 4 set 2026 sulla spec nativa; tolto da entrambi i client nella
+  // stessa finestra (entro#118 e entro-mobile#99), perché due copie che
+  // divergono in silenzio sono il difetto che il guardiano di parità esiste
+  // per impedire.
   storage_location: storageLocationEnum,
   // La colonna è `numeric(10,2)` con `check (quantity > 0)`. Il minimo non è
   // quindi «maggiore di zero» sul valore digitato, ma 0.01: il più piccolo
