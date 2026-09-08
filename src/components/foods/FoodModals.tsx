@@ -1,4 +1,5 @@
-import { lazy, Suspense, useRef, type RefObject } from 'react'
+import { lazy, Suspense, useRef, useState, type RefObject } from 'react'
+import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard'
 import { Check, Trash2, X } from 'lucide-react'
 import {
   Dialog,
@@ -65,6 +66,15 @@ export function FoodModals({
   isDeleting,
   deleteOpener,
 }: FoodModalsProps) {
+  /**
+   * Se il form aperto ha modifiche non salvate. Lo dice il form stesso, che è
+   * l'unico a saperlo, e lo usa la guardia, che è l'unica a poter fermare la
+   * chiusura — vedi `useUnsavedChangesGuard`.
+   *
+   * Uno stato solo per i due dialoghi: non possono essere aperti insieme.
+   */
+  const [sporco, setSporco] = useState(false)
+  const guardia = useUnsavedChangesGuard(sporco)
   // Posizione della card che sta per uscire dalla lista, letta prima che
   // l'aggiornamento ottimistico la tolga. `null` significa «il dialogo non è
   // stato chiuso confermando», ed è il valore che distingue Annulla ed Esc.
@@ -89,7 +99,13 @@ export function FoodModals({
   return (
     <>
       {/* Add Food Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={onAddDialogChange}>
+      <Dialog
+        open={isAddDialogOpen}
+        onOpenChange={guardia.intercetta(() => {
+          onAddDialogChange(false)
+          setSporco(false)
+        })}
+      >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Aggiungi Nuovo Alimento</DialogTitle>
@@ -100,13 +116,20 @@ export function FoodModals({
               onSubmit={onCreateFood}
               onCancel={() => onAddDialogChange(false)}
               isSubmitting={isCreating}
+              onDirtyChange={setSporco}
             />
           </Suspense>
         </DialogContent>
       </Dialog>
 
       {/* Edit Food Dialog */}
-      <Dialog open={!!editingFood} onOpenChange={(open) => !open && onEditDialogChange(false)}>
+      <Dialog
+        open={!!editingFood}
+        onOpenChange={guardia.intercetta(() => {
+          onEditDialogChange(false)
+          setSporco(false)
+        })}
+      >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Modifica Alimento</DialogTitle>
@@ -119,11 +142,42 @@ export function FoodModals({
                 onSubmit={onUpdateFood}
                 onCancel={() => onEditDialogChange(false)}
                 isSubmitting={isUpdating}
+                onDirtyChange={setSporco}
               />
             </Suspense>
           )}
         </DialogContent>
       </Dialog>
+
+      {/*
+        La conferma sulle modifiche non salvate. Una sola per i due form: non
+        possono essere aperti insieme, e duplicarla darebbe due frasi da tenere
+        allineate.
+
+        `AlertDialog` e non `Dialog`: è il componente che shadcn riserva alle
+        conferme, ed è quello che questa schermata usa già per la rimozione. Le
+        etichette sono le stesse del gemello nativo — «Annulla» e «Scarta» — e
+        l'azione distruttiva porta la variante distruttiva, come là.
+      */}
+      <AlertDialog open={guardia.isConfirmOpen} onOpenChange={(open) => !open && guardia.annulla()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Scartare le modifiche?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Quello che hai scritto in questo modulo andrà perso.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={guardia.annulla}>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={guardia.scarta}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Scarta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Conferma eliminazione: chiede com'è finita, non «sei sicuro?» */}
       <AlertDialog open={!!deletingFood} onOpenChange={(open) => !open && onDeleteDialogChange(false)}>
