@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.1] - 2026-09-08
+
+### Fixed
+- **Un modulo con modifiche non salvate non si chiude più in silenzio.** Esc, il click fuori dal dialogo e la X buttavano via quello che l'utente aveva scritto — una foto appena scattata compresa — senza chiedere niente: `grep isDirty` dava zero risultati ([#119](https://github.com/E-Lop/entro/issues/119), punto 3). Ora compare «Scartare le modifiche?», con «Annulla» che riporta al modulo intatto e «Scarta» che chiude.
+
+  **Le tre uscite sono una sola**: Radix instrada Esc, click fuori e la X sullo stesso `onOpenChange(false)`, quindi la guardia avvolge quel callback e chi la usa non deve sapere da quale delle tre l'utente sia uscito. La quarta — ricaricare la pagina o chiudere la scheda — non passa da Radix e si intercetta con `beforeunload`, registrato **solo mentre il modulo è sporco**: un listener sempre attivo disabiliterebbe il bfcache, cioè rallenterebbe ogni navigazione indietro per proteggere un caso che quasi mai è vero. Il testo di quell'avviso lo sceglie il browser e dal 2019 non è modificabile.
+
+  È la gemella della guardia che il client nativo ha messo nella stessa finestra ([entro-mobile#99](https://github.com/E-Lop/entro-mobile/pull/124)): la **decisione** è condivisa — un modulo sporco non si chiude senza chiedere — e le etichette sono le stesse, «Annulla» e «Scarta»; il **meccanismo** no, perché là le uscite sono il gesto indietro e la maniglia del foglio, e qui sono quelle del DOM.
+
 ## [1.12.0] - 2026-09-07
 
 ### Changed
@@ -683,7 +692,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.11.13...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.1...HEAD
+[1.12.1]: https://github.com/E-Lop/entro/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/E-Lop/entro/compare/v1.11.15...v1.12.0
 [1.11.15]: https://github.com/E-Lop/entro/compare/v1.11.14...v1.11.15
 [1.11.14]: https://github.com/E-Lop/entro/compare/v1.11.13...v1.11.14
