@@ -13,16 +13,20 @@ const MIN_HEIGHT = 44
 
 test.use({ viewport: { width: 390, height: 844 } })
 
+// Il campo si chiama `path` e non `page`: dentro il test `page` è la **fixture**
+// di Playwright, e un campo omonimo la ombreggerebbe — `page.goto(page)`
+// passerebbe l'oggetto della pagina al posto dell'URL. Il compilatore non lo
+// vede, perché `tests/` sta fuori dall'`include` di `tsconfig.json`.
 const CASES = [
-  { page: '/login', link: 'Password dimenticata?' },
-  { page: '/forgot-password', link: 'Torna al login' },
-  { page: '/verify-email?email=e2e%40example.com', link: 'Torna al login' },
+  { path: '/login', link: 'Password dimenticata?' },
+  { path: '/forgot-password', link: 'Torna al login' },
+  { path: '/verify-email?email=e2e%40example.com', link: 'Torna al login' },
 ] as const
 
 test.describe('bersagli tattili dei link auth (mobile)', () => {
-  for (const { page, link } of CASES) {
-    test(`"${link}" su ${page} è alto almeno ${MIN_HEIGHT}px`, async ({ page }) => {
-      await page.goto(page)
+  for (const { path, link } of CASES) {
+    test(`"${link}" su ${path} è alto almeno ${MIN_HEIGHT}px`, async ({ page }) => {
+      await page.goto(path)
 
       const target = page.getByRole('link', { name: link })
       await expect(target).toBeVisible()
