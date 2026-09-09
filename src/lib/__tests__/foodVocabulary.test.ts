@@ -34,23 +34,23 @@ import {
  */
 
 // @ts-expect-error — 'banana' non è un esito: il vocabolario è quello del CHECK
-export const esitoInventato: Food['status'] = 'banana'
+export const inventedOutcome: Food['status'] = 'banana'
 
 // @ts-expect-error — 'garage' non è un luogo di conservazione
-export const luogoInventato: Food['storage_location'] = 'garage'
+export const inventedStorage: Food['storage_location'] = 'garage'
 
 // @ts-expect-error — 'litri' non è un'unità: le unità sono 'l' e 'ml'
-export const unitaInventata: Food['quantity_unit'] = 'litri'
+export const inventedUnit: Food['quantity_unit'] = 'litri'
 
 // @ts-expect-error — nemmeno una UPDATE può scrivere un esito fuori vocabolario
-export const scritturaInventata: FoodUpdate = { status: 'banana' }
+export const inventedWrite: FoodUpdate = { status: 'banana' }
 
-const CARTELLA_MIGRAZIONI = join(process.cwd(), 'supabase', 'migrations')
+const MIGRATIONS_FOLDER = join(process.cwd(), 'supabase', 'migrations')
 
-function fileMigrazione(): string[] {
-  return readdirSync(CARTELLA_MIGRAZIONI)
-    .filter((nome) => nome.endsWith('.sql'))
-    .map((nome) => readFileSync(join(CARTELLA_MIGRAZIONI, nome), 'utf8'))
+function migrationFile(): string[] {
+  return readdirSync(MIGRATIONS_FOLDER)
+    .filter((name) => name.endsWith('.sql'))
+    .map((name) => readFileSync(join(MIGRATIONS_FOLDER, name), 'utf8'))
 }
 
 /**
@@ -61,33 +61,33 @@ function fileMigrazione(): string[] {
  * il file la scambierebbe per quella di `foods`, verificando la cosa sbagliata
  * con l'aria di funzionare.
  */
-function corpoTabellaFoods(): string {
-  const blocchi = fileMigrazione().flatMap((sql) => {
-    const inizio = sql.indexOf('create table public.foods (')
-    if (inizio === -1) return []
-    const fine = sql.indexOf('\n);', inizio)
-    return [sql.slice(inizio, fine)]
+function foodsTableBody(): string {
+  const blocks = migrationFile().flatMap((sql) => {
+    const start = sql.indexOf('create table public.foods (')
+    if (start === -1) return []
+    const fine = sql.indexOf('\n);', start)
+    return [sql.slice(start, fine)]
   })
 
   expect(
-    blocchi,
+    blocks,
     'atteso un solo `create table public.foods` fra le migrazioni'
   ).toHaveLength(1)
 
-  return blocchi[0]
+  return blocks[0]
 }
 
 /** I valori fra apici dentro `<colonna> = any (array[...])`. */
-function valoriAmmessiDalCheck(colonna: string): string[] {
+function allowedCheckValues(column: string): string[] {
   const pattern = new RegExp(
-    `${colonna}\\s*=\\s*any\\s*\\(\\s*array\\[([^\\]]*)\\]`,
+    `${column}\\s*=\\s*any\\s*\\(\\s*array\\[([^\\]]*)\\]`,
     'i'
   )
-  const trovato = corpoTabellaFoods().match(pattern)
+  const found = foodsTableBody().match(pattern)
 
-  expect(trovato, `nessun CHECK trovato per la colonna ${colonna}`).not.toBeNull()
+  expect(found, `nessun CHECK trovato per la colonna ${column}`).not.toBeNull()
 
-  return [...trovato![1].matchAll(/'([^']*)'/g)].map((m) => m[1])
+  return [...found![1].matchAll(/'([^']*)'/g)].map((m) => m[1])
 }
 
 describe('vocabolario delle colonne text + CHECK', () => {
@@ -95,8 +95,8 @@ describe('vocabolario delle colonne text + CHECK', () => {
     ['status', statusEnum],
     ['storage_location', storageLocationEnum],
     ['quantity_unit', quantityUnitEnum],
-  ])('l\'enum Zod di %s elenca gli stessi valori del CHECK', (colonna, enumZod) => {
-    expect([...enumZod.options].sort()).toEqual(valoriAmmessiDalCheck(colonna).sort())
+  ])('l\'enum Zod di %s elenca gli stessi valori del CHECK', (column, enumZod) => {
+    expect([...enumZod.options].sort()).toEqual(allowedCheckValues(column).sort())
   })
 
   /**
@@ -106,7 +106,7 @@ describe('vocabolario delle colonne text + CHECK', () => {
    * prova più niente. Meglio farlo fallire e costringere a riscriverlo.
    */
   it('nessuna migrazione successiva ridefinisce quei CHECK', () => {
-    const ridefinizioni = fileMigrazione().flatMap((sql) => [
+    const ridefinizioni = migrationFile().flatMap((sql) => [
       ...sql.matchAll(
         /alter\s+table[^;]*\bfoods\b[^;]*\bcheck\b[^;]*\b(status|storage_location|quantity_unit)\b/gis
       ),

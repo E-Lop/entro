@@ -25,11 +25,11 @@ describe('ThemeToggle', () => {
     const radios = await screen.findAllByRole('menuitemradio')
     expect(radios).toHaveLength(3)
 
-    const scuro = radios.find((r) => /Scuro/.test(r.textContent || ''))
-    expect(scuro?.getAttribute('aria-checked')).toBe('true')
+    const dark = radios.find((r) => /Scuro/.test(r.textContent || ''))
+    expect(dark?.getAttribute('aria-checked')).toBe('true')
 
-    const chiaro = radios.find((r) => /Chiaro/.test(r.textContent || ''))
-    expect(chiaro?.getAttribute('aria-checked')).toBe('false')
+    const light = radios.find((r) => /Chiaro/.test(r.textContent || ''))
+    expect(light?.getAttribute('aria-checked')).toBe('false')
   })
 
   it('non usa il glifo ✓ per indicare la selezione', async () => {
@@ -45,8 +45,8 @@ describe('ThemeToggle', () => {
     render(<ThemeToggle />)
     await user.click(screen.getByRole('button', { name: 'Cambia tema' }))
     const radios = await screen.findAllByRole('menuitemradio')
-    const chiaro = radios.find((r) => /Chiaro/.test(r.textContent || ''))!
-    await user.click(chiaro)
+    const light = radios.find((r) => /Chiaro/.test(r.textContent || ''))!
+    await user.click(light)
     expect(setTheme).toHaveBeenCalledWith('light')
   })
 })

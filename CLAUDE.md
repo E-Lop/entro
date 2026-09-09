@@ -79,6 +79,7 @@ Per nuove API molto sensibili considerare uno schema dedicato (`api`, `internal`
 - **Code simplifier**: invocare la skill `code-simplifier:code-simplifier` dopo ogni feature significativa, prima di committare.
 - **Test automatici**: per ogni feature, coprire validation + authorization + business rules + destructive action safeguards (vedi `~/.claude/CLAUDE.md`).
 - **Dominio**: il glossario è `../entro-family/core/`; non creare un `CONTEXT.md` in questo repo. Regole di consumo del bundle e collocazione degli ADR in `docs/agents/domain.md`.
+- **Lingua**: prosa in italiano — commenti, documentazione, testo a schermo. Codice in inglese, e «codice» comprende i nomi dei file e i `data-testid`, non solo variabili e tipi. Questo repo la rispettava senza averla scritta, finché il commit `922914b` dell'8 set 2026 non ha portato dentro `avvisa`, `intercetta`, `scarta` e `sporco`: ora la tiene `src/lib/__tests__/englishNames.test.ts`. Il perché sta in `../entro-family/conventions/code-in-english.md`.
 
 ## Edge Functions deploy
 

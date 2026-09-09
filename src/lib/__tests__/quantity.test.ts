@@ -122,18 +122,18 @@ describe('quantity — formato', () => {
     expect(formatQuantity(2, 'confezioni')).toBe('2 confezioni')
 
     // La regola, non le due stringhe: stessa unità, parola diversa.
-    const [, aUno] = formatQuantity(1, 'confezioni').split(' ')
-    const [, aDue] = formatQuantity(2, 'confezioni').split(' ')
-    expect(aUno).not.toBe(aDue)
+    const [, forOne] = formatQuantity(1, 'confezioni').split(' ')
+    const [, forTwo] = formatQuantity(2, 'confezioni').split(' ')
+    expect(forOne).not.toBe(forTwo)
   })
 
   // Le altre cinque sono simboli: `kg` resta `kg` a qualsiasi numero, e
   // pluralizzarli sarebbe il difetto opposto.
   it.each(['pz', 'kg', 'g', 'l', 'ml'] as QuantityUnit[])(
     '«%s» è un simbolo e non cambia fra 1 e 2',
-    (unita) => {
-      expect(formatQuantity(1, unita)).toBe(`1 ${unita}`)
-      expect(formatQuantity(2, unita)).toBe(`2 ${unita}`)
+    (unit) => {
+      expect(formatQuantity(1, unit)).toBe(`1 ${unit}`)
+      expect(formatQuantity(2, unit)).toBe(`2 ${unit}`)
     }
   )
 })

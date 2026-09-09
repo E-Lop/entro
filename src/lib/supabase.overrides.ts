@@ -25,7 +25,7 @@ import type {
   StorageLocation,
 } from './validations/food.schemas'
 
-type TabelleGenerate = Generata['public']['Tables']
+type GeneratedTables = Generata['public']['Tables']
 
 /**
  * Nullabilità e obbligatorietà ricalcano il DDL, non i desideri del codice:
@@ -33,31 +33,31 @@ type TabelleGenerate = Generata['public']['Tables']
  * Restringere il vocabolario dichiarando anche non-nullo sarebbe scambiare una
  * correzione per due.
  */
-type VocabolarioRow = {
+type VocabularyRow = {
   status: FoodStatus | null
   storage_location: StorageLocation
   quantity_unit: QuantityUnit | null
 }
 
-type VocabolarioInsert = {
+type VocabularyInsert = {
   status?: FoodStatus | null
   storage_location: StorageLocation
   quantity_unit?: QuantityUnit | null
 }
 
-type VocabolarioUpdate = Partial<VocabolarioInsert>
+type VocabularyUpdate = Partial<VocabularyInsert>
 
-type ColonneVocabolario = keyof VocabolarioRow
+type VocabularyColumns = keyof VocabularyRow
 
-type FoodsRistretta = {
-  Row: Omit<TabelleGenerate['foods']['Row'], ColonneVocabolario> & VocabolarioRow
-  Insert: Omit<TabelleGenerate['foods']['Insert'], ColonneVocabolario> & VocabolarioInsert
-  Update: Omit<TabelleGenerate['foods']['Update'], ColonneVocabolario> & VocabolarioUpdate
-  Relationships: TabelleGenerate['foods']['Relationships']
+type NarrowedFoods = {
+  Row: Omit<GeneratedTables['foods']['Row'], VocabularyColumns> & VocabularyRow
+  Insert: Omit<GeneratedTables['foods']['Insert'], VocabularyColumns> & VocabularyInsert
+  Update: Omit<GeneratedTables['foods']['Update'], VocabularyColumns> & VocabularyUpdate
+  Relationships: GeneratedTables['foods']['Relationships']
 }
 
 export type Database = Omit<Generata, 'public'> & {
   public: Omit<Generata['public'], 'Tables'> & {
-    Tables: Omit<TabelleGenerate, 'foods'> & { foods: FoodsRistretta }
+    Tables: Omit<GeneratedTables, 'foods'> & { foods: NarrowedFoods }
   }
 }

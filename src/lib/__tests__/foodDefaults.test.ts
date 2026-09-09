@@ -12,19 +12,19 @@
 import { describe, it, expect } from 'vitest';
 import { storageLocationForCategory } from '../foodDefaults';
 
-const latticini = { default_storage: 'fridge' as const };
-const surgelati = { default_storage: 'freezer' as const };
+const dairy = { default_storage: 'fridge' as const };
+const frozen = { default_storage: 'freezer' as const };
 
 describe('storageLocationForCategory — pre-compila', () => {
   it('propone il luogo della categoria su un form nuovo e mai toccato', () => {
     expect(
-      storageLocationForCategory(latticini, { current: null, touched: false, isCreate: true })
+      storageLocationForCategory(dairy, { current: null, touched: false, isCreate: true })
     ).toBe('fridge');
   });
 
   it('segue un secondo cambio di categoria, se il campo resta non toccato', () => {
     expect(
-      storageLocationForCategory(surgelati, { current: 'fridge', touched: false, isCreate: true })
+      storageLocationForCategory(frozen, { current: 'fridge', touched: false, isCreate: true })
     ).toBe('freezer');
   });
 });
@@ -32,7 +32,7 @@ describe('storageLocationForCategory — pre-compila', () => {
 describe('storageLocationForCategory — non sovrascrive', () => {
   it('non tocca il luogo se l\'utente lo ha già scelto a mano', () => {
     expect(
-      storageLocationForCategory(surgelati, { current: 'pantry', touched: true, isCreate: true })
+      storageLocationForCategory(frozen, { current: 'pantry', touched: true, isCreate: true })
     ).toBe('pantry');
   });
 
@@ -40,19 +40,19 @@ describe('storageLocationForCategory — non sovrascrive', () => {
     // Il caso subdolo: scegliere a mano proprio il predefinito è comunque una
     // decisione, e un cambio di categoria successivo non deve scavalcarla.
     expect(
-      storageLocationForCategory(surgelati, { current: 'fridge', touched: true, isCreate: true })
+      storageLocationForCategory(frozen, { current: 'fridge', touched: true, isCreate: true })
     ).toBe('fridge');
   });
 
   it('non pre-compila in modifica, dove il luogo è un dato già scelto', () => {
     expect(
-      storageLocationForCategory(surgelati, { current: 'pantry', touched: false, isCreate: false })
+      storageLocationForCategory(frozen, { current: 'pantry', touched: false, isCreate: false })
     ).toBe('pantry');
   });
 
   it('non pre-compila in modifica nemmeno con il campo vuoto', () => {
     expect(
-      storageLocationForCategory(surgelati, { current: null, touched: false, isCreate: false })
+      storageLocationForCategory(frozen, { current: null, touched: false, isCreate: false })
     ).toBeNull();
   });
 });
@@ -61,9 +61,9 @@ describe('storageLocationForCategory — categoria assente', () => {
   it.each([
     ['null', null],
     ['undefined', undefined],
-  ])('lascia il luogo com\'è quando la categoria è %s', (_nome, categoria) => {
+  ])('lascia il luogo com\'è quando la categoria è %s', (_name, category) => {
     expect(
-      storageLocationForCategory(categoria, { current: 'pantry', touched: false, isCreate: true })
+      storageLocationForCategory(category, { current: 'pantry', touched: false, isCreate: true })
     ).toBe('pantry');
   });
 

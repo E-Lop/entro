@@ -93,16 +93,16 @@ describe('conferma eliminazione — chiede l\'esito', () => {
   it('tutte le scelte hanno un bersaglio ≥44px', () => {
     renderDialog()
 
-    for (const nome of [/L'ho consumato/, /L'ho buttato/, /Toglilo e basta/, /^Annulla$/]) {
-      expect(screen.getByRole('button', { name: nome }).className).toContain('h-11')
+    for (const name of [/L'ho consumato/, /L'ho buttato/, /Toglilo e basta/, /^Annulla$/]) {
+      expect(screen.getByRole('button', { name: name }).className).toContain('h-11')
     }
   })
 
   it('durante l\'eliminazione non si può premere due volte', () => {
     renderDialog(vi.fn(), true)
 
-    for (const nome of [/L'ho consumato/, /L'ho buttato/, /Toglilo e basta/]) {
-      expect(screen.getByRole('button', { name: nome }).hasAttribute('disabled')).toBe(true)
+    for (const name of [/L'ho consumato/, /L'ho buttato/, /Toglilo e basta/]) {
+      expect(screen.getByRole('button', { name: name }).hasAttribute('disabled')).toBe(true)
     }
   })
 })
@@ -110,7 +110,7 @@ describe('conferma eliminazione — chiede l\'esito', () => {
 /**
  * Dove finisce il fuoco quando il dialogo si chiude (#87).
  *
- * La regola è quella della convenzione di famiglia `fuoco-dopo-una-rimozione`;
+ * La regola è quella della convenzione di famiglia `focus-after-removal`;
  * qui si verifica il pezzo che vive nel dialogo, cioè che Radix non riporti il
  * fuoco su una card che nel frattempo è sparita. Il test rende la lista attorno
  * al dialogo — è il contratto vero: il modulo cerca i bersagli nel documento.

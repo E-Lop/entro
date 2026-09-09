@@ -158,10 +158,10 @@ describe('FoodCard — alternativa allo swipe (WCAG 2.5.1, livello A)', () => {
 
     fireEvent.keyDown(screen.getByRole('button', { name: 'Azioni per Latte' }), { key: 'Enter' })
 
-    const elimina = await screen.findByRole('menuitem', { name: /Elimina/ })
+    const removeAction = await screen.findByRole('menuitem', { name: /Elimina/ })
     expect(screen.getByRole('menuitem', { name: /Modifica/ })).toBeTruthy()
 
-    fireEvent.click(elimina)
+    fireEvent.click(removeAction)
     expect(onDelete).toHaveBeenCalledWith(food)
   })
 

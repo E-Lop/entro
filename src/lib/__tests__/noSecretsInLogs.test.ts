@@ -143,9 +143,9 @@ describe('redactSecrets', () => {
   })
 
   it('toglie più token dalla stessa stringa', () => {
-    const redatto = redactSecrets(`a=${TOKEN} b=${REFRESH_TOKEN}`)
-    expect(redatto).not.toContain(TOKEN)
-    expect(redatto).not.toContain(REFRESH_TOKEN)
+    const redacted = redactSecrets(`a=${TOKEN} b=${REFRESH_TOKEN}`)
+    expect(redacted).not.toContain(TOKEN)
+    expect(redacted).not.toContain(REFRESH_TOKEN)
   })
 
   it('non tocca una stringa senza segreti', () => {
@@ -158,14 +158,14 @@ describe('redactUrl', () => {
   it('butta il frammento, dove Supabase mette i parametri di sessione', () => {
     const href = `https://entroapp.it/dashboard#access_token=${TOKEN}&refresh_token=opaco-non-jwt&type=magiclink`
 
-    const redatto = redactUrl(href)
+    const redacted = redactUrl(href)
 
-    expect(redatto).toBe('https://entroapp.it/dashboard')
-    expect(redatto).not.toContain(TOKEN)
+    expect(redacted).toBe('https://entroapp.it/dashboard')
+    expect(redacted).not.toContain(TOKEN)
     // Il refresh token di Supabase è opaco: non ha la forma di un JWT e
     // nessun pattern lo intercetterebbe. Per questo si butta tutto il
     // frammento invece di ripulirlo.
-    expect(redatto).not.toContain('opaco-non-jwt')
+    expect(redacted).not.toContain('opaco-non-jwt')
   })
 
   it('butta anche la query', () => {

@@ -51,14 +51,14 @@ test.describe('lista personale alla registrazione', () => {
     await expect(page.getByRole('heading', { name: /Ciao, /i })).toBeVisible({ timeout: 20000 })
 
     await page.getByRole('button', { name: 'Alimento', exact: true }).click()
-    const dialogo = page.getByRole('dialog', { name: 'Aggiungi Nuovo Alimento' })
-    await dialogo.getByLabel('Nome *').fill('Primo alimento')
-    await dialogo.getByLabel('Categoria *').selectOption({ label: 'Latticini' })
-    await dialogo.getByLabel('Posizione *').selectOption({ label: 'Frigo' })
-    await dialogo.getByLabel('Data di scadenza *').fill(futureDateInputValue(5))
-    await dialogo.getByRole('button', { name: 'Aggiungi alimento' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Aggiungi Nuovo Alimento' })
+    await dialog.getByLabel('Nome *').fill('Primo alimento')
+    await dialog.getByLabel('Categoria *').selectOption({ label: 'Latticini' })
+    await dialog.getByLabel('Posizione *').selectOption({ label: 'Frigo' })
+    await dialog.getByLabel('Data di scadenza *').fill(futureDateInputValue(5))
+    await dialog.getByRole('button', { name: 'Aggiungi alimento' }).click()
 
-    await expect(dialogo).toBeHidden()
+    await expect(dialog).toBeHidden()
 
     await expect(page.getByRole('heading', { name: /Primo alimento/ })).toBeVisible()
 

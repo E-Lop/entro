@@ -64,13 +64,19 @@ jobs:
       # guarda niente non è un controllo. Se un giorno arriveranno contributi
       # esterni, la via d'uscita è rendere pubblico il bundle, non ammorbidire
       # il test.
-      - name: Checkout entro-family (solo il dominio)
+      # `conventions/` accanto a `core/` dal 9 set 2026: `englishNames.test.ts`
+      # legge da lì `italian-words.txt`. Con lo sparse-checkout del solo `core`
+      # quel file non arriva e il guardiano fallisce **in CI e non in locale**,
+      # che è il modo peggiore di scoprirlo.
+      - name: Checkout entro-family (dominio e convenzioni)
         uses: actions/checkout@v5
         with:
           repository: E-Lop/entro-family
           token: ${{ secrets.ENTRO_FAMILY_TOKEN }}
           path: .entro-family
-          sparse-checkout: core
+          sparse-checkout: |
+            core
+            conventions
 
       - name: Setup Node
         uses: actions/setup-node@v5

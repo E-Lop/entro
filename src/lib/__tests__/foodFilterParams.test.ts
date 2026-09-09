@@ -88,7 +88,7 @@ describe('buildSearchParams', () => {
   })
 
   it('fa il giro completo: quello che scrive, sa rileggerlo', () => {
-    const originali = {
+    const original = {
       category_id: 'c1',
       storage_location: 'freezer' as const,
       expiry: 'expiring_soon' as const,
@@ -97,6 +97,6 @@ describe('buildSearchParams', () => {
       sortOrder: 'desc' as const,
     }
 
-    expect(parseFilterParams(buildSearchParams(originali))).toMatchObject(originali)
+    expect(parseFilterParams(buildSearchParams(original))).toMatchObject(original)
   })
 })

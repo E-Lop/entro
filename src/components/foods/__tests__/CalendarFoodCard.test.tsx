@@ -56,8 +56,8 @@ describe('CalendarFoodCard — accessibilità (WCAG 2.1.1 tastiera)', () => {
         onEdit={() => {}}
       />
     )
-    const bottone = screen.getByRole('button', { name: /Tonno/ })
+    const button = screen.getByRole('button', { name: /Tonno/ })
 
-    expect(bottone.getAttribute('aria-label')).toBe('Modifica Tonno, 1 confezione')
+    expect(button.getAttribute('aria-label')).toBe('Modifica Tonno, 1 confezione')
   })
 })

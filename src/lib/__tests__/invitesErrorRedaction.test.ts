@@ -30,11 +30,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 /** Come lo direbbe Postgres. */
-const MESSAGGIO_DB = 'permission denied for table list_members'
+const DB_MESSAGE = 'permission denied for table list_members'
 /** Come lo direbbe una Edge Function nel corpo della risposta. */
-const MESSAGGIO_FUNZIONE = 'JWT expired at 1755000000'
+const FUNCTION_MESSAGE = 'JWT expired at 1755000000'
 
-const ERRORE_DB = { message: MESSAGGIO_DB, code: '42501', details: null, hint: null }
+const DB_ERROR = { message: DB_MESSAGE, code: '42501', details: null, hint: null }
 
 const { mockAuth, mockFrom, mockRpc, setResult } = vi.hoisted(() => {
   let result: unknown = { data: null, error: null }
@@ -94,19 +94,19 @@ beforeEach(() => {
     data: { session: { access_token: 'token', user: { id: 'user-1' } } },
   })
   mockAuth.getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-  setResult({ data: null, error: ERRORE_DB })
+  setResult({ data: null, error: DB_ERROR })
 
   // Ogni Edge Function risponde con un errore del server nel corpo.
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => ({
       ok: false,
-      json: async () => ({ error: MESSAGGIO_FUNZIONE }),
+      json: async () => ({ error: FUNCTION_MESSAGE }),
     }))
   )
 })
 
-const casi: [string, () => Promise<{ error: Error | null }>][] = [
+const cases: [string, () => Promise<{ error: Error | null }>][] = [
   ['createInvite', () => createInvite('list-1')],
   ['validateInvite', () => validateInvite('ABC123')],
   ['registerPendingInvite', () => registerPendingInvite('ABC123', 'a@b.it')],
@@ -120,17 +120,17 @@ const casi: [string, () => Promise<{ error: Error | null }>][] = [
 ]
 
 describe('il messaggio del server non arriva a schermo dagli inviti', () => {
-  it.each(casi)('%s non espone il testo del server', async (_nome, chiama) => {
-    const { error } = await chiama()
+  it.each(cases)('%s non espone il testo del server', async (_name, call) => {
+    const { error } = await call()
 
     expect(error).toBeInstanceOf(Error)
-    expect(error!.message).not.toContain(MESSAGGIO_DB)
-    expect(error!.message).not.toContain(MESSAGGIO_FUNZIONE)
+    expect(error!.message).not.toContain(DB_MESSAGE)
+    expect(error!.message).not.toContain(FUNCTION_MESSAGE)
     expect(error!.message).not.toMatch(/permission denied|for table|JWT/i)
   })
 
-  it.each(casi)('%s parla italiano', async (_nome, chiama) => {
-    const { error } = await chiama()
+  it.each(cases)('%s parla italiano', async (_name, call) => {
+    const { error } = await call()
 
     // Le stringhe inglesi scritte da noi non sono una fuga, ma per chi legge
     // sono indistinguibili da una.

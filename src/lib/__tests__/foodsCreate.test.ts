@@ -45,13 +45,13 @@ vi.mock('@/lib/pendingImages', () => ({
 
 import { createFood } from '@/lib/foods'
 
-const DATI = { name: 'Yogurt', expiry_date: '2026-12-31' } as Parameters<typeof createFood>[0]
+const DATA = { name: 'Yogurt', expiry_date: '2026-12-31' } as Parameters<typeof createFood>[0]
 
 beforeEach(() => {
   vi.clearAllMocks()
   mockAuth.getSession.mockResolvedValue({ data: { session: { user: { id: 'u1' } } }, error: null })
-  mockFrom.mockImplementation((tabella: string) =>
-    tabella === 'list_members' ? mockListBuilder : mockInsertBuilder
+  mockFrom.mockImplementation((table: string) =>
+    table === 'list_members' ? mockListBuilder : mockInsertBuilder
   )
 })
 
@@ -59,7 +59,7 @@ describe('createFood senza una lista', () => {
   it('non tenta la scrittura, che la policy rifiuterebbe comunque', async () => {
     mockListBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
 
-    const { food, error } = await createFood(DATI)
+    const { food, error } = await createFood(DATA)
 
     expect(food).toBeNull()
     expect(error).not.toBeNull()
@@ -69,7 +69,7 @@ describe('createFood senza una lista', () => {
   it('dice all’utente cosa fare, in italiano', async () => {
     mockListBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
 
-    const { error } = await createFood(DATI)
+    const { error } = await createFood(DATA)
 
     expect(error?.message).toContain('lista')
     expect(error?.message).toContain('Ricarica')
@@ -84,7 +84,7 @@ describe('createFood quando il database rifiuta', () => {
       error: { message: 'new row violates row-level security policy for table "foods"' },
     })
 
-    const { error } = await createFood(DATI)
+    const { error } = await createFood(DATA)
 
     expect(error?.message).not.toContain('row-level security')
     expect(error?.message).not.toContain('foods')
@@ -98,7 +98,7 @@ describe('createFood quando il database rifiuta', () => {
       error: { message: 'new row violates row-level security policy for table "foods"' },
     })
 
-    await createFood(DATI)
+    await createFood(DATA)
 
     expect(mockLogError).toHaveBeenCalled()
   })
@@ -109,7 +109,7 @@ describe('createFood sul percorso felice', () => {
     mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
     mockInsertBuilder.single.mockResolvedValue({ data: { id: 'f1', name: 'Yogurt' }, error: null })
 
-    const { food, error } = await createFood(DATI)
+    const { food, error } = await createFood(DATA)
 
     expect(error).toBeNull()
     expect(food).toEqual({ id: 'f1', name: 'Yogurt' })

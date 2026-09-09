@@ -30,7 +30,7 @@ import { useAuth } from '../useAuth'
 import { useAuthStore } from '../../stores/authStore'
 
 /** Mette lo store nello stato di un utente entrato. */
-function entra() {
+function enter() {
   useAuthStore.setState({
     user: { id: 'u1', email: 'utente@example.com' } as never,
     isAuthenticated: true,
@@ -38,7 +38,7 @@ function entra() {
 }
 
 beforeEach(() => {
-  entra()
+  enter()
 })
 
 afterEach(() => {
@@ -83,13 +83,13 @@ describe('useAuth().signOut()', () => {
     })
     const { result } = renderHook(() => useAuth())
 
-    let esito: Awaited<ReturnType<typeof result.current.signOut>> | undefined
+    let outcome: Awaited<ReturnType<typeof result.current.signOut>> | undefined
     await act(async () => {
-      esito = await result.current.signOut()
+      outcome = await result.current.signOut()
     })
 
-    expect(esito?.success).toBe(false)
-    expect(esito?.localSessionCleared).toBe(true)
+    expect(outcome?.success).toBe(false)
+    expect(outcome?.localSessionCleared).toBe(true)
   })
 
   it('avvisa l’utente senza rimandargli il messaggio del server', async () => {
@@ -107,9 +107,9 @@ describe('useAuth().signOut()', () => {
     })
 
     expect(toastError).toHaveBeenCalledTimes(1)
-    const messaggio = String(toastError.mock.calls[0][0])
-    expect(messaggio).not.toContain('session_id')
-    expect(messaggio.length).toBeGreaterThan(0)
+    const message = String(toastError.mock.calls[0][0])
+    expect(message).not.toContain('session_id')
+    expect(message.length).toBeGreaterThan(0)
   })
 
   it('sul percorso felice avvisa del successo e svuota lo store', async () => {

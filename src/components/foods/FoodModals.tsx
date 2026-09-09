@@ -73,8 +73,8 @@ export function FoodModals({
    *
    * Uno stato solo per i due dialoghi: non possono essere aperti insieme.
    */
-  const [sporco, setSporco] = useState(false)
-  const guardia = useUnsavedChangesGuard(sporco)
+  const [dirty, setDirty] = useState(false)
+  const guard = useUnsavedChangesGuard(dirty)
   // Posizione della card che sta per uscire dalla lista, letta prima che
   // l'aggiornamento ottimistico la tolga. `null` significa «il dialogo non è
   // stato chiuso confermando», ed è il valore che distingue Annulla ed Esc.
@@ -101,9 +101,9 @@ export function FoodModals({
       {/* Add Food Dialog */}
       <Dialog
         open={isAddDialogOpen}
-        onOpenChange={guardia.intercetta(() => {
+        onOpenChange={guard.intercept(() => {
           onAddDialogChange(false)
-          setSporco(false)
+          setDirty(false)
         })}
       >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -116,7 +116,7 @@ export function FoodModals({
               onSubmit={onCreateFood}
               onCancel={() => onAddDialogChange(false)}
               isSubmitting={isCreating}
-              onDirtyChange={setSporco}
+              onDirtyChange={setDirty}
             />
           </Suspense>
         </DialogContent>
@@ -125,9 +125,9 @@ export function FoodModals({
       {/* Edit Food Dialog */}
       <Dialog
         open={!!editingFood}
-        onOpenChange={guardia.intercetta(() => {
+        onOpenChange={guard.intercept(() => {
           onEditDialogChange(false)
-          setSporco(false)
+          setDirty(false)
         })}
       >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -142,7 +142,7 @@ export function FoodModals({
                 onSubmit={onUpdateFood}
                 onCancel={() => onEditDialogChange(false)}
                 isSubmitting={isUpdating}
-                onDirtyChange={setSporco}
+                onDirtyChange={setDirty}
               />
             </Suspense>
           )}
@@ -159,7 +159,7 @@ export function FoodModals({
         etichette sono le stesse del gemello nativo — «Annulla» e «Scarta» — e
         l'azione distruttiva porta la variante distruttiva, come là.
       */}
-      <AlertDialog open={guardia.isConfirmOpen} onOpenChange={(open) => !open && guardia.annulla()}>
+      <AlertDialog open={guard.isConfirmOpen} onOpenChange={(open) => !open && guard.cancel()}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Scartare le modifiche?</AlertDialogTitle>
@@ -168,9 +168,9 @@ export function FoodModals({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={guardia.annulla}>Annulla</AlertDialogCancel>
+            <AlertDialogCancel onClick={guard.cancel}>Annulla</AlertDialogCancel>
             <AlertDialogAction
-              onClick={guardia.scarta}
+              onClick={guard.discard}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Scarta

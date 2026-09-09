@@ -27,7 +27,7 @@ import {
 const password = 'E2ePassword!2026'
 
 /** Come lo direbbe la RLS: inglese, col nome della tabella dentro. */
-const MESSAGGIO_DB = 'permission denied for table foods'
+const DB_MESSAGE = 'permission denied for table foods'
 
 test.describe('il messaggio del database non arriva a schermo', () => {
   let email: string
@@ -62,7 +62,7 @@ test.describe('il messaggio del database non arriva a schermo', () => {
         status: 403,
         contentType: 'application/json',
         body: JSON.stringify({
-          message: MESSAGGIO_DB,
+          message: DB_MESSAGE,
           code: '42501',
           details: null,
           hint: null,
@@ -70,7 +70,7 @@ test.describe('il messaggio del database non arriva a schermo', () => {
       })
     })
 
-    const nome = await page.evaluate(
+    const name = await page.evaluate(
       () =>
         document
           .querySelector('[data-food-actions] [aria-label^="Elimina "]')
@@ -78,7 +78,7 @@ test.describe('il messaggio del database non arriva a schermo', () => {
           ?.replace(/^Elimina /, '') ?? ''
     )
 
-    await page.getByRole('button', { name: `Elimina ${nome}` }).click()
+    await page.getByRole('button', { name: `Elimina ${name}` }).click()
     await page.getByRole('button', { name: 'Toglilo e basta' }).click()
 
     // Si aspetta che *un* avviso compaia, e solo dopo si guarda cosa dice.
@@ -86,15 +86,15 @@ test.describe('il messaggio del database non arriva a schermo', () => {
     // passerebbe prima che il toast sia reso, cioè sempre.
     // Ristretto al tipo «errore»: dopo il login resta a schermo anche il toast
     // di conferma, e un selettore generico ne troverebbe due.
-    const avviso = page.locator('[data-sonner-toast][data-type="error"]')
-    await expect(avviso).toBeVisible()
-    await expect(avviso).toContainText(
+    const alert = page.locator('[data-sonner-toast][data-type="error"]')
+    await expect(alert).toBeVisible()
+    await expect(alert).toContainText(
       'Non è stato possibile togliere l\'alimento dalla lista. Riprova.'
     )
 
     // La domanda che regge il peso: quel testo non deve comparire da nessuna
     // parte, per nessuna strada — né nell'avviso, né altrove nella pagina.
-    await expect(page.locator('body')).not.toContainText(MESSAGGIO_DB)
+    await expect(page.locator('body')).not.toContainText(DB_MESSAGE)
 
     // E il rollback ha rimesso la card al suo posto.
     await expect(page.locator('[data-food-actions]')).toHaveCount(2)

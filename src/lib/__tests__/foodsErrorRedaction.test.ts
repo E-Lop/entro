@@ -81,7 +81,7 @@ beforeEach(() => {
  * Ogni voce è una funzione che, con il database che rifiuta, deve tornare un
  * errore leggibile da un utente italiano e conservare l'originale in `cause`.
  */
-const casi: [string, () => Promise<{ error: Error | null }>][] = [
+const cases: [string, () => Promise<{ error: Error | null }>][] = [
   ['getCategories', () => getCategories()],
   ['getFoods', () => getFoods()],
   ['getFoodById', () => getFoodById('food-1')],
@@ -91,8 +91,8 @@ const casi: [string, () => Promise<{ error: Error | null }>][] = [
 ]
 
 describe('il messaggio del database non arriva a schermo', () => {
-  it.each(casi)('%s non mette il messaggio di Postgres in error.message', async (_nome, chiama) => {
-    const { error } = await chiama()
+  it.each(cases)('%s non mette il messaggio di Postgres in error.message', async (_name, call) => {
+    const { error } = await call()
 
     expect(error).toBeInstanceOf(Error)
     expect(error!.message).not.toContain(DB_MESSAGE)
@@ -101,8 +101,8 @@ describe('il messaggio del database non arriva a schermo', () => {
     expect(error!.message).not.toMatch(/row-level security|violates|for table/i)
   })
 
-  it.each(casi)('%s conserva l\'errore originale in error.cause', async (_nome, chiama) => {
-    const { error } = await chiama()
+  it.each(cases)('%s conserva l\'errore originale in error.cause', async (_name, call) => {
+    const { error } = await call()
 
     expect(error!.cause).toBe(DB_ERROR)
   })

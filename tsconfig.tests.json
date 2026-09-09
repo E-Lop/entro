@@ -1,0 +1,13 @@
+{
+  /* I test end-to-end non stavano in nessun `include`, quindi non erano
+     typecheckati affatto. Il 9 set 2026 un campo rinominato `page` ha
+     ombreggiato la fixture `page` di Playwright e `page.goto(page)` ha passato
+     l'oggetto della pagina al posto dell'URL: rosso solo nella E2E, che gira in
+     coda e su un runner. Qui `tsc` lo dice in un secondo — «Argument of type
+     'Page' is not assignable to parameter of type 'string'». */
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "@playwright/test"]
+  },
+  "include": ["tests", "playwright.config.ts"]
+}

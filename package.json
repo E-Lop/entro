@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && tsc -p tsconfig.tests.json",
     "supabase:types": "supabase gen types typescript --local > src/lib/supabase.types.ts",
     "detect:design": "node scripts/detect-design.mjs",
     "preview": "vite preview",

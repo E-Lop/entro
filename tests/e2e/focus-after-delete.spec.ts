@@ -18,7 +18,7 @@ import {
 // «Annulla» perdeva il fuoco.
 //
 // La regola verificata è quella della convenzione condivisa
-// `entro-family/conventions/fuoco-dopo-una-rimozione.md`: riga successiva,
+// `entro-family/conventions/focus-after-removal.md`: riga successiva,
 // intestazione della lista come ripiego.
 //
 // **Limiti dichiarati.** Gira solo su Chromium, l'unico progetto configurato,
@@ -61,7 +61,7 @@ test.describe('fuoco dopo l’eliminazione', () => {
     // prende il posto di quella rimossa, qualunque sia l'ordinamento.
     // I nomi si leggono dagli `aria-label`, non dal titolo: l'`h3` include
     // anche la quantità («Food E2E 0(1 pz)»).
-    const nomi = await page.evaluate(() =>
+    const names = await page.evaluate(() =>
       Array.from(document.querySelectorAll('[data-food-actions]')).map(
         (card) =>
           card
@@ -70,34 +70,34 @@ test.describe('fuoco dopo l’eliminazione', () => {
             ?.replace(/^Elimina /, '') ?? ''
       )
     )
-    const [daEliminare, successivo] = nomi
+    const [toDelete, next] = names
 
-    await page.getByRole('button', { name: `Elimina ${daEliminare}` }).click()
+    await page.getByRole('button', { name: `Elimina ${toDelete}` }).click()
     await page.getByRole('button', { name: 'Toglilo e basta' }).click()
     await expect(page.locator('[data-food-actions]')).toHaveCount(1)
 
-    const dopoLaPrima = await page.evaluate(() => ({
+    const afterFirst = await page.evaluate(() => ({
       suBody: document.activeElement === document.body,
-      testo: document.activeElement?.textContent ?? '',
+      text: document.activeElement?.textContent ?? '',
       eUnaCard: document.activeElement?.hasAttribute('data-food-actions') ?? false,
     }))
 
-    expect(dopoLaPrima.suBody, 'il fuoco è caduto su body: è il difetto della #87').toBe(false)
-    expect(dopoLaPrima.eUnaCard).toBe(true)
-    expect(dopoLaPrima.testo).toContain(successivo)
+    expect(afterFirst.suBody, 'il fuoco è caduto su body: è il difetto della #87').toBe(false)
+    expect(afterFirst.eUnaCard).toBe(true)
+    expect(afterFirst.text).toContain(next)
 
     // Ora l'ultima rimasta: non c'è un successivo, tocca all'intestazione.
-    await page.getByRole('button', { name: `Elimina ${successivo}` }).click()
+    await page.getByRole('button', { name: `Elimina ${next}` }).click()
     await page.getByRole('button', { name: 'Toglilo e basta' }).click()
     await expect(page.locator('[data-food-actions]')).toHaveCount(0)
 
-    const dopoLUltima = await page.evaluate(() => ({
+    const afterLast = await page.evaluate(() => ({
       suBody: document.activeElement === document.body,
-      eIntestazione: document.activeElement?.hasAttribute('data-list-heading') ?? false,
+      isHeader: document.activeElement?.hasAttribute('data-list-heading') ?? false,
     }))
 
-    expect(dopoLUltima.suBody).toBe(false)
-    expect(dopoLUltima.eIntestazione).toBe(true)
+    expect(afterLast.suBody).toBe(false)
+    expect(afterLast.isHeader).toBe(true)
   })
 
   test('su «Annulla» il fuoco torna al pulsante che ha aperto il dialogo', async ({ page }) => {
@@ -105,7 +105,7 @@ test.describe('fuoco dopo l’eliminazione', () => {
     // «Annulla» lasciava il fuoco su `document.body`, misurato qui.
     await login(page)
 
-    const nome = await page.evaluate(
+    const name = await page.evaluate(
       () =>
         document
           .querySelector('[data-food-actions] [aria-label^="Elimina "]')
@@ -113,7 +113,7 @@ test.describe('fuoco dopo l’eliminazione', () => {
           ?.replace(/^Elimina /, '') ?? ''
     )
 
-    const apritore = page.getByRole('button', { name: `Elimina ${nome}` })
+    const apritore = page.getByRole('button', { name: `Elimina ${name}` })
     await apritore.click()
     await page.getByRole('button', { name: 'Annulla' }).click()
 

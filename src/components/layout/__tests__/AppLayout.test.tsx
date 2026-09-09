@@ -20,7 +20,7 @@ const { navigateMock, signOutMock } = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => navigateMock,
-  Outlet: () => <div data-testid="contenuto" />,
+  Outlet: () => <div data-testid="content" />,
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),
@@ -55,7 +55,7 @@ import { AppLayout } from '../AppLayout'
 const setup = () => userEvent.setup({ pointerEventsCheck: 0 })
 
 /** Apre il menu utente e ritorna la voce «Disconnetti». */
-async function apriMenuUtente(user: ReturnType<typeof setup>) {
+async function openUserMenu(user: ReturnType<typeof setup>) {
   await user.click(screen.getByRole('button', { name: 'Menu utente' }))
   return screen.findByText('Disconnetti')
 }
@@ -75,7 +75,7 @@ describe('AppLayout — uscita', () => {
     const user = setup()
     render(<AppLayout />)
 
-    await user.click(await apriMenuUtente(user))
+    await user.click(await openUserMenu(user))
 
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true })
@@ -92,7 +92,7 @@ describe('AppLayout — uscita', () => {
     const user = setup()
     render(<AppLayout />)
 
-    await user.click(await apriMenuUtente(user))
+    await user.click(await openUserMenu(user))
 
     await waitFor(() => {
       expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true })
@@ -110,7 +110,7 @@ describe('AppLayout — uscita', () => {
     const user = setup()
     render(<AppLayout />)
 
-    await user.click(await apriMenuUtente(user))
+    await user.click(await openUserMenu(user))
 
     await waitFor(() => expect(signOutMock).toHaveBeenCalled())
     expect(navigateMock).not.toHaveBeenCalled()
