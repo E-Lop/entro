@@ -110,7 +110,7 @@ describe('conferma eliminazione — chiede l\'esito', () => {
 /**
  * Dove finisce il fuoco quando il dialogo si chiude (#87).
  *
- * La regola è quella della convenzione di famiglia `fuoco-dopo-una-rimozione`;
+ * La regola è quella della convenzione di famiglia `focus-after-removal`;
  * qui si verifica il pezzo che vive nel dialogo, cioè che Radix non riporti il
  * fuoco su una card che nel frattempo è sparita. Il test rende la lista attorno
  * al dialogo — è il contratto vero: il modulo cerca i bersagli nel documento.

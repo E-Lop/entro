@@ -39,6 +39,24 @@ export function bundlePage(name: string): string {
 }
 
 /**
+ * Un file di `conventions/`, per nome completo (estensione compresa).
+ *
+ * Vale la stessa regola di `bundlePage`: l'assenza è un errore. Un guardiano
+ * che si salta quando non trova la propria lista passa **proprio** nel caso in
+ * cui non sta guardando niente.
+ */
+export function bundleConvention(fileName: string): string {
+  const path = join(BUNDLE_FOLDER, 'conventions', fileName)
+  if (!existsSync(path)) {
+    throw new Error(
+      `Bundle di famiglia non trovato in ${path}. Clona \`E-Lop/entro-family\` ` +
+        'affiancato a questo repo, oppure indica la cartella con ENTRO_FAMILY_DIR.'
+    )
+  }
+  return readFileSync(path, 'utf8')
+}
+
+/**
  * Le righe della tabella «Le parole che l'utente legge» di una pagina, come
  * coppie `chiave → etichetta`. L'etichetta è la stringa fra apici inversi;
  * `null` quando la cella non ne ha (in `expiry-status.md` significa

@@ -7,7 +7,7 @@
  * esiste più. Il fuoco finisce su `document.body` e il primo Tab riparte
  * dall'inizio del documento — dopo *ogni* eliminazione, anche a rete perfetta.
  *
- * La regola è quella fissata nel bundle di famiglia (`fuoco-dopo-una-rimozione`):
+ * La regola è quella fissata nel bundle di famiglia (`focus-after-removal`):
  * riga successiva, intestazione della lista come ripiego, e sul rollback il
  * fuoco torna sulla riga ricomparsa.
  */

@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 // loro riga di testo (~20px a `text-sm`): sotto i 24×24 px CSS richiesti da
 // WCAG 2.2 SC 2.5.8 (AA). La soglia usata qui è 44, allineata alle 44pt iOS /
 // 48dp Android della app nativa: vedi la convenzione condivisa
-// `entro-family/conventions/touch-target-e-semantica-link.md`.
+// `entro-family/conventions/touch-target-and-link-semantics.md`.
 //
 // I link *inline in una frase* ("Non hai un account? **Registrati**") sono
 // esclusi di proposito: SC 2.5.8 li esenta esplicitamente, e allargarli

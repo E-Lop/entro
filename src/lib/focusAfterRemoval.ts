@@ -7,7 +7,7 @@
  * più — e il fuoco cade su `document.body`: il primo Tab riparte dall'inizio
  * del documento, dopo **ogni** eliminazione, anche a rete perfetta (entro#87).
  *
- * La destinazione segue la convenzione di famiglia `fuoco-dopo-una-rimozione`:
+ * La destinazione segue la convenzione di famiglia `focus-after-removal`:
  * riga successiva, intestazione della lista come ripiego, e sul rollback il
  * fuoco torna sulla riga ricomparsa. La regola è condivisa con entro-mobile;
  * il meccanismo no — lì si passa da `AccessibilityInfo.setAccessibilityFocus`.

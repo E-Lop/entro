@@ -18,7 +18,7 @@ import {
 // «Annulla» perdeva il fuoco.
 //
 // La regola verificata è quella della convenzione condivisa
-// `entro-family/conventions/fuoco-dopo-una-rimozione.md`: riga successiva,
+// `entro-family/conventions/focus-after-removal.md`: riga successiva,
 // intestazione della lista come ripiego.
 //
 // **Limiti dichiarati.** Gira solo su Chromium, l'unico progetto configurato,
