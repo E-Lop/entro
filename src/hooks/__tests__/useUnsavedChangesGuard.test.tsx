@@ -110,11 +110,11 @@ describe('useUnsavedChangesGuard', () => {
       ({ dirty }) => useUnsavedChangesGuard(dirty),
       { initialProps: { dirty: false } }
     )
-    const prima = result.current.intercept
+    const before = result.current.intercept
 
     rerender({ dirty: true })
 
-    expect(result.current.intercept).toBe(prima)
+    expect(result.current.intercept).toBe(before)
   })
 
   it('legge lo stato sporco **corrente**, non quello di quando è stata creata', () => {

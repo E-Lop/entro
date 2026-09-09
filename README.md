@@ -26,11 +26,11 @@ Entro is an open-source Italian PWA for tracking food expiry dates, reducing was
 
 | Dashboard (dark mode) | Filtri e ricerca (light mode) |
 |:---:|:---:|
-| ![Dashboard](docs/screenshots/homepage.png) | ![Filtri](docs/screenshots/filtri-di-ricerca.png) |
+| ![Dashboard](docs/screenshots/homepage.png) | ![Filtri](docs/screenshots/search-filters.png) |
 
 | Aggiunta alimento | Vista mobile |
 |:---:|:---:|
-| ![Inserimento](docs/screenshots/inserimento.png) | ![Mobile](docs/screenshots/mobile.png) |
+| ![Inserimento](docs/screenshots/add-food.png) | ![Mobile](docs/screenshots/mobile.png) |
 
 ---
 
