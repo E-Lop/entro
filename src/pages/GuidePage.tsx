@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 
-export function GuidaPage() {
+export function GuidePage() {
   useDocumentMeta('Guida')
 
   return (
@@ -467,4 +467,4 @@ export function GuidaPage() {
   )
 }
 
-export default GuidaPage
+export default GuidePage

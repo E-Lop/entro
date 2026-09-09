@@ -17,8 +17,8 @@ export function CalendarFoodCard({ food, onEdit }: CalendarFoodCardProps) {
   // concatenazione a mano non solo non accordava l'unità («1confezioni»), la
   // attaccava anche al numero — e questa stringa è la frase che uno screen
   // reader legge (entro-mobile#43).
-  const quantita = formatQuantity(food.quantity, food.quantity_unit)
-  const label = hasQuantity ? `Modifica ${food.name}, ${quantita}` : `Modifica ${food.name}`
+  const quantity = formatQuantity(food.quantity, food.quantity_unit)
+  const label = hasQuantity ? `Modifica ${food.name}, ${quantity}` : `Modifica ${food.name}`
 
   return (
     <button
@@ -30,7 +30,7 @@ export function CalendarFoodCard({ food, onEdit }: CalendarFoodCardProps) {
       <span className="truncate text-sm text-foreground">
         {food.name}
         {hasQuantity && (
-          <span className="ml-1 text-muted-foreground">({quantita})</span>
+          <span className="ml-1 text-muted-foreground">({quantity})</span>
         )}
       </span>
     </button>

@@ -9,19 +9,19 @@
  * che il difetto entro-mobile#43 rendeva visibile come «1 confezioni», visto in
  * produzione su questa PWA prima ancora che sull'app.
  *
- * Le regole del gioco stanno in `bundleDiFamiglia.ts`, in particolare che
+ * Le regole del gioco stanno in `familyBundle.ts`, in particolare che
  * l'assenza del bundle è un **errore** e non un motivo per saltare.
  */
 import { describe, expect, it } from 'vitest'
-import { formeDelleUnita } from './bundleDiFamiglia'
+import { unitForms } from './familyBundle'
 import { quantityUnitEnum } from '@/lib/validations/food.schemas'
 import { UNIT_FORMS, unitLabel } from '@/lib/unitLabels'
 
-const PAGINA = 'storage-and-units'
+const PAGE = 'storage-and-units'
 
 describe('le forme delle unità dicono quello che dice il bundle', () => {
   it('la tabella del bundle copre esattamente il vocabolario di `QuantityUnit`', () => {
-    const bundle = formeDelleUnita(PAGINA)
+    const bundle = unitForms(PAGE)
 
     // Stessa catena delle etichette dei luoghi: DDL → enum Zod → bundle →
     // codice, con un test per anello. Un'unità nuova nel `CHECK` non può
@@ -29,12 +29,12 @@ describe('le forme delle unità dicono quello che dice il bundle', () => {
     expect([...bundle.keys()].sort()).toEqual([...quantityUnitEnum.options].sort())
   })
 
-  it.each(quantityUnitEnum.options)('«%s» ha le forme che il bundle dichiara', (unita) => {
-    expect(UNIT_FORMS[unita]).toEqual(formeDelleUnita(PAGINA).get(unita))
+  it.each(quantityUnitEnum.options)('«%s» ha le forme che il bundle dichiara', (unit) => {
+    expect(UNIT_FORMS[unit]).toEqual(unitForms(PAGE).get(unit))
   })
 
   it('il codice non dichiara unità che il bundle non conosce', () => {
-    expect(Object.keys(UNIT_FORMS).sort()).toEqual([...formeDelleUnita(PAGINA).keys()].sort())
+    expect(Object.keys(UNIT_FORMS).sort()).toEqual([...unitForms(PAGE).keys()].sort())
   })
 
   it('una sola unità varia col numero, e il bundle lo dice', () => {
@@ -42,9 +42,9 @@ describe('le forme delle unità dicono quello che dice il bundle', () => {
     // non serve un motore di plurali. Cinque simboli invariabili e un
     // sostantivo. Se un giorno ne variasse un'altra, questa riga fallisce e chi
     // legge scopre che l'assunzione va rivista, invece di ereditarla.
-    const variabili = [...formeDelleUnita(PAGINA)].filter(([, f]) => f.one !== f.other).map(([u]) => u)
+    const variables = [...unitForms(PAGE)].filter(([, f]) => f.one !== f.other).map(([u]) => u)
 
-    expect(variabili).toEqual(['confezioni'])
+    expect(variables).toEqual(['confezioni'])
   })
 })
 

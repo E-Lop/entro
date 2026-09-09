@@ -33,10 +33,10 @@ import {
 const password = 'E2ePassword!2026'
 
 /** Come lo direbbe Postgres su una DELETE rifiutata. */
-const MESSAGGIO_DB = 'permission denied for table list_members'
+const DB_MESSAGE = 'permission denied for table list_members'
 
 /** Come lo direbbe una Edge Function nel corpo della risposta. */
-const MESSAGGIO_FUNZIONE = 'JWT expired at 1755000000'
+const FUNCTION_MESSAGE = 'JWT expired at 1755000000'
 
 test.describe('il messaggio del server non arriva a schermo dagli inviti', () => {
   let user: E2EUser
@@ -72,7 +72,7 @@ test.describe('il messaggio del server non arriva a schermo dagli inviti', () =>
         status: 403,
         contentType: 'application/json',
         body: JSON.stringify({
-          message: MESSAGGIO_DB,
+          message: DB_MESSAGE,
           code: '42501',
           details: null,
           hint: null,
@@ -85,15 +85,15 @@ test.describe('il messaggio del server non arriva a schermo dagli inviti', () =>
     await page.getByRole('button', { name: /Abbandona lista condivisa/ }).click()
     await page.getByRole('button', { name: 'Abbandona lista' }).click()
 
-    const avviso = page.locator('[data-sonner-toast][data-type="error"]')
-    await expect(avviso).toBeVisible()
-    await expect(avviso).toContainText(
+    const alert = page.locator('[data-sonner-toast][data-type="error"]')
+    await expect(alert).toBeVisible()
+    await expect(alert).toContainText(
       'Non è stato possibile abbandonare la lista. Riprova.'
     )
 
     // La domanda che regge il peso: quel testo non deve comparire da nessuna
     // parte, per nessuna strada.
-    await expect(page.locator('body')).not.toContainText(MESSAGGIO_DB)
+    await expect(page.locator('body')).not.toContainText(DB_MESSAGE)
   })
 
   test('la risposta di una Edge Function non finisce nel toast', async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe('il messaggio del server non arriva a schermo dagli inviti', () =>
       await route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ error: MESSAGGIO_FUNZIONE }),
+        body: JSON.stringify({ error: FUNCTION_MESSAGE }),
       })
     })
 
@@ -116,10 +116,10 @@ test.describe('il messaggio del server non arriva a schermo dagli inviti', () =>
     await page.getByRole('button', { name: /Crea invito/ }).click()
     await page.getByRole('button', { name: 'Genera codice invito' }).click()
 
-    const avviso = page.locator('[data-sonner-toast][data-type="error"]')
-    await expect(avviso).toBeVisible()
-    await expect(avviso).toContainText('Non è stato possibile creare l\'invito. Riprova.')
+    const alert = page.locator('[data-sonner-toast][data-type="error"]')
+    await expect(alert).toBeVisible()
+    await expect(alert).toContainText('Non è stato possibile creare l\'invito. Riprova.')
 
-    await expect(page.locator('body')).not.toContainText(MESSAGGIO_FUNZIONE)
+    await expect(page.locator('body')).not.toContainText(FUNCTION_MESSAGE)
   })
 })

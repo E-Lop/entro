@@ -49,33 +49,33 @@ vi.mock('@/lib/pendingImages', () => ({
 
 import { getCategories } from '@/lib/foods'
 
-const CARTELLA_MIGRAZIONI = resolve(__dirname, '..', '..', '..', 'supabase', 'migrations')
+const MIGRATIONS_FOLDER = resolve(__dirname, '..', '..', '..', 'supabase', 'migrations')
 
 /** Le coppie `(name, name_it)` del seed delle categorie. */
-function categorieDelSeed(): { name: string; name_it: string }[] {
-  if (!existsSync(CARTELLA_MIGRAZIONI)) {
-    throw new Error(`Migrazioni non trovate in ${CARTELLA_MIGRAZIONI}`)
+function seedCategories(): { name: string; name_it: string }[] {
+  if (!existsSync(MIGRATIONS_FOLDER)) {
+    throw new Error(`Migrazioni non trovate in ${MIGRATIONS_FOLDER}`)
   }
 
-  const blocchi = readdirSync(CARTELLA_MIGRAZIONI)
-    .filter((nome) => nome.endsWith('.sql'))
-    .map((nome) => readFileSync(join(CARTELLA_MIGRAZIONI, nome), 'utf8'))
+  const blocks = readdirSync(MIGRATIONS_FOLDER)
+    .filter((name) => name.endsWith('.sql'))
+    .map((name) => readFileSync(join(MIGRATIONS_FOLDER, name), 'utf8'))
     .flatMap((sql) => {
-      const inizio = sql.indexOf('insert into public.categories (')
-      if (inizio === -1) return []
-      return [sql.slice(inizio, sql.indexOf('on conflict', inizio))]
+      const start = sql.indexOf('insert into public.categories (')
+      if (start === -1) return []
+      return [sql.slice(start, sql.indexOf('on conflict', start))]
     })
 
-  expect(blocchi).toHaveLength(1)
+  expect(blocks).toHaveLength(1)
 
   // `('bakery', 'Pane e Pasta', 'wheat', …)` → le prime due stringhe di ogni riga.
-  return [...blocchi[0].matchAll(/\(\s*'([^']+)',\s*'([^']+)'/g)].map((riga) => ({
-    name: riga[1],
-    name_it: riga[2],
+  return [...blocks[0].matchAll(/\(\s*'([^']+)',\s*'([^']+)'/g)].map((row) => ({
+    name: row[1],
+    name_it: row[2],
   }))
 }
 
-const perNome = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
+const byName = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -93,63 +93,63 @@ describe('getCategories — si ordina per la colonna che si legge', () => {
   })
 
   it("propaga le righe nell'ordine in cui il database le restituisce", async () => {
-    const righe = [
+    const rows = [
       { id: '1', name_it: 'Altro' },
       { id: '2', name_it: 'Bevande' },
     ]
-    mockBuilder.order.mockResolvedValue({ data: righe, error: null })
+    mockBuilder.order.mockResolvedValue({ data: rows, error: null })
 
     const { categories, error } = await getCategories()
 
     expect(error).toBeNull()
-    expect(categories).toEqual(righe)
+    expect(categories).toEqual(rows)
   })
 })
 
 describe('il motivo: i due nomi non ordinano allo stesso modo', () => {
   it("l'ordine inglese non è l'ordine italiano, sul vocabolario vero", () => {
-    const categorie = categorieDelSeed()
+    const categories = seedCategories()
 
     // Senza questa riga il test passerebbe anche a seed vuoto o non agganciato
     // dalla regex, che è la forma peggiore di verde.
-    expect(categorie.length).toBeGreaterThan(5)
+    expect(categories.length).toBeGreaterThan(5)
 
-    const secondoInglese = [...categorie]
-      .sort((a, b) => perNome(a.name, b.name))
+    const byEnglish = [...categories]
+      .sort((a, b) => byName(a.name, b.name))
       .map((c) => c.name_it)
-    const secondoItaliano = [...categorie]
-      .sort((a, b) => perNome(a.name_it, b.name_it))
+    const byItalian = [...categories]
+      .sort((a, b) => byName(a.name_it, b.name_it))
       .map((c) => c.name_it)
 
-    expect(secondoInglese).not.toEqual(secondoItaliano)
+    expect(byEnglish).not.toEqual(byItalian)
   })
 
   it('`bakery` precede `beverages` in inglese, ma «Bevande» precede «Pane e Pasta» in italiano', () => {
-    const categorie = categorieDelSeed()
-    const pane = categorie.find((c) => c.name === 'bakery')
-    const bevande = categorie.find((c) => c.name === 'beverages')
+    const categories = seedCategories()
+    const pane = categories.find((c) => c.name === 'bakery')
+    const drinks = categories.find((c) => c.name === 'beverages')
 
     expect(pane?.name_it).toBe('Pane e Pasta')
-    expect(bevande?.name_it).toBe('Bevande')
+    expect(drinks?.name_it).toBe('Bevande')
     // È la coppia che si inverte: se l'ordinamento tornasse su `name`, questa
     // sarebbe la prima riga sbagliata che l'utente vede in cima all'elenco.
-    expect(perNome(pane!.name, bevande!.name)).toBeLessThan(0)
-    expect(perNome(pane!.name_it, bevande!.name_it)).toBeGreaterThan(0)
+    expect(byName(pane!.name, drinks!.name)).toBeLessThan(0)
+    expect(byName(pane!.name_it, drinks!.name_it)).toBeGreaterThan(0)
   })
 })
 
 describe('la precondizione che tiene la correzione a una riga', () => {
   it('nessun nome italiano richiede una collazione linguistica', () => {
-    const categorie = categorieDelSeed()
+    const categories = seedCategories()
 
     // ASCII, iniziale maiuscola, nessun accento: su questo insieme `C`,
     // `en_US.UTF-8` e `it-IT-x-icu` producono lo stesso ordine. Se questa
     // prova fallisce, la collazione ha smesso di essere irrilevante e va
     // decisa lato database — vedi il commento in testa a questo file.
-    const problematici = categorie
+    const problematic = categories
       .map((c) => c.name_it)
-      .filter((nome) => !/^[A-Z][A-Za-z ]*$/.test(nome))
+      .filter((name) => !/^[A-Z][A-Za-z ]*$/.test(name))
 
-    expect(problematici).toEqual([])
+    expect(problematic).toEqual([])
   })
 })

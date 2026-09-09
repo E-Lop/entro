@@ -18,10 +18,10 @@ import { createClient } from '@supabase/supabase-js'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const URL_SUPABASE = 'http://localhost:9999'
-const CHIAVE_ANON = 'chiave-anonima-di-prova'
+const ANON_KEY = 'chiave-anonima-di-prova'
 
 /** Sessione plausibile e non scaduta, come quella di un utente entrato. */
-function sessionePersistita() {
+function persistedSession() {
   return {
     access_token: 'access-token-di-prova',
     refresh_token: 'refresh-token-di-prova',
@@ -42,46 +42,46 @@ function sessionePersistita() {
 
 /**
  * Client vero con storage in memoria già popolato e rete sotto controllo.
- * `rispostaLogout` decide come il server tratta la chiamata a `/logout`.
+ * `logoutResponse` decide come il server tratta la chiamata a `/logout`.
  */
-function clientConSessione(rispostaLogout: () => Promise<Response>) {
+function clientWithSession(logoutResponse: () => Promise<Response>) {
   const memoria = new Map<string, string>()
-  const chiaveStorage = 'sb-localhost-auth-token'
-  memoria.set(chiaveStorage, JSON.stringify(sessionePersistita()))
+  const storageKey = 'sb-localhost-auth-token'
+  memoria.set(storageKey, JSON.stringify(persistedSession()))
 
-  const fetchFinto = vi.fn(async (input: RequestInfo | URL) => {
+  const fakeFetch = vi.fn(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
-    if (url.includes('/logout')) return rispostaLogout()
+    if (url.includes('/logout')) return logoutResponse()
     return new Response('{}', { status: 200 })
   })
 
-  const client = createClient(URL_SUPABASE, CHIAVE_ANON, {
+  const client = createClient(URL_SUPABASE, ANON_KEY, {
     auth: {
       autoRefreshToken: false,
       persistSession: true,
       detectSessionInUrl: false,
-      storageKey: chiaveStorage,
+      storageKey: storageKey,
       storage: {
         getItem: (k: string) => memoria.get(k) ?? null,
         setItem: (k: string, v: string) => void memoria.set(k, v),
         removeItem: (k: string) => void memoria.delete(k),
       },
     },
-    global: { fetch: fetchFinto as unknown as typeof fetch },
+    global: { fetch: fakeFetch as unknown as typeof fetch },
   })
 
-  return { client, memoria, chiaveStorage, fetchFinto }
+  return { client, memoria, storageKey, fakeFetch }
 }
 
-type ClientDiProva = ReturnType<typeof clientConSessione>['client']
+type TestClient = ReturnType<typeof clientWithSession>['client']
 
 /** Raccoglie gli eventi di `onAuthStateChange` emessi durante il test. */
-function registraEventi(client: ClientDiProva) {
-  const eventi: string[] = []
-  const { data } = client.auth.onAuthStateChange((evento) => {
-    eventi.push(evento)
+function registerEvents(client: TestClient) {
+  const events: string[] = []
+  const { data } = client.auth.onAuthStateChange((event) => {
+    events.push(event)
   })
-  return { eventi, disiscrivi: () => data.subscription.unsubscribe() }
+  return { events, disiscrivi: () => data.subscription.unsubscribe() }
 }
 
 afterEach(() => {
@@ -90,7 +90,7 @@ afterEach(() => {
 
 describe('supabase.auth.signOut() sul percorso d’errore', () => {
   it('con la sessione già scaduta lato server non ritorna errore ed emette SIGNED_OUT', async () => {
-    const { client, memoria, chiaveStorage } = clientConSessione(
+    const { client, memoria, storageKey } = clientWithSession(
       async () =>
         new Response(
           JSON.stringify({
@@ -100,29 +100,29 @@ describe('supabase.auth.signOut() sul percorso d’errore', () => {
           { status: 403, headers: { 'Content-Type': 'application/json' } }
         )
     )
-    const { eventi, disiscrivi } = registraEventi(client)
+    const { events, disiscrivi } = registerEvents(client)
 
     const { error } = await client.auth.signOut()
 
     expect(error).toBeNull()
-    expect(eventi).toContain('SIGNED_OUT')
-    expect(memoria.has(chiaveStorage)).toBe(false)
+    expect(events).toContain('SIGNED_OUT')
+    expect(memoria.has(storageKey)).toBe(false)
     disiscrivi()
   })
 
   it('quando la rete cade ritorna errore e NON emette SIGNED_OUT', async () => {
-    const { client, memoria, chiaveStorage } = clientConSessione(() =>
+    const { client, memoria, storageKey } = clientWithSession(() =>
       Promise.reject(new TypeError('Failed to fetch'))
     )
-    const { eventi, disiscrivi } = registraEventi(client)
+    const { events, disiscrivi } = registerEvents(client)
 
     const { error } = await client.auth.signOut()
 
     expect(error).not.toBeNull()
-    expect(eventi).not.toContain('SIGNED_OUT')
+    expect(events).not.toContain('SIGNED_OUT')
     // La sessione resta nello storage di supabase-js: è la nostra
     // `clearAuthStorage()` a toglierla, non il client.
-    expect(memoria.has(chiaveStorage)).toBe(true)
+    expect(memoria.has(storageKey)).toBe(true)
     disiscrivi()
   })
 })

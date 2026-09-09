@@ -237,12 +237,12 @@ describe('FoodForm — la data e il luogo che arrivano a onSubmit', () => {
     cleanup()
   })
 
-  async function compila(
+  async function fill(
     user: ReturnType<typeof userEvent.setup>,
-    { data = '2026-09-04', categoria }: { data?: string; categoria?: string } = {}
+    { data = '2026-09-04', category }: { data?: string; category?: string } = {}
   ) {
     await user.type(screen.getByLabelText(/Nome \*/), 'Latte intero')
-    if (categoria) await user.selectOptions(screen.getByLabelText(/Categoria \*/), categoria)
+    if (category) await user.selectOptions(screen.getByLabelText(/Categoria \*/), category)
     // `user.type` non deposita niente in un `input[type=date]` sotto jsdom:
     // il campo resta vuoto, la validazione ferma il submit, e il test
     // fallisce con «onSubmit mai chiamato» invece che sulla data — cioè
@@ -261,7 +261,7 @@ describe('FoodForm — la data e il luogo che arrivano a onSubmit', () => {
    * c'è. Quello che si prova qui è cosa esce dal submit handler, e per quello
    * l'evento sul form è la via diretta.
    */
-  async function inviaIlForm(container: HTMLElement) {
+  async function sendForm(container: HTMLElement) {
     await act(async () => {
       fireEvent.submit(container.querySelector('form')!)
     })
@@ -271,8 +271,8 @@ describe('FoodForm — la data e il luogo che arrivano a onSubmit', () => {
     const user = userEvent.setup()
     const { container } = render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
 
-    await compila(user, { categoria: 'cat-1' })
-    await inviaIlForm(container)
+    await fill(user, { category: 'cat-1' })
+    await sendForm(container)
 
     await waitFor(() => expect(mockOnSubmit).toHaveBeenCalled())
     // Esattamente la stringa dell'input: nessuna `T`, nessuna `Z`, nessun'ora.
@@ -285,8 +285,8 @@ describe('FoodForm — la data e il luogo che arrivano a onSubmit', () => {
     const user = userEvent.setup()
     const { container } = render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
 
-    await compila(user, { data: '2020-01-15', categoria: 'cat-1' })
-    await inviaIlForm(container)
+    await fill(user, { data: '2020-01-15', category: 'cat-1' })
+    await sendForm(container)
 
     await waitFor(() => expect(mockOnSubmit).toHaveBeenCalled())
     expect(mockOnSubmit.mock.calls[0][0].expiry_date).toBe('2020-01-15')
@@ -334,15 +334,15 @@ describe('FoodForm — il barcode scansionato', () => {
     cleanup()
   })
 
-  async function scansiona(user: ReturnType<typeof userEvent.setup>, codice: string) {
+  async function scan(user: ReturnType<typeof userEvent.setup>, code: string) {
     await user.click(screen.getAllByRole('button', { name: /Scansiona Barcode/i })[0])
     await waitFor(() => expect(capturedOnScanSuccess).not.toBeNull())
     await act(async () => {
-      capturedOnScanSuccess!(codice)
+      capturedOnScanSuccess!(code)
     })
   }
 
-  async function inviaIlForm(container: HTMLElement) {
+  async function sendForm(container: HTMLElement) {
     await act(async () => {
       fireEvent.submit(container.querySelector('form')!)
     })
@@ -357,11 +357,11 @@ describe('FoodForm — il barcode scansionato', () => {
     mockMapProduct.mockReturnValue({ name: 'Latte Intero', category_id: 'cat-1' })
 
     const { container } = render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
-    await scansiona(user, '8001120000123')
+    await scan(user, '8001120000123')
     fireEvent.change(screen.getByLabelText(/Data di scadenza \*/), {
       target: { value: '2026-09-04' },
     })
-    await inviaIlForm(container)
+    await sendForm(container)
 
     await waitFor(() => expect(mockOnSubmit).toHaveBeenCalled())
     expect(mockOnSubmit.mock.calls[0][1]).toBe('8001120000123')
@@ -375,13 +375,13 @@ describe('FoodForm — il barcode scansionato', () => {
     mockFetchProduct.mockResolvedValue({ data: null, error: 'not found' })
 
     const { container } = render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
-    await scansiona(user, '9999999999999')
+    await scan(user, '9999999999999')
     await user.type(screen.getByLabelText(/Nome \*/), 'Prodotto ignoto')
     await user.selectOptions(screen.getByLabelText(/Categoria \*/), 'cat-1')
     fireEvent.change(screen.getByLabelText(/Data di scadenza \*/), {
       target: { value: '2026-09-04' },
     })
-    await inviaIlForm(container)
+    await sendForm(container)
 
     await waitFor(() => expect(mockOnSubmit).toHaveBeenCalled())
     expect(mockOnSubmit.mock.calls[0][1]).toBe('9999999999999')
@@ -396,7 +396,7 @@ describe('FoodForm — il barcode scansionato', () => {
     fireEvent.change(screen.getByLabelText(/Data di scadenza \*/), {
       target: { value: '2026-09-04' },
     })
-    await inviaIlForm(container)
+    await sendForm(container)
 
     await waitFor(() => expect(mockOnSubmit).toHaveBeenCalled())
     expect(mockOnSubmit.mock.calls[0][1]).toBeNull()
@@ -425,7 +425,7 @@ describe('FoodForm — il barcode scansionato', () => {
         onSubmit={mockOnSubmit}
       />
     )
-    await inviaIlForm(container)
+    await sendForm(container)
 
     await waitFor(() => expect(mockOnSubmit).toHaveBeenCalled())
     expect(mockOnSubmit.mock.calls[0][1]).toBe('8001120000123')

@@ -20,23 +20,23 @@
  * messaggio. In CI la cartella si impone con `ENTRO_FAMILY_DIR`.
  */
 import { describe, expect, it } from 'vitest'
-import { etichetteDellaPagina, paginaDelBundle } from './bundleDiFamiglia'
+import { pageLabels, bundlePage } from './familyBundle'
 import type { ExpiryStatus } from '@/types/food.types'
 import { EXPIRY_LABELS, formatDaysLabel, getExpiryLabel } from '@/lib/expiryLabels'
 
-const PAGINA = 'expiry-status'
+const PAGE = 'expiry-status'
 
 /** Le righe della tabella, dal helper condiviso con `storageLabels.test.ts`. */
-const etichetteDelBundle = () => etichetteDellaPagina(PAGINA)
+const bundleLabels = () => pageLabels(PAGE)
 
 /** Il formato del conteggio, sempre dal bundle. */
-function formeDelConteggio(): { singolare: string; plurale: string } {
-  const m = paginaDelBundle(PAGINA).match(/`1 (\w+)` al singolare, `N (\w+)` altrimenti/)
+function countForms(): { singular: string; plural: string } {
+  const m = bundlePage(PAGE).match(/`1 (\w+)` al singolare, `N (\w+)` altrimenti/)
   if (!m) throw new Error('Il bundle non dichiara più le due forme del conteggio')
-  return { singolare: m[1], plurale: m[2] }
+  return { singular: m[1], plural: m[2] }
 }
 
-const TUTTI_GLI_STATI: ExpiryStatus[] = [
+const ALL_STATES: ExpiryStatus[] = [
   'expired',
   'expires_today',
   'expires_soon',
@@ -46,47 +46,47 @@ const TUTTI_GLI_STATI: ExpiryStatus[] = [
 
 describe('le etichette dicono quello che dice il bundle', () => {
   it('la tabella del bundle copre tutti e cinque gli stati, e nessun altro', () => {
-    const bundle = etichetteDelBundle()
+    const bundle = bundleLabels()
 
     // Senza, il test resterebbe verde su una tabella svuotata o rinominata —
     // cioè proprio quando ha smesso di guardare qualcosa.
-    expect([...bundle.keys()].sort()).toEqual([...TUTTI_GLI_STATI].sort())
+    expect([...bundle.keys()].sort()).toEqual([...ALL_STATES].sort())
   })
 
-  it.each(TUTTI_GLI_STATI)('«%s» produce l’etichetta che il bundle dichiara', (stato) => {
-    const atteso = etichetteDelBundle().get(stato)
-    const giorni = 3
+  it.each(ALL_STATES)('«%s» produce l’etichetta che il bundle dichiara', (state) => {
+    const expected = bundleLabels().get(state)
+    const days = 3
 
-    if (atteso === null) {
+    if (expected === null) {
       // Il bundle dice *conteggio*: l'etichetta è il numero, non una parola fissa.
-      expect(getExpiryLabel(stato, giorni)).toBe(formatDaysLabel(giorni))
+      expect(getExpiryLabel(state, days)).toBe(formatDaysLabel(days))
     } else {
-      expect(getExpiryLabel(stato, giorni)).toBe(atteso)
+      expect(getExpiryLabel(state, days)).toBe(expected)
     }
   })
 
   it('gli stati con parola propria sono esattamente quelli esportati', () => {
-    const conParola = [...etichetteDelBundle()]
-      .filter(([, etichetta]) => etichetta !== null)
-      .map(([stato]) => stato)
+    const withWord = [...bundleLabels()]
+      .filter(([, label]) => label !== null)
+      .map(([state]) => state)
       .sort()
 
-    expect(conParola).toEqual(Object.keys(EXPIRY_LABELS).sort())
+    expect(withWord).toEqual(Object.keys(EXPIRY_LABELS).sort())
   })
 })
 
 describe('il conteggio accorda l’unità col numero', () => {
   it('usa le due forme che il bundle dichiara', () => {
-    const { singolare, plurale } = formeDelConteggio()
+    const { singular, plural } = countForms()
 
-    expect(formatDaysLabel(1)).toBe(`1 ${singolare}`)
-    expect(formatDaysLabel(3)).toBe(`3 ${plurale}`)
+    expect(formatDaysLabel(1)).toBe(`1 ${singular}`)
+    expect(formatDaysLabel(3)).toBe(`3 ${plural}`)
   })
 
   it('il singolare vale solo per 1: zero e negativi restano al plurale', () => {
-    const { plurale } = formeDelConteggio()
+    const { plural } = countForms()
 
-    expect(formatDaysLabel(0)).toBe(`0 ${plurale}`)
-    expect(formatDaysLabel(2)).toBe(`2 ${plurale}`)
+    expect(formatDaysLabel(0)).toBe(`0 ${plural}`)
+    expect(formatDaysLabel(2)).toBe(`2 ${plural}`)
   })
 })

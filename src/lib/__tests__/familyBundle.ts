@@ -15,7 +15,7 @@ import { join, resolve } from 'node:path'
  * Il bundle vive affiancato ai repo in `~/Documents/`. In CI quel percorso non
  * esiste: il workflow lo clona e punta qui con `ENTRO_FAMILY_DIR`.
  */
-const CARTELLA_BUNDLE = process.env.ENTRO_FAMILY_DIR
+const BUNDLE_FOLDER = process.env.ENTRO_FAMILY_DIR
   ? resolve(process.env.ENTRO_FAMILY_DIR)
   : join(__dirname, '..', '..', '..', '..', 'entro-family')
 
@@ -26,16 +26,16 @@ const CARTELLA_BUNDLE = process.env.ENTRO_FAMILY_DIR
  * quando non trova la sorgente passa esattamente nella situazione in cui non
  * sta guardando niente.
  */
-export function paginaDelBundle(nome: string): string {
-  const percorso = join(CARTELLA_BUNDLE, 'core', `${nome}.md`)
-  if (!existsSync(percorso)) {
+export function bundlePage(name: string): string {
+  const path = join(BUNDLE_FOLDER, 'core', `${name}.md`)
+  if (!existsSync(path)) {
     throw new Error(
-      `Bundle di famiglia non trovato in ${percorso}. Le etichette sono dominio e ` +
+      `Bundle di famiglia non trovato in ${path}. Le etichette sono dominio e ` +
         'vivono lì: clona `E-Lop/entro-family` affiancato a questo repo, oppure ' +
         'indica la cartella con ENTRO_FAMILY_DIR.'
     )
   }
-  return readFileSync(percorso, 'utf8')
+  return readFileSync(path, 'utf8')
 }
 
 /**
@@ -48,22 +48,22 @@ export function paginaDelBundle(nome: string): string {
  * più sopra altre tabelle con le stesse chiavi nella prima colonna, e una
  * lettura su tutto il file prenderebbe quelle.
  */
-export function etichetteDellaPagina(nome: string): Map<string, string | null> {
-  const testo = paginaDelBundle(nome)
-  const inizio = testo.indexOf("## Le parole che l'utente legge")
-  if (inizio === -1) {
-    throw new Error(`Sezione «Le parole che l’utente legge» non trovata in core/${nome}.md`)
+export function pageLabels(name: string): Map<string, string | null> {
+  const text = bundlePage(name)
+  const start = text.indexOf("## Le parole che l'utente legge")
+  if (start === -1) {
+    throw new Error(`Sezione «Le parole che l’utente legge» non trovata in core/${name}.md`)
   }
 
-  const fine = testo.indexOf('\n## ', inizio + 1)
-  const sezione = testo.slice(inizio, fine === -1 ? undefined : fine)
+  const fine = text.indexOf('\n## ', start + 1)
+  const section = text.slice(start, fine === -1 ? undefined : fine)
 
-  const righe = new Map<string, string | null>()
-  for (const m of sezione.matchAll(/^\|\s*`([a-z_]+)`\s*\|\s*(.+?)\s*\|$/gm)) {
-    const conParola = m[2].match(/^`(.+)`$/)
-    righe.set(m[1], conParola ? conParola[1] : null)
+  const rows = new Map<string, string | null>()
+  for (const m of section.matchAll(/^\|\s*`([a-z_]+)`\s*\|\s*(.+?)\s*\|$/gm)) {
+    const withWord = m[2].match(/^`(.+)`$/)
+    rows.set(m[1], withWord ? withWord[1] : null)
   }
-  return righe
+  return rows
 }
 
 /**
@@ -71,7 +71,7 @@ export function etichetteDellaPagina(nome: string): Map<string, string | null> {
  * coppie `unità → { one, other }`.
  *
  * Due colonne di parole invece di una, quindi non è la tabella di
- * `etichetteDellaPagina` con una colonna in più: `one` e `other` sono le
+ * `pageLabels` con una colonna in più: `one` e `other` sono le
  * categorie cardinali CLDR, e la cella vuota qui non esiste — un'unità che non
  * dichiarasse entrambe le forme è un difetto del bundle, e la riga
  * semplicemente non entra nella mappa, dove il confronto col vocabolario la fa
@@ -80,19 +80,19 @@ export function etichetteDellaPagina(nome: string): Map<string, string | null> {
  * Vale la stessa ragione di delimitare la sezione: la pagina porta più sopra
  * la tabella degli step per unità, con le stesse chiavi nella prima colonna.
  */
-export function formeDelleUnita(nome: string): Map<string, { one: string; other: string }> {
-  const testo = paginaDelBundle(nome)
-  const inizio = testo.indexOf('## Le forme leggibili delle unità')
-  if (inizio === -1) {
-    throw new Error(`Sezione «Le forme leggibili delle unità» non trovata in core/${nome}.md`)
+export function unitForms(name: string): Map<string, { one: string; other: string }> {
+  const text = bundlePage(name)
+  const start = text.indexOf('## Le forme leggibili delle unità')
+  if (start === -1) {
+    throw new Error(`Sezione «Le forme leggibili delle unità» non trovata in core/${name}.md`)
   }
 
-  const fine = testo.indexOf('\n## ', inizio + 1)
-  const sezione = testo.slice(inizio, fine === -1 ? undefined : fine)
+  const fine = text.indexOf('\n## ', start + 1)
+  const section = text.slice(start, fine === -1 ? undefined : fine)
 
-  const righe = new Map<string, { one: string; other: string }>()
-  for (const m of sezione.matchAll(/^\|\s*`([a-z]+)`\s*\|\s*`(.+?)`\s*\|\s*`(.+?)`\s*\|$/gm)) {
-    righe.set(m[1], { one: m[2], other: m[3] })
+  const rows = new Map<string, { one: string; other: string }>()
+  for (const m of section.matchAll(/^\|\s*`([a-z]+)`\s*\|\s*`(.+?)`\s*\|\s*`(.+?)`\s*\|$/gm)) {
+    rows.set(m[1], { one: m[2], other: m[3] })
   }
-  return righe
+  return rows
 }

@@ -175,11 +175,11 @@ describe('softDeleteFood — errori', () => {
   })
 
   it('riporta l\'errore dell\'UPDATE invece di sollevare, senza il testo del database', async () => {
-    const erroreDb = { message: 'permission denied for table foods' }
+    const dbError = { message: 'permission denied for table foods' }
     mockBuilder.single
       .mockReset()
       .mockResolvedValueOnce({ data: { image_url: null }, error: null })
-      .mockResolvedValue({ data: null, error: erroreDb })
+      .mockResolvedValue({ data: null, error: dbError })
 
     const { error } = await softDeleteFood(FOOD_ID)
 
@@ -187,6 +187,6 @@ describe('softDeleteFood — errori', () => {
     // fissava la fuga invece di impedirla: quel messaggio finiva in un toast.
     // Quello che l'utente legge ora è italiano; l'originale resta in `cause`.
     expect(error?.message).toBe('Non è stato possibile togliere l\'alimento dalla lista. Riprova.')
-    expect(error?.cause).toBe(erroreDb)
+    expect(error?.cause).toBe(dbError)
   })
 })

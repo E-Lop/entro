@@ -17,7 +17,7 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const JoinPage = lazy(() => import('./pages/JoinPage'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
-const GuidaPage = lazy(() => import('./pages/GuidaPage'))
+const GuidePage = lazy(() => import('./pages/GuidePage'))
 
 /**
  * sonner Toaster wired to the brand: it follows the active theme (dark mode
@@ -73,7 +73,7 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/guida" element={<GuidaPage />} />
+                <Route path="/guida" element={<GuidePage />} />
               </Route>
             </Route>
           </Routes>

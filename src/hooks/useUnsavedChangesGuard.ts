@@ -50,14 +50,14 @@ export function useUnsavedChangesGuard(isDirty: boolean) {
   useEffect(() => {
     if (!isDirty) return
 
-    const avvisa = (evento: BeforeUnloadEvent) => {
+    const warn = (event: BeforeUnloadEvent) => {
       // `preventDefault()` è la forma che la specifica indica oggi; il testo lo
       // sceglie il browser e non si può cambiare.
-      evento.preventDefault()
+      event.preventDefault()
     }
 
-    window.addEventListener('beforeunload', avvisa)
-    return () => window.removeEventListener('beforeunload', avvisa)
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
   }, [isDirty])
 
   /**
@@ -66,31 +66,31 @@ export function useUnsavedChangesGuard(isDirty: boolean) {
    *
    * L'apertura (`open === true`) passa sempre: la guardia riguarda solo l'uscita.
    */
-  const intercetta = useCallback(
-    (chiudi: () => void) => (open: boolean) => {
+  const intercept = useCallback(
+    (close: () => void) => (open: boolean) => {
       if (open) return
       if (!isDirtyRef.current) {
-        chiudi()
+        close()
         return
       }
       // La funzione va avvolta: `useState` chiama ciò che riceve.
-      setPendingClose(() => chiudi)
+      setPendingClose(() => close)
     },
     []
   )
 
-  const scarta = useCallback(() => {
+  const discard = useCallback(() => {
     pendingClose?.()
     setPendingClose(null)
   }, [pendingClose])
 
-  const annulla = useCallback(() => setPendingClose(null), [])
+  const cancel = useCallback(() => setPendingClose(null), [])
 
   return {
     /** Vero mentre la conferma è a schermo. */
     isConfirmOpen: pendingClose !== null,
-    intercetta,
-    scarta,
-    annulla,
+    intercept,
+    discard,
+    cancel,
   }
 }

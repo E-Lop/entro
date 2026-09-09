@@ -9,20 +9,20 @@ import { expect, test } from '@playwright/test'
 // I link *inline in una frase* ("Non hai un account? **Registrati**") sono
 // esclusi di proposito: SC 2.5.8 li esenta esplicitamente, e allargarli
 // spezzerebbe il flusso del testo. Qui si verificano solo quelli isolati.
-const ALTEZZA_MINIMA = 44
+const MIN_HEIGHT = 44
 
 test.use({ viewport: { width: 390, height: 844 } })
 
-const CASI = [
-  { pagina: '/login', link: 'Password dimenticata?' },
-  { pagina: '/forgot-password', link: 'Torna al login' },
-  { pagina: '/verify-email?email=e2e%40example.com', link: 'Torna al login' },
+const CASES = [
+  { page: '/login', link: 'Password dimenticata?' },
+  { page: '/forgot-password', link: 'Torna al login' },
+  { page: '/verify-email?email=e2e%40example.com', link: 'Torna al login' },
 ] as const
 
 test.describe('bersagli tattili dei link auth (mobile)', () => {
-  for (const { pagina, link } of CASI) {
-    test(`"${link}" su ${pagina} è alto almeno ${ALTEZZA_MINIMA}px`, async ({ page }) => {
-      await page.goto(pagina)
+  for (const { page, link } of CASES) {
+    test(`"${link}" su ${page} è alto almeno ${MIN_HEIGHT}px`, async ({ page }) => {
+      await page.goto(page)
 
       const target = page.getByRole('link', { name: link })
       await expect(target).toBeVisible()
@@ -31,8 +31,8 @@ test.describe('bersagli tattili dei link auth (mobile)', () => {
       expect(box, `Nessun box per il link "${link}"`).not.toBeNull()
       expect(
         box!.height,
-        `Il link "${link}" su ${pagina} è alto ${box!.height}px`,
-      ).toBeGreaterThanOrEqual(ALTEZZA_MINIMA)
+        `Il link "${link}" su ${page} è alto ${box!.height}px`,
+      ).toBeGreaterThanOrEqual(MIN_HEIGHT)
     })
   }
 })

@@ -16,17 +16,17 @@ import { act, renderHook } from '@testing-library/react'
 import { useUnsavedChangesGuard } from '../useUnsavedChangesGuard'
 
 describe('useUnsavedChangesGuard', () => {
-  let aggiunti: string[]
-  let tolti: string[]
+  let added: string[]
+  let removed: string[]
 
   beforeEach(() => {
-    aggiunti = []
-    tolti = []
-    vi.spyOn(window, 'addEventListener').mockImplementation(((tipo: string) => {
-      aggiunti.push(tipo)
+    added = []
+    removed = []
+    vi.spyOn(window, 'addEventListener').mockImplementation(((kind: string) => {
+      added.push(kind)
     }) as typeof window.addEventListener)
-    vi.spyOn(window, 'removeEventListener').mockImplementation(((tipo: string) => {
-      tolti.push(tipo)
+    vi.spyOn(window, 'removeEventListener').mockImplementation(((kind: string) => {
+      removed.push(kind)
     }) as typeof window.removeEventListener)
   })
 
@@ -35,71 +35,71 @@ describe('useUnsavedChangesGuard', () => {
   })
 
   it('a form pulito lascia passare la chiusura, senza chiedere niente', () => {
-    const chiudi = vi.fn()
+    const close = vi.fn()
     const { result } = renderHook(() => useUnsavedChangesGuard(false))
 
-    act(() => result.current.intercetta(chiudi)(false))
+    act(() => result.current.intercept(close)(false))
 
-    expect(chiudi).toHaveBeenCalledTimes(1)
+    expect(close).toHaveBeenCalledTimes(1)
     expect(result.current.isConfirmOpen).toBe(false)
   })
 
   it('a form sporco trattiene la chiusura e apre la conferma', () => {
-    const chiudi = vi.fn()
+    const close = vi.fn()
     const { result } = renderHook(() => useUnsavedChangesGuard(true))
 
-    act(() => result.current.intercetta(chiudi)(false))
+    act(() => result.current.intercept(close)(false))
 
-    expect(chiudi).not.toHaveBeenCalled()
+    expect(close).not.toHaveBeenCalled()
     expect(result.current.isConfirmOpen).toBe(true)
   })
 
   it('non intercetta l’apertura: la guardia riguarda solo l’uscita', () => {
-    const chiudi = vi.fn()
+    const close = vi.fn()
     const { result } = renderHook(() => useUnsavedChangesGuard(true))
 
-    act(() => result.current.intercetta(chiudi)(true))
+    act(() => result.current.intercept(close)(true))
 
     expect(result.current.isConfirmOpen).toBe(false)
-    expect(chiudi).not.toHaveBeenCalled()
+    expect(close).not.toHaveBeenCalled()
   })
 
   it('«Scarta» esegue la chiusura trattenuta e chiude la conferma', () => {
-    const chiudi = vi.fn()
+    const close = vi.fn()
     const { result } = renderHook(() => useUnsavedChangesGuard(true))
 
-    act(() => result.current.intercetta(chiudi)(false))
-    act(() => result.current.scarta())
+    act(() => result.current.intercept(close)(false))
+    act(() => result.current.discard())
 
-    expect(chiudi).toHaveBeenCalledTimes(1)
+    expect(close).toHaveBeenCalledTimes(1)
     expect(result.current.isConfirmOpen).toBe(false)
   })
 
   it('«Annulla» non chiude niente e riporta al form', () => {
-    const chiudi = vi.fn()
+    const close = vi.fn()
     const { result } = renderHook(() => useUnsavedChangesGuard(true))
 
-    act(() => result.current.intercetta(chiudi)(false))
-    act(() => result.current.annulla())
+    act(() => result.current.intercept(close)(false))
+    act(() => result.current.cancel())
 
-    expect(chiudi).not.toHaveBeenCalled()
+    expect(close).not.toHaveBeenCalled()
     expect(result.current.isConfirmOpen).toBe(false)
   })
 
   it('registra `beforeunload` solo a form sporco', () => {
     const { rerender, unmount } = renderHook(
-      ({ sporco }) => useUnsavedChangesGuard(sporco),
-      { initialProps: { sporco: false } }
+      ({ dirty }) => useUnsavedChangesGuard(dirty),
+      { initialProps: { dirty: false } }
     )
-    expect(aggiunti).not.toContain('beforeunload')
+    expect(added).not.toContain('beforeunload')
 
-    rerender({ sporco: true })
-    expect(aggiunti).toContain('beforeunload')
+    rerender({ dirty: true })
+    expect(added).toContain('beforeunload')
 
     // E lo toglie appena il form torna pulito: il bfcache non deve restare
     // disabilitato per un form che non ha più niente da perdere.
-    rerender({ sporco: false })
-    expect(tolti).toContain('beforeunload')
+    rerender({ dirty: false })
+    expect(removed).toContain('beforeunload')
 
     unmount()
   })
@@ -107,30 +107,30 @@ describe('useUnsavedChangesGuard', () => {
   it('`intercetta` non cambia identità mentre si digita', () => {
     // Altrimenti `Dialog` riceverebbe una prop nuova a ogni carattere.
     const { result, rerender } = renderHook(
-      ({ sporco }) => useUnsavedChangesGuard(sporco),
-      { initialProps: { sporco: false } }
+      ({ dirty }) => useUnsavedChangesGuard(dirty),
+      { initialProps: { dirty: false } }
     )
-    const prima = result.current.intercetta
+    const prima = result.current.intercept
 
-    rerender({ sporco: true })
+    rerender({ dirty: true })
 
-    expect(result.current.intercetta).toBe(prima)
+    expect(result.current.intercept).toBe(prima)
   })
 
   it('legge lo stato sporco **corrente**, non quello di quando è stata creata', () => {
     // È il rovescio del test sopra: se `intercetta` non cambia identità, deve
     // comunque vedere il valore aggiornato, o resterebbe ferma a «pulito».
-    const chiudi = vi.fn()
+    const close = vi.fn()
     const { result, rerender } = renderHook(
-      ({ sporco }) => useUnsavedChangesGuard(sporco),
-      { initialProps: { sporco: false } }
+      ({ dirty }) => useUnsavedChangesGuard(dirty),
+      { initialProps: { dirty: false } }
     )
-    const intercetta = result.current.intercetta
+    const intercept = result.current.intercept
 
-    rerender({ sporco: true })
-    act(() => intercetta(chiudi)(false))
+    rerender({ dirty: true })
+    act(() => intercept(close)(false))
 
-    expect(chiudi).not.toHaveBeenCalled()
+    expect(close).not.toHaveBeenCalled()
     expect(result.current.isConfirmOpen).toBe(true)
   })
 })

@@ -20,11 +20,11 @@ import type { StorageLocation } from './validations/food.schemas'
  */
 
 /** La forma minima che serve di una categoria: il resto non entra in gioco. */
-export interface CategoriaConLuogoPredefinito {
+export interface CategoryWithDefaultStorage {
   default_storage: StorageLocation
 }
 
-export interface ContestoDelLuogo {
+export interface StorageContext {
   /** Il luogo attualmente nel form, o `null` se non ne ha ancora uno. */
   current: StorageLocation | null
   /**
@@ -53,8 +53,8 @@ export interface ContestoDelLuogo {
  * tutti i casi in cui non c'è niente da suggerire.
  */
 export function storageLocationForCategory(
-  category: CategoriaConLuogoPredefinito | null | undefined,
-  { current, touched, isCreate }: ContestoDelLuogo
+  category: CategoryWithDefaultStorage | null | undefined,
+  { current, touched, isCreate }: StorageContext
 ): StorageLocation | null {
   if (!isCreate) return current
   if (touched) return current
