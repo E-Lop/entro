@@ -41,13 +41,13 @@ function persistedSession() {
 }
 
 /**
- * Client vero con storage in memoria già popolato e rete sotto controllo.
+ * Client vero con storage in memory già popolato e rete sotto controllo.
  * `logoutResponse` decide come il server tratta la chiamata a `/logout`.
  */
 function clientWithSession(logoutResponse: () => Promise<Response>) {
-  const memoria = new Map<string, string>()
+  const memory = new Map<string, string>()
   const storageKey = 'sb-localhost-auth-token'
-  memoria.set(storageKey, JSON.stringify(persistedSession()))
+  memory.set(storageKey, JSON.stringify(persistedSession()))
 
   const fakeFetch = vi.fn(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
@@ -62,15 +62,15 @@ function clientWithSession(logoutResponse: () => Promise<Response>) {
       detectSessionInUrl: false,
       storageKey: storageKey,
       storage: {
-        getItem: (k: string) => memoria.get(k) ?? null,
-        setItem: (k: string, v: string) => void memoria.set(k, v),
-        removeItem: (k: string) => void memoria.delete(k),
+        getItem: (k: string) => memory.get(k) ?? null,
+        setItem: (k: string, v: string) => void memory.set(k, v),
+        removeItem: (k: string) => void memory.delete(k),
       },
     },
     global: { fetch: fakeFetch as unknown as typeof fetch },
   })
 
-  return { client, memoria, storageKey, fakeFetch }
+  return { client, memory, storageKey, fakeFetch }
 }
 
 type TestClient = ReturnType<typeof clientWithSession>['client']
@@ -90,7 +90,7 @@ afterEach(() => {
 
 describe('supabase.auth.signOut() sul percorso d’errore', () => {
   it('con la sessione già scaduta lato server non ritorna errore ed emette SIGNED_OUT', async () => {
-    const { client, memoria, storageKey } = clientWithSession(
+    const { client, memory, storageKey } = clientWithSession(
       async () =>
         new Response(
           JSON.stringify({
@@ -106,12 +106,12 @@ describe('supabase.auth.signOut() sul percorso d’errore', () => {
 
     expect(error).toBeNull()
     expect(events).toContain('SIGNED_OUT')
-    expect(memoria.has(storageKey)).toBe(false)
+    expect(memory.has(storageKey)).toBe(false)
     disiscrivi()
   })
 
   it('quando la rete cade ritorna errore e NON emette SIGNED_OUT', async () => {
-    const { client, memoria, storageKey } = clientWithSession(() =>
+    const { client, memory, storageKey } = clientWithSession(() =>
       Promise.reject(new TypeError('Failed to fetch'))
     )
     const { events, disiscrivi } = registerEvents(client)
@@ -122,7 +122,7 @@ describe('supabase.auth.signOut() sul percorso d’errore', () => {
     expect(events).not.toContain('SIGNED_OUT')
     // La sessione resta nello storage di supabase-js: è la nostra
     // `clearAuthStorage()` a toglierla, non il client.
-    expect(memoria.has(storageKey)).toBe(true)
+    expect(memory.has(storageKey)).toBe(true)
     disiscrivi()
   })
 })

@@ -79,11 +79,11 @@ test.describe('fuoco dopo l’eliminazione', () => {
     const afterFirst = await page.evaluate(() => ({
       suBody: document.activeElement === document.body,
       text: document.activeElement?.textContent ?? '',
-      eUnaCard: document.activeElement?.hasAttribute('data-food-actions') ?? false,
+      isCard: document.activeElement?.hasAttribute('data-food-actions') ?? false,
     }))
 
     expect(afterFirst.suBody, 'il fuoco è caduto su body: è il difetto della #87').toBe(false)
-    expect(afterFirst.eUnaCard).toBe(true)
+    expect(afterFirst.isCard).toBe(true)
     expect(afterFirst.text).toContain(next)
 
     // Ora l'ultima rimasta: non c'è un successivo, tocca all'intestazione.
