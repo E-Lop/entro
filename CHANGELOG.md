@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.2] - 2026-09-10
+
+### Changed
+- **Il verde di entro passa da `#16a34a` a `#006e2d`**, e il testo sopra i pulsanti primari da un bianco rosato a bianco puro. Il contrasto del pulsante primario — «Accedi», «Salva» — sale da **3,00:1 a 6,43:1**, cioè da sotto la soglia AA a comodamente sopra.
+
+  **Il verde di prima non era sbagliato: era il tono del tema scuro.** Generando lo schema tonale da quel colore, `#16a34a` risulta essere il **tono 60** della propria rampa — il tono che Material assegna al primario in tema scuro — mentre in tema chiaro il primario è il tono 40, cioè `#006e2d`. Usare il 60 dove va il 40 è precisamente ciò che rendeva il bianco sopra illeggibile, e nessuna scelta di colore del testo lo salvava: il verde scuro `#052e16` arrivava a 4,52:1, cioè passava per due centesimi, e il nero funzionava ma è nero su verde.
+
+  **Il testo sopra il verde non era nemmeno bianco.** Era `hsl(355.7 100% 97.3%)`, cioè `#fff1f2`, un bianco tinto di rosa: il `--primary-foreground` di serie di shadcn, arrivato col template e mai scelto. Faceva scendere il contrasto a 3,00:1 invece dei 3,30:1 del bianco puro, ed era sopravvissuto a ogni revisione perché nessun occhio vede che `355.7 100% 97.3%` non è bianco. Lo ha trovato il confronto fra i due client, che converte prima di confrontare.
+
+  La decisione è del bundle di famiglia, che è la fonte unica del colore ([entro-family#31](https://github.com/E-Lop/entro-family/issues/31)), e vale per **entrambi** i client: il client nativo segue con la stessa tavolozza. L'icona dell'app si sposta da sola — il disco è `currentColor` legato a `--primary` — ma il bordo della foglia resta da ridisegnare, perché sul disco più scuro sparisce: è una decisione di identità e sta aperta nel bundle.
+
+  **I toni della scadenza non sono identità e non si toccano**: `--success-foreground` porta lo stesso valore che aveva il testo sopra il primario in tema scuro, ma vive in un ruolo semantico diverso ed è rimasto dov'era.
+
 ## [1.12.1] - 2026-09-08
 
 ### Fixed
@@ -692,7 +705,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.2...HEAD
+[1.12.2]: https://github.com/E-Lop/entro/compare/v1.12.1...v1.12.2
 [1.12.1]: https://github.com/E-Lop/entro/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/E-Lop/entro/compare/v1.11.15...v1.12.0
 [1.11.15]: https://github.com/E-Lop/entro/compare/v1.11.14...v1.11.15
