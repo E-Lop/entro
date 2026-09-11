@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.3] - 2026-09-11
+
+### Changed
+- **Lo schema di validazione degli alimenti è confrontato anche da qui, non più da un lato solo.** `src/lib/validations/food.schemas.ts` e `src/shared/validations/food.schemas.ts` su entro-mobile non sono un pacchetto condiviso: sono **due copie in due repo**. Il guardiano che le confronta esisteva da settembre, ma viveva solo sul client nativo: una modifica fatta **qui** lasciava questa CI verde, e il rosso arrivava sull'altro repo al suo prossimo push — che può essere giorni dopo, addosso a chi non ha fatto la modifica ([#120](https://github.com/E-Lop/entro/issues/120)).
+
+  Ora `src/lib/__tests__/foodSchemaParity.test.ts` fa girare i due schemi sulla stessa batteria di 32 payload e confronta esito e insieme dei campi in errore — non i messaggi, che sono testo che l'utente legge e che la piattaforma può volere diversi. I limiti si provano **a cavallo** (100 e 101, 500 e 501, 0.01 e 0.004): un `max` sbagliato di uno passa qualunque prova fatta lontano dal bordo. L'unica divergenza legittima — `image_url` accetta anche un `File` qui, solo un path là, perché il picker nativo consegna sempre un percorso — è asserita in **entrambi** i versi, così allinearla senza cancellarne la dichiarazione fa diventare rosso il test.
+
+  **I due schemi girano sulla stessa copia di zod**, imposta da un alias in `vitest.config.ts`. Senza, il confronto misurerebbe anche lo scarto fra le versioni installate nei due repo (4.3.5 e 4.4.3) invece delle due dichiarazioni — e fallirebbe nel modo più difficile da riconoscere che esista: `expected [Function ZodObject] to be [Function ZodObject] — Compared values have no visual difference`.
+
+  Provato mordendo, perché un guardiano che non si è mai visto rosso non è ancora un guardiano: rimettere il divieto sulla data passata da un lato solo accende quattro casi, allentare `min(0.01)` a `min(0)` ne accende due, allineare `image_url` accende la divergenza dichiarata, e **togliere la sorgente fa esplodere il test invece di farlo passare** — un controllo che diventa verde quando non trova ciò che deve guardare passa proprio nel caso in cui non sta guardando niente.
+
 ## [1.12.2] - 2026-09-10
 
 ### Changed
@@ -705,7 +716,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.3...HEAD
+[1.12.3]: https://github.com/E-Lop/entro/compare/v1.12.2...v1.12.3
 [1.12.2]: https://github.com/E-Lop/entro/compare/v1.12.1...v1.12.2
 [1.12.1]: https://github.com/E-Lop/entro/compare/v1.12.0...v1.12.1
 [1.12.0]: https://github.com/E-Lop/entro/compare/v1.11.15...v1.12.0
