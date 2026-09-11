@@ -44,6 +44,7 @@ jobs:
       VITE_ENABLE_SHARED_LISTS: "true"
       VITE_ENABLE_NOTIFICATIONS: "true"
       ENTRO_FAMILY_DIR: ${{ github.workspace }}/.entro-family
+      ENTRO_MOBILE_SCHEMAS_DIR: ${{ github.workspace }}/.entro-mobile/src/shared/validations
 
     steps:
       - name: Checkout
@@ -77,6 +78,33 @@ jobs:
           sparse-checkout: |
             core
             conventions
+
+      # `src/lib/__tests__/foodSchemaParity.test.ts` fa girare questo schema di
+      # validazione e la sua copia sul client nativo sulla stessa batteria di
+      # payload: i due `food.schemas.ts` non sono un pacchetto condiviso, sono
+      # due file in due repo, e senza questo confronto divergono in silenzio
+      # ([#120](https://github.com/E-Lop/entro/issues/120)).
+      #
+      # `entro-mobile` è **privato**, quindi serve `ENTRO_MOBILE_TOKEN`, un PAT
+      # fine-grained con il solo permesso *Contents: read* su quel repo.
+      # ⚠️ **Scade il 10 dicembre 2026** (90 giorni dall'11 set). Quando
+      # succederà, questo passo fallirà con `Repository not found` — che è il
+      # messaggio sbagliato per la causa vera, e il motivo per cui la data sta
+      # scritta qui invece che solo nelle impostazioni dell'account.
+      #
+      # Vale anche qui la conseguenza già accettata per il bundle: i secret non
+      # arrivano alle PR che vengono da un fork, quindi lì questo passo fallisce
+      # e la CI è rossa. Il test non degrada a verde quando non trova lo schema
+      # gemello, perché un controllo che passa mentre non guarda niente non è un
+      # controllo.
+      - name: Checkout entro-mobile (lo schema gemello)
+        uses: actions/checkout@v5
+        with:
+          repository: E-Lop/entro-mobile
+          token: ${{ secrets.ENTRO_MOBILE_TOKEN }}
+          path: .entro-mobile
+          sparse-checkout: |
+            src/shared/validations
 
       - name: Setup Node
         uses: actions/setup-node@v5
