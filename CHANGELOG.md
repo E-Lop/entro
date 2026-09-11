@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.4] - 2026-09-11
+
+### Security
+- **Le dodici segnalazioni Dependabot aperte si chiudono rinfrescando il lockfile.** Nove advisory distinte — `js-yaml`, `fast-uri` (quattro), `sharp`, `browserslist`, `vitest` con `@vitest/mocker`, `baseline-browser-mapping`, `@humanfs/node`, `postcss-selector-parser` — tutte in dipendenze di **sviluppo**: nessuna arriva nel bundle servito agli utenti. `npm audit` passa da nove a zero.
+
+  **Il `package.json` non è cambiato di una riga, ed è il punto.** Gli override che questo repo tiene da agosto erano già scritti col caret giusto — `js-yaml` a `^4.3.1` con la correzione in 4.3.2, `fast-uri` a `^3.1.5` con la correzione in 3.1.6 — quindi il manifest permetteva già le versioni corrette. Era il **lockfile** a essere fermo. Un override col caret invecchia in silenzio: continua a sembrare aggiornato mentre l'albero installato non lo è, e nessun controllo lo dice tranne Dependabot.
+
+  Le 48 versioni cambiate risalgono tutte a una di quelle nove: i binari per piattaforma di `sharp`, i pacchetti interni di `vitest`, e i dati di `browserslist` (`caniuse-lite`, `electron-to-chromium`, `node-releases`).
+
+  Verificato dove la salita poteva mordere: la suite gira su **vitest 4.1.11** invece di 4.1.8 — 498 test verdi su 66 file — e `npm run build` produce il service worker con le sue 65 voci di precache.
+
 ## [1.12.3] - 2026-09-11
 
 ### Changed
@@ -716,7 +727,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.4...HEAD
+[1.12.4]: https://github.com/E-Lop/entro/compare/v1.12.3...v1.12.4
 [1.12.3]: https://github.com/E-Lop/entro/compare/v1.12.2...v1.12.3
 [1.12.2]: https://github.com/E-Lop/entro/compare/v1.12.1...v1.12.2
 [1.12.1]: https://github.com/E-Lop/entro/compare/v1.12.0...v1.12.1
