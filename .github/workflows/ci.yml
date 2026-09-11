@@ -105,6 +105,17 @@ jobs:
           path: .entro-mobile
           sparse-checkout: |
             src/shared/validations
+          # ⚠️ Non-cone **di proposito**, ed è il passo che ha reso rossa la
+          # prima corsa di questa PR. In modalità cone lo sparse-checkout porta
+          # sempre anche i file di radice, `tsconfig.json` compreso — che su
+          # entro-mobile dichiara `"extends": "expo/tsconfig.base"` e si risolve
+          # dentro il **suo** `node_modules`. Qui quel `node_modules` non esiste
+          # e non deve esistere: serve un file, non un progetto. Il risultato era
+          # `[TSCONFIG_ERROR] Failed to load tsconfig … Tsconfig not found`, un
+          # rosso che in locale non si vede perché lì le dipendenze native ci
+          # sono. Senza quel file la trasformazione risale e trova il tsconfig di
+          # questo repo, che è quello giusto per un file compilato da noi.
+          sparse-checkout-cone-mode: false
 
       - name: Setup Node
         uses: actions/setup-node@v5
