@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.6] - 2026-09-16
+
+### Fixed
+- **Una foto scattata offline mentre si modifica un alimento arriva davvero nel bucket.** La coda offline caricava la foto in attesa solo se il payload portava `user_id`: in creazione c'è, in modifica no, perché il form non ce l'ha. La foto finiva in tabella come `pending://…`, una stringa che solo l'IndexedDB di quel browser sa leggere ([#113](https://github.com/E-Lop/entro/issues/113)). Ora si decide dal valore: se `image_url` comincia con `pending://` si carica, e la cartella la dà la sessione. Se il caricamento fallisce, la foto che l'alimento aveva resta dov'è invece di sparire.
+
+### Security
+- **I dump del database non si possono più committare per sbaglio da un clone nuovo.** I `backup_*.sql` nella radice contengono righe di `auth.users`, cioè email e hash delle password, e li teneva fuori solo `.git/info/exclude` — che la documentazione di git descrive come il posto per le regole «specific to one user's workflow», e che infatti non viaggia col clone ([#123](https://github.com/E-Lop/entro/issues/123)). La regola è ora in `.gitignore`. Nessun dump è mai stato in cronologia: `git log --all -- 'backup_*.sql'` è vuoto.
+
 ## [1.12.5] - 2026-09-16
 
 ### Fixed
@@ -740,7 +748,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.6...HEAD
+[1.12.6]: https://github.com/E-Lop/entro/compare/v1.12.5...v1.12.6
 [1.12.5]: https://github.com/E-Lop/entro/compare/v1.12.4...v1.12.5
 [1.12.4]: https://github.com/E-Lop/entro/compare/v1.12.3...v1.12.4
 [1.12.3]: https://github.com/E-Lop/entro/compare/v1.12.2...v1.12.3

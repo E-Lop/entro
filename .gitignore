@@ -76,3 +76,7 @@ PRODUCT.md
 
 # Clone del bundle di famiglia fatto dalla CI per il guardiano delle etichette.
 .entro-family/
+
+# Dump del database: contengono auth.users, cioè email e hash delle password.
+# Stava solo in .git/info/exclude, che non viaggia col repo (#123).
+backup_*.sql
