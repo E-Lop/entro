@@ -104,17 +104,16 @@ export async function uploadFoodImage(file: File, userId: string): Promise<strin
 /**
  * Delete image from Supabase Storage
  * @param imagePathOrUrl - Storage path or URL of the image to delete
- * @param userId - User ID (for validation)
+ *
+ * Nessuna guardia sullo userId: le policy di `storage.objects` ammettono anche
+ * la cartella di chi condivide una lista, e la guardia `startsWith(userId)` che
+ * stava qui lasciava orfana la foto di A quando B la sostituiva (#116). Decide
+ * la policy.
  */
-export async function deleteFoodImage(imagePathOrUrl: string, userId: string): Promise<void> {
+export async function deleteFoodImage(imagePathOrUrl: string): Promise<void> {
   try {
     // Extract path from URL if needed (backward compatibility)
     const imagePath = extractPathFromUrlOrPath(imagePathOrUrl)
-
-    // Verify path starts with user_id for security
-    if (!imagePath.startsWith(userId)) {
-      throw new Error('Non autorizzato a eliminare questa immagine')
-    }
 
     const { error } = await supabase.storage
       .from(BUCKET_NAME)

@@ -122,7 +122,7 @@ describe('softDeleteFood — l\'immagine invece sparisce davvero', () => {
 
     await softDeleteFood(FOOD_ID)
 
-    expect(mockDeleteFoodImage).toHaveBeenCalledWith(`${USER_ID}/foto.jpg`, USER_ID)
+    expect(mockDeleteFoodImage).toHaveBeenCalledWith(`${USER_ID}/foto.jpg`)
     // Azzerare il riferimento è parte del contratto: un puntatore a un blob
     // che non c'è più è peggio di nessun puntatore.
     expect(updatePayload().image_url).toBeNull()
@@ -154,6 +154,45 @@ describe('softDeleteFood — l\'immagine invece sparisce davvero', () => {
 
     expect(error).toBeNull()
     expect(updatePayload().deleted_at).toEqual(expect.any(String))
+  })
+
+  it('cancella l\'oggetto **dopo** l\'UPDATE, non prima', async () => {
+    // Prima di #116 era il contrario: se l'UPDATE falliva, l'alimento restava
+    // in lista con un `image_url` che non risolveva più. Un oggetto orfano è
+    // spazzatura recuperabile, una riga che punta al nulla l'utente la vede.
+    mockBuilder.single
+      .mockReset()
+      .mockResolvedValueOnce({ data: { image_url: `${USER_ID}/foto.jpg` }, error: null })
+      .mockResolvedValue({ data: { id: FOOD_ID }, error: null })
+
+    await softDeleteFood(FOOD_ID)
+
+    expect(mockBuilder.update.mock.invocationCallOrder[0]).toBeLessThan(
+      mockDeleteFoodImage.mock.invocationCallOrder[0]
+    )
+  })
+
+  it('se l\'UPDATE fallisce l\'immagine resta, perché la riga la cita ancora', async () => {
+    mockBuilder.single
+      .mockReset()
+      .mockResolvedValueOnce({ data: { image_url: `${USER_ID}/foto.jpg` }, error: null })
+      .mockResolvedValue({ data: null, error: { message: 'permission denied for table foods' } })
+
+    const { error } = await softDeleteFood(FOOD_ID)
+
+    expect(error).not.toBeNull()
+    expect(mockDeleteFoodImage).not.toHaveBeenCalled()
+  })
+
+  it('lo stesso per un\'immagine ancora in coda: IndexedDB si svuota solo a UPDATE riuscita', async () => {
+    mockBuilder.single
+      .mockReset()
+      .mockResolvedValueOnce({ data: { image_url: 'pending://abc-123' }, error: null })
+      .mockResolvedValue({ data: null, error: { message: 'permission denied for table foods' } })
+
+    await softDeleteFood(FOOD_ID)
+
+    expect(mockDeletePendingImage).not.toHaveBeenCalled()
   })
 
   it('senza immagine non tocca lo Storage', async () => {

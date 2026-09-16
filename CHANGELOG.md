@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.5] - 2026-09-16
+
+### Fixed
+- **Un upload fallito non salva più l'alimento senza foto.** Prima `resolveImageFile` inghiottiva l'errore e restituiva un ripiego — nessuna foto in creazione, quella di prima in modifica — e la scrittura partiva lo stesso: il dialogo si chiudeva e arrivava il toast verde, senza la foto appena scelta. Era il caso peggiore, perché l'utente credeva di avere una foto che non esisteva ([#114](https://github.com/E-Lop/entro/issues/114)). Ora compare «La foto non è stata caricata. Riprova.», il dialogo resta aperto e la foto resta nel form. Vale anche offline, quando la foto non si riesce a mettere in coda in IndexedDB.
+
+  E se la foto sale ma la riga non si scrive, l'oggetto appena caricato si cancella invece di restare nel bucket senza nessuno che lo citi.
+
+- **La foto vecchia si cancella dopo l'UPDATE, non prima.** `updateFood` e `softDeleteFood` cancellavano l'oggetto e poi scrivevano la riga: se la scrittura falliva, l'alimento restava in lista con un `image_url` che non risolveva più ([#116](https://github.com/E-Lop/entro/issues/116)). Il criterio viene dal bundle di famiglia (`core/food-images.md`): si scrive nella direzione che, fallendo a metà, lascia spazzatura — un oggetto orfano si recupera, una riga che punta al nulla l'utente la vede.
+
+- **Togliere la foto da un alimento la toglie davvero.** Trovato provando la correzione sopra, ed era peggio dell'ordine sbagliato: il dialogo trasformava il `null` della foto tolta in `undefined`, `JSON.stringify` buttava la chiave, e l'UPDATE lasciava la riga col vecchio percorso — mentre `updateFood`, vedendo la chiave nel payload, cancellava l'oggetto. Riprodotto su `main` contro la Supabase locale: riga ancora col percorso, bucket vuoto.
+
+- **Un membro di una lista condivisa può sostituire la foto caricata da un altro.** `deleteFoodImage` rifiutava ogni percorso che non cominciasse con lo userId di chi chiamava, mentre le policy di `storage.objects` ammettono anche la cartella di chi condivide la lista: la vecchia foto restava orfana per sempre ([#116](https://github.com/E-Lop/entro/issues/116)). La guardia è tolta, e a decidere è la policy — provato che un utente fuori dalla lista continua a non poter cancellare niente.
+
 ## [1.12.4] - 2026-09-11
 
 ### Security
@@ -727,7 +740,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.5...HEAD
+[1.12.5]: https://github.com/E-Lop/entro/compare/v1.12.4...v1.12.5
 [1.12.4]: https://github.com/E-Lop/entro/compare/v1.12.3...v1.12.4
 [1.12.3]: https://github.com/E-Lop/entro/compare/v1.12.2...v1.12.3
 [1.12.2]: https://github.com/E-Lop/entro/compare/v1.12.1...v1.12.2
