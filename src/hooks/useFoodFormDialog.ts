@@ -9,15 +9,22 @@ import { triggerHaptic } from '@/lib/haptics'
 import { logError } from '@/lib/safeLog'
 import { restoreFocusTo } from '@/lib/focusAfterRemoval'
 
+/** Quello che l'utente legge quando la foto non parte, online o offline. */
+const IMAGE_FAILED_MESSAGE = 'La foto non è stata caricata. Riprova.'
+
 /**
  * Upload or persist an image File depending on online/offline state.
- * Returns the storage path, pending:// URL, or the fallback value on failure.
+ * Returns the storage path or pending:// URL, or `null` on failure.
+ *
+ * `null` vuol dire «non salvare»: prima c'era un ripiego — nessuna foto in
+ * creazione, quella di prima in modifica — e la riga si scriveva lo stesso,
+ * col toast verde e senza la foto scelta (#114). Ora chi chiama mostra
+ * l'errore e lascia il dialogo aperto, con la foto ancora nel form.
  */
 async function resolveImageFile(
   file: File,
   userId: string,
   isOnline: boolean,
-  fallback: string | null = null,
 ): Promise<string | null> {
   if (isOnline) {
     try {
@@ -25,7 +32,7 @@ async function resolveImageFile(
       return await uploadFoodImage(file, userId)
     } catch (error) {
       logError('Image upload failed:', error)
-      return fallback
+      return null
     }
   }
 
@@ -35,7 +42,7 @@ async function resolveImageFile(
     return await savePendingImage(file)
   } catch (error) {
     logError('Failed to save pending image:', error)
-    return fallback
+    return null
   }
 }
 
@@ -58,6 +65,10 @@ export function useFoodFormDialog() {
     let imagePath: string | null = null
     if (data.image_url instanceof File) {
       imagePath = await resolveImageFile(data.image_url, user!.id, isOnline)
+      if (!imagePath) {
+        toast.error(IMAGE_FAILED_MESSAGE)
+        return
+      }
     } else if (typeof data.image_url === 'string') {
       imagePath = data.image_url
     }
@@ -94,11 +105,17 @@ export function useFoodFormDialog() {
     if (!editingFood) return
     const isOnline = onlineManager.isOnline()
 
-    let imagePath: string | null | undefined
+    let imagePath: string | null
     if (data.image_url instanceof File) {
-      imagePath = await resolveImageFile(data.image_url, user!.id, isOnline, editingFood.image_url)
+      imagePath = await resolveImageFile(data.image_url, user!.id, isOnline)
+      if (!imagePath) {
+        toast.error(IMAGE_FAILED_MESSAGE)
+        return
+      }
     } else {
-      imagePath = data.image_url ?? undefined
+      // `null` e non `undefined`: è la foto tolta, e `JSON.stringify` butterebbe
+      // la chiave lasciando la riga col vecchio percorso.
+      imagePath = data.image_url ?? null
     }
 
     // Exclude image_url from spread since we handle it separately

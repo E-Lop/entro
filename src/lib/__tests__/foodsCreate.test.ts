@@ -13,7 +13,15 @@
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { mockAuth, mockFrom, mockListBuilder, mockInsertBuilder, mockLogError } = vi.hoisted(() => {
+const {
+  mockAuth,
+  mockFrom,
+  mockListBuilder,
+  mockInsertBuilder,
+  mockLogError,
+  mockDeleteFoodImage,
+  mockIsPendingUrl,
+} = vi.hoisted(() => {
   const mockListBuilder = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
@@ -30,6 +38,8 @@ const { mockAuth, mockFrom, mockListBuilder, mockInsertBuilder, mockLogError } =
     mockListBuilder,
     mockInsertBuilder,
     mockLogError: vi.fn(),
+    mockDeleteFoodImage: vi.fn(),
+    mockIsPendingUrl: vi.fn<(url: unknown) => boolean>(() => false),
   }
 })
 
@@ -37,9 +47,9 @@ vi.mock('@/lib/supabase', () => ({
   supabase: { auth: mockAuth, from: mockFrom },
 }))
 vi.mock('@/lib/safeLog', () => ({ logError: mockLogError, logWarn: vi.fn() }))
-vi.mock('@/lib/storage', () => ({ deleteFoodImage: vi.fn() }))
+vi.mock('@/lib/storage', () => ({ deleteFoodImage: mockDeleteFoodImage }))
 vi.mock('@/lib/pendingImages', () => ({
-  isPendingUrl: vi.fn(() => false),
+  isPendingUrl: mockIsPendingUrl,
   deletePendingImage: vi.fn(),
 }))
 
@@ -116,5 +126,73 @@ describe('createFood sul percorso felice', () => {
     expect(mockInsertBuilder.insert).toHaveBeenCalledWith(
       expect.objectContaining({ list_id: 'lista-1', user_id: 'u1' })
     )
+  })
+})
+
+/**
+ * Una riga fallita dopo un upload riuscito lascia un oggetto che nessuna riga
+ * cita: si cancella subito, invece di aspettare che qualcuno lo trovi nel
+ * bucket (#114). L'ordine giusto viene da `entro-family/core/food-images.md`:
+ * carica l'oggetto, poi scrivi la riga, e se la riga fallisce togli l'oggetto.
+ */
+describe('createFood — la foto appena caricata, se la riga non si scrive', () => {
+  const PHOTO = 'u1/1757846400000-latte.jpg'
+
+  it('il database rifiuta: l’oggetto appena caricato si cancella', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
+    mockInsertBuilder.single.mockResolvedValue({ data: null, error: { message: 'boom' } })
+
+    const { error } = await createFood({ ...DATA, image_url: PHOTO })
+
+    expect(error).not.toBeNull()
+    expect(mockDeleteFoodImage).toHaveBeenCalledWith(PHOTO)
+  })
+
+  it('manca la lista: la riga non parte, e l’oggetto si cancella lo stesso', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
+
+    await createFood({ ...DATA, image_url: PHOTO })
+
+    expect(mockDeleteFoodImage).toHaveBeenCalledWith(PHOTO)
+  })
+
+  it('se anche la cancellazione fallisce, l’errore che arriva è quello della riga', async () => {
+    // L'orfano è spazzatura recuperabile: si logga, ma non prende il posto
+    // del messaggio che dice all'utente cosa non è andato.
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
+    mockInsertBuilder.single.mockResolvedValue({ data: null, error: { message: 'boom' } })
+    mockDeleteFoodImage.mockRejectedValueOnce(new Error('Storage irraggiungibile'))
+
+    const { error } = await createFood({ ...DATA, image_url: PHOTO })
+
+    expect(error?.message).toBe('Non è stato possibile salvare l\'alimento. Riprova.')
+  })
+
+  it('la riga si scrive: l’oggetto resta', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
+    mockInsertBuilder.single.mockResolvedValue({ data: { id: 'f1' }, error: null })
+
+    await createFood({ ...DATA, image_url: PHOTO })
+
+    expect(mockDeleteFoodImage).not.toHaveBeenCalled()
+  })
+
+  it('senza foto non tocca Storage', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
+    mockInsertBuilder.single.mockResolvedValue({ data: null, error: { message: 'boom' } })
+
+    await createFood(DATA)
+
+    expect(mockDeleteFoodImage).not.toHaveBeenCalled()
+  })
+
+  it('un riferimento `pending://` non va a Storage: non ci è mai salito', async () => {
+    mockIsPendingUrl.mockImplementation((url: unknown) => String(url).startsWith('pending://'))
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
+    mockInsertBuilder.single.mockResolvedValue({ data: null, error: { message: 'boom' } })
+
+    await createFood({ ...DATA, image_url: 'pending://abc' })
+
+    expect(mockDeleteFoodImage).not.toHaveBeenCalled()
   })
 })

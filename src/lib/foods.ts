@@ -254,6 +254,7 @@ export async function createFood(
       error: null,
     }
   } catch (error) {
+    await discardUploadedImage(foodData.image_url)
     return {
       food: null,
       error: error instanceof Error ? error : new Error('Errore nella creazione dell\'alimento'),
@@ -264,6 +265,10 @@ export async function createFood(
 /**
  * Update an existing food item
  * If image_url is being changed/removed, deletes the old image from storage
+ *
+ * L'ordine viene da `entro-family/core/food-images.md`: UPDATE **prima**,
+ * cancellazione della vecchia foto **dopo**. Prima di #116 era il contrario, e
+ * un'UPDATE fallita lasciava la riga puntata a un oggetto che non c'era più.
  */
 export async function updateFood(id: string, foodData: FoodUpdate): Promise<FoodResponse> {
   try {
@@ -273,24 +278,23 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
       throw new Error('Utente non autenticato')
     }
 
-    const user = session.user
-
-    // If image_url is being updated, get the old image to delete it
-    if ('image_url' in foodData) {
+    // If image_url is being updated, get the old image to delete it.
+    // `undefined` non cambia niente: `JSON.stringify` butta la chiave, e la
+    // riga tiene il riferimento di prima.
+    let previousImage: string | null = null
+    let imageChanged = false
+    if (foodData.image_url !== undefined) {
       const { data: oldFood, error: fetchError } = await supabase
         .from('foods')
         .select('image_url')
         .eq('id', id)
         .single()
 
-      // Only try to delete old image if fetch succeeded
-      if (!fetchError && oldFood?.image_url && oldFood.image_url !== foodData.image_url) {
-        try {
-          await deleteFoodImage(oldFood.image_url, user.id)
-        } catch (imageError) {
-          logWarn('Failed to delete old image, continuing with update:', imageError)
-          // Continue with update even if image deletion fails
-        }
+      // Senza sapere cosa citava la riga non si sa cosa è spazzatura: meglio
+      // un oggetto orfano che uno cancellato mentre qualcuno lo cita.
+      if (!fetchError && oldFood) {
+        previousImage = oldFood.image_url
+        imageChanged = oldFood.image_url !== foodData.image_url
       }
     }
 
@@ -302,7 +306,19 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
       .single()
 
     if (error) {
+      // La riga cita ancora la foto di prima; quella appena caricata non la
+      // cita nessuno.
+      if (imageChanged) await discardUploadedImage(foodData.image_url)
       throw userFacingError('Non è stato possibile salvare l\'alimento. Riprova.', error)
+    }
+
+    if (imageChanged && previousImage) {
+      try {
+        await deleteFoodImage(previousImage)
+      } catch (imageError) {
+        // La modifica è salva: un oggetto rimasto indietro è spazzatura.
+        logWarn('Failed to delete old image after update:', imageError)
+      }
     }
 
     return {
@@ -325,20 +341,38 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
  * l'utente ha chiesto di togliere l'alimento, e un blob rimasto indietro è un
  * problema di spazio, non una ragione per disobbedire.
  */
-async function discardFoodImage(imageUrl: string | null | undefined, userId: string): Promise<void> {
+async function discardFoodImage(imageUrl: string | null | undefined): Promise<void> {
   if (!imageUrl) return
 
   try {
     if (isPendingUrl(imageUrl)) {
       await deletePendingImage(imageUrl)
     } else {
-      await deleteFoodImage(imageUrl, userId)
+      await deleteFoodImage(imageUrl)
     }
   } catch (error) {
     // `logError` stampa il solo messaggio, ripulito: passare l'oggetto alla
     // console ne stamperebbe le proprietà, dove i client Supabase mettono i
     // dati della risposta (#79).
     logError('Immagine non cancellata, l\'alimento viene tolto comunque:', error)
+  }
+}
+
+/**
+ * Cancella una foto appena caricata per una riga che non si è scritta.
+ *
+ * Nessuna riga la cita, quindi è spazzatura: toglierla subito invece di
+ * lasciarla nel bucket (#114). Un `pending://` non è mai salito su Storage e
+ * resta alla coda offline. Il fallimento si logga e basta — l'errore che
+ * conta per l'utente è quello della riga.
+ */
+async function discardUploadedImage(imageUrl: string | null | undefined): Promise<void> {
+  if (!imageUrl || isPendingUrl(imageUrl)) return
+
+  try {
+    await deleteFoodImage(imageUrl)
+  } catch (error) {
+    logError('Foto caricata per una riga non scritta, rimasta orfana:', error)
   }
 }
 
@@ -387,8 +421,6 @@ export async function softDeleteFood(id: string, outcome?: FoodOutcome): Promise
       .eq('id', id)
       .single()
 
-    await discardFoodImage(existing?.image_url, session.user.id)
-
     // Un solo istante per tutta la scrittura: è un evento unico, e `consumed_at`
     // non deve risultare successivo al `deleted_at` della stessa UPDATE.
     const now = new Date().toISOString()
@@ -415,6 +447,10 @@ export async function softDeleteFood(id: string, outcome?: FoodOutcome): Promise
     if (error) {
       throw userFacingError('Non è stato possibile togliere l\'alimento dalla lista. Riprova.', error)
     }
+
+    // Dopo l'UPDATE, non prima (#116): se la scrittura fallisce l'alimento
+    // resta in lista, e deve restarci con una foto che risolve ancora.
+    await discardFoodImage(existing?.image_url)
 
     return {
       food: data,
