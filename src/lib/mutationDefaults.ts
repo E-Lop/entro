@@ -10,6 +10,7 @@ import {
   type FoodOutcome,
 } from './foods'
 import { mutationTracker } from './realtime'
+import { supabase } from './supabase'
 import { logWarn } from './safeLog'
 import { uploadFoodImage } from './storage'
 import { isPendingUrl, pendingImageToFile, deletePendingImage } from './pendingImages'
@@ -83,11 +84,20 @@ export function registerMutationDefaults(queryClient: QueryClient): void {
 
   queryClient.setMutationDefaults(mutationKeys.updateFood, {
     mutationFn: async (variables: { id: string; data: FoodUpdate }) => {
-      if (variables.data.user_id) {
-        variables.data.image_url = await resolvePendingImage(
-          variables.data.image_url,
-          variables.data.user_id,
-        )
+      // Si decide dal valore, non da chi ha scritto il payload (#113): il form
+      // di modifica non porta `user_id`, e prima una foto scattata offline in
+      // modifica finiva in tabella come `pending://`. Lo userId serve solo a
+      // scegliere la cartella del caricamento; chi autorizza è la RLS.
+      if (isPendingUrl(variables.data.image_url)) {
+        const userId =
+          variables.data.user_id ?? (await supabase.auth.getSession()).data.session?.user.id
+        const resolved = userId
+          ? await resolvePendingImage(variables.data.image_url, userId)
+          : null
+        // Caricamento fallito o nessuna sessione: la colonna non si tocca.
+        // `null` toglierebbe la foto che la riga ha oggi, e `updateFood` ne
+        // cancellerebbe l'oggetto.
+        variables.data.image_url = resolved ?? undefined
       }
       mutationTracker.track(variables.id, 'UPDATE')
       return unwrapFood(await updateFood(variables.id, variables.data))
