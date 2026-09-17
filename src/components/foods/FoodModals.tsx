@@ -74,6 +74,18 @@ export function FoodModals({
    * Uno stato solo per i due dialoghi: non possono essere aperti insieme.
    */
   const [dirty, setDirty] = useState(false)
+
+  // Con nessun form aperto non c'è niente da proteggere, **qualunque** sia la
+  // strada per cui il dialogo si è chiuso. Le uscite dell'utente passano da
+  // `guard.intercept` e riabbassano `dirty` da sole; il salvataggio no: chiude
+  // dall'esterno, il form si smonta senza dire che non è più sporco, e il
+  // `beforeunload` restava registrato — ricaricare chiedeva «Lasciare il
+  // sito?» senza nessun form aperto (#131). Si riallinea durante il render e
+  // non in un effetto, così la guardia non vede mai un fotogramma col valore
+  // vecchio.
+  const anyFormOpen = isAddDialogOpen || !!editingFood
+  if (!anyFormOpen && dirty) setDirty(false)
+
   const guard = useUnsavedChangesGuard(dirty)
   // Posizione della card che sta per uscire dalla lista, letta prima che
   // l'aggiornamento ottimistico la tolga. `null` significa «il dialogo non è

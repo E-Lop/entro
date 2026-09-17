@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.7] - 2026-09-17
+
+### Fixed
+- **Dopo aver salvato un alimento, ricaricare la pagina non chiede più «Lasciare il sito?».** La guardia delle modifiche non salvate registra un `beforeunload` finché il form è sporco, e riabbassava lo stato solo nelle uscite dell'utente — Esc, clic fuori, la X. Il salvataggio chiude il dialogo dall'esterno, il form si smontava senza dire che non era più sporco, e il listener restava lì con nessun form aperto ([#131](https://github.com/E-Lop/entro/issues/131)). Ora con nessun dialogo aperto la guardia è spenta, qualunque sia la strada per cui si è chiuso. Verificato nel browser contro la Supabase locale: prima del salvataggio l'evento risulta intercettato, dopo no, e un ricaricamento vero passa senza dialogo.
+
 ## [1.12.6] - 2026-09-16
 
 ### Fixed
@@ -748,7 +753,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.6...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.7...HEAD
+[1.12.7]: https://github.com/E-Lop/entro/compare/v1.12.6...v1.12.7
 [1.12.6]: https://github.com/E-Lop/entro/compare/v1.12.5...v1.12.6
 [1.12.5]: https://github.com/E-Lop/entro/compare/v1.12.4...v1.12.5
 [1.12.4]: https://github.com/E-Lop/entro/compare/v1.12.3...v1.12.4
