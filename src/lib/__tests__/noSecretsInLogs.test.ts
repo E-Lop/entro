@@ -46,20 +46,26 @@ const SENTINELS = [TOKEN, REFRESH_TOKEN, PASSWORD, INVITE_CODE, OPAQUE_SECRET]
  */
 const LEGACY_SIGNED_URL = `https://rmbmmwcxtnanacxbkihc.supabase.co/storage/v1/object/sign/food-images/utente/foto.jpg?token=${TOKEN}`
 
-const { mockAuth, mockRpc, mockCreateSignedUrl } = vi.hoisted(() => ({
+const { mockAuth, mockRpc, mockCreateSignedUrl, mockCreateSignedUrls } = vi.hoisted(() => ({
   mockAuth: {
     getUser: vi.fn(),
     getSession: vi.fn(),
   },
   mockRpc: vi.fn(),
   mockCreateSignedUrl: vi.fn(),
+  mockCreateSignedUrls: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     auth: mockAuth,
     rpc: mockRpc,
-    storage: { from: () => ({ createSignedUrl: mockCreateSignedUrl }) },
+    storage: {
+      from: () => ({
+        createSignedUrl: mockCreateSignedUrl,
+        createSignedUrls: mockCreateSignedUrls,
+      }),
+    },
   },
 }))
 
@@ -380,28 +386,32 @@ describe('flusso signed URL — il token non finisce in console', () => {
     // Qui il segreto non arriva dall'errore: arriva dal *percorso*. Alcune
     // righe in DB tengono l'URL firmato intero come `image_url`, e quel valore
     // finiva interpolato nel contesto del log — token nella query compreso.
-    mockCreateSignedUrl.mockResolvedValue({
+    //
+    // Dalla #119 la firma è una `createSignedUrls` sola, e se fallisce lancia
+    // invece di tornare una mappa vuota: la regola sui log non cambia.
+    mockCreateSignedUrls.mockResolvedValue({
       data: null,
       error: supabaseErrorWithSession('Errore interno del server'),
     })
 
-    const urls = await getSignedImageUrls([LEGACY_SIGNED_URL])
+    await expect(getSignedImageUrls([LEGACY_SIGNED_URL])).rejects.toThrow()
 
-    expect(urls.size).toBe(0)
     expectNoSentinels()
   })
 
-  it('getSignedImageUrls tiene il percorso normale nel log, che è il motivo per cui lo si logga', async () => {
-    // Redigere è utile finché non cancella la diagnosi: un percorso d'archivio
-    // non è un URL e deve restare leggibile.
-    mockCreateSignedUrl.mockResolvedValue({
+  it('getSignedImageUrls tiene nel log quante foto stava firmando', async () => {
+    // Redigere è utile finché non cancella la diagnosi. Fino alla #119 il log
+    // portava il percorso, perché falliva un percorso alla volta; ora fallisce
+    // la chiamata intera e nessun percorso è il colpevole, quindi resta il
+    // conteggio — che non può portarsi dietro un token.
+    mockCreateSignedUrls.mockResolvedValue({
       data: null,
       error: new Error('Errore interno del server'),
     })
 
-    await getSignedImageUrls(['utente/foto.jpg'])
+    await expect(getSignedImageUrls(['utente/foto.jpg', 'utente/altra.jpg'])).rejects.toThrow()
 
-    expect(output()).toContain('utente/foto.jpg')
+    expect(output()).toContain('2 images')
   })
 })
 

@@ -12,6 +12,7 @@ import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
 import { SwipeableCardProvider } from '../hooks/useSwipeableCardController'
 import { useRealtimeFoods } from '../hooks/useRealtimeFoods'
+import { usePrefetchSignedUrls } from '../hooks/useSignedUrl'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodFilters } from '../components/foods/FoodFilters'
 import { InstructionCard } from '../components/foods/InstructionCard'
@@ -87,6 +88,11 @@ export function DashboardPage() {
   // online → persistita e disponibile offline. Filtro/ordinamento/conteggi sono
   // derivati client-side dagli stessi dati (vedi @/lib/foodFilters).
   const { data: allFoods = [], isLoading: foodsLoading } = useFoods()
+
+  // Tutte le foto della lista in una richiesta di firma sola, prima che le card
+  // le chiedano una a una (#119). Anche quelle nascoste da un filtro: una lista
+  // di casa ha decine di foto, e togliendo il filtro sono già pronte.
+  usePrefetchSignedUrls(allFoods.map((food) => food.image_url))
 
   const { foods, stats } = useMemo(
     () => deriveDashboardData(allFoods, debouncedFilters),

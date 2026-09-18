@@ -331,3 +331,33 @@ export async function seedFoods(listId: string, ownerId: string, n: number): Pro
   const { error } = await adminClient.from('foods').insert(rows)
   if (error) throw new Error(`Impossibile creare i foods: ${error.message}`)
 }
+
+/** Un JPEG valido da 1×1: basta a far esistere l'oggetto, e il bucket accetta solo immagini. */
+const TINY_JPEG = Buffer.from(
+  '/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=',
+  'base64'
+)
+
+/**
+ * Carica una foto nel bucket, nella cartella dell'utente, e ne restituisce il
+ * percorso d'archivio — cioè ciò che va in `foods.image_url`.
+ */
+export async function uploadE2EFoodImage(
+  userId: string,
+  name: string,
+  body: Buffer = TINY_JPEG
+): Promise<string> {
+  const path = `${userId}/${name}`
+  const { error } = await adminClient.storage
+    .from('food-images')
+    .upload(path, body, { contentType: 'image/jpeg', upsert: true })
+  if (error) throw new Error(`Impossibile caricare la foto di prova: ${error.message}`)
+  return path
+}
+
+/** Toglie dal bucket le foto di prova: cancellare l'utente non cancella i suoi oggetti. */
+export async function removeE2EFoodImages(paths: string[]): Promise<void> {
+  if (paths.length === 0) return
+  const { error } = await adminClient.storage.from('food-images').remove(paths)
+  if (error) throw new Error(`Impossibile togliere le foto di prova: ${error.message}`)
+}
