@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.10] - 2026-09-18
+
+### Fixed
+- **Una creazione rifiutata non lascia più in lista un alimento che non esiste** (#139). Aggiungendo un alimento la card compare subito, prima della risposta del server. Se il server rifiutava, a toglierla era solo la rilettura della lista che segue ogni scrittura: se falliva anche quella — il server irraggiungibile, cioè quando una creazione fallisce — la card restava a schermo, contata nei totali, con l'avviso d'errore già sparito. Ora l'errore toglie subito la card, per id. Non ripristina una fotografia delle liste come fanno modifica e rimozione: con più creazioni in volo, per esempio al ritorno della rete, la fotografia della prima cancellerebbe la card della seconda. Una creazione in pausa perché si è offline non è un errore, e tiene la sua card.
+
+  Provato sul browser con `tests/e2e/create-rejected-no-ghost-card.spec.ts`, che rifiuta sia la scrittura sia la rilettura: contro il codice precedente era rosso, con la card ancora in lista. Guardato anche a schermo.
+
 ## [1.12.9] - 2026-09-18
 
 ### Fixed
@@ -769,7 +776,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.9...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.10...HEAD
+[1.12.10]: https://github.com/E-Lop/entro/compare/v1.12.9...v1.12.10
 [1.12.9]: https://github.com/E-Lop/entro/compare/v1.12.8...v1.12.9
 [1.12.8]: https://github.com/E-Lop/entro/compare/v1.12.7...v1.12.8
 [1.12.7]: https://github.com/E-Lop/entro/compare/v1.12.6...v1.12.7
