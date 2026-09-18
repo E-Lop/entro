@@ -129,7 +129,17 @@ export function useCreateFood() {
       return { optimisticFood }
     },
     onSuccess: () => onlineToast('Alimento aggiunto con successo'),
-    onError: (error: Error) => {
+    onError: (error: Error, variables: { data: FoodInsert; id: string }) => {
+      // La card ottimistica si toglie qui, e non si lascia alla rilettura di
+      // `onSettled`: se fallisce anche quella — il server irraggiungibile, che
+      // è quando una creazione fallisce — in lista resterebbe un alimento che
+      // non esiste (#139). Per id, e non con `restorePreviousLists`: con più
+      // creazioni in volo la fotografia della prima cancellerebbe la card
+      // della seconda.
+      queryClient.setQueriesData<Food[]>(
+        { queryKey: foodsKeys.lists() },
+        (old) => old?.filter((food) => food.id !== variables.id),
+      )
       toast.error(error.message || 'Errore nella creazione dell\'alimento')
     },
     onSettled: () => {
