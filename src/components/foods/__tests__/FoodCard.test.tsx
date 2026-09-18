@@ -126,9 +126,11 @@ describe('FoodCard — accessibilità & identità', () => {
 
   it('evidenzia le note come contenuto neutro a token (no ambra grezza)', () => {
     render(<FoodCard food={makeFood({ notes: 'Aprire entro 2 giorni' })} />)
-    const note = screen.getByText('Aprire entro 2 giorni')
-    expect(note.className).toContain('bg-muted')
-    expect(note.className).not.toMatch(/bg-amber/)
+    // Lo sfondo sta sul riquadro, non sul testo: il taglio a due righe vuole un
+    // elemento interno senza padding (#133).
+    const note = screen.getByText('Aprire entro 2 giorni').closest('[data-food-notes]')
+    expect(note?.className).toContain('bg-muted')
+    expect(note?.className).not.toMatch(/bg-amber/)
   })
 })
 
