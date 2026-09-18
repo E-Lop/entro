@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.8] - 2026-09-18
+
+### Fixed
+- **I messaggi di Supabase Auth non arrivano più a schermo** (#100). Chi sbagliava la password leggeva `Invalid login credentials`, e con l'auth irraggiungibile l'avviso del form mostrava `{}`. Ora il messaggio lo sceglie una tabella decisa il 18 settembre per i due client, in `src/lib/authErrorMessage.ts`: «Email o password non corretti», «Conferma la tua email prima di accedere», «Esiste già un account con questa email», due messaggi sulla password, «Troppi tentativi, riprova fra qualche minuto», «Il link è scaduto, richiedine uno nuovo», «Non riesco a raggiungere il server. Controlla la connessione e riprova» quando la rete manca, e per tutto il resto «Qualcosa è andato storto, riprova». Le credenziali sbagliate restano generiche di proposito: distinguere direbbe a chiunque se un account esiste.
+
+  Gli errori si riconoscono da `error.code`, mai dal testo, come prescrive la doc Supabase (*Auth error codes*); la rete assente, l'unico caso senza `code`, da `AuthRetryableFetchError` a `status` 0. Per questo `auth.ts` rilancia l'errore com'è: `new Error(error.message)` perdeva il `code`. L'originale resta in `Error.cause`. Vale per login, registrazione, richiesta e cambio della password, e per il reinvio dell'email di conferma, che chiamava Supabase dalla pagina. I punti che mostrano il messaggio passano da `redactSecrets`. Il logout non cambia: i suoi messaggi li sceglie già `useAuth`.
+
+  Provato sul browser con `tests/e2e/auth-message-not-on-screen.spec.ts`, che guarda tutto il body e non solo l'avviso: password sbagliata contro la Supabase locale, auth che risponde 503, rete assente. Lanciato prima contro il codice precedente, era rosso sui primi due. entro-mobile fa lo stesso con entro-mobile#33.
+
 ## [1.12.7] - 2026-09-17
 
 ### Fixed
@@ -753,7 +762,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.7...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.8...HEAD
+[1.12.8]: https://github.com/E-Lop/entro/compare/v1.12.7...v1.12.8
 [1.12.7]: https://github.com/E-Lop/entro/compare/v1.12.6...v1.12.7
 [1.12.6]: https://github.com/E-Lop/entro/compare/v1.12.5...v1.12.6
 [1.12.5]: https://github.com/E-Lop/entro/compare/v1.12.4...v1.12.5

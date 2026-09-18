@@ -2,6 +2,8 @@ import { supabase } from './supabase'
 import { unsubscribeFromPush } from './pushNotifications'
 import { clearPersistedCache } from './queryPersister'
 import { logError } from './safeLog'
+import { authErrorMessage } from './authErrorMessage'
+import { userFacingError } from './userFacingError'
 import type { User, Session } from '@supabase/supabase-js'
 
 /**
@@ -66,14 +68,23 @@ function markExplicitAuth(session: Session | null): void {
 }
 
 /**
- * Wrap an error into the AuthResponse failure shape.
+ * L'errore di una funzione il cui esito **una pagina mostra**.
+ *
+ * Fino alla #100 qui passava `error.message`, cioè il testo di Supabase Auth:
+ * in inglese, e con l'auth irraggiungibile la risposta serializzata. Il
+ * messaggio lo sceglie la tabella di `authErrorMessage`, per `error.code`;
+ * l'originale resta in `cause` per chi diagnostica. Per questo più sotto si
+ * rilancia `error` com'è e non `new Error(error.message)`, che perdeva il
+ * `code`.
+ *
+ * `signOut` non passa di qui: i suoi messaggi li sceglie `useAuth`.
  */
-function authFailure(error: unknown, fallbackMessage: string): AuthResponse {
-  return {
-    user: null,
-    session: null,
-    error: error instanceof Error ? error : new Error(fallbackMessage),
-  }
+function shownError(error: unknown): Error {
+  return userFacingError(authErrorMessage(error), error)
+}
+
+function authFailure(error: unknown): AuthResponse {
+  return { user: null, session: null, error: shownError(error) }
 }
 
 /**
@@ -91,13 +102,13 @@ export async function signUp(
       options: { data: { full_name: fullName } },
     })
 
-    if (error) throw new Error(error.message)
+    if (error) throw error
 
     markExplicitAuth(data.session)
 
     return { user: data.user, session: data.session, error: null }
   } catch (error) {
-    return authFailure(error, 'Errore durante la registrazione')
+    return authFailure(error)
   }
 }
 
@@ -114,13 +125,13 @@ export async function signIn(
       password,
     })
 
-    if (error) throw new Error(error.message)
+    if (error) throw error
 
     markExplicitAuth(data.session)
 
     return { user: data.user, session: data.session, error: null }
   } catch (error) {
-    return authFailure(error, 'Errore durante il login')
+    return authFailure(error)
   }
 }
 
@@ -251,12 +262,10 @@ export async function resetPasswordRequest(
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })
-    if (error) throw new Error(error.message)
+    if (error) throw error
     return { error: null }
   } catch (error) {
-    return {
-      error: error instanceof Error ? error : new Error('Errore durante l\'invio dell\'email'),
-    }
+    return { error: shownError(error) }
   }
 }
 
@@ -268,11 +277,9 @@ export async function updatePassword(
 ): Promise<{ error: Error | null }> {
   try {
     const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) throw new Error(error.message)
+    if (error) throw error
     return { error: null }
   } catch (error) {
-    return {
-      error: error instanceof Error ? error : new Error('Errore durante l\'aggiornamento della password'),
-    }
+    return { error: shownError(error) }
   }
 }

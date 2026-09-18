@@ -8,6 +8,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { supabase } from '../lib/supabase'
 import { logError } from '../lib/safeLog'
+import { authErrorMessage } from '../lib/authErrorMessage'
 import { Mail, CheckCircle2, Loader2 } from 'lucide-react'
 
 function getResendButtonContent(isResending: boolean, resendSuccess: boolean): ReactNode {
@@ -104,7 +105,7 @@ export function VerifyEmailPage() {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error(authErrorMessage(error))
       } else {
         setResendSuccess(true)
         toast.success('Email di conferma inviata nuovamente!')

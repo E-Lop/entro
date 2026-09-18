@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { updatePassword } from '../lib/auth'
+import { redactSecrets } from '../lib/safeLog'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { resetPasswordSchema, type ResetPasswordFormData } from '../lib/validations/auth.schemas'
 import { Button } from '../components/ui/button'
@@ -33,7 +34,7 @@ export default function ResetPasswordPage() {
       const { error } = await updatePassword(data.password)
 
       if (error) {
-        toast.error(error.message)
+        toast.error(redactSecrets(error.message))
         return
       }
 

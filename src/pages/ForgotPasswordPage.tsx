@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
 import { ArrowLeft, Mail } from 'lucide-react'
 import { resetPasswordRequest } from '../lib/auth'
+import { redactSecrets } from '../lib/safeLog'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../lib/validations/auth.schemas'
 import { Button } from '../components/ui/button'
@@ -30,7 +31,7 @@ export default function ForgotPasswordPage() {
       const { error } = await resetPasswordRequest(data.email)
 
       if (error) {
-        toast.error(error.message)
+        toast.error(redactSecrets(error.message))
         return
       }
 
