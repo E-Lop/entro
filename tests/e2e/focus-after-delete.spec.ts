@@ -113,10 +113,10 @@ test.describe('fuoco dopo l’eliminazione', () => {
           ?.replace(/^Elimina /, '') ?? ''
     )
 
-    const apritore = page.getByRole('button', { name: `Elimina ${name}` })
-    await apritore.click()
+    const opener = page.getByRole('button', { name: `Elimina ${name}` })
+    await opener.click()
     await page.getByRole('button', { name: 'Annulla' }).click()
 
-    await expect(apritore).toBeFocused()
+    await expect(opener).toBeFocused()
   })
 })

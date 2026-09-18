@@ -81,7 +81,7 @@ function registerEvents(client: TestClient) {
   const { data } = client.auth.onAuthStateChange((event) => {
     events.push(event)
   })
-  return { events, disiscrivi: () => data.subscription.unsubscribe() }
+  return { events, unsubscribe: () => data.subscription.unsubscribe() }
 }
 
 afterEach(() => {
@@ -100,21 +100,21 @@ describe('supabase.auth.signOut() sul percorso d’errore', () => {
           { status: 403, headers: { 'Content-Type': 'application/json' } }
         )
     )
-    const { events, disiscrivi } = registerEvents(client)
+    const { events, unsubscribe } = registerEvents(client)
 
     const { error } = await client.auth.signOut()
 
     expect(error).toBeNull()
     expect(events).toContain('SIGNED_OUT')
     expect(memory.has(storageKey)).toBe(false)
-    disiscrivi()
+    unsubscribe()
   })
 
   it('quando la rete cade ritorna errore e NON emette SIGNED_OUT', async () => {
     const { client, memory, storageKey } = clientWithSession(() =>
       Promise.reject(new TypeError('Failed to fetch'))
     )
-    const { events, disiscrivi } = registerEvents(client)
+    const { events, unsubscribe } = registerEvents(client)
 
     const { error } = await client.auth.signOut()
 
@@ -123,6 +123,6 @@ describe('supabase.auth.signOut() sul percorso d’errore', () => {
     // La sessione resta nello storage di supabase-js: è la nostra
     // `clearAuthStorage()` a toglierla, non il client.
     expect(memory.has(storageKey)).toBe(true)
-    disiscrivi()
+    unsubscribe()
   })
 })
