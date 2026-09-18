@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { loginSchema, signupSchema, type LoginFormData, type SignupFormData } from '../../lib/validations/auth.schemas'
+import { redactSecrets } from '../../lib/safeLog'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Alert, AlertDescription } from '../ui/alert'
@@ -69,7 +70,9 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
         form.reset()
         onSuccess?.(data.email)
       } else {
-        setServerError(result.error?.message ?? 'Si è verificato un errore. Riprova.')
+        setServerError(
+          redactSecrets(result.error?.message ?? 'Si è verificato un errore. Riprova.')
+        )
       }
     } finally {
       setIsSubmitting(false)
