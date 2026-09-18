@@ -106,14 +106,14 @@ describe('vocabolario delle colonne text + CHECK', () => {
    * prova più niente. Meglio farlo fallire e costringere a riscriverlo.
    */
   it('nessuna migrazione successiva ridefinisce quei CHECK', () => {
-    const ridefinizioni = migrationFile().flatMap((sql) => [
+    const redefinitions = migrationFile().flatMap((sql) => [
       ...sql.matchAll(
         /alter\s+table[^;]*\bfoods\b[^;]*\bcheck\b[^;]*\b(status|storage_location|quantity_unit)\b/gis
       ),
     ])
 
     expect(
-      ridefinizioni.map((m) => m[0]),
+      redefinitions.map((m) => m[0]),
       'un CHECK è stato ridefinito: aggiorna questo test perché legga la definizione valida'
     ).toEqual([])
   })
