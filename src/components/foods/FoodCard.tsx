@@ -272,10 +272,18 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
           <span>Scadenza: {formattedExpiryDate}</span>
         </div>
 
-        {/* Notes - Highlighted as user content */}
+        {/* Notes - Highlighted as user content.
+            Il padding sta sul riquadro e il taglio sul testo dentro: `line-clamp`
+            ritaglia al bordo del padding, e con tutti e due sullo stesso
+            elemento la terza riga spuntava nel padding di sotto (#133).
+            `whitespace-pre-line` tiene l'a capo che la scansione mette fra
+            «Marca» e «Categorie OFF». */}
         {food.notes && (
-          <div className="text-sm text-foreground/90 line-clamp-2 mt-2 bg-muted rounded-md px-3 py-2 border border-border">
-            {food.notes}
+          <div
+            data-food-notes
+            className="text-sm text-foreground/90 mt-2 bg-muted rounded-md px-3 py-2 border border-border"
+          >
+            <p className="line-clamp-2 whitespace-pre-line">{food.notes}</p>
           </div>
         )}
       </CardContent>

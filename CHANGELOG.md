@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.9] - 2026-09-18
+
+### Fixed
+- **Le note sulla card mostrano due righe intere, e l'a capo dov'è stato scritto** (#133). Sotto le due righe troncate spuntava la metà superiore di una terza: `line-clamp` ritaglia al bordo del padding, e padding e taglio stavano sullo stesso elemento, quindi la terza riga si vedeva dentro il padding di sotto. E le note di una scansione, «Marca: …» e «Categorie OFF: …», uscivano su una riga sola, perché senza `white-space` il browser riduce `\n` a uno spazio. Ora il padding sta sul riquadro e il taglio sul testo dentro, con `whitespace-pre-line`: è anche ciò che fa l'app nativa, dove `Text` rispetta l'a capo.
+
+  Sono due difetti di resa, e jsdom non ha layout: li prova `tests/e2e/food-card-notes.spec.ts`, che sul browser conta le righe di testo dentro l'area che chi ritaglia lascia vedere. Contro il markup precedente era rosso su entrambi, 3 righe invece di 2 e le due voci alla stessa altezza. Guardato anche a schermo a 390×844, prima e dopo.
+
 ## [1.12.8] - 2026-09-18
 
 ### Fixed
@@ -762,7 +769,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.8...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.9...HEAD
+[1.12.9]: https://github.com/E-Lop/entro/compare/v1.12.8...v1.12.9
 [1.12.8]: https://github.com/E-Lop/entro/compare/v1.12.7...v1.12.8
 [1.12.7]: https://github.com/E-Lop/entro/compare/v1.12.6...v1.12.7
 [1.12.6]: https://github.com/E-Lop/entro/compare/v1.12.5...v1.12.6
