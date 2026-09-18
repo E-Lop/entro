@@ -177,29 +177,41 @@ export async function getSignedImageUrl(imagePath: string, expiresIn: number = 3
 }
 
 /**
- * Get signed URLs for multiple image paths
- * @param imagePaths - Array of storage paths
- * @param expiresIn - Expiration time in seconds (default: 1 hour)
- * @returns Map of path to signed URL
+ * Le signed URL di più foto in **una** richiesta: `createSignedUrls` (#119).
+ *
+ * Fino alla 1.12.10 firmava un percorso alla volta, in parallelo. La mappa ha
+ * una voce per ogni percorso **che ha un oggetto**: Storage risponde 200 anche
+ * quando un oggetto manca, con `signedURL: null` e un `error` per voce, e il
+ * testo è lo stesso per «non esiste» e «non hai accesso» (misurato sulla
+ * Supabase locale il 18 set 2026). È uno stato previsto — la riga punta a una
+ * foto cancellata — quindi quella voce resta fuori senza finire nei log.
+ *
+ * Lancia solo se fallisce la chiamata intera. Il gemello su entro-mobile è
+ * `getSignedImageUrls` in `src/shared/lib/foodImages.ts`.
+ *
+ * @param imagePaths - Percorsi d'archivio
+ * @param expiresIn - Scadenza in secondi (default: un'ora)
  */
 export async function getSignedImageUrls(
   imagePaths: string[],
   expiresIn: number = 3600
 ): Promise<Map<string, string>> {
   const urlMap = new Map<string, string>()
+  const paths = [...new Set(imagePaths)]
+  if (paths.length === 0) return urlMap
 
-  // Generate signed URLs in parallel
-  const promises = imagePaths.map(async (path) => {
-    try {
-      const signedUrl = await getSignedImageUrl(path, expiresIn)
-      urlMap.set(path, signedUrl)
-    } catch (error) {
-      logError(`Failed to generate signed URL for ${safeImageRef(path)}:`, error)
-      // Don't add to map if failed
-    }
-  })
+  const { data, error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .createSignedUrls(paths, expiresIn)
 
-  await Promise.all(promises)
+  if (error || !data) {
+    logError(`Error creating signed URLs for ${paths.length} images:`, error)
+    throw new Error('Errore durante il recupero delle immagini')
+  }
+
+  for (const item of data) {
+    if (item.path && item.signedUrl) urlMap.set(item.path, item.signedUrl)
+  }
 
   return urlMap
 }

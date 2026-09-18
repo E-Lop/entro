@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.11] - 2026-09-18
+
+### Changed
+- **Le foto della lista si firmano in una richiesta sola, e non si richiedono a ogni cambio di vista** (#119). Ogni card chiedeva la propria signed URL a ogni montaggio, senza cache: con N card partivano N richieste, e passare da Lista a Calendario e ritorno le rifaceva tutte. Ora ogni percorso ha la sua voce in React Query, i percorsi chiesti nello stesso giro partono in una sola `createSignedUrls`, e la lista mette in coda tutte le sue foto insieme. Una URL resta buona per 55 minuti, cinque meno della sua scadenza. È lo stesso disegno dell'app nativa. La card e l'anteprima nel form condividono la stessa voce.
+
+  `getSignedImageUrls` si chiamava «in batch» ma firmava un percorso alla volta: ora è una chiamata sola, e la usa anche l'esportazione dati, che dà lo stesso risultato di prima. Una riga che punta a una foto cancellata è uno stato previsto: vale «nessuna foto», non ferma le altre e non finisce nei log. Storage risponde 200 con un errore per voce, e il testo è lo stesso per «non esiste» e «non hai accesso», quindi non lo si riconosce dal testo. Restano fuori dal batch, e funzionano come prima, le foto scattate offline e gli URL interi delle righe legacy.
+
+  Misurato sul browser con `tests/e2e/signed-urls-in-one-request.spec.ts`: quattro card, **una** richiesta di firma e nessuna tornando dal calendario, dove il codice precedente ne faceva otto in sviluppo e altre otto a ogni ritorno. `data-export-image-urls.spec.ts` scarica l'esportazione e passa identico prima e dopo. Guardate a schermo a 390×844 la card, l'anteprima nel form, una riga legacy e una foto scattata offline.
+
 ## [1.12.10] - 2026-09-18
 
 ### Fixed
@@ -776,7 +785,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.10...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.11...HEAD
+[1.12.11]: https://github.com/E-Lop/entro/compare/v1.12.10...v1.12.11
 [1.12.10]: https://github.com/E-Lop/entro/compare/v1.12.9...v1.12.10
 [1.12.9]: https://github.com/E-Lop/entro/compare/v1.12.8...v1.12.9
 [1.12.8]: https://github.com/E-Lop/entro/compare/v1.12.7...v1.12.8

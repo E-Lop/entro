@@ -19,6 +19,12 @@ vi.mock('@/lib/openfoodfacts', () => ({
   mapProductToFormData: mockMapProduct,
 }))
 
+// Dalla #119 l'anteprima della foto passa da React Query. Qui il form si monta
+// senza provider e le foto non sono sotto esame: le prova `useSignedUrl.test`.
+vi.mock('@/hooks/useSignedUrl', () => ({
+  useSignedUrl: () => ({ signedUrl: null, isLoading: false, error: null }),
+}))
+
 vi.mock('@/hooks/useFoods', () => ({
   useCategories: () => ({
     data: [
