@@ -23,37 +23,29 @@
  * Non importa niente di piattaforma né `supabase-js`: legge `code` da un
  * valore qualunque. Gemello di `entro-mobile/src/shared/lib/authErrorMessage.ts`.
  */
-export const GENERIC_AUTH_ERROR = "Qualcosa è andato storto, riprova";
+export const GENERIC_AUTH_ERROR = 'Qualcosa è andato storto, riprova'
 
-const ACCOUNT_EXISTS = "Esiste già un account con questa email";
-const TOO_MANY_ATTEMPTS = "Troppi tentativi, riprova fra qualche minuto";
+const ACCOUNT_EXISTS = 'Esiste già un account con questa email'
+const TOO_MANY_ATTEMPTS = 'Troppi tentativi, riprova fra qualche minuto'
 
 const MESSAGES = new Map<string, string>([
-  ["invalid_credentials", "Email o password non corretti"],
-  ["email_not_confirmed", "Conferma la tua email prima di accedere"],
-  ["user_already_exists", ACCOUNT_EXISTS],
-  ["email_exists", ACCOUNT_EXISTS],
-  [
-    "weak_password",
-    "La password è troppo debole: scegline una più lunga o meno comune",
-  ],
-  ["same_password", "La nuova password deve essere diversa da quella attuale"],
-  ["over_email_send_rate_limit", TOO_MANY_ATTEMPTS],
-  ["over_request_rate_limit", TOO_MANY_ATTEMPTS],
-  ["otp_expired", "Il link è scaduto, richiedine uno nuovo"],
-]);
+  ['invalid_credentials', 'Email o password non corretti'],
+  ['email_not_confirmed', 'Conferma la tua email prima di accedere'],
+  ['user_already_exists', ACCOUNT_EXISTS],
+  ['email_exists', ACCOUNT_EXISTS],
+  ['weak_password', 'La password è troppo debole: scegline una più lunga o meno comune'],
+  ['same_password', 'La nuova password deve essere diversa da quella attuale'],
+  ['over_email_send_rate_limit', TOO_MANY_ATTEMPTS],
+  ['over_request_rate_limit', TOO_MANY_ATTEMPTS],
+  ['otp_expired', 'Il link è scaduto, richiedine uno nuovo'],
+])
 
-const UNREACHABLE =
-  "Non riesco a raggiungere il server. Controlla la connessione e riprova";
+const UNREACHABLE = 'Non riesco a raggiungere il server. Controlla la connessione e riprova'
 
 export function authErrorMessage(error: unknown): string {
-  if (typeof error !== "object" || error === null) return GENERIC_AUTH_ERROR;
+  if (typeof error !== 'object' || error === null) return GENERIC_AUTH_ERROR
 
-  const { code, name, status } = error as {
-    code?: unknown;
-    name?: unknown;
-    status?: unknown;
-  };
-  if (name === "AuthRetryableFetchError" && status === 0) return UNREACHABLE;
-  return (typeof code === "string" && MESSAGES.get(code)) || GENERIC_AUTH_ERROR;
+  const { code, name, status } = error as { code?: unknown; name?: unknown; status?: unknown }
+  if (name === 'AuthRetryableFetchError' && status === 0) return UNREACHABLE
+  return (typeof code === 'string' && MESSAGES.get(code)) || GENERIC_AUTH_ERROR
 }
