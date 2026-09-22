@@ -60,5 +60,11 @@ export interface AcceptInviteConfirmationResponse {
   listId: string | null
   requiresConfirmation: boolean
   foodCount?: number
+  /**
+   * Nella richiesta di conferma: `true` se chi accetta è l'unico membro della
+   * lista che lascia, che allora si cancella con i suoi alimenti; `false` se la
+   * lista resta agli altri. `null` se il server non lo dice (prima della #147).
+   */
+  onlyMember?: boolean | null
   error: Error | null
 }

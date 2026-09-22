@@ -1,5 +1,5 @@
 import { getCurrentUser } from './auth'
-import { getFoods } from './foods'
+import { supabase } from './supabase'
 import { getUserList, getListMembers } from './invites'
 import { getSignedImageUrls } from './storage'
 import { logError, logWarn } from './safeLog'
@@ -10,7 +10,7 @@ import type { Food } from './foods'
  *
  * Exports all user data in a machine-readable JSON format:
  * - User profile (email, name, created_at)
- * - All food items
+ * - All food items, compresi quelli tolti con il loro esito (#147)
  * - Shared lists and memberships
  */
 
@@ -48,12 +48,19 @@ export async function exportUserData(): Promise<{ success: boolean; error: Error
       throw new Error('Utente non autenticato')
     }
 
-    // 2. Fetch all foods
-    const { foods, error: foodsError } = await getFoods()
+    // 2. Fetch all foods. Non `getFoods()`, che risponde a «cosa c'è in lista»
+    // e scarta le righe tolte: dalla v1.11.0 togliere un alimento conserva la
+    // riga con il suo esito (`status`, `consumed_at`, `deleted_at`), e anche
+    // quelle sono dati dell'utente (#147).
+    const { data, error: foodsError } = await supabase
+      .from('foods')
+      .select('*')
+      .order('created_at', { ascending: true })
 
     if (foodsError) {
       throw new Error(`Errore nel recupero alimenti: ${foodsError.message}`)
     }
+    const foods: Food[] = data ?? []
 
     // 3. Generate signed URLs for all images (valid for 24 hours)
     const imagePaths = foods

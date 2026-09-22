@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.16] - 2026-09-22
+
+### Fixed
+- **L'esportazione dei dati porta anche gli alimenti tolti, con il loro esito** (#147). Dalla v1.11.0 togliere un alimento conserva la riga con `status`, `consumed_at` e `deleted_at`, ma l'esportazione prendeva gli alimenti da `getFoods()`, che risponde a «cosa c'è in lista» e scarta le righe tolte. Le Impostazioni promettono «una copia di tutti i tuoi dati»: ora ci sono anche quelle, ciascuna con il suo esito e la sua data.
+- **L'avviso prima di accettare un invito dice ciò che succede davvero** (#147). Accettando un invito si lascia la lista in cui si è: la lista si cancella con i suoi alimenti solo se si era l'unico membro, e se è condivisa resta agli altri. L'avviso invece diceva sempre «Tutti questi dati saranno eliminati definitivamente», e il numero contava anche gli alimenti già tolti. Ora `join_list_via_invite` dice in quale caso si è (`only_member`) e conta solo gli alimenti in lista. Da unico membro l'avviso resta, con il numero giusto; da una lista condivisa dice «Lascerai la lista condivisa» e che gli alimenti restano agli altri membri, senza annunciare una perdita che non c'è.
+
+  Provato sul Supabase locale con `tests/e2e/invite-join-warning.spec.ts`: da unico membro, con due alimenti in lista e uno tolto, la conferma riporta 2; da una lista condivisa riporta `only_member: false`, e dopo l'uscita l'altro membro vede ancora i suoi alimenti. `data-export-image-urls.spec.ts` scarica l'esportazione e trova l'alimento tolto con il suo esito. Contro il codice precedente erano rossi tutti e tre. Il client è sicuro anche con il server di prima: senza `only_member` l'avviso resta quello di perdita, come prima.
+
 ## [1.12.15] - 2026-09-22
 
 ### Fixed
@@ -825,7 +833,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.15...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.16...HEAD
+[1.12.16]: https://github.com/E-Lop/entro/compare/v1.12.15...v1.12.16
 [1.12.15]: https://github.com/E-Lop/entro/compare/v1.12.14...v1.12.15
 [1.12.14]: https://github.com/E-Lop/entro/compare/v1.12.13...v1.12.14
 [1.12.13]: https://github.com/E-Lop/entro/compare/v1.12.12...v1.12.13

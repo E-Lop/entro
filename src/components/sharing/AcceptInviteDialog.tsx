@@ -24,6 +24,8 @@ interface AcceptInviteDialogProps {
 
 interface ConfirmationData {
   foodCount: number
+  /** `null` da un server di prima della #147: si avvisa della perdita, come prima. */
+  onlyMember: boolean | null
 }
 
 export function AcceptInviteDialog({
@@ -51,6 +53,7 @@ export function AcceptInviteDialog({
       if (result.requiresConfirmation && !force) {
         setConfirmationData({
           foodCount: result.foodCount || 0,
+          onlyMember: result.onlyMember ?? null,
         })
         return
       }
@@ -128,31 +131,47 @@ export function AcceptInviteDialog({
             </DialogFooter>
           </>
         ) : (
-          // Confirmation state - Data loss warning
+          // Confirmation state. Da unico membro la lista si cancella con i suoi
+          // alimenti; da una lista condivisa se ne esce e basta, e gli alimenti
+          // restano agli altri membri: lì non c'è nessuna perdita da annunciare
+          // (#147). Senza l'informazione (server di prima) si avvisa, come prima.
           <>
-            <DialogHeader>
-              <DialogTitle>Attenzione: Perdita dati</DialogTitle>
-              <DialogDescription>
-                Accettando questo invito rinuncerai alla tua lista personale
-              </DialogDescription>
-            </DialogHeader>
+            {confirmationData.onlyMember === false ? (
+              <DialogHeader>
+                <DialogTitle>Lascerai la lista condivisa</DialogTitle>
+                <DialogDescription>
+                  Accettando questo invito lasci la lista condivisa in cui sei ora.
+                </DialogDescription>
+              </DialogHeader>
+            ) : (
+              <DialogHeader>
+                <DialogTitle>Attenzione: Perdita dati</DialogTitle>
+                <DialogDescription>
+                  Accettando questo invito rinuncerai alla tua lista
+                </DialogDescription>
+              </DialogHeader>
+            )}
 
             <div className="space-y-4 py-4">
-              <Alert variant="destructive">
-                <AlertDescription>
-                  <div className="space-y-1">
-                    <p>
-                      La tua lista personale contiene{' '}
-                      <span className="font-semibold">
-                        {confirmationData.foodCount} {confirmationData.foodCount === 1 ? 'alimento' : 'alimenti'}
-                      </span>.
-                    </p>
-                    <p>
-                      Tutti questi dati saranno eliminati definitivamente.
-                    </p>
-                  </div>
-                </AlertDescription>
-              </Alert>
+              {confirmationData.onlyMember === false ? (
+                <p className="text-sm">Gli alimenti restano nella lista per gli altri membri.</p>
+              ) : (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    <div className="space-y-1">
+                      <p>
+                        La tua lista contiene{' '}
+                        <span className="font-semibold">
+                          {confirmationData.foodCount} {confirmationData.foodCount === 1 ? 'alimento' : 'alimenti'}
+                        </span>.
+                      </p>
+                      <p>
+                        Saranno eliminati definitivamente.
+                      </p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
 
               <div className="rounded-lg bg-muted p-4">
                 <p className="text-sm leading-relaxed text-muted-foreground">
