@@ -419,6 +419,7 @@ export type Database = {
           error_message: string
           food_count: number
           list_id: string
+          only_member: boolean
           requires_confirmation: boolean
           success: boolean
         }[]

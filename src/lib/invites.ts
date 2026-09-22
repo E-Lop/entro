@@ -372,7 +372,7 @@ export async function acceptInviteWithConfirmation(
       return { success: false, listId: null, requiresConfirmation: false, error: new Error('Nessuna risposta') }
     }
     if (row.requires_confirmation) {
-      return { success: false, listId: null, requiresConfirmation: true, foodCount: row.food_count ?? 0, error: null }
+      return { success: false, listId: null, requiresConfirmation: true, foodCount: row.food_count ?? 0, onlyMember: row.only_member ?? null, error: null }
     }
     if (!row.success) {
       return { success: false, listId: null, requiresConfirmation: false, error: row.error_message ? new Error(row.error_message) : new Error('Accettazione non riuscita') }

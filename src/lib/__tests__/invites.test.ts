@@ -95,6 +95,22 @@ describe('acceptInviteWithConfirmation', () => {
     expect(result.foodCount).toBe(3)
   })
 
+  // #147: la RPC dice se chi esce è l'unico membro della lista che lascia.
+  it.each([
+    [true, true],
+    [false, false],
+  ])('propaga only_member=%s come onlyMember', async (onlyMember, expected) => {
+    mockRpc.mockResolvedValue({ data: [{ list_id: null, success: false, requires_confirmation: true, food_count: 2, error_message: null, only_member: onlyMember }], error: null })
+    const result = await acceptInviteWithConfirmation('abc123')
+    expect(result.onlyMember).toBe(expected)
+  })
+
+  it('senza only_member (un server di prima della #147) non lo inventa', async () => {
+    mockRpc.mockResolvedValue({ data: [{ list_id: null, success: false, requires_confirmation: true, food_count: 2, error_message: null }], error: null })
+    const result = await acceptInviteWithConfirmation('abc123')
+    expect(result.onlyMember).toBeNull()
+  })
+
   it('mappa il successo con list_id', async () => {
     mockRpc.mockResolvedValue({ data: [{ list_id: 'list-9', success: true, requires_confirmation: false, food_count: null, error_message: null }], error: null })
     const result = await acceptInviteWithConfirmation('abc123', true)
