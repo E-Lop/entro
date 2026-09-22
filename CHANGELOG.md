@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.12] - 2026-09-22
+
+### Fixed
+- **Chi cancella l'account non porta più via la lista condivisa agli altri membri** (#152). Se a cancellarsi era chi aveva creato la lista, sparivano la lista intera e, a cascata, tutti i suoi alimenti e le iscrizioni degli altri, che restavano senza nessuna lista; se era un altro membro, sparivano gli alimenti che aveva creato lui. Erano le chiavi esterne `lists.created_by` e `foods.user_id`, entrambe `ON DELETE CASCADE`, più un `delete` esplicito in `delete_user()`. In una lista condivisa non c'è un «mio» e un «tuo»: ora chi se ne va lascia la lista, e lista e alimenti restano agli altri, con `created_by` e `user_id` a null, senza inventare un autore. Da unico membro la cancellazione porta via lista e alimenti, compresi quelli tolti, come prima, e così le liste che l'utente aveva creato e che erano rimaste vuote.
+
+  La regola sta in un trigger su `auth.users` e non solo in `delete_user()`: un utente cancellato dalla dashboard o con l'API admin non lascia dietro né la sua lista né i suoi alimenti. Le foto restano dove sono. Quelle rimaste nella cartella di chi se ne va le «eredita» la lista condivisa, in una tabella che nessun client legge o scrive, e le policy dello Storage le aprono ai suoi membri. Aprirle a «qualunque alimento delle mie liste punti a questo oggetto» sarebbe stato più semplice, ma `image_url` lo scrive l'utente: chi conosceva un percorso, per esempio un ex membro, avrebbe potuto prendersi la foto puntandola da un alimento suo. Il dialogo toglie le foto solo da unico membro, e se l'anteprima non arriva non le tocca.
+
+  Il dialogo di cancellazione dice cosa succederà nei due casi, e lo chiede al server con la nuova RPC `account_deletion_preview()`. Prima annunciava sempre «tutti gli alimenti» contando quelli di tutta la lista. Da unico membro mostra gli alimenti in lista che andranno persi, da una lista condivisa dice che restano agli altri. Se l'anteprima non arriva, non promette niente e la cancellazione resta possibile.
+
+  Provato sul Supabase locale con `tests/e2e/account-deletion-shared-list.spec.ts`, nove casi con due e tre account e le scritture fatte dai loro client con la RLS attiva: contro lo schema precedente sei erano rossi. Dopo la cancellazione, chi è fuori dalla lista, o chi punta alla foto da un alimento suo, continua a non vederne né gli alimenti né le foto. La migrazione, applicata a un database con dati, non cambia il numero di righe di alimenti, liste, iscrizioni, oggetti e utenti; applicata da zero con le altre, dà lo stesso schema.
+
 ## [1.12.11] - 2026-09-18
 
 ### Changed
@@ -785,7 +796,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.11...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.12...HEAD
+[1.12.12]: https://github.com/E-Lop/entro/compare/v1.12.11...v1.12.12
 [1.12.11]: https://github.com/E-Lop/entro/compare/v1.12.10...v1.12.11
 [1.12.10]: https://github.com/E-Lop/entro/compare/v1.12.9...v1.12.10
 [1.12.9]: https://github.com/E-Lop/entro/compare/v1.12.8...v1.12.9

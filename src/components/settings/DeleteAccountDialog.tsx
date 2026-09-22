@@ -27,39 +27,91 @@ import { logError } from '@/lib/safeLog'
  * Delete Account Dialog Component
  * GDPR Article 17 - Right to Erasure
  *
- * Allows users to permanently delete their account and all associated data:
- * - User profile
- * - All food items
- * - Uploaded images (Supabase Storage)
- * - List memberships
- * - Pending invites
- *
- * Cascade deletes are handled via Supabase RLS policies
+ * Cosa viene eliminato lo decide `delete_user()`, e lo dice `DeletionScope`.
  */
+interface DeletionPreview {
+  listShared: boolean
+  activeFoodCount: number
+}
+
+type PreviewState = DeletionPreview | 'unavailable' | null
+
+/**
+ * Cosa sparisce con l'account. Due casi, come li decide `delete_user()`:
+ * da unico membro va via la lista con i suoi alimenti; da una lista condivisa
+ * se ne va solo l'utente, e gli alimenti restano agli altri, perché in una
+ * lista condivisa non c'è un «mio» e un «tuo» (#152).
+ */
+function DeletionScope({ preview }: { preview: PreviewState }) {
+  if (preview === null) return null
+
+  if (preview === 'unavailable') {
+    return (
+      <p>
+        Il tuo profilo sarà eliminato permanentemente. Non riusciamo a mostrarti il dettaglio di
+        cosa verrà eliminato con lui.
+      </p>
+    )
+  }
+
+  if (preview.listShared) {
+    return (
+      <>
+        <p>Saranno eliminati permanentemente:</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Profilo utente</li>
+          <li>Inviti pendenti</li>
+        </ul>
+        <p>Lascerai la lista condivisa: gli alimenti restano agli altri membri.</p>
+      </>
+    )
+  }
+
+  const { activeFoodCount } = preview
+  return (
+    <>
+      <p>Tutti i tuoi dati saranno eliminati permanentemente:</p>
+      <ul className="list-disc pl-5 space-y-1">
+        <li>Profilo utente</li>
+        <li>
+          La tua lista, con{' '}
+          <span className="font-medium">
+            {activeFoodCount} {activeFoodCount === 1 ? 'alimento' : 'alimenti'} in lista
+          </span>
+        </li>
+        <li>Immagini caricate</li>
+        <li>Inviti pendenti</li>
+      </ul>
+    </>
+  )
+}
+
 export function DeleteAccountDialog() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [password, setPassword] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
-  const [foodCount, setFoodCount] = useState<number | null>(null)
+  // Cosa farà la cancellazione, chiesto al server (#152): è lui a decidere
+  // cosa sparisce, e un client che lo deducesse da sé potrebbe dire una cosa e
+  // farne un'altra. `null` finché non arriva, `'unavailable'` se la chiamata
+  // fallisce: in quel caso il dialogo non promette niente, ma non blocca.
+  const [preview, setPreview] = useState<PreviewState>(null)
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch food count when dialog opens
   const handleOpenChange = async (isOpen: boolean) => {
     setOpen(isOpen)
 
-    // `foodCount === null` e non `!foodCount`: con un totale reale di 0 alimenti
-    // `!foodCount` resta truthy → la query veniva rifatta a ogni riapertura del dialog.
-    if (isOpen && foodCount === null) {
-      // Fetch food count
-      const { count } = await supabase
-        .from('foods')
-        .select('*', { count: 'exact', head: true })
-        .is('deleted_at', null)
-
-      setFoodCount(count || 0)
+    // Si chiede una volta sola, anche quando gli alimenti sono zero.
+    if (isOpen && preview === null) {
+      const { data, error: previewError } = await supabase.rpc('account_deletion_preview')
+      const row = data?.[0]
+      setPreview(
+        previewError || !row
+          ? 'unavailable'
+          : { listShared: row.list_shared, activeFoodCount: row.active_food_count }
+      )
     }
 
     // Reset password and error when closing
@@ -95,37 +147,40 @@ export function DeleteAccountDialog() {
         throw new Error('Password non corretta')
       }
 
-      // Step 2: Delete all images from Supabase Storage
-      // Get all foods with images
-      const { data: foodsWithImages } = await supabase
-        .from('foods')
-        .select('image_url')
-        .eq('user_id', user.id)
-        .not('image_url', 'is', null)
+      // Step 2: Delete all images from Supabase Storage — solo da unico membro.
+      // Da una lista condivisa gli alimenti restano agli altri, e con loro le
+      // foto (#152); senza anteprima non si sa, e un orfano costa meno di una
+      // foto tolta a qualcun altro.
+      const onlyMember = preview !== null && preview !== 'unavailable' && !preview.listShared
+      if (onlyMember) {
+        const { data: foodsWithImages } = await supabase
+          .from('foods')
+          .select('image_url')
+          .eq('user_id', user.id)
+          .not('image_url', 'is', null)
 
-      if (foodsWithImages && foodsWithImages.length > 0) {
-        // Extract storage paths from signed URLs
-        const imagePaths = foodsWithImages
-          .map((food) => {
-            if (!food.image_url) return null
-            // Extract path from signed URL: /storage/v1/object/sign/food-images/USER_ID/FILE
-            const match = food.image_url.match(/food-images\/([^?]+)/)
-            return match ? match[1] : null
-          })
-          .filter(Boolean) as string[]
+        if (foodsWithImages && foodsWithImages.length > 0) {
+          // Extract storage paths from signed URLs
+          const imagePaths = foodsWithImages
+            .map((food) => {
+              if (!food.image_url) return null
+              // Extract path from signed URL: /storage/v1/object/sign/food-images/USER_ID/FILE
+              const match = food.image_url.match(/food-images\/([^?]+)/)
+              return match ? match[1] : null
+            })
+            .filter(Boolean) as string[]
 
-        if (imagePaths.length > 0) {
-          // Delete images in batches
-          await supabase.storage.from('food-images').remove(imagePaths)
+          if (imagePaths.length > 0) {
+            // Delete images in batches
+            await supabase.storage.from('food-images').remove(imagePaths)
+          }
         }
       }
 
-      // Step 3: Delete user account
-      // This triggers cascade deletes for:
-      // - foods table (via RLS policies)
-      // - list_members table (via RLS policies)
-      // - invites table (via RLS policies)
-      // - lists table if user is the only member (handled by RLS)
+      // Step 3: Delete user account. `delete_user()` elimina le liste di cui
+      // l'utente era l'unico membro (con i loro alimenti), i suoi inviti e le
+      // sue appartenenze; da una lista condivisa esce e basta, e gli alimenti
+      // restano agli altri membri (#152).
       const { error: deleteError } = await supabase.rpc('delete_user')
 
       if (deleteError) {
@@ -184,19 +239,7 @@ export function DeleteAccountDialog() {
         {/* Contenuto rich fuori da AlertDialogDescription (è un <p>): qui può
             contenere lista, disclosure e box senza nesting HTML non valido. */}
         <div className="space-y-3 text-left text-sm">
-          <p>Tutti i tuoi dati saranno eliminati permanentemente:</p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Profilo utente</li>
-            <li>
-              Tutti gli alimenti{' '}
-              {foodCount !== null && (
-                <span className="font-medium">({foodCount} totali)</span>
-              )}
-            </li>
-            <li>Immagini caricate</li>
-            <li>Liste condivise e appartenenze</li>
-            <li>Inviti pendenti</li>
-          </ul>
+          <DeletionScope preview={preview} />
 
           {/* Technical details collapsible */}
           <button

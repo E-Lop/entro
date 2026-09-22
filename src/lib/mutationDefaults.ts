@@ -72,11 +72,14 @@ async function resolvePendingImage(
 export function registerMutationDefaults(queryClient: QueryClient): void {
   queryClient.setMutationDefaults(mutationKeys.createFood, {
     mutationFn: async (variables: { data: FoodInsert; id: string }) => {
-      // Upload pending image from IndexedDB if present
-      variables.data.image_url = await resolvePendingImage(
-        variables.data.image_url,
-        variables.data.user_id,
-      ) ?? null
+      // Upload pending image from IndexedDB if present. Dalla #152 `user_id`
+      // è nullable nello schema (un membro che ha cancellato l'account), quindi
+      // il tipo non lo garantisce più: si ripiega sulla sessione, come in modifica.
+      const userId =
+        variables.data.user_id ?? (await supabase.auth.getSession()).data.session?.user.id
+      variables.data.image_url = userId
+        ? (await resolvePendingImage(variables.data.image_url, userId)) ?? null
+        : null
       mutationTracker.track(variables.id, 'INSERT')
       return unwrapFood(await createFood(variables.data, variables.id))
     },

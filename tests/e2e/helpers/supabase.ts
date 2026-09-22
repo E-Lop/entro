@@ -242,6 +242,17 @@ export async function listExists(listId: string): Promise<boolean> {
   return data !== null
 }
 
+/**
+ * Toglie una lista di prova con i suoi alimenti (via service-role).
+ *
+ * Serve dalla #152: cancellare un utente non porta più via le liste che ha
+ * creato, quindi una lista condivisa sopravvive al teardown dei suoi membri.
+ */
+export async function deleteList(listId: string): Promise<void> {
+  const { error } = await adminClient.from('lists').delete().eq('id', listId)
+  if (error) throw new Error(`Impossibile togliere la lista di prova: ${error.message}`)
+}
+
 /** True se l'utente risulta membro della lista indicata (via service-role). */
 export async function isMember(listId: string, userId: string): Promise<boolean> {
   const { data } = await adminClient

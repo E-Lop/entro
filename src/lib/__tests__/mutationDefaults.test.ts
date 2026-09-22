@@ -134,4 +134,28 @@ describe('createFood in coda — resta com’era', () => {
       'f1'
     )
   })
+
+  // Dalla #152 `user_id` è nullable nello schema: il tipo non lo garantisce più.
+  it('senza `user_id` nel payload carica la foto nella cartella della sessione', async () => {
+    const run = mutationFn<{ id: string; data: Record<string, unknown> }>(mutationKeys.createFood)
+
+    await run({ id: 'f1', data: { name: 'Latte', image_url: 'pending://abc' } })
+
+    expect(mocks.uploadFoodImage).toHaveBeenCalledWith(PHOTO, 'u1')
+    expect(mocks.createFood).toHaveBeenCalledWith(
+      expect.objectContaining({ image_url: 'u1/9-foto.jpg' }),
+      'f1'
+    )
+  })
+
+  it('senza `user_id` e senza sessione non carica niente, e la riga non riceve `pending://`', async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null })
+    const run = mutationFn<{ id: string; data: Record<string, unknown> }>(mutationKeys.createFood)
+
+    await run({ id: 'f1', data: { name: 'Latte', image_url: 'pending://abc' } })
+
+    expect(mocks.uploadFoodImage).not.toHaveBeenCalled()
+    const [data] = mocks.createFood.mock.calls[0] as [Record<string, unknown>]
+    expect(data.image_url).toBeNull()
+  })
 })
