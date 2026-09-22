@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.13] - 2026-09-22
+
+### Fixed
+- **Cancellando l'account, le foto degli alimenti che spariscono spariscono anche dallo Storage** (#145). Il dialogo ricavava il percorso di ogni foto con un'espressione che cercava `food-images/`, ma dal passaggio al bucket privato `image_url` contiene il percorso nudo, `{user_id}/{file}`: non trovava niente, non toglieva niente, e l'account veniva cancellato lasciando le foto nel bucket. Poi nessun client le poteva più togliere. Ora il percorso si ricava con la funzione che `storage.ts` usava già, che conosce sia il percorso nudo sia l'URL firmato delle righe di prima; le foto in attesa di caricamento e gli URL che non sono del bucket si saltano.
+
+  Seguono la regola della #152: si tolgono le foto degli alimenti che la cancellazione elimina davvero, cioè tutte quelle della lista quando l'utente ne è l'unico membro, compresi gli alimenti tolti con il loro esito. Da una lista condivisa gli alimenti restano agli altri, e con loro le foto. Se lo Storage rifiuta, o non si riesce a sapere quali foto togliere, la cancellazione si ferma con un errore nel dialogo e l'account resta. Il pulsante di conferma aspetta la risposta dell'anteprima: senza, il dialogo non sa se togliere le foto, e una conferma rapida le saltava. Lo ha trovato lo spec, instabile una volta su cinque prima di questa correzione e stabile in trenta ripetizioni dopo. E al momento della conferma l'anteprima si rilegge: quella dell'apertura poteva essere vecchia, se nel frattempo qualcuno era entrato nella lista, e avrebbe fatto togliere le foto di alimenti che restano al nuovo membro.
+
+  Provato sul browser dal dialogo vero con `tests/e2e/account-deletion-removes-photos.spec.ts`: da unico membro il bucket si svuota di tutte e tre le forme di foto; con lo Storage che rifiuta, l'account e la foto restano e il dialogo mostra l'errore; da una lista condivisa l'altro membro firma ancora la foto. Contro il codice precedente i primi due erano rossi. La logica sta in `src/lib/accountDeletion.ts`, perché servirà anche alla cancellazione dell'account di entro-mobile.
+
 ## [1.12.12] - 2026-09-22
 
 ### Fixed
@@ -796,7 +805,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.12...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.13...HEAD
+[1.12.13]: https://github.com/E-Lop/entro/compare/v1.12.12...v1.12.13
 [1.12.12]: https://github.com/E-Lop/entro/compare/v1.12.11...v1.12.12
 [1.12.11]: https://github.com/E-Lop/entro/compare/v1.12.10...v1.12.11
 [1.12.10]: https://github.com/E-Lop/entro/compare/v1.12.9...v1.12.10

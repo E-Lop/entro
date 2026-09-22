@@ -14,7 +14,7 @@ const COMPRESSED_MAX_SIZE_MB = 1
  * Extract storage path from URL or return path as is
  * Handles both storage paths and full URLs for backward compatibility
  */
-function extractPathFromUrlOrPath(urlOrPath: string): string {
+export function extractPathFromUrlOrPath(urlOrPath: string): string {
   // If it's already a path (doesn't start with http), return as is
   if (!urlOrPath.startsWith('http')) {
     return urlOrPath
