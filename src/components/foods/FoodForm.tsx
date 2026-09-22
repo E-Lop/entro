@@ -278,6 +278,26 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
   }, [mode, initialData?.id])
 
   // Handle barcode scan success
+  /**
+   * La categoria pre-compila il **luogo**, e non la data: vedi `foodDefaults.ts`
+   * per il perché. La usano il selettore della categoria e la scansione, che
+   * fino alla #146 portava una sua posizione e scavalcava questa regola.
+   */
+  const applyCategoryStorage = (categoryId: string) => {
+    const category = categories.find((c) => c.id === categoryId)
+    // `default_storage` arriva come `string` dai tipi generati: si restringe a
+    // runtime, come già fa il `reset` in modifica. Qui però `safeParse` e non
+    // `parse`: una categoria corrotta in tabella non deve far esplodere il form
+    // mentre l'utente lo compila — al massimo resta senza suggerimento.
+    const parsed = category ? storageLocationEnum.safeParse(category.default_storage) : undefined
+    const next = storageLocationForCategory(parsed?.success ? { default_storage: parsed.data } : undefined, {
+      current: form.getValues('storage_location'),
+      touched: storageTouchedRef.current,
+      isCreate: mode === 'create',
+    })
+    if (next) form.setValue('storage_location', next)
+  }
+
   const handleBarcodeScanned = async (barcode: string) => {
     // Si registra **prima** della chiamata a Open Food Facts, e di proposito:
     // un prodotto sconosciuto al catalogo ha comunque un codice, e quel codice
@@ -305,10 +325,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
 
       if (mappedData.category_id) {
         form.setValue('category_id', mappedData.category_id)
-      }
-
-      if (mappedData.storage_location) {
-        form.setValue('storage_location', mappedData.storage_location)
+        applyCategoryStorage(mappedData.category_id)
       }
 
       // DO NOT auto-fill expiry date - user should set it manually
@@ -508,25 +525,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                       {...field}
                       onChange={(e) => {
                         field.onChange(e)
-                        // La categoria pre-compila il **luogo**, e non la data:
-                        // vedi `foodDefaults.ts` per il perché.
-                        const category = categories.find((c) => c.id === e.target.value)
-                        // `default_storage` arriva come `string` dai tipi
-                        // generati: si restringe a runtime, come già fa il
-                        // `reset` in modifica. Qui però `safeParse` e non
-                        // `parse`: una categoria corrotta in tabella non deve
-                        // far esplodere il form mentre l'utente lo compila —
-                        // al massimo resta senza suggerimento, che è il
-                        // comportamento che c'era prima di questa modifica.
-                        const parsed = category
-                          ? storageLocationEnum.safeParse(category.default_storage)
-                          : undefined
-                        const next = storageLocationForCategory(parsed?.success ? { default_storage: parsed.data } : undefined, {
-                          current: form.getValues('storage_location'),
-                          touched: storageTouchedRef.current,
-                          isCreate: mode === 'create',
-                        })
-                        if (next) form.setValue('storage_location', next)
+                        applyCategoryStorage(e.target.value)
                       }}
                     >
                       <option value="">Seleziona una categoria</option>

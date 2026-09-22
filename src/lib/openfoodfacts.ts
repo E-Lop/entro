@@ -13,69 +13,54 @@ import type {
 const OFF_API_BASE = 'https://world.openfoodfacts.org/api/v2'
 
 /**
- * Category mappings from Open Food Facts to our Italian categories
- * Maps OFF category tags to Italian category names and storage suggestions
+ * Dai tag di Open Food Facts alle categorie del database.
+ *
+ * Si aggancia a `categories.name`, l'identificativo stabile del bundle
+ * (`entro-family/core/categories.md`), e non al nome a schermo: il confronto
+ * con nomi italiani scritti qui lasciava senza categoria quattro voci su dieci,
+ * che nel database si chiamano diversamente (#146). La posizione non sta qui:
+ * la decide la categoria, come quando la si sceglie a mano (#122).
  */
 const CATEGORY_MAPPINGS: CategoryMapping[] = [
   {
     offTags: ['dairies', 'milk', 'cheese', 'yogurt', 'latte', 'formaggio', 'yogurt', 'latticini'],
-    categoryNameIt: 'Latticini',
-    storageLocation: 'fridge',
-    shelfLifeDays: 7,
+    categoryName: 'dairy',
   },
   {
     offTags: ['meats', 'chicken', 'beef', 'pork', 'carne', 'pollo', 'manzo', 'maiale'],
-    categoryNameIt: 'Carni',
-    storageLocation: 'fridge',
-    shelfLifeDays: 3,
+    categoryName: 'meat',
   },
   {
     offTags: ['fish', 'seafood', 'pesce', 'frutti di mare', 'salmone', 'tonno'],
-    categoryNameIt: 'Pesce',
-    storageLocation: 'fridge',
-    shelfLifeDays: 2,
+    categoryName: 'fish',
   },
   {
     offTags: ['fruits', 'fruit', 'frutta', 'mela', 'banana', 'arancia'],
-    categoryNameIt: 'Frutta',
-    storageLocation: 'fridge',
-    shelfLifeDays: 7,
+    categoryName: 'fruits',
   },
   {
     offTags: ['vegetables', 'verdure', 'insalata', 'pomodoro', 'carota', 'spinaci'],
-    categoryNameIt: 'Verdure',
-    storageLocation: 'fridge',
-    shelfLifeDays: 5,
+    categoryName: 'vegetables',
   },
   {
     offTags: ['cereals', 'bread', 'pasta', 'rice', 'cereali', 'pane', 'pasta', 'riso'],
-    categoryNameIt: 'Cereali e derivati',
-    storageLocation: 'pantry',
-    shelfLifeDays: 30,
+    categoryName: 'bakery',
   },
   {
     offTags: ['beverages', 'drinks', 'bevande', 'succo', 'bibita', 'acqua', 'water', 'juice'],
-    categoryNameIt: 'Bevande',
-    storageLocation: 'fridge',
-    shelfLifeDays: 14,
+    categoryName: 'beverages',
   },
   {
     offTags: ['sweets', 'desserts', 'chocolate', 'dolci', 'cioccolato', 'biscotti', 'cookies'],
-    categoryNameIt: 'Dolci',
-    storageLocation: 'pantry',
-    shelfLifeDays: 60,
+    categoryName: 'snacks',
   },
   {
     offTags: ['condiments', 'sauces', 'oils', 'condimenti', 'salse', 'olio', 'aceto'],
-    categoryNameIt: 'Condimenti',
-    storageLocation: 'pantry',
-    shelfLifeDays: 90,
+    categoryName: 'condiments',
   },
   {
     offTags: ['frozen', 'surgelati', 'gelato', 'ice cream'],
-    categoryNameIt: 'Surgelati',
-    storageLocation: 'freezer',
-    shelfLifeDays: 90,
+    categoryName: 'frozen',
   },
 ]
 
@@ -127,7 +112,7 @@ export async function fetchProductByBarcode(
  */
 export function mapProductToFormData(
   product: OpenFoodFactsProduct,
-  availableCategories: Array<{ id: string; name_it: string }>
+  availableCategories: Array<{ id: string; name: string }>
 ): MappedProductData {
   // Get product name (prefer Italian, fallback to generic)
   const name = product.product_name_it || product.product_name || 'Prodotto sconosciuto'
@@ -136,9 +121,7 @@ export function mapProductToFormData(
   const categoryMapping = detectCategoryFromProduct(product)
 
   // Find matching category ID from our database
-  const matchedCategory = availableCategories.find(
-    cat => cat.name_it.toLowerCase() === categoryMapping.categoryNameIt.toLowerCase()
-  )
+  const matchedCategory = availableCategories.find(cat => cat.name === categoryMapping.categoryName)
 
   // Parse quantity if available
   const { quantity, quantityUnit } = parseQuantity(product.quantity)
@@ -146,8 +129,6 @@ export function mapProductToFormData(
   // Build mapped data
   const mappedData: MappedProductData = {
     name: formatProductName(name, product.brands),
-    suggestedCategory: categoryMapping.categoryNameIt,
-    storage_location: categoryMapping.storageLocation,
     image_url: product.image_front_small_url || product.image_front_url || product.image_url,
   }
 
@@ -202,8 +183,7 @@ function detectCategoryFromProduct(product: OpenFoodFactsProduct): CategoryMappi
   // Default fallback category
   return {
     offTags: [],
-    categoryNameIt: 'Altro',
-    storageLocation: 'pantry',
+    categoryName: 'other',
   }
 }
 
@@ -266,20 +246,4 @@ function parseQuantity(quantityString?: string): {
   }
 
   return { quantity: isNaN(quantity) ? undefined : quantity, quantityUnit: unit }
-}
-
-/**
- * Calculate suggested expiry date based on category
- */
-export function suggestExpiryDate(categoryNameIt: string): Date {
-  const mapping = CATEGORY_MAPPINGS.find(
-    m => m.categoryNameIt.toLowerCase() === categoryNameIt.toLowerCase()
-  )
-
-  const daysToAdd = mapping?.shelfLifeDays || 14 // Default 2 weeks
-
-  const expiryDate = new Date()
-  expiryDate.setDate(expiryDate.getDate() + daysToAdd)
-
-  return expiryDate
 }
