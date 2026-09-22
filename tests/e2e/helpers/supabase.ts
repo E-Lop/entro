@@ -366,6 +366,26 @@ export async function uploadE2EFoodImage(
   return path
 }
 
+/** I nomi degli oggetti nella cartella `{userId}/` del bucket (via service-role). */
+export async function listE2EFoodImages(userId: string): Promise<string[]> {
+  const { data, error } = await adminClient.storage.from('food-images').list(userId)
+  if (error) throw new Error(`Impossibile elencare le foto di prova: ${error.message}`)
+  return (data ?? []).map((object) => `${userId}/${object.name}`)
+}
+
+/**
+ * True se l'utente esiste ancora (via service-role). Per id e non per email:
+ * `listUsers()` restituisce solo la prima pagina, e un utente oltre la prima
+ * risulterebbe «cancellato» anche quando non lo è.
+ */
+export async function userExists(userId: string): Promise<boolean> {
+  const { data, error } = await adminClient.auth.admin.getUserById(userId)
+  if (error && error.status !== 404) {
+    throw new Error(`Impossibile leggere l'utente E2E: ${error.message}`)
+  }
+  return Boolean(data?.user)
+}
+
 /** Toglie dal bucket le foto di prova: cancellare l'utente non cancella i suoi oggetti. */
 export async function removeE2EFoodImages(paths: string[]): Promise<void> {
   if (paths.length === 0) return

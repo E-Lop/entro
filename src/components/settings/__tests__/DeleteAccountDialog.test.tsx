@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event'
 
 type Preview = { data: { list_shared: boolean; active_food_count: number }[] | null; error: { message: string } | null }
 
-const { signInWithPassword, signOut, rpc, preview, navigateMock, clearAuthStorage, foodsWithImages, removeImages } = vi.hoisted(() => {
+const { signInWithPassword, signOut, rpc, preview, navigateMock, clearAuthStorage, removePhotos } = vi.hoisted(() => {
   const preview = vi.fn(
     (): Promise<Preview> => Promise.resolve({ data: [{ list_shared: false, active_food_count: 4 }], error: null })
   )
@@ -17,8 +17,7 @@ const { signInWithPassword, signOut, rpc, preview, navigateMock, clearAuthStorag
     preview,
     navigateMock: vi.fn(),
     clearAuthStorage: vi.fn(),
-    foodsWithImages: vi.fn((): Promise<{ data: { image_url: string }[] }> => Promise.resolve({ data: [] })),
-    removeImages: vi.fn(() => Promise.resolve({ data: [], error: null })),
+    removePhotos: vi.fn((): Promise<void> => Promise.resolve()),
   }
 })
 
@@ -27,16 +26,11 @@ vi.mock('@/lib/auth', () => ({ clearAuthStorage }))
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1', email: 'a@b.it' } }) }))
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('@/lib/haptics', () => ({ triggerHaptic: vi.fn() }))
+vi.mock('@/lib/accountDeletion', () => ({ removePhotosOfDeletedFoods: removePhotos }))
 vi.mock('@/lib/supabase', () => ({
   supabase: {
-    from: () => ({
-      select: () => ({
-        eq: () => ({ not: foodsWithImages }),
-      }),
-    }),
     auth: { signInWithPassword, signOut },
     rpc,
-    storage: { from: () => ({ remove: removeImages }) },
   },
 }))
 
@@ -87,6 +81,23 @@ describe('DeleteAccountDialog — salvaguardie azione distruttiva', () => {
     // Nessuna navigazione/cancellazione su errore
     expect(navigateMock).not.toHaveBeenCalled()
     expect(rpc).not.toHaveBeenCalledWith('delete_user')
+  })
+
+  it('la conferma resta disabilitata finché non si sa cosa verrà eliminato', async () => {
+    // Senza anteprima il dialogo non sa se togliere le foto: confermare prima
+    // che arrivi le salterebbe, e lascerebbe orfane quelle di un unico membro.
+    let answer: (value: Preview) => void = () => {}
+    preview.mockImplementationOnce(() => new Promise<Preview>((resolve) => { answer = resolve }))
+    const user = setup()
+    render(<DeleteAccountDialog />)
+
+    const passwordInput = await openDialog(user)
+    await user.type(passwordInput, 'secret123')
+    const confirm = screen.getByRole('button', { name: 'Capisco, elimina il mio account' }) as HTMLButtonElement
+    expect(confirm.disabled).toBe(true)
+
+    answer({ data: [{ list_shared: false, active_food_count: 1 }], error: null })
+    await vi.waitFor(() => expect(confirm.disabled).toBe(false))
   })
 
   it('collega l’errore al campo password via aria-invalid e aria-describedby', async () => {
@@ -175,12 +186,9 @@ describe('DeleteAccountDialog — cosa viene eliminato', () => {
   })
 })
 
-// #152: le foto degli alimenti che restano agli altri membri non si toccano.
+// #152 e #145: le foto si tolgono solo quando spariscono anche i loro alimenti,
+// e se non si riesce a toglierle l'account non si cancella.
 describe('DeleteAccountDialog — foto', () => {
-  // Una riga legacy con l'URL firmato intero: è la forma che l'estrazione del
-  // percorso riconosce oggi (quella dei percorsi nudi è la #145).
-  const legacyRow = { image_url: 'http://x/storage/v1/object/sign/food-images/u1/foto.jpg?token=t' }
-
   async function confirmDeletion() {
     signInWithPassword.mockResolvedValue({ error: null })
     const user = setup()
@@ -188,33 +196,62 @@ describe('DeleteAccountDialog — foto', () => {
     const passwordInput = await openDialog(user)
     await user.type(passwordInput, 'secret123')
     await user.click(screen.getByRole('button', { name: 'Capisco, elimina il mio account' }))
-    await vi.waitFor(() => expect(rpc).toHaveBeenCalledWith('delete_user'))
   }
 
   it('da una lista condivisa non toglie nessuna foto', async () => {
     preview.mockResolvedValue({ data: [{ list_shared: true, active_food_count: 2 }], error: null })
-    foodsWithImages.mockResolvedValue({ data: [legacyRow] })
 
     await confirmDeletion()
 
-    expect(removeImages).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(rpc).toHaveBeenCalledWith('delete_user'))
+    expect(removePhotos).not.toHaveBeenCalled()
   })
 
   it('se l\u2019anteprima non arriva non toglie nessuna foto: meglio un orfano che una foto altrui persa', async () => {
     preview.mockResolvedValue({ data: null, error: { message: 'network' } })
-    foodsWithImages.mockResolvedValue({ data: [legacyRow] })
 
     await confirmDeletion()
 
-    expect(removeImages).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(rpc).toHaveBeenCalledWith('delete_user'))
+    expect(removePhotos).not.toHaveBeenCalled()
   })
 
-  it('da unico membro toglie le foto dei suoi alimenti, come prima', async () => {
+  it('da unico membro toglie le foto prima di cancellare l\u2019account', async () => {
     preview.mockResolvedValue({ data: [{ list_shared: false, active_food_count: 2 }], error: null })
-    foodsWithImages.mockResolvedValue({ data: [legacyRow] })
 
     await confirmDeletion()
 
-    expect(removeImages).toHaveBeenCalledWith(['u1/foto.jpg'])
+    await vi.waitFor(() => expect(rpc).toHaveBeenCalledWith('delete_user'))
+    expect(removePhotos).toHaveBeenCalledTimes(1)
+    const deleteUserCall = rpc.mock.calls.findIndex(([name]) => name === 'delete_user')
+    expect(removePhotos.mock.invocationCallOrder[0]).toBeLessThan(rpc.mock.invocationCallOrder[deleteUserCall])
+  })
+
+  it('decide sulle foto con l\u2019anteprima del momento della conferma, non con quella dell\u2019apertura', async () => {
+    // All'apertura l'utente è l'unico membro; prima della conferma qualcuno
+    // entra nella lista. Con l'anteprima vecchia si toglierebbero le foto di
+    // alimenti che restano al nuovo membro.
+    preview
+      .mockResolvedValueOnce({ data: [{ list_shared: false, active_food_count: 2 }], error: null })
+      .mockResolvedValueOnce({ data: [{ list_shared: true, active_food_count: 2 }], error: null })
+
+    await confirmDeletion()
+
+    await vi.waitFor(() => expect(rpc).toHaveBeenCalledWith('delete_user'))
+    expect(removePhotos).not.toHaveBeenCalled()
+  })
+
+  it('se le foto non si tolgono, l\u2019account resta: errore nel dialogo, niente cancellazione e niente logout', async () => {
+    preview.mockResolvedValue({ data: [{ list_shared: false, active_food_count: 2 }], error: null })
+    removePhotos.mockRejectedValueOnce(new Error('Non siamo riusciti a eliminare le tue foto. Riprova tra poco.'))
+
+    await confirmDeletion()
+
+    const err = await screen.findByRole('alert')
+    expect(err.textContent).toMatch(/eliminare le tue foto/)
+    expect(screen.getByPlaceholderText('Inserisci password')).toBeTruthy()
+    expect(rpc).not.toHaveBeenCalledWith('delete_user')
+    expect(signOut).not.toHaveBeenCalled()
+    expect(navigateMock).not.toHaveBeenCalled()
   })
 })

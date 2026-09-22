@@ -22,6 +22,7 @@ import { Label } from '../ui/label'
 import { triggerHaptic } from '@/lib/haptics'
 import { inlineErrorAttrs } from '@/lib/a11y'
 import { logError } from '@/lib/safeLog'
+import { removePhotosOfDeletedFoods } from '@/lib/accountDeletion'
 
 /**
  * Delete Account Dialog Component
@@ -35,6 +36,14 @@ interface DeletionPreview {
 }
 
 type PreviewState = DeletionPreview | 'unavailable' | null
+
+async function fetchDeletionPreview(): Promise<DeletionPreview | 'unavailable'> {
+  const { data, error } = await supabase.rpc('account_deletion_preview')
+  const row = data?.[0]
+  return error || !row
+    ? 'unavailable'
+    : { listShared: row.list_shared, activeFoodCount: row.active_food_count }
+}
 
 /**
  * Cosa sparisce con l'account. Due casi, come li decide `delete_user()`:
@@ -104,15 +113,7 @@ export function DeleteAccountDialog() {
     setOpen(isOpen)
 
     // Si chiede una volta sola, anche quando gli alimenti sono zero.
-    if (isOpen && preview === null) {
-      const { data, error: previewError } = await supabase.rpc('account_deletion_preview')
-      const row = data?.[0]
-      setPreview(
-        previewError || !row
-          ? 'unavailable'
-          : { listShared: row.list_shared, activeFoodCount: row.active_food_count }
-      )
-    }
+    if (isOpen && preview === null) setPreview(await fetchDeletionPreview())
 
     // Reset password and error when closing
     if (!isOpen) {
@@ -147,35 +148,17 @@ export function DeleteAccountDialog() {
         throw new Error('Password non corretta')
       }
 
-      // Step 2: Delete all images from Supabase Storage — solo da unico membro.
+      // Step 2: le foto degli alimenti che spariscono — solo da unico membro.
       // Da una lista condivisa gli alimenti restano agli altri, e con loro le
       // foto (#152); senza anteprima non si sa, e un orfano costa meno di una
-      // foto tolta a qualcun altro.
-      const onlyMember = preview !== null && preview !== 'unavailable' && !preview.listShared
-      if (onlyMember) {
-        const { data: foodsWithImages } = await supabase
-          .from('foods')
-          .select('image_url')
-          .eq('user_id', user.id)
-          .not('image_url', 'is', null)
-
-        if (foodsWithImages && foodsWithImages.length > 0) {
-          // Extract storage paths from signed URLs
-          const imagePaths = foodsWithImages
-            .map((food) => {
-              if (!food.image_url) return null
-              // Extract path from signed URL: /storage/v1/object/sign/food-images/USER_ID/FILE
-              const match = food.image_url.match(/food-images\/([^?]+)/)
-              return match ? match[1] : null
-            })
-            .filter(Boolean) as string[]
-
-          if (imagePaths.length > 0) {
-            // Delete images in batches
-            await supabase.storage.from('food-images').remove(imagePaths)
-          }
-        }
-      }
+      // foto tolta a qualcun altro. Se non si riesce a toglierle ci si ferma
+      // qui: dopo la cancellazione nessuno potrebbe più farlo (#145).
+      // L'anteprima si rilegge adesso: quella dell'apertura può essere vecchia,
+      // se nel frattempo qualcuno è entrato nella lista.
+      const current = await fetchDeletionPreview()
+      setPreview(current)
+      const onlyMember = current !== 'unavailable' && !current.listShared
+      if (onlyMember) await removePhotosOfDeletedFoods()
 
       // Step 3: Delete user account. `delete_user()` elimina le liste di cui
       // l'utente era l'unico membro (con i loro alimenti), i suoi inviti e le
@@ -304,7 +287,8 @@ export function DeleteAccountDialog() {
               e.preventDefault()
               handleDelete()
             }}
-            disabled={isDeleting || !password.trim()}
+            // Finché l'anteprima non risponde non si sa se togliere le foto (#145).
+            disabled={isDeleting || !password.trim() || preview === null}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {isDeleting ? 'Eliminazione...' : 'Capisco, elimina il mio account'}
