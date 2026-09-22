@@ -394,6 +394,32 @@ describe('FoodForm — il barcode scansionato', () => {
     expect(mockOnSubmit.mock.calls[0][1]).toBe('8001120000123')
   })
 
+  // #146: la posizione dopo una scansione la decide la categoria, con la stessa
+  // regola di quando la si sceglie a mano (#122), non una seconda tabella.
+  it('dopo la scansione la posizione è quella della categoria', async () => {
+    const user = userEvent.setup()
+    mockFetchProduct.mockResolvedValue({ data: { product_name: 'Piselli' }, error: null })
+    mockMapProduct.mockReturnValue({ name: 'Piselli', category_id: 'cat-2' })
+
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+    await scan(user, '8000000000001')
+
+    await waitFor(() => expect(screen.getByLabelText(/Posizione \*/)).toHaveValue('freezer'))
+  })
+
+  it('dopo la scansione la posizione scelta a mano non cambia', async () => {
+    const user = userEvent.setup()
+    mockFetchProduct.mockResolvedValue({ data: { product_name: 'Piselli' }, error: null })
+    mockMapProduct.mockReturnValue({ name: 'Piselli', category_id: 'cat-2' })
+
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+    await user.selectOptions(screen.getByLabelText(/Posizione \*/), 'pantry')
+    await scan(user, '8000000000001')
+
+    await waitFor(() => expect(screen.getByLabelText(/Nome \*/)).toHaveValue('Piselli'))
+    expect(screen.getByLabelText(/Posizione \*/)).toHaveValue('pantry')
+  })
+
   it('passa il codice anche se il prodotto non è nel catalogo', async () => {
     // Il caso che conta: un prodotto sconosciuto ha comunque un codice, ed è
     // proprio lì che salvarlo serve di più. Registrare il barcode solo in caso

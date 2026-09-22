@@ -5,6 +5,19 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.15] - 2026-09-22
+
+### Fixed
+- **La scansione propone la categoria anche per carne, verdura, pane e pasta e snack** (#146). La mappatura da Open Food Facts cercava la categoria confrontando nomi italiani scritti nel codice con quelli del database, e quattro su dieci non esistevano: «Carni», «Verdure», «Cereali e derivati» e «Dolci» invece di «Carne», «Verdura», «Pane e Pasta» e «Snack». Per quei prodotti la categoria restava vuota. Ora la mappatura si aggancia a `categories.name`, l'identificativo stabile (`meat`, `vegetables`, `bakery`, `snacks`…), che non cambia se cambia il nome a schermo.
+
+### Changed
+- **Dopo una scansione la posizione la decide la categoria** (#146). La mappatura portava una sua posizione per ogni voce, e sulle bevande non era d'accordo con la categoria: una bevanda scansionata finiva in frigo, una inserita a mano in dispensa. E scavalcava la posizione che l'utente aveva già scelto. Ora la scansione applica la stessa regola del selettore di categoria (#122): la posizione di default della categoria, a meno che l'utente non l'abbia toccata.
+
+### Removed
+- `suggestExpiryDate` e le durate `shelfLifeDays` della mappatura. Non le chiamava nessuno, e il bundle (`core/categories.md`) dice che lo shelf-life non precompila mai la data di scadenza, in nessun client.
+
+  Provato con i test della mappatura, uno per voce contro le categorie come le consegna il database (quattro rossi prima), e con la vera funzione chiamata nel browser sulle categorie del Supabase locale: undici voci su undici, `other` compresa, agganciano la categoria giusta. Due test del modulo coprono la posizione dopo la scansione.
+
 ## [1.12.14] - 2026-09-22
 
 ### Fixed
@@ -812,7 +825,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.14...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.15...HEAD
+[1.12.15]: https://github.com/E-Lop/entro/compare/v1.12.14...v1.12.15
 [1.12.14]: https://github.com/E-Lop/entro/compare/v1.12.13...v1.12.14
 [1.12.13]: https://github.com/E-Lop/entro/compare/v1.12.12...v1.12.13
 [1.12.12]: https://github.com/E-Lop/entro/compare/v1.12.11...v1.12.12
