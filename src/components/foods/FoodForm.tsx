@@ -579,7 +579,6 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
                   <FormControl>
                     <Input
                       type="date"
-                      min={format(new Date(), 'yyyy-MM-dd')}
                       className="h-11"
                       disabled={isSubmitting}
                       {...field}

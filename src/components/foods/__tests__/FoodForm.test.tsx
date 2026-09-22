@@ -298,6 +298,27 @@ describe('FoodForm — la data e il luogo che arrivano a onSubmit', () => {
     expect(mockOnSubmit.mock.calls[0][0].expiry_date).toBe('2020-01-15')
   })
 
+  it('rifiuta la data vuota: senza il vincolo nativo lo fa lo schema, e lo dice', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    await fill(user, { data: '', category: 'cat-1' })
+    await sendForm(container)
+
+    expect(await screen.findByText('Data di scadenza richiesta')).toBeTruthy()
+    expect(mockOnSubmit).not.toHaveBeenCalled()
+  })
+
+  // jsdom non applica la validazione nativa dei vincoli: il test qui sopra passa
+  // anche con un `min` sul campo, che nel browser blocca l'invio prima di
+  // `handleSubmit` (#144). La prova del comportamento è
+  // `tests/e2e/past-expiry-date.spec.ts`; questo tiene l'attributo fuori.
+  it('il campo della data non ha un minimo nativo che il browser farebbe valere', () => {
+    render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)
+
+    expect(screen.getByLabelText(/Data di scadenza \*/).hasAttribute('min')).toBe(false)
+  })
+
   it('la categoria pre-compila il luogo, se l\'utente non lo ha toccato', async () => {
     const user = userEvent.setup()
     render(<FoodForm mode="create" onSubmit={mockOnSubmit} />)

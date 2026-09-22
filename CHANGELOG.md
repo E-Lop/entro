@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.14] - 2026-09-22
+
+### Fixed
+- **Una data di scadenza passata si salva, e un alimento scaduto si modifica** (#144). La v1.12.0 (#122) aveva reso valida una data passata nello schema, ma il campo della data aveva ancora il vincolo nativo `min` fissato a oggi. Il browser rifiutava l'invio prima che partisse la validazione dell'app, mostrava «Il valore deve essere … o successivo» e lasciava il modulo aperto. Così non si salvava un alimento con la data di ieri, e non si modificava in nessun campo un alimento già scaduto: proprio il caso da cui era nata la #118. Il test di unità era verde perché jsdom non applica la validazione nativa. Tolto il `min`; gli altri vincoli nativi del modulo restano, e la data vuota resta rifiutata dallo schema con «Data di scadenza richiesta».
+
+  Provato sul browser con `tests/e2e/past-expiry-date.spec.ts`: un alimento nuovo con la data di ieri e la modifica del nome di uno scaduto da tre giorni arrivano al database. Contro il codice precedente erano rossi tutti e due, con il modulo ancora aperto. Un test di unità tiene l'attributo fuori dal campo.
+
 ## [1.12.13] - 2026-09-22
 
 ### Fixed
@@ -805,7 +812,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.13...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.14...HEAD
+[1.12.14]: https://github.com/E-Lop/entro/compare/v1.12.13...v1.12.14
 [1.12.13]: https://github.com/E-Lop/entro/compare/v1.12.12...v1.12.13
 [1.12.12]: https://github.com/E-Lop/entro/compare/v1.12.11...v1.12.12
 [1.12.11]: https://github.com/E-Lop/entro/compare/v1.12.10...v1.12.11
