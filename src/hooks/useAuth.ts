@@ -67,14 +67,14 @@ export function useAuth() {
     if (error) {
       logError('Logout rifiutato dal server', error)
 
-      // Il messaggio di Supabase non arriva all'utente: è in inglese e può
-      // contenere identificativi di sessione. Gli si dice la sola cosa che gli
-      // serve, e cambia a seconda che sia uscito da qui o no.
-      toast.error(
-        localSessionCleared
-          ? 'Sei uscito da questo dispositivo, ma altrove potresti essere ancora dentro.'
-          : 'Non è stato possibile completare la disconnessione. Chiudi il browser per sicurezza.'
-      )
+      // Con la pulizia locale riuscita l'utente è uscito da qui, e con lo
+      // scope locale non c'è un «altrove» da segnalare: nessun messaggio.
+      // Resta quello per la pulizia fallita, perché lì può essere ancora
+      // dentro. Il testo di Supabase non arriva mai all'utente: è in inglese
+      // e può contenere identificativi di sessione.
+      if (!localSessionCleared) {
+        toast.error('Non è stato possibile completare la disconnessione. Chiudi il browser per sicurezza.')
+      }
       return { success: false, error, localSessionCleared }
     }
 

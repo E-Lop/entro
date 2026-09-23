@@ -92,13 +92,31 @@ describe('useAuth().signOut()', () => {
     expect(outcome?.localSessionCleared).toBe(true)
   })
 
-  it('avvisa l’utente senza rimandargli il messaggio del server', async () => {
-    // Il messaggio di Supabase è in inglese e può contenere identificativi di
-    // sessione: quello che serve all'utente è sapere che altrove potrebbe
-    // essere ancora dentro.
+  it('con il server che rifiuta e la pulizia locale riuscita non mostra niente, e scrive nei log', async () => {
+    // L'utente è uscito da questo browser: sessione e chiavi non ci sono più.
+    // Con lo scope locale non c'è un «altrove» da segnalare, quindi nessun
+    // messaggio; il successo nemmeno, perché la chiamata non è riuscita.
+    const serverError = new Error('Session from session_id claim in JWT does not exist')
+    serviceSignOut.mockResolvedValue({ error: serverError, localSessionCleared: true })
+    const { result } = renderHook(() => useAuth())
+
+    await act(async () => {
+      await result.current.signOut()
+    })
+
+    expect(toastError).not.toHaveBeenCalled()
+    expect(toastSuccess).not.toHaveBeenCalled()
+    expect(useAuthStore.getState().isAuthenticated).toBe(false)
+    expect(logError).toHaveBeenCalledWith(expect.any(String), serverError)
+  })
+
+  it('se nemmeno la pulizia locale è riuscita avvisa, senza rimandare il messaggio del server', async () => {
+    // Qui l'utente può essere ancora dentro su questo dispositivo, e deve
+    // saperlo. Il messaggio di Supabase è in inglese e può contenere
+    // identificativi di sessione: non arriva a schermo.
     serviceSignOut.mockResolvedValue({
       error: new Error('Session from session_id claim in JWT does not exist'),
-      localSessionCleared: true,
+      localSessionCleared: false,
     })
     const { result } = renderHook(() => useAuth())
 
@@ -108,8 +126,8 @@ describe('useAuth().signOut()', () => {
 
     expect(toastError).toHaveBeenCalledTimes(1)
     const message = String(toastError.mock.calls[0][0])
+    expect(message).toContain('Chiudi il browser')
     expect(message).not.toContain('session_id')
-    expect(message.length).toBeGreaterThan(0)
   })
 
   it('sul percorso felice avvisa del successo e svuota lo store', async () => {
