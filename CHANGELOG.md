@@ -5,6 +5,12 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.17] - 2026-09-23
+
+### Fixed
+- **«Esci» chiude solo la sessione di questo browser** (entro-mobile#119). `signOut()` chiamava Supabase senza argomenti, e il default di supabase-js è lo scope globale: uscendo dalla PWA si chiudevano anche l'app sul telefono e gli altri browser dello stesso utente, e viceversa. Ora la chiamata passa `{ scope: 'local' }`. La regola, con il rischio accettato e il modo di chiudere un dispositivo perso, è nel bundle di famiglia (`conventions/sign-out-scope.md`).
+- **Un logout rifiutato dal server non mostra più un errore quando l'utente è comunque uscito.** Se Supabase rifiuta ma i token spariscono dal browser, l'errore va nei log e basta, come sull'app nativa. Il messaggio «Sei uscito da questo dispositivo, ma altrove potresti essere ancora dentro» non segnalava più niente, perché con lo scope locale è vero a ogni logout. Resta l'avviso per il caso in cui nemmeno la pulizia locale riesce.
+
 ## [1.12.16] - 2026-09-22
 
 ### Fixed
@@ -833,7 +839,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.16...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.17...HEAD
+[1.12.17]: https://github.com/E-Lop/entro/compare/v1.12.16...v1.12.17
 [1.12.16]: https://github.com/E-Lop/entro/compare/v1.12.15...v1.12.16
 [1.12.15]: https://github.com/E-Lop/entro/compare/v1.12.14...v1.12.15
 [1.12.14]: https://github.com/E-Lop/entro/compare/v1.12.13...v1.12.14

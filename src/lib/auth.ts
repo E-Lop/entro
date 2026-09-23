@@ -161,7 +161,10 @@ export async function signOut(): Promise<SignOutResult> {
   let failure: Error | null = null
 
   try {
-    const { error } = await supabase.auth.signOut()
+    // Solo la sessione di questo browser: il default di supabase-js è
+    // `global`, che chiuderebbe anche il telefono e gli altri browser.
+    // entro-family, `conventions/sign-out-scope.md`.
+    const { error } = await supabase.auth.signOut({ scope: 'local' })
 
     if (error) {
       failure = new Error(error.message)

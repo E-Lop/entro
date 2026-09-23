@@ -66,6 +66,15 @@ describe('signOut', () => {
     expect(sessionStorage.getItem('user_initialized_abc')).toBeNull()
   })
 
+  it('chiude solo la sessione di questo browser, non quelle degli altri dispositivi', async () => {
+    // Il default di supabase-js è `scope: 'global'`, che revoca ogni sessione
+    // dell'utente: un logout dal telefono chiudeva anche il browser (#119 di
+    // entro-mobile). La regola è in entro-family, `conventions/sign-out-scope.md`.
+    await signOut()
+
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: 'local' })
+  })
+
   it('lascia intatto quello che non è di auth', async () => {
     seedSession()
 
