@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.21] - 2026-09-25
+
+### Fixed
+- **Una modifica fallita annulla solo quello che aveva cambiato lei** (#141). Modifica, cambio di stato e rimozione di un alimento, se fallivano, rimettevano una fotografia di tutte le liste presa prima del proprio aggiornamento. Con più operazioni in corso insieme quella fotografia cancellava anche le altre: un alimento tolto con successo ricompariva, o, se falliva anche la rilettura, un alimento la cui rimozione non era andata a buon fine restava sparito. Oggi l'app impedisce quasi sempre due operazioni insieme, ma è il prerequisito per poter togliere più alimenti offline (#153). Ora ogni operazione fallita rimette solo i campi dell'alimento che ha toccato, e solo se nessun'altra li ha cambiati dopo. Un alimento tolto torna al suo posto, accanto a quello che lo seguiva.
+- **Le scritture sugli alimenti arrivano al server nell'ordine in cui sono state fatte** (#141). A schermo cambiano subito; al server vanno una alla volta. Serve per esempio quando si modifica, offline, un alimento creato offline.
+
+  Provato con cinque test sugli hook, con le liste senza rilettura possibile (il caso peggiore). Contro il codice precedente erano rossi tutti e cinque.
+
 ## [1.12.20] - 2026-09-25
 
 ### Fixed
@@ -870,7 +878,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.20...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.21...HEAD
+[1.12.21]: https://github.com/E-Lop/entro/compare/v1.12.20...v1.12.21
 [1.12.20]: https://github.com/E-Lop/entro/compare/v1.12.19...v1.12.20
 [1.12.19]: https://github.com/E-Lop/entro/compare/v1.12.18...v1.12.19
 [1.12.18]: https://github.com/E-Lop/entro/compare/v1.12.17...v1.12.18

@@ -8,9 +8,10 @@
  * liste non hanno una `queryFn`, quindi la rilettura non risponde mai: la card
  * deve sparire lo stesso.
  *
- * Si toglie **per id** e non ripristinando una fotografia delle liste, come
- * fanno le altre tre mutazioni: con più creazioni in volo la fotografia della
- * prima cancellerebbe la card della seconda.
+ * Si toglie **per id** e non ripristinando una fotografia delle liste: con più
+ * creazioni in volo la fotografia della prima cancellerebbe la card della
+ * seconda. Dalla #141 fanno così anche le altre tre mutazioni
+ * (`useFoodsConcurrentRollback.test.tsx`).
  */
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query'
