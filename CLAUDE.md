@@ -48,11 +48,15 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.my_table TO service_role;
 
 ```sql
 CREATE OR REPLACE FUNCTION public.my_function(...)
-RETURNS ... LANGUAGE plpgsql SECURITY DEFINER AS $$ ... $$;
+RETURNS ... LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$ ... $$;
 
+-- Una funzione NON nasce invisibile: Postgres dà EXECUTE a PUBLIC, e anon ne fa
+-- parte (#160). Dalla 20260925 i default privileges la chiudono già, ma la
+-- revoca esplicita resta: il guardiano è supabase/tests/function_grants.test.sql.
+REVOKE EXECUTE ON FUNCTION public.my_function(...) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.my_function(...) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.my_function(...) TO service_role;
--- GRANT EXECUTE ON FUNCTION public.my_function(...) TO anon;  -- solo se davvero pubblica
+-- GRANT EXECUTE ON FUNCTION public.my_function(...) TO anon;  -- solo se davvero pubblica: va aggiunta anche alla lista del guardiano
 ```
 
 ### Sintomo se manchi un GRANT

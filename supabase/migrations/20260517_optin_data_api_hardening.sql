@@ -16,6 +16,11 @@
 -- in public richiedera' GRANT espliciti per essere raggiungibile via
 -- supabase-js / PostgREST. Senza GRANT, PostgREST risponde con errore 42501.
 --
+-- ⚠️ Per le FUNZIONI l'effetto non c'e' stato (#160): l'ultima riga, per
+-- schema, non toglie l'EXECUTE che Postgres da' a PUBLIC per default, quindi
+-- ogni funzione nuova restava eseguibile da anon. Corretto dalla 20260925,
+-- con la stessa revoca scritta senza schema.
+--
 -- Supabase applichera' lo stesso comportamento automaticamente a tutti i
 -- progetti esistenti il 30 ottobre 2026. Questo opt-in anticipa l'allineamento.
 -- ============================================

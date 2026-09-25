@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.18] - 2026-09-25
+
+### Security
+- **Le funzioni del database non sono più eseguibili da chi non ha fatto l'accesso** (#160). Postgres concede `EXECUTE` a `PUBLIC` su ogni funzione appena creata, e il ruolo anonimo di Supabase ne fa parte: i `revoke … from anon` scritti nelle migrazioni non toglievano niente. Il caso con effetti era `get_expiring_foods_for_notifications`, la funzione che prepara le notifiche. Gira con i permessi del proprietario e non controlla chi la chiama: con la sola chiave pubblica della PWA restituiva `user_id`, nome, scadenza e fuso orario degli alimenti in scadenza di **tutti** gli utenti. Verificato in produzione in sola lettura il 25 set: `anon` poteva eseguirla. Ora ogni funzione di `public` è chiusa a `PUBLIC` e ad `anon`, tranne `register_pending_invite`, che il client chiama durante la registrazione, prima che esista una sessione; quella delle notifiche resta alla sola service role, cioè all'Edge Function.
+
+  La migrazione di maggio (`20260517`) doveva già impedirlo per le funzioni nuove, con la riga suggerita dalla guida di Supabase *Hardening the Data API*: `alter default privileges … in schema public revoke execute on functions from public`. Secondo la documentazione di Postgres quella forma non ha effetto, perché una revoca per schema non toglie un default globale, e sul database non l'ha avuto. Ora la revoca è scritta senza schema. `get_expiring_foods_for_notifications` ha anche il `search_path` fissato.
+
+  Il guardiano è un test pgTAP (`supabase/tests/function_grants.test.sql`, eseguito in CI con `supabase test db`). Su `main` era rosso su 4 controlli su 5; dopo la migrazione è verde. Provato sul Supabase locale: `anon` riceve 401 dalla funzione delle notifiche, la service role 200 con gli stessi dati di prima, e `register_pending_invite` resta raggiungibile da `anon`. Chiudere a `PUBLIC` anche le funzioni di trigger non ne ferma nessuna: `EXECUTE` serve per creare un trigger, non perché scatti (misurato con un ruolo senza il permesso).
+
 ## [1.12.17] - 2026-09-23
 
 ### Fixed
@@ -839,7 +848,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.17...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.18...HEAD
+[1.12.18]: https://github.com/E-Lop/entro/compare/v1.12.17...v1.12.18
 [1.12.17]: https://github.com/E-Lop/entro/compare/v1.12.16...v1.12.17
 [1.12.16]: https://github.com/E-Lop/entro/compare/v1.12.15...v1.12.16
 [1.12.15]: https://github.com/E-Lop/entro/compare/v1.12.14...v1.12.15
