@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.22] - 2026-09-25
+
+### Fixed
+- **Offline si possono togliere e modificare più alimenti** (#153). Dal secondo in poi il dialogo «Com'è finita?» si apriva con i tre esiti disabilitati, senza dire perché, finché la rete non tornava; lo stesso valeva per il salvataggio di una modifica. Il blocco era globale: bastava un'operazione in coda su qualunque alimento. Ora vale solo per l'alimento che ha già un'operazione in attesa, e in quel caso il dialogo lo dice. Gli altri si tolgono e si modificano anche senza rete.
+
+  Provato nel browser con la rete tolta davvero: tre alimenti tolti offline, e tornata la rete arrivano tutti al database senza ricaricare la pagina. Contro il codice precedente il test si fermava al secondo, con gli esiti disabilitati. Possibile ora che la #141 fa annullare a ogni operazione fallita solo ciò che ha toccato.
+
 ## [1.12.21] - 2026-09-25
 
 ### Fixed
@@ -878,7 +885,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.21...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.22...HEAD
+[1.12.22]: https://github.com/E-Lop/entro/compare/v1.12.21...v1.12.22
 [1.12.21]: https://github.com/E-Lop/entro/compare/v1.12.20...v1.12.21
 [1.12.20]: https://github.com/E-Lop/entro/compare/v1.12.19...v1.12.20
 [1.12.19]: https://github.com/E-Lop/entro/compare/v1.12.18...v1.12.19

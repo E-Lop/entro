@@ -47,6 +47,7 @@ vi.mock('@/lib/pendingImages', () => ({ savePendingImage: mocks.savePendingImage
 vi.mock('@/lib/haptics', () => ({ triggerHaptic: vi.fn() }))
 vi.mock('@/lib/safeLog', () => ({ logError: vi.fn() }))
 vi.mock('@/lib/focusAfterRemoval', () => ({ restoreFocusTo: vi.fn() }))
+vi.mock('../usePendingMutations', () => ({ useFoodHasPendingWrite: () => false }))
 
 import { useFoodFormDialog } from '../useFoodFormDialog'
 
