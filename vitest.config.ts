@@ -23,7 +23,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     setupFiles: ['./src/test/setup.ts'],
-    exclude: ['tests/e2e/**', '**/node_modules/**', '**/dist/**'],
+    // I guardiani di famiglia (`*.family.test.*`) leggono `entro-family` ed
+    // `entro-mobile`, che sono privati: stanno in `npm run test:family`, così
+    // `npm test` passa in un clone nuovo (#149).
+    exclude: ['tests/e2e/**', '**/node_modules/**', '**/dist/**', '**/*.family.test.*'],
     // Node 25+ enables experimental Web Storage by default; without a backing file
     // its built-in `localStorage` resolves to `undefined` and shadows the one tests
     // expect (vitest#8757). Disabling it lets our setup own the global cleanly and
