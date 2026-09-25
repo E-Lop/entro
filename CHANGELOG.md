@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.19] - 2026-09-25
+
+### Fixed
+- **Accettare un invito per email non mette più nessuno in due liste** (#74). `accept_pending_invite_by_email` controllava solo di non essere già membro della lista dell'invito, non di un'altra. L'app la chiama solo per chi non ha liste, quindi dal flusso normale non succedeva, ma chiamata da sola la RPC aggiungeva l'utente a una seconda lista, e da lì il caricamento della lista andava in errore. Ora chi ha già una lista riceve lo stesso esito di quando non c'è nessun invito, e l'invito resta aperto: lo si accetta con il codice, che chiede conferma prima di lasciare la lista in cui si è.
+- **Un errore imprevisto accettando un invito dà il solito messaggio, non quello del database** (#74). `join_list_via_invite` e `accept_pending_invite_by_email` non avevano un ramo per gli errori imprevisti (per esempio un doppio invio): l'errore usciva grezzo invece che nell'esito che il client sa leggere. Ora rispondono «Non è stato possibile accettare l'invito. Riprova.», e nel log del server resta solo il codice dell'errore, perché il client mostra quel testo all'utente.
+
+### Security
+- **Tolto un permesso di modifica inutilizzato su `list_members`, e fissato il `search_path` di tre funzioni** (#74). Gli utenti avevano ancora `UPDATE` sulla tabella dei membri, che non ha nessuna policy di aggiornamento: non si poteva usare, ma non doveva esserci. `get_user_list_ids`, `get_shared_list_member_ids` e `create_personal_list` girano con i permessi del proprietario e risolvevano i nomi con il `search_path` di chi le chiamava.
+
+  Provato con due test pgTAP (`supabase/tests/join_rpcs.test.sql`): sul codice precedente l'utente finiva in due liste e l'invito risultava accettato, e l'errore simulato interrompeva la chiamata; dopo, 9 controlli su 9.
+
 ## [1.12.18] - 2026-09-25
 
 ### Security
@@ -848,7 +859,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.18...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.19...HEAD
+[1.12.19]: https://github.com/E-Lop/entro/compare/v1.12.18...v1.12.19
 [1.12.18]: https://github.com/E-Lop/entro/compare/v1.12.17...v1.12.18
 [1.12.17]: https://github.com/E-Lop/entro/compare/v1.12.16...v1.12.17
 [1.12.16]: https://github.com/E-Lop/entro/compare/v1.12.15...v1.12.16

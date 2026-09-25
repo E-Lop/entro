@@ -38,6 +38,9 @@ test.describe('sicurezza join list_members', () => {
     const inviteeEmail = createE2EEmail()
     const invitee = await createE2EUser(inviteeEmail, password)
     try {
+      // Il client la chiama solo per chi non ha liste (authStore), e dalla #94
+      // ogni utente nasce con una: lo scenario va ricreato di proposito.
+      await removeUserList(invitee.id)
       const listId = await seedPendingInviteByEmail(inviter.id, inviteeEmail)
       const client = await signInAsUser(inviteeEmail, password)
       const { data, error } = await client.rpc('accept_pending_invite_by_email')
@@ -45,6 +48,26 @@ test.describe('sicurezza join list_members', () => {
       expect(error).toBeNull()
       expect(row?.success).toBe(true)
       expect(row?.list_id).toBe(listId)
+    } finally {
+      await deleteE2EUserByEmail(inviter.email)
+      await deleteE2EUserByEmail(invitee.email)
+    }
+  })
+
+  test('accept_pending_invite_by_email: NON aggiunge a una seconda lista chi ne ha già una', async () => {
+    const inviterEmail = createE2EEmail()
+    const inviter = await createE2EUser(inviterEmail, password)
+    const inviteeEmail = createE2EEmail()
+    const invitee = await createE2EUser(inviteeEmail, password)
+    try {
+      // L'invitato tiene la lista con cui è nato (#74).
+      const listId = await seedPendingInviteByEmail(inviter.id, inviteeEmail)
+      const client = await signInAsUser(inviteeEmail, password)
+      const { data, error } = await client.rpc('accept_pending_invite_by_email')
+      const row = Array.isArray(data) ? data[0] : data
+      expect(error).toBeNull()
+      expect(row?.success).toBe(false)
+      expect(await countListMemberships(listId, invitee.id)).toBe(0)
     } finally {
       await deleteE2EUserByEmail(inviter.email)
       await deleteE2EUserByEmail(invitee.email)
