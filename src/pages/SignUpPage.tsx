@@ -9,7 +9,7 @@ import { Label } from '../components/ui/label'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
-import { validateInvite, registerPendingInvite } from '../lib/invites'
+import { validateInvite } from '../lib/invites'
 import { logError } from '../lib/safeLog'
 import { Loader2 } from 'lucide-react'
 
@@ -45,7 +45,9 @@ export function SignUpPage() {
   // Solo short code
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [inviteValid, setInviteValid] = useState<boolean>(false)
-  const [inviteLoading, setInviteLoading] = useState<boolean>(false)
+  // Con un codice nell'URL si parte già in validazione: il form non deve poter
+  // partire prima, o il codice non viaggia con la registrazione (#165).
+  const [inviteLoading, setInviteLoading] = useState<boolean>(() => Boolean(searchParams.get('code')))
   const [inviteCreatorName, setInviteCreatorName] = useState<string>('')
 
   // Input manuale
@@ -103,18 +105,8 @@ export function SignUpPage() {
 
   const handleSuccess = async (email?: string) => {
     try {
-      if (inviteCode && inviteValid && email) {
-        // Register this email with the invite so it can be accepted after email confirmation
-        const { success } = await registerPendingInvite(inviteCode, email)
-
-        if (!success) {
-          // Il messaggio del server non viene stampato: `register_pending_invite`
-          // riceve il codice invito fra i parametri, e un `RAISE EXCEPTION` che
-          // lo interpola lo farebbe finire in console. Qui non basta redigere,
-          // perché il segreto è il messaggio stesso.
-          console.error('Failed to register pending invite')
-        }
-      }
+      // Il codice invito è già arrivato al database con la registrazione, nei
+      // metadati (#165): qui non c'è più niente da registrare.
 
       // Save email in sessionStorage (secure, not exposed in URL)
       // and redirect to verify email page
@@ -185,7 +177,8 @@ export function SignUpPage() {
             <AuthForm
               mode="signup"
               onSuccess={handleSuccess}
-              disableSubmit={!termsAccepted}
+              disableSubmit={!termsAccepted || inviteLoading}
+              inviteCode={inviteValid && inviteCode ? inviteCode : undefined}
               // NO prefillEmail, NO lockEmail
             />
 

@@ -16,6 +16,8 @@ interface AuthFormProps {
   prefillEmail?: string | null
   lockEmail?: boolean
   disableSubmit?: boolean
+  /** Codice invito già validato dalla pagina: va nei metadati della registrazione (#165). */
+  inviteCode?: string
 }
 
 function getSubmitButtonText(mode: 'login' | 'signup', isSubmitting: boolean): string {
@@ -25,7 +27,7 @@ function getSubmitButtonText(mode: 'login' | 'signup', isSubmitting: boolean): s
   return isSubmitting ? 'Registrazione in corso...' : 'Registrati'
 }
 
-export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubmit }: AuthFormProps) {
+export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubmit, inviteCode }: AuthFormProps) {
   const { signIn, signUp } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -63,7 +65,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
       } else {
         // Type assertion safe here because we know signup form has full_name
         const signupData = data as SignupFormData
-        result = await signUp(data.email, data.password, signupData.full_name)
+        result = await signUp(data.email, data.password, signupData.full_name, inviteCode)
       }
 
       if (result.success) {

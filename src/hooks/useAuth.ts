@@ -15,8 +15,8 @@ export function useAuth() {
   /**
    * Sign up a new user with full name
    */
-  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    const { user, error } = await authService.signUp(email, password, fullName)
+  const signUp = useCallback(async (email: string, password: string, fullName: string, inviteCode?: string) => {
+    const { user, error } = await authService.signUp(email, password, fullName, inviteCode)
 
     if (error) {
       // Error surfaced inline by AuthForm, not as a transient toast
