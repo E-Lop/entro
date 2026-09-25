@@ -22,6 +22,15 @@ test('registrandosi con un codice invito si entra nella lista di chi ha invitato
   try {
     const { listId, shortCode } = await seedPendingInviteByCode(owner.id)
 
+    // La validazione del codice è asincrona, e sul runner della CI a volte il
+    // form partiva prima che finisse: il codice non viaggiava con la
+    // registrazione. Qui la si rallenta di proposito, così la finestra c'è
+    // sempre, e il test prova che «Registrati» la aspetta.
+    await page.route('**/functions/v1/validate-invite*', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await route.continue()
+    })
+
     await page.goto(`/signup?code=${shortCode}`)
     await page.locator('input[name="full_name"]').fill('Invitato E2E')
     await page.locator('input[name="email"]').fill(email)

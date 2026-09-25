@@ -45,7 +45,9 @@ export function SignUpPage() {
   // Solo short code
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [inviteValid, setInviteValid] = useState<boolean>(false)
-  const [inviteLoading, setInviteLoading] = useState<boolean>(false)
+  // Con un codice nell'URL si parte già in validazione: il form non deve poter
+  // partire prima, o il codice non viaggia con la registrazione (#165).
+  const [inviteLoading, setInviteLoading] = useState<boolean>(() => Boolean(searchParams.get('code')))
   const [inviteCreatorName, setInviteCreatorName] = useState<string>('')
 
   // Input manuale
@@ -175,7 +177,7 @@ export function SignUpPage() {
             <AuthForm
               mode="signup"
               onSuccess={handleSuccess}
-              disableSubmit={!termsAccepted}
+              disableSubmit={!termsAccepted || inviteLoading}
               inviteCode={inviteValid && inviteCode ? inviteCode : undefined}
               // NO prefillEmail, NO lockEmail
             />

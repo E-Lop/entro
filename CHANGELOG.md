@@ -12,7 +12,9 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
   Ora il codice viaggia con la registrazione, nei metadati dell'utente. Il database lo legge mentre crea l'account e, se l'invito è valido, mette l'utente direttamente nella lista che l'ha invitato, senza dargliene una sua. Con un codice scaduto, già usato o inesistente, l'utente nasce con la sua lista come prima.
 
-  Provato con un test end-to-end che si registra da `/signup?code=…` (rosso prima della correzione: l'utente finiva in una lista propria e l'invito restava in sospeso) e con un test pgTAP su tutti i rami del trigger.
+  C'era anche una finestra che avrebbe perso il codice comunque: la pagina valida il codice dell'URL in modo asincrono, e «Registrati» era attivo mentre la validazione era in corso. Ora aspetta che finisca.
+
+  Provato con un test end-to-end che si registra da `/signup?code=…` (rosso prima della correzione: l'utente finiva in una lista propria e l'invito restava in sospeso) e con un test pgTAP su tutti i rami del trigger. Il test end-to-end rallenta apposta la validazione del codice: senza l'attesa di «Registrati» falliva 3 volte su 3, con l'attesa passa 5 su 5.
 
 ## [1.12.19] - 2026-09-25
 
