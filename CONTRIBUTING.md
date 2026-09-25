@@ -57,7 +57,20 @@ npm test
 npm run build
 ```
 
-La CI GitHub esegue gli stessi controlli su push e pull request.
+La CI GitHub esegue gli stessi controlli su push e pull request. Per contribuire basta che questi siano verdi: `npm test` passa in un clone nuovo, senza nient'altro accanto.
+
+### Guardiani di famiglia
+
+Alcuni test confrontano entro con due repo affiancati, `entro-family` (il dominio condiviso della famiglia di app) ed `entro-mobile` (l'app nativa). Sono **privati**, quindi quei test non stanno in `npm test`: stanno in `npm run test:family`, e si riconoscono dal nome, `*.family.test.ts`. Senza i repo affiancati falliscono di proposito, con un messaggio che dice cosa manca.
+
+La CI li esegue in un job a parte, «Guardiani di famiglia», sul repo principale e su `main`. Sulle pull request aperte da un fork quel job non parte, perché i token per leggere i repo privati non arrivano ai fork, e non fa fallire il resto: li verifica chi mantiene il repo.
+
+Un test nuovo che legge i repo affiancati va chiamato `*.family.test.ts`. Se non lo è, `npm test` diventa rosso su `familyTestsBoundary.test.ts`.
+
+### Regole che i test e il lint fanno rispettare
+
+- **Codice in inglese.** Nomi di variabili, funzioni, tipi, proprietà e file sono in inglese; prosa, commenti e testo a schermo in italiano. Lo controlla `englishNames.family.test.ts`, che fa parte dei guardiani di famiglia perché la lista delle parole italiane sta in `entro-family`.
+- **Niente dati della risposta nei log.** `console.error`, `console.warn` e simili non possono ricevere un secondo argomento: ne stamperebbero le proprietà, dove i client Supabase mettono i dati della risposta. Si usano `logError` e `logWarn` da `@/lib/safeLog`. È la regola `no-restricted-syntax` in `eslint.config.js`, quindi `npm run lint` la fa rispettare.
 
 ## Test end-to-end
 

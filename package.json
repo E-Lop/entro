@@ -1,7 +1,7 @@
 {
   "name": "entro",
   "private": true,
-  "version": "1.12.26",
+  "version": "1.12.27",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:ci": "vitest run --no-file-parallelism --maxWorkers=1",
+    "test:family": "vitest run --config vitest.family.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {

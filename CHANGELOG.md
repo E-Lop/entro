@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.27] - 2026-09-25
+
+### Changed
+- **`npm test` passa in un clone nuovo** (#149). Sei test confrontano entro con due repo affiancati, `entro-family` ed `entro-mobile`, che sono privati: senza, fallivano apposta, quindi chi clonava il repo pubblico vedeva i test rossi, e sulle pull request da un fork la CI falliva sempre. Ora quei test si chiamano `*.family.test.ts` e girano con `npm run test:family`, in un job della CI a parte che parte sul repo principale e non sulle PR dai fork. Senza la sorgente affiancata continuano a fallire, non vengono saltati. Un test nuovo che legge i repo affiancati senza quel nome fa diventare rosso `npm test`. CONTRIBUTING spiega le due suite, e scrive le due regole che finora stavano solo nelle istruzioni interne: codice in inglese, niente dati della risposta nei log.
+
+  Provato in un clone nuovo, senza repo affiancati: `npm test` verde (83 file, 630 test), `npm run test:family` rosso con il messaggio che dice cosa manca. Con i repo affiancati le due suite eseguono 694 test, gli stessi 691 di prima più i 3 del controllo sul confine, provato rosso con un file di prova.
+
 ## [1.12.26] - 2026-09-25
 
 ### Changed
@@ -922,7 +929,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.26...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.27...HEAD
+[1.12.27]: https://github.com/E-Lop/entro/compare/v1.12.26...v1.12.27
 [1.12.26]: https://github.com/E-Lop/entro/compare/v1.12.25...v1.12.26
 [1.12.25]: https://github.com/E-Lop/entro/compare/v1.12.24...v1.12.25
 [1.12.24]: https://github.com/E-Lop/entro/compare/v1.12.23...v1.12.24
