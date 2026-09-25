@@ -2,9 +2,10 @@
 name: Entro
 description: PWA italiana per il tracciamento delle scadenze alimentari, mobile-first
 colors:
-  primary: "#16a34a"
-  primary-foreground: "#fef2f2"
-  primary-dark: "#22c55e"
+  primary: "#006e2d"
+  primary-foreground: "#ffffff"
+  primary-dark: "#62df7d"
+  primary-dark-foreground: "#003914"
   background: "#ffffff"
   foreground: "#0a0a0a"
   card: "#ffffff"
@@ -12,28 +13,28 @@ colors:
   muted: "#f5f5f5"
   muted-foreground: "#737373"
   border: "#e5e5e5"
-  ring: "#16a34a"
+  ring: "#006e2d"
   destructive: "#ef4444"
   destructive-foreground: "#fafafa"
 typography:
   display:
-    fontFamily: "Inter, system-ui, sans-serif"
+    fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif"
     fontSize: "clamp(1.5rem, 5vw, 1.875rem)"
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "-0.025em"
   title:
-    fontFamily: "Inter, system-ui, sans-serif"
+    fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 600
     lineHeight: 1.3
   body:
-    fontFamily: "Inter, system-ui, sans-serif"
+    fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "Inter, system-ui, sans-serif"
+    fontFamily: "system-ui, Avenir, Helvetica, Arial, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 500
     lineHeight: 1.25
@@ -84,7 +85,7 @@ components:
 
 Entro è un'app da cucina: utile, calma, leggibile a colpo d'occhio mentre tieni il telefono con una mano e
 la spesa nell'altra. Il sistema visivo è uno **shadcn/ui neutro con un'unica voce verde**: superfici bianche e
-grigi neutri che fanno da sfondo silenzioso, e il verde del brand (#16a34a) che porta tutte le azioni e gli
+grigi neutri che fanno da sfondo silenzioso, e il verde del brand (#006e2d) che porta tutte le azioni e gli
 stati attivi. La densità è bassa, lo spazio respira, niente ornamenti: l'informazione che conta è lo stato di
 scadenza, e tutto il resto si fa da parte.
 
@@ -105,8 +106,10 @@ canonici sono definiti come CSS custom properties HSL in `src/index.css` (tema c
 sono la loro resa sRGB.
 
 ### Primary
-- **Verde Entro** (#16a34a): l'identità. Bottoni primari, FAB, stati attivi/selezionati, focus ring, link.
-  In dark mode si schiarisce a **Verde Acceso** (#22c55e) per restare leggibile sul fondo scuro.
+- **Verde Entro** (#006e2d, `144.5 100% 21.6%`): l'identità. Bottoni primari, FAB, stati attivi/selezionati,
+  focus ring, link. Testo sopra: bianco (#ffffff).
+  In dark mode si schiarisce a **Verde Acceso** (#62df7d, `133 66.1% 62.9%`) per restare leggibile sul fondo
+  scuro; il testo sopra diventa verde scurissimo (#003914).
 
 ### Neutral
 - **Bianco** (#ffffff): sfondo app e superfici card.
@@ -140,12 +143,13 @@ icona + testo. Un daltonico deve distinguere "in scadenza" da "scaduto" senza ve
 
 ## 3. Typography
 
-**Display Font:** Inter (fallback system-ui, sans-serif)
-**Body Font:** Inter (stessa famiglia)
-**Label Font:** Inter
+**Display Font:** il font di sistema (`system-ui, Avenir, Helvetica, Arial, sans-serif`, in `src/index.css`)
+**Body Font:** lo stesso
+**Label Font:** lo stesso
 
-**Character:** una sola famiglia, gerarchia costruita su scala + peso. Inter è neutra e legge bene a corpo
-piccolo su mobile; la personalità viene dal contrasto di peso, non dall'accostamento di font.
+**Character:** una sola famiglia, gerarchia costruita su scala + peso. L'app non carica font web: ogni
+dispositivo mostra il font della propria interfaccia (`system-ui`). La personalità viene dal contrasto di peso,
+non dall'accostamento di font.
 
 ### Hierarchy
 - **Display** (700, clamp 1.5–1.875rem, lh 1.2, tracking -0.025em): saluto Dashboard, titoli di pagina.
@@ -154,7 +158,7 @@ piccolo su mobile; la personalità viene dal contrasto di peso, non dall'accosta
 - **Label** (500, 0.75rem): etichette stat, metadati, caption (colore grigio testo #737373).
 
 ### Named Rules
-**La regola Una Famiglia.** Una sola famiglia (Inter). La gerarchia nasce da peso e scala, mai
+**La regola Una Famiglia.** Una sola famiglia (quella di sistema). La gerarchia nasce da peso e scala, mai
 dall'introduzione di un secondo typeface.
 
 ## 4. Elevation
@@ -176,15 +180,14 @@ galleggia sopra il contenuto.
 
 ### Buttons
 - **Shape:** angoli arrotondati morbidi (6px, `rounded-md`).
-- **Primary:** fondo verde brand (#16a34a), testo chiaro (#fef2f2), padding 8×16px. Icona Lucide + testo
+- **Primary:** fondo verde brand (#006e2d), testo bianco (#ffffff), padding 8×16px. Icona Lucide + testo
   (verbo + oggetto).
 - **Hover / Focus:** scurimento leggero del fondo; focus-visible con ring verde a 2px e offset.
 - **Outline / Ghost:** fondo trasparente/bianco, testo inchiostro, bordo neutro; per azioni secondarie.
 
 ### Stat cards (segnale-componente)
 Tre pulsanti-statistica (Totali / In scadenza / Scaduti) che fungono da quick-filter. Card neutra con icona +
-numero grande + label; lo stato selezionato è evidenziato da un ring. **Il ring selezionato deve essere verde
-brand** (oggi alcuni stati usano `ring-blue-500`: fuori sistema, da correggere).
+numero grande + label; lo stato selezionato è evidenziato da un ring verde brand (`ring-2 ring-primary`).
 
 ### Cards / Containers
 - **Corner Style:** 8px (`rounded-lg`).
@@ -195,7 +198,7 @@ brand** (oggi alcuni stati usano `ring-blue-500`: fuori sistema, da correggere).
 
 ### Inputs / Fields
 - **Style:** bordo neutro 1px, fondo bianco, 6px radius, padding 8×12px.
-- **Focus:** ring verde brand (#16a34a), focus-visible.
+- **Focus:** ring verde brand (#006e2d), focus-visible.
 - **Error:** messaggio inline sotto il campo; bordo/destructive rosso (#ef4444).
 
 ### Navigation
@@ -205,7 +208,7 @@ brand** (oggi alcuni stati usano `ring-blue-500`: fuori sistema, da correggere).
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** usare il **verde brand (#16a34a)** per ogni azione primaria, stato attivo, selezione e focus ring.
+- **Do** usare il **verde brand (#006e2d)** per ogni azione primaria, stato attivo, selezione e focus ring.
 - **Do** comunicare lo stato di scadenza con **colore + icona + testo** insieme (regola Mai Solo Colore).
 - **Do** mantenere i target tattili **≥ 44×44px** su mobile (le primitive condivise — `Button size="touch"`,
   `AlertDialog`, chiusura `Dialog` — sono già a 44px; usa `touch`/`icon-touch` per i nuovi controlli tappabili).
@@ -220,4 +223,4 @@ brand** (oggi alcuni stati usano `ring-blue-500`: fuori sistema, da correggere).
 - **Don't** usare **gradient text** (`background-clip: text`), **glassmorphism** decorativo, palette cream/sand,
   eyebrow maiuscolo tracked sopra ogni sezione, o l'**hero-metric template** (tutti tell dell'AI-slop).
 - **Don't** affidare un'informazione critica al **solo colore**.
-- **Don't** introdurre un secondo font: la gerarchia è peso + scala su Inter.
+- **Don't** introdurre un secondo font né caricare un font web: la gerarchia è peso + scala sul font di sistema.

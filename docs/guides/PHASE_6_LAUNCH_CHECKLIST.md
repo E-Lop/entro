@@ -1,3 +1,5 @@
+> **Documento storico, non aggiornato.** È la checklist della preparazione al lancio pubblico, scritta tra gennaio e febbraio 2026 (prima della v1.0.0) e lasciata com'era. Usa il vecchio dominio `entro-il.netlify.app` (oggi l'app è su https://entroapp.it), dà per future funzioni che nel frattempo sono uscite, come le notifiche push e l'offline, e cita file che non sono nel repository pubblico (`ROADMAP.md`, `DATABASE_SCHEMA.md`, `docs/gdpr-implementation-summary.md`). Lo stato attuale dell'app è nel [README](../../README.md) e nel [CHANGELOG](../../CHANGELOG.md).
+
 # Fase 6 - Launch Checklist
 
 ## 🎯 Obiettivo
