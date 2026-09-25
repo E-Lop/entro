@@ -1,5 +1,6 @@
 // Single source of truth for expiry-status classification.
-// Mirrors the canonical SQL view `foods_with_expiry_status` (see docs/development/DOMAIN_GLOSSARY.md).
+// The database has no equivalent (no view or function computes it): see
+// entro-family core/expiry-status.md.
 // Pure classification only — no presentation (Tailwind) or localized strings.
 import { differenceInDays } from 'date-fns'
 import type { ExpiryStatus } from '@/types/food.types'
