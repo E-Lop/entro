@@ -2,318 +2,273 @@
 
 **entro** ti aiuta a tenere traccia delle scadenze degli alimenti per ridurre gli sprechi alimentari.
 
+Questa è la guida da leggere su GitHub, senza installare l'app. Dentro l'app la stessa guida è su [entroapp.it/guida](https://entroapp.it/guida): le due hanno le stesse sezioni, nello stesso ordine, e un test del repo lo controlla. Solo qui ci sono l'indice, i primi passi e i contatti.
+
 ---
 
 ## Indice
 
-- [Primi Passi](#primi-passi)
-- [Aggiungere Alimenti](#aggiungere-alimenti)
-- [Gestire gli Alimenti](#gestire-gli-alimenti)
-- [Filtri e Ricerca](#filtri-e-ricerca)
-- [Vista Calendario](#vista-calendario)
-- [Condividere la Lista](#condividere-la-lista)
-- [Scansione Barcode](#scansione-barcode)
-- [Notifiche Scadenza](#notifiche-scadenza)
-- [Feedback Aptico](#feedback-aptico)
-- [Installare l'App (PWA)](#installare-lapp-pwa)
-- [Utilizzo Offline](#utilizzo-offline)
-- [Domande Frequenti](#domande-frequenti)
+- [Primi passi](#primi-passi)
+- [Aggiungere alimenti](#aggiungere-alimenti)
+- [Gestire gli alimenti](#gestire-gli-alimenti)
+- [Filtri e ricerca](#filtri-e-ricerca)
+- [Vista calendario](#vista-calendario)
+- [Condividere la lista](#condividere-la-lista)
+- [Notifiche di scadenza](#notifiche-di-scadenza)
+- [Scansione barcode](#scansione-barcode)
+- [Feedback aptico](#feedback-aptico)
+- [Installare l'app](#installare-lapp)
+- [Utilizzo offline](#utilizzo-offline)
+- [Domande frequenti](#domande-frequenti)
 
 ---
 
-## Primi Passi
+## Primi passi
 
-### Creare un Account
+### Creare un account
 
 1. Vai su https://entroapp.it
-2. Clicca su "Crea account"
-3. Inserisci la tua email e una password sicura che contenga:
+2. Nella pagina di accesso, sotto il modulo, clicca **"Registrati"**
+3. Inserisci nome, email e una password che contenga:
    - Minimo 8 caratteri
    - Almeno una lettera maiuscola (A-Z)
    - Almeno una lettera minuscola (a-z)
    - Almeno un numero (0-9)
    - Almeno un carattere speciale (!@#$%^&*...)
-4. Controlla la tua email per il link di conferma (arriva da `noreply@entroapp.it`)
-5. Clicca il link per attivare l'account
+4. Ripeti la password in **"Conferma Password"**, accetta i termini e clicca **"Registrati"**
+5. Controlla la tua email per il link di conferma (arriva da `noreply@entroapp.it`)
+6. Clicca il link per attivare l'account
+
+Se hai ricevuto un codice invito, vedi [Accettare un invito](#accettare-un-invito): con il codice, alla registrazione entri direttamente nella lista di chi ti ha invitato.
 
 ### Accedere
 
 1. Vai su https://entroapp.it/login
 2. Inserisci email e password
-3. Clicca "Accedi"
+3. Clicca **"Accedi"**
 
-### Password Dimenticata
+### Password dimenticata
 
-Se hai dimenticato la password, puoi reimpostarla facilmente:
-
-1. Vai alla pagina di login: https://entroapp.it/login
-2. Clicca sul link **"Password dimenticata?"** sotto il form di login
+1. Vai alla pagina di accesso: https://entroapp.it/login
+2. Clicca **"Password dimenticata?"** sotto il modulo
 3. Inserisci la tua **email** registrata
 4. Clicca **"Invia link di reset"**
-5. Controlla la tua **casella email** (anche spam/posta indesiderata) - l'email arriva da `noreply@entroapp.it`
-6. Clicca sul **link nell'email** per reimpostare la password
-7. Inserisci la tua **nuova password sicura** che contenga:
-   - Minimo 8 caratteri
-   - Almeno una lettera maiuscola (A-Z)
-   - Almeno una lettera minuscola (a-z)
-   - Almeno un numero (0-9)
-   - Almeno un carattere speciale (!@#$%^&*...)
-8. Clicca **"Aggiorna password"**
-9. Verrai automaticamente reindirizzato alla dashboard
+5. Controlla la tua **casella email** (anche spam/posta indesiderata): l'email arriva da `noreply@entroapp.it`
+6. Clicca il **link nell'email**
+7. Scrivi la **nuova password** due volte, con le stesse regole della registrazione
+8. Clicca **"Aggiorna password"**: dopo un secondo e mezzo sei nella dashboard
 
 **Note**:
-- Il link di reset è valido solo per un tempo limitato
-- Puoi richiedere un nuovo link se quello precedente è scaduto
-- Dopo aver cambiato la password, usa la nuova per accedere
-- Se non ricevi l'email, controlla la cartella spam e verifica che il mittente `noreply@entroapp.it` non sia bloccato
+- Il link di reset vale per un tempo limitato; se è scaduto, chiedine un altro
+- Se non ricevi l'email, controlla lo spam e che il mittente `noreply@entroapp.it` non sia bloccato
 
 ---
 
-## Aggiungere Alimenti
+## Aggiungere alimenti
 
-### Metodo 1: Inserimento Manuale
+### Inserimento manuale
 
-1. Clicca il pulsante verde **"+ Alimento"** in alto a destra
-2. Il form si apre con la sezione **"Dati alimento"** visibile:
-   - **Nome**: nome dell'alimento (obbligatorio)
-   - **Categoria**: seleziona dal menu (es. Latticini, Carne, Frutta)
-   - **Posizione**: dove lo conservi (Frigo, Freezer, Dispensa)
-   - **Scadenza**: data di scadenza (obbligatoria)
-   - **Quantità**: numero e unità (es. 2 pz, 500 g) — opzionale
-3. Per aggiungere foto o note, tocca **"Dettagli aggiuntivi"** — la sezione dati si chiude e si apre quella dei dettagli:
-   - **Foto**: scatta o carica una foto (opzionale)
-   - **Note**: informazioni aggiuntive (opzionale)
-4. Clicca **"Aggiungi alimento"** (sempre visibile in basso)
+1. Tocca il pulsante per aggiungere un alimento: su smartphone è il **pulsante verde tondo in basso a destra**, su computer il pulsante **"+ Alimento"** in alto a destra
+2. Il modulo si apre sulla sezione **"Dati alimento"**:
+   - **Nome** (obbligatorio)
+   - **Categoria**: es. Latticini, Carne, Frutta
+   - **Posizione**: Frigo, Freezer o Dispensa
+   - **Scadenza** (obbligatoria)
+   - **Quantità**: numero e unità (es. 2 pz, 500 g), facoltativa
+3. Per aggiungere foto o note, tocca **"Dettagli aggiuntivi"**: la sezione dei dati si chiude e si apre quella dei dettagli
+4. Clicca **"Aggiungi alimento"**, sempre visibile in basso
 
-> **Nota**: se provi a salvare senza compilare un campo obbligatorio, la sezione che contiene il campo mancante si riaprirà automaticamente.
+Quando scegli la categoria, la posizione si compila da sola: Latticini va in frigo, Surgelati in freezer, Pane e Pasta in dispensa. Se la posizione l'hai già scelta tu, la categoria non la cambia. Vale per gli alimenti nuovi: in modifica la posizione resta quella salvata.
 
-### Metodo 2: Scansione Barcode
+Se chiudi il modulo dopo averci scritto qualcosa (con Esc, cliccando fuori o sulla X), l'app chiede **"Scartare le modifiche?"**. **"Annulla"** ti riporta al modulo com'era, **"Scarta"** lo chiude e perde quello che hai scritto. Se invece ricarichi la pagina, l'avviso è quello del browser.
 
-1. Clicca **"+ Alimento"**
+Se salvi senza un campo obbligatorio, si riapre la sezione che lo contiene.
+
+### Scansione barcode
+
+1. Apri il modulo con il pulsante tondo **+** (su computer **"+ Alimento"**)
 2. Clicca **"Scansiona Barcode"**
-3. Inquadra il codice a barre del prodotto con la fotocamera
-4. L'app compilerà automaticamente i dati disponibili (nome, categoria, posizione)
-5. Aggiungi la **data di scadenza** e verifica la **quantità** — questi campi non vengono compilati dal barcode
+3. Inquadra il codice a barre con la fotocamera
+4. L'app compila nome, categoria e posizione, la quantità se è scritta sulla confezione, e nelle note la marca
+5. Aggiungi la **data di scadenza**, che il codice a barre non contiene, e controlla il resto
 6. Clicca **"Aggiungi alimento"**
 
 ---
 
-## Gestire gli Alimenti
+## Gestire gli alimenti
 
-### Modificare la Quantità (veloce)
+### Modificare la quantità (veloce)
 
-**Su Mobile:**
-- Fai uno **swipe verso destra** sulla card dell'alimento: si apre l'**editor rapido della quantità** direttamente sulla card
-- Usa i pulsanti **−** / **+** oppure tocca il numero per digitarlo (il passo si adatta all'unità: 1 per pezzi/confezioni, 0,1 per kg/l, 10 per g/ml)
-- La modifica si salva da sola (funziona anche offline). Resta uno **spicchio** della card a destra: toccalo o fai swipe indietro per richiuderla; anche scorrere la lista la richiude
-- Dove supportato (Android) sentirai una vibrazione quando raggiungi la soglia di azione
+**Su mobile:**
+- Fai uno **swipe verso destra** sulla card: si apre l'**editor rapido della quantità** direttamente sulla card
+- Usa i pulsanti **−** / **+** oppure tocca il numero per digitarlo (il passo si adatta all'unità: 1 per pezzi e confezioni, 0,1 per kg e l, 10 per g e ml)
+- La modifica si salva da sola, anche offline. Resta uno **spicchio** della card a destra: toccalo o fai swipe indietro per richiuderla; anche scorrere la lista la richiude
 
-### Modificare un Alimento (completo)
+**Su desktop:**
+- Clicca **"Modifica"** sulla card e cambia la quantità nel modulo
 
-**Su Desktop:**
-- Clicca il pulsante **"Modifica"** sulla card dell'alimento
+### Modificare tutto il resto
 
-**Su Mobile:**
+**Su mobile:**
 - Nell'editor rapido tocca **"Modifica completa"** per aprire il modulo con nome, scadenza, unità, categoria, note e foto
+- Oppure usa il menu **⋮** della card e scegli **"Modifica"**
 
-### Eliminare un Alimento
+**Su desktop:**
+- Clicca **"Modifica"** sulla card
 
-**Su Desktop:**
-- Clicca il pulsante **"Elimina"** sulla card
-- Conferma l'eliminazione
+### Eliminare
 
-**Su Mobile:**
-- Fai uno **swipe verso sinistra** sulla card dell'alimento
-- Conferma l'eliminazione
+**Su mobile:**
+- Fai uno **swipe verso sinistra** sulla card, oppure menu **⋮** e **"Elimina"**
 
-> **Feedback aptico**: su Android (dove il browser espone la vibrazione) riceverai una vibrazione tattile durante lo swipe e alla conferma delle azioni. Su iPhone/Safari il web non supporta questa funzione. Puoi disattivarlo da **Impostazioni > Feedback Aptico**.
+**Su desktop:**
+- Clicca **"Elimina"** sulla card
 
-### Capire i Colori
+L'app chiede **"Com'è finita?"** e propone tre risposte:
 
-Le card degli alimenti hanno un bordo colorato che indica l'urgenza:
+- **"L'ho consumato"**: l'hai mangiato o usato
+- **"L'ho buttato"**: è finito nella spazzatura
+- **"Toglilo e basta"**: l'avevi inserito per sbaglio, e non conta né come consumato né come buttato
 
-| Colore | Significato |
-|--------|-------------|
-| 🟢 Verde | Più di 7 giorni alla scadenza |
-| 🟡 Giallo | 4-7 giorni alla scadenza |
-| 🟠 Arancione | 1-3 giorni alla scadenza |
-| 🔴 Rosso | Scaduto |
+In tutti e tre i casi l'alimento esce dalla lista e la sua foto viene cancellata: la foto non si recupera. **"Annulla"** lascia tutto com'era.
+
+### Il menu ⋮ su telefono
+
+Sotto i 640 px di larghezza le card non hanno i pulsanti in basso: al loro posto c'è **⋮** in alto a destra, con **"Modifica"** ed **"Elimina"**. Fa le stesse cose degli swipe. Con VoiceOver o TalkBack è la strada da usare, perché gli swipe sulla card non sono raggiungibili da uno screen reader.
+
+### Stato di scadenza
+
+Ogni card mostra un'etichetta con un colore e un testo, così lo stato si legge anche senza distinguere i colori:
+
+| Etichetta | Colore | Significato |
+|-----------|--------|-------------|
+| «10 giorni» | Verde | Manca più di una settimana alla scadenza |
+| «3 giorni» | Ambra | Scade entro 7 giorni: consumalo presto |
+| «Scade oggi» | Rosso | Scade in giornata |
+| «Scaduto» | Rosso | La data di scadenza è già passata |
 
 ---
 
-## Filtri e Ricerca
+## Filtri e ricerca
 
-### Usare i Filtri
+### Usare i filtri
 
-1. Clicca su **"Filtri e Ricerca"** per espandere
+1. Clicca **"Filtri e Ricerca"** per aprire il pannello
 2. Puoi filtrare per:
    - **Categoria**: es. solo Latticini
    - **Posizione**: es. solo Frigo
-   - **Stato**: In scadenza, Scaduti
-3. Usa la **barra di ricerca** per cercare per nome
+   - **Scadenza**: **"Non scaduti"**, **"In scadenza (7gg)"** o **"Scaduti"**
+3. Usa **"Cerca per nome"** per cercare un alimento
 
-### Filtri Rapidi
+Con almeno un filtro attivo compare **"Cancella"**, che li toglie tutti insieme.
 
-Clicca sulle **card statistiche** in alto:
-- **"Totali"**: mostra tutti gli alimenti
-- **"In scadenza"**: mostra solo quelli che scadono entro 7 giorni
-- **"Scaduti"**: mostra solo quelli già scaduti
+### Ordinare la lista
 
-> **Nota**: i filtri rapidi funzionano anche offline. Il risultato mostrato è sempre coerente con il numero indicato sulla card, perché entrambi vengono calcolati dagli stessi dati in cache.
+Nello stesso pannello, **"Ordina per"** mette gli alimenti in ordine di scadenza (prima i prossimi o prima i lontani), di nome (A-Z o Z-A) o di data di aggiunta (prima i recenti o prima i vecchi). Si parte dalla scadenza più vicina.
+
+### Filtri rapidi
+
+Clicca le **card statistiche** in alto:
+- **"Totali"**: tutti gli alimenti
+- **"In scadenza"**: quelli che scadono entro 7 giorni, oggi compreso
+- **"Scaduti"**: quelli già scaduti
+
+I filtri rapidi funzionano anche offline. Il numero sulla card e la lista filtrata vengono dagli stessi dati in cache, quindi coincidono.
 
 ---
 
-## Vista Calendario
+## Vista calendario
 
-### Passare alla Vista Calendario
+Clicca **"Calendario"** (accanto a "Lista") per vedere le scadenze come agenda della settimana: i prossimi 7 giorni, uno sotto l'altro.
 
-1. Clicca su **"Calendario"** (accanto a "Lista")
-2. Vedrai un'**agenda della settimana**: i prossimi 7 giorni, uno sotto l'altro
-
-### Leggere l'Agenda
-
-- I giorni sono in ordine dall'alto: **"Oggi"**, **"Domani"**, poi il resto della settimana. Scorri in **verticale** per vederli tutti, l'intera settimana a colpo d'occhio.
+- I giorni sono in ordine dall'alto: **"Oggi"**, **"Domani"**, poi il resto della settimana. Scorri in **verticale** per vederli tutti.
 - Ogni giorno mostra **quanti alimenti scadono** e con quale **urgenza** (oggi in rosso, i giorni successivi in ambra).
-- I giorni senza scadenze restano visibili come riga "nessuna scadenza", così vedi subito dove si concentrano le scadenze.
-
-### Interagire con gli Alimenti
-
-- Tocca un alimento (o selezionalo da tastiera) per modificarlo
+- I giorni senza scadenze restano visibili come riga "nessuna scadenza", così vedi dove si concentrano le scadenze.
+- Tocca un alimento (o selezionalo da tastiera) per modificarlo.
 
 ---
 
-## Condividere la Lista
+## Condividere la lista
 
-**entro** ti permette di condividere la tua lista con familiari, coinquilini o partner, così tutti possono vedere e gestire gli alimenti insieme.
+Puoi condividere la tua lista con familiari, coinquilini o partner: tutti vedono e gestiscono gli stessi alimenti.
 
-### Come Funziona
+### Invitare qualcuno
 
-Quando condividi la tua lista:
-- Gli altri utenti vedono **tutti i tuoi alimenti** in tempo reale
-- Possono **aggiungere, modificare ed eliminare** alimenti
-- Tutti condividono la **stessa lista** - non ci sono copie separate
-- Le modifiche sono **sincronizzate immediatamente** per tutti
+1. Clicca il **menu utente** in alto a destra e scegli **"Inviti"**
+2. Seleziona **"Crea invito"**
+3. Clicca **"Genera codice invito"**: ricevi un **codice di 6 caratteri** (es. `ABC123`) e il link che lo contiene (es. `https://entroapp.it/join/ABC123`)
+4. Mandali con **"Condividi"** (WhatsApp, Telegram, SMS, email…) o copia il codice con **"Copia"**
 
-### Invitare Qualcuno
+### Accettare un invito
 
-1. Clicca sul **menu utente** in alto a destra (con il tuo nome e email)
-2. Seleziona **"Invita membro"**
-3. Clicca **"Genera codice invito"**
-4. Riceverai un **codice di 6 caratteri** (es: `ABC123`)
-5. **Condividi il codice** con la persona che vuoi invitare tramite:
-   - WhatsApp
-   - Telegram
-   - SMS
-   - Email
-   - Qualsiasi altra app di messaggistica
+**Hai già un account:**
+- Apri il link ricevuto e clicca **"Unisciti"**
+- Oppure dal menu utente scegli **"Inviti"** → **"Accetta invito"**, scrivi il codice e clicca **"Continua"**
 
-**Suggerimento**: Usa il pulsante "Condividi" per condividere rapidamente il codice, oppure "Copia" per copiare il codice negli appunti.
+**Non hai un account:**
+- Il link apre la registrazione con il codice già inserito
+- Senza link, vai su https://entroapp.it/signup, clicca **"Ho un codice invito"**, scrivi il codice e clicca **"Verifica"**
+- Completa la registrazione come in [Creare un account](#creare-un-account) e conferma l'email: sei già nella lista di chi ti ha invitato
 
-### Accettare un Invito
+### Se hai già una lista
 
-Se hai ricevuto un codice invito, hai due modi per usarlo:
+Si appartiene a una lista sola. Accettando un invito lasci quella in cui sei, e l'app te lo dice prima di farlo:
 
-**Opzione 1: Link diretto**
-- Se ti è stato inviato il link completo (es: `https://entroapp.it/join/ABC123`)
-- Clicca sul link e verrai portato alla pagina di registrazione
+- **Se eri l'unico membro**, la tua lista viene eliminata insieme ai suoi alimenti. L'avviso dice quanti sono
+- **Se la lista era condivisa**, ne esci e gli alimenti restano agli altri membri
 
-**Opzione 2: Inserimento manuale**
-1. Vai su https://entroapp.it/signup
-2. Clicca su **"Ho un codice invito"**
-3. Inserisci il **codice di 6 caratteri** (es: `ABC123`)
-4. Clicca **"Verifica"**
+Per procedere clicca **"Conferma e unisciti"**. Non si torna indietro.
 
-**Completamento Registrazione**:
-- Inserisci il tuo **nome** e **email**
-- Crea una **password sicura** (minimo 8 caratteri con maiuscola, minuscola, numero e simbolo)
-- Clicca **"Crea Account"**
-- Verrai reindirizzato a una pagina di conferma
-- Controlla la tua email per il **link di conferma** (arriva da `noreply@entroapp.it`)
-- Clicca il link di conferma
-- Verrai automaticamente aggiunto alla lista condivisa!
+### Abbandonare una lista condivisa
 
-**Nota**: Il codice invito può essere usato da chiunque lo riceve. Non c'è vincolo di email specifica.
+Dal menu utente scegli **"Inviti"** → **"Abbandona lista condivisa"**, poi **"Abbandona lista"**. La voce c'è solo se sei in una lista con altri. Ti ritrovi con una lista personale vuota; gli altri membri tengono la lista e i suoi alimenti. Per rientrare serve un nuovo invito.
 
-### Cosa Succede Dopo
+### Come funziona
 
-Una volta che qualcuno accetta il tuo invito:
-- Vedrà tutti i tuoi alimenti nella dashboard
-- Potrà aggiungere nuovi alimenti
-- Potrà modificare ed eliminare alimenti esistenti
-- Le modifiche saranno visibili immediatamente a tutti i membri
+- Tutti i membri vedono gli stessi alimenti in tempo reale
+- Ognuno può aggiungere, modificare ed eliminare alimenti
+- Non ci sono copie separate: la lista è una sola
 
-### Vedere i Membri della Lista
-
-Attualmente non c'è un'interfaccia per vedere l'elenco dei membri. Questa funzionalità sarà aggiunta in futuro.
-
-### Limitazioni Attuali
-
-- **Un utente può appartenere solo a una lista alla volta**
-- **Gli inviti scadono dopo 7 giorni** dalla creazione
-- **Non puoi lasciare una lista condivisa** o tornare a una lista personale (funzionalità futura)
-- **Non puoi rimuovere membri** dalla lista (funzionalità futura)
-
-### Domande Frequenti Condivisione
+### Domande frequenti
 
 **Posso invitare più persone?**
-Sì, puoi generare più codici invito per la stessa lista.
+Sì. Ogni codice vale una volta sola: genera un codice per ogni persona.
 
-**Il codice invito può essere usato da chiunque?**
-Sì, il codice è completamente anonimo. Chiunque abbia il codice può registrarsi e unirsi alla tua lista. Condividilo solo con persone di fiducia.
-
-**Cosa succede se invito qualcuno che ha già una lista?**
-Al momento, se una persona ha già una lista personale e accetta un invito, la sua lista precedente non sarà più accessibile. Pianificato per miglioramento futuro.
+**Il codice invito è legato a un'email?**
+No. Entra chi lo usa per primo, quindi mandalo solo a persone di cui ti fidi.
 
 **L'invito scade?**
-Sì, i codici invito scadono dopo 7 giorni dalla creazione. Dopo la scadenza, dovrai generare un nuovo codice.
+Sì, dopo 7 giorni dalla creazione. Poi serve un codice nuovo.
 
 **Posso annullare un invito?**
-Attualmente non è possibile annullare un codice già generato. Il codice scadrà automaticamente dopo 7 giorni.
+No: un codice generato resta valido finché qualcuno lo usa o finché scade.
+
+**Posso vedere chi è nella lista, o togliere qualcuno?**
+Non ancora: non c'è un elenco dei membri, e non si può togliere nessuno.
 
 ---
 
-## Scansione Barcode
-
-### Come Funziona
-
-1. La scansione legge il codice EAN-13 del prodotto
-2. Cerca le informazioni su Open Food Facts (database pubblico)
-3. Compila automaticamente: nome, categoria, posizione suggerita
-
-### Cosa NON Può Fare
-
-- **Non legge la data di scadenza**: devi inserirla manualmente
-- **Non tutti i prodotti sono nel database**: alcuni prodotti potrebbero non essere riconosciuti
-
-### Suggerimenti
-
-- Assicurati di avere buona illuminazione
-- Tieni il barcode ben inquadrato e fermo
-- Se un prodotto non viene riconosciuto, inseriscilo manualmente
-
----
-
-## Notifiche Scadenza
+## Notifiche di scadenza
 
 Entro può inviarti notifiche push per avvisarti quando i tuoi alimenti stanno per scadere.
 
-### Attivare le Notifiche
+### Attivare le notifiche
 
 1. Vai in **Impostazioni** (icona utente in alto a destra)
 2. Nella sezione **Notifiche**, premi **"Attiva"**
 3. Consenti le notifiche quando il browser lo chiede
 
-### Personalizzare gli Avvisi
+### Personalizzare gli avvisi
 
 - **Quando avvisarti**: scegli quanti giorni prima della scadenza ricevere l'avviso (7, 3, 2, 1 giorni prima o il giorno stesso)
 - **Ore silenziose**: imposta una fascia oraria in cui non ricevere notifiche
 - **Limite giornaliero**: decidi quante notifiche ricevere al massimo ogni giorno
 
-### Quando Arrivano
+### Quando arrivano
 
 Le notifiche vengono inviate ogni giorno alle **10:00 (ora italiana)**. Riceverai un unico avviso che raggruppa tutti gli alimenti in scadenza secondo le tue preferenze.
 
-### Note Importanti
+### Note importanti
 
 - **iPhone**: le notifiche push funzionano **solo** con l'app installata sulla schermata Home, non dal browser Safari
 - **Ogni dispositivo va attivato separatamente**: se usi entro su più dispositivi, attiva le notifiche su ognuno
@@ -322,124 +277,121 @@ Le notifiche vengono inviate ogni giorno alle **10:00 (ora italiana)**. Ricevera
 
 ---
 
-## Feedback Aptico
+## Scansione barcode
 
-Su dispositivi il cui browser espone la Vibration API (Android), Entro fornisce vibrazione tattile durante le interazioni principali. Su iPhone/Safari il web non espone questa API, quindi il feedback aptico non è disponibile:
+### Come funziona
 
-- **Swipe**: vibrazione leggera quando raggiungi la soglia di azione, più intensa alla conferma
-- **Creazione/modifica alimento**: vibrazione di successo
-- **Eliminazione**: vibrazione di avviso
+1. La scansione legge il codice a barre del prodotto
+2. Cerca le informazioni su Open Food Facts (database pubblico)
+3. Compila il nome e la categoria. La posizione segue la categoria, come nell'inserimento manuale, a meno che tu non l'abbia già scelta
+4. Se la confezione dichiara un peso o un volume (es. 500 g), compila anche la quantità
+5. Nelle note scrive la marca e le categorie di Open Food Facts; puoi cancellarle o cambiarle prima di salvare
 
-### Attivare/Disattivare
+### Limiti
 
-1. Vai in **Impostazioni**
-2. Nella sezione **Feedback Aptico**, premi **"Attiva"** o **"Disattiva"**
-
-> **Nota**: questa opzione appare solo su dispositivi che supportano il feedback aptico. Su desktop e su iPhone non è disponibile.
+- **Non legge la data di scadenza**: va inserita a mano
+- **Non tutti i prodotti sono nel database**: se un prodotto non viene riconosciuto, inseriscilo a mano
+- Serve buona illuminazione, e il codice a barre va tenuto fermo e ben inquadrato
 
 ---
 
-## Installare l'App (PWA)
+## Feedback aptico
 
-**entro** può essere installata come un'app sul tuo dispositivo per un accesso più rapido.
+Dove il browser sa far vibrare il telefono (Android), entro vibra quando uno swipe arriva alla soglia, quando salvi un alimento e quando lo togli dalla lista. Su iPhone e su computer il browser non lo permette.
 
-### Su iPhone (Safari)
+Per spegnerlo o riaccenderlo vai in **Impostazioni**, sezione **"Feedback aptico"**. La sezione c'è solo sui dispositivi che vibrano.
+
+---
+
+## Installare l'app
+
+**entro** si installa come un'app, senza passare da uno store. Installata si apre a schermo intero dalla sua icona, tiene i dati offline senza limiti di tempo e, su iPhone, è l'unico modo per ricevere le notifiche: da Safari senza installazione i dati in cache si cancellano dopo 7 giorni di non utilizzo.
+
+### iPhone (Safari)
 
 1. Apri https://entroapp.it in **Safari**
 2. Tocca l'icona **Condividi** (quadrato con freccia verso l'alto)
 3. Scorri e seleziona **"Aggiungi alla schermata Home"**
 4. Dai un nome all'app e tocca **"Aggiungi"**
 
-### Su Android (Chrome)
+### Android (Chrome)
 
 1. Apri https://entroapp.it in **Chrome**
 2. Tocca i **tre puntini** (⋮) in alto a destra
 3. Seleziona **"Installa app"** o **"Aggiungi a schermata Home"**
 4. Conferma l'installazione
 
-### Su Computer (Chrome/Edge)
+### Computer (Chrome/Edge)
 
 1. Apri il sito nel browser
 2. Cerca l'icona di **installazione** (⊕) nella barra degli indirizzi
 3. Clicca e conferma **"Installa"**
 
-### Vantaggi dell'Installazione
-
-- Accesso rapido dalla schermata home
-- Si apre a schermo intero (senza barra del browser)
-- Icona dedicata con il logo entro
-- **Cache offline persistente** — i tuoi dati restano disponibili senza limiti di tempo
-- **Push notifications** — ricevi avvisi per le scadenze (su iPhone funzionano *solo* con l'app installata)
-- **Offline completo su iOS** — senza installazione, Safari cancella i dati in cache dopo 7 giorni di non utilizzo
-
 ---
 
-## Utilizzo Offline
+## Utilizzo offline
 
-Entro funziona anche senza connessione internet, ma l'esperienza varia in base a come usi l'app.
+Entro funziona anche senza connessione, ma quanto bene dipende da come lo usi.
 
-### Con l'App Installata (consigliato)
+### Con l'app installata (consigliato)
 
-Installando entro sulla schermata Home hai l'esperienza offline migliore:
-
-| Funzionalità | Disponibile Offline | Note |
-|--------------|---------------------|------|
+| Funzionalità | Offline | Note |
+|--------------|---------|------|
 | Vedere i tuoi alimenti | ✅ Sì | Dalla cache locale, **senza limiti di tempo** |
 | Cercare e filtrare | ✅ Sì | Sui dati in cache |
 | Vista calendario | ✅ Sì | Dalla cache locale |
 | Aggiungere alimenti | ✅ Sì | Sincronizzato al ritorno online |
 | Modificare alimenti | ✅ Sì | Sincronizzato al ritorno online |
-| Eliminare alimenti | ✅ Sì | Sincronizzato al ritorno online |
-| Cambiare stato (consumato) | ✅ Sì | Sincronizzato al ritorno online |
+| Eliminare alimenti, con il loro esito | ✅ Sì | Sincronizzato al ritorno online |
 | Notifiche push | ✅ Sì | Su tutti i dispositivi, incluso iPhone |
 
-### Da Browser Mobile (senza installare)
+### Da browser mobile (senza installare)
 
 - **Android (Chrome)**: l'offline funziona come con l'app installata, incluse le notifiche push.
-- **iPhone (Safari)**: puoi consultare i dati in cache, ma con limitazioni importanti:
+- **iPhone (Safari)**: puoi consultare i dati in cache, con limiti importanti:
   - Safari **cancella i dati salvati** dopo **7 giorni di non utilizzo**
   - Le notifiche push **non funzionano** da Safari
   - Le modifiche offline potrebbero non essere salvate in modo affidabile
 
-> **Consiglio**: installa l'app sulla schermata Home per l'esperienza migliore. Su iPhone è particolarmente importante per evitare la perdita dei dati in cache e abilitare le notifiche.
+> **Consiglio**: installa l'app sulla schermata Home. Su iPhone evita la perdita dei dati in cache e abilita le notifiche.
 
-### Cosa NON Funziona Offline
+### Cosa funziona sempre offline
+
+- Vedere alimenti, scadenze, filtri e calendario
+- Aggiungere, modificare ed eliminare alimenti, anche più di uno di seguito
+- Scattare o scegliere una foto, in un alimento nuovo o in uno che stai modificando: resta sul dispositivo e si carica quando torna la rete
+- Uscire con **"Disconnetti"**: esci da questo dispositivo, gli altri su cui hai fatto l'accesso restano collegati
+
+Un alimento che ha già una modifica in attesa non si può modificare né togliere di nuovo finché quella non arriva al server: il dialogo lo dice.
+
+### Non disponibile offline
 
 | Funzionalità | Motivo |
 |--------------|--------|
 | Attivazione notifiche push | Richiede registrazione sul server |
 | Modifica preferenze notifiche | Richiede salvataggio sul server |
-| Gestione liste condivise e inviti | Richiede comunicazione con il server |
+| Gestione liste condivise e inviti (creare, accettare, abbandonare) | Richiede comunicazione con il server |
 | Esportazione dati | Richiede recupero dati dal server |
 | Scansione barcode | Richiede connessione a Open Food Facts |
-| Login/Logout | Richiede autenticazione con il server |
+| Accesso | Per entrare serve la rete |
 
-### Come Funziona
+### Quando torni online
 
-1. **Quando perdi la connessione**: un banner arancione appare in cima alla pagina. Puoi continuare a usare l'app normalmente.
-2. **Le tue modifiche vengono salvate**: il banner mostra quante modifiche sono in attesa di sincronizzazione (es. "2 modifiche in attesa").
-3. **Quando torni online**: le modifiche vengono inviate automaticamente al server. Un banner blu con "Sincronizzazione in corso..." appare brevemente durante il processo.
-4. **Dopo la sincronizzazione**: il banner scompare e i dati sono aggiornati.
+1. **Offline**, in cima alla pagina c'è un banner ambra, **"Sei offline"**, con il numero di modifiche in attesa (es. "2 modifiche in attesa di sincronizzazione").
+2. **Quando torna la rete** le modifiche partono da sole, nell'ordine in cui le hai fatte, e il banner diventa verde con **"Sincronizzazione in corso..."**.
+3. **Finito l'invio** il banner sparisce e i dati sono aggiornati.
 
 ---
 
-## Domande Frequenti
+## Domande frequenti
 
 ### Come cambio la mia password?
 
-Se hai dimenticato la password o vuoi cambiarla:
+1. Dal menu utente premi **"Disconnetti"**
+2. Nella pagina di accesso clicca **"Password dimenticata?"**
+3. Segui il link che ricevi per email e scegli la nuova password
 
-1. Fai **logout** dall'app
-2. Vai alla pagina di login
-3. Clicca su **"Password dimenticata?"**
-4. Segui la procedura di reset password tramite email
-5. Imposta la tua nuova password
-
-Consulta la sezione [Password Dimenticata](#password-dimenticata) per maggiori dettagli.
-
-### Posso condividere la mia lista con altri?
-
-Sì! Puoi invitare altre persone a condividere la tua lista. Vedi la sezione [Condividere la Lista](#condividere-la-lista) per maggiori dettagli.
+I passaggi completi sono in [Password dimenticata](#password-dimenticata).
 
 ### I miei dati sono al sicuro?
 
@@ -450,7 +402,11 @@ Sì, i tuoi dati sono:
 
 ### Perché il barcode non riconosce il mio prodotto?
 
-Il database Open Food Facts è mantenuto dalla comunità. Alcuni prodotti, specialmente quelli locali o nuovi, potrebbero non essere presenti. Puoi inserire l'alimento manualmente.
+Il database Open Food Facts è mantenuto dalla comunità. Alcuni prodotti, specialmente quelli locali o nuovi, potrebbero non essere presenti. Puoi inserire l'alimento a mano.
+
+### Cosa succede se la foto non si carica?
+
+Compare "La foto non è stata caricata. Riprova." e il modulo resta aperto, con la foto ancora dentro: l'alimento non è stato salvato. Premi di nuovo il pulsante di salvataggio, oppure togli la foto e salva senza.
 
 ### Perché non ricevo le notifiche su iPhone?
 
@@ -475,4 +431,4 @@ Per segnalare problemi, suggerire miglioramenti o chiedere aiuto:
 
 ---
 
-*Ultimo aggiornamento: 29 marzo 2026*
+*Ultimo aggiornamento: 25 settembre 2026*

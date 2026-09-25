@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.24] - 2026-09-25
+
+### Added
+- **Un test tiene insieme le due guide** (#148): `src/pages/__tests__/userGuideParity.test.tsx` confronta i titoli h2/h3 della guida in app, resa in jsdom, con i `##`/`###` di `USER_GUIDE.md`, nello stesso ordine, e le domande della sezione «Domande frequenti». Le sezioni che esistono di proposito in una guida sola (indice, primi passi, supporto) stanno in un elenco dichiarato nel test, ciascuna con il suo perché. Confronta la struttura e non il testo: due sezioni con lo stesso titolo e contenuti diversi passano, e il test lo dice nel suo commento. Se `USER_GUIDE.md` manca, fallisce.
+
+  Provato rosso tre volte: togliendo `### Ordinare la lista` dalla sola markdown (due controlli rossi, con il titolo elencato come presente solo nell'app), togliendo una domanda frequente dalla sola guida in app (tre rossi), e spostando `USER_GUIDE.md` (sei rossi). Prima del riallineamento era rosso su quattro controlli su sei.
+
+### Fixed
+- **La guida in app, la guida rapida e `docs/guides/USER_GUIDE.md` descrivono l'app di oggi** (#148). Erano ferme al 2 luglio, e da allora sono uscite le versioni dalla 1.10.4 alla 1.12.22. Dicevano il falso in quattro punti: l'eliminazione senza la domanda «Com'è finita?», un badge verde d'esempio con «5 giorni» che nell'app è ambra, il filtro «stato» che si chiama «Scadenza» dalla 1.10.5, e la voce «Crea invito» che sta sotto «Inviti». Ora raccontano anche il menu ⋮ delle card su telefono, che con uno screen reader è l'unica strada; la posizione che si compila dalla categoria; «Scartare le modifiche?»; cosa compila la scansione, senza nominare EAN-13; l'ordinamento; accettare un invito dall'app e abbandonare una lista condivisa; cosa succede alla propria lista quando si accetta un invito (eliminata con gli alimenti se se ne era l'unico membro, lasciata agli altri se era condivisa); la registrazione con codice che porta nella lista di chi ha invitato (#165); offline, le foto in coda, più alimenti tolti di seguito (#153) e «Disconnetti», che chiude solo questo browser; una domanda frequente sulla foto che non si carica. Il feedback aptico diventa una sezione anche nella guida in app. La parte sulle notifiche non cambia: ore silenziose, limite giornaliero e orario li sistema la #154.
 ## [1.12.23] - 2026-09-25
 
 ### Changed
@@ -890,7 +899,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.23...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.24...HEAD
+[1.12.24]: https://github.com/E-Lop/entro/compare/v1.12.23...v1.12.24
 [1.12.23]: https://github.com/E-Lop/entro/compare/v1.12.22...v1.12.23
 [1.12.22]: https://github.com/E-Lop/entro/compare/v1.12.21...v1.12.22
 [1.12.21]: https://github.com/E-Lop/entro/compare/v1.12.20...v1.12.21
