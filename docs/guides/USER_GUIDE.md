@@ -2,7 +2,7 @@
 
 **entro** ti aiuta a tenere traccia delle scadenze degli alimenti per ridurre gli sprechi alimentari.
 
-Questa è la guida da leggere su GitHub, senza installare l'app. Dentro l'app la stessa guida è su [entroapp.it/guida](https://entroapp.it/guida): le due hanno le stesse sezioni, nello stesso ordine, e un test del repo lo controlla.
+Questa è la guida da leggere su GitHub, senza installare l'app. Dentro l'app la stessa guida è su [entroapp.it/guida](https://entroapp.it/guida): le due hanno le stesse sezioni, nello stesso ordine, e un test del repo lo controlla. Solo qui ci sono l'indice, i primi passi e i contatti.
 
 ---
 
