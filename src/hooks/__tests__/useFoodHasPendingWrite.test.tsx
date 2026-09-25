@@ -31,9 +31,9 @@ function mount() {
   return renderHook(
     () => ({
       remove: useMutation({ mutationKey: mutationKeys.deleteFood, mutationFn: async () => {} }),
-      latte: useFoodHasPendingWrite('latte'),
-      uova: useFoodHasPendingWrite('uova'),
-      nessuno: useFoodHasPendingWrite(null),
+      milk: useFoodHasPendingWrite('latte'),
+      eggs: useFoodHasPendingWrite('uova'),
+      nobody: useFoodHasPendingWrite(null),
     }),
     { wrapper },
   ).result
@@ -44,18 +44,18 @@ describe('useFoodHasPendingWrite', () => {
     const result = mount()
     act(() => result.current.remove.mutate({ id: 'latte' } as never))
 
-    await waitFor(() => expect(result.current.latte).toBe(true))
-    expect(result.current.uova).toBe(false)
-    expect(result.current.nessuno).toBe(false)
+    await waitFor(() => expect(result.current.milk).toBe(true))
+    expect(result.current.eggs).toBe(false)
+    expect(result.current.nobody).toBe(false)
   })
 
   it('tornata la rete la scrittura parte, e il blocco cade', async () => {
     const result = mount()
     act(() => result.current.remove.mutate({ id: 'latte' } as never))
-    await waitFor(() => expect(result.current.latte).toBe(true))
+    await waitFor(() => expect(result.current.milk).toBe(true))
 
     act(() => onlineManager.setOnline(true))
 
-    await waitFor(() => expect(result.current.latte).toBe(false))
+    await waitFor(() => expect(result.current.milk).toBe(false))
   })
 })
