@@ -74,7 +74,7 @@ Se vedi `42501` in dev, mancano i GRANT nella migrazione.
 
 ### Regola alternativa: schemi separati
 
-Per nuove API molto sensibili considerare uno schema dedicato (`api`, `internal`) invece di `public`, con `GRANT USAGE ON SCHEMA ... TO authenticated` esplicito. Per ora Entro continua a usare `public` per coerenza con le 22 migrazioni storiche.
+Per nuove API molto sensibili considerare uno schema dedicato (`api`, `internal`) invece di `public`, con `GRANT USAGE ON SCHEMA ... TO authenticated` esplicito. Per ora Entro continua a usare `public` per coerenza con le 20 migrazioni storiche.
 
 ## Convenzioni di sviluppo
 
@@ -99,7 +99,7 @@ Genera token da https://supabase.com/dashboard/account/tokens e **revocalo dopo 
 - `src/sw.ts` — service worker custom (push + offline)
 - `supabase/migrations/` — migrazioni recenti versionate
 - `migrations/` — migrazioni storiche (numerate 001-016 + helpers)
-- `../entro-family/` — bundle conoscenza condiviso, **fonte unica** del dominio (core/) e dei pattern cross-prodotto (conventions/); consumato anche da entro-mobile e dalle future native. Ex `docs/development/DOMAIN_GLOSSARY.md` (ora stub)
+- `../entro-family/` — bundle conoscenza condiviso, **fonte unica** del dominio (core/) e dei pattern cross-prodotto (conventions/); consumato anche da entro-mobile e dalle future native
 - `CHANGELOG.md` — Keep a Changelog in italiano, semver
 
 ## Agent skills

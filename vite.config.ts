@@ -21,7 +21,7 @@ export default defineConfig({
         name: 'entro - Food Expiry Tracker',
         short_name: 'entro',
         description: 'Gestisci le scadenze degli alimenti e riduci gli sprechi',
-        theme_color: '#16a34a',
+        theme_color: '#006e2d',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',

@@ -44,7 +44,7 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 
 ## Funzionalità principali
 
-- **CRUD completo** — Aggiungi, modifica, elimina alimenti con immagini, categorie, luogo di conservazione e note
+- **CRUD completo** — Aggiungi, modifica e togli alimenti con immagini, categorie, luogo di conservazione e note. Togliendo un alimento l'app chiede «Com'è finita?» (consumato, buttato, o tolto e basta): la riga resta nel database con `deleted_at` e l'esito, e la foto viene cancellata
 - **Scansione barcode** — Riconosce EAN-13, UPC e QR Code tramite la fotocamera; auto-compila i dati da Open Food Facts
 - **Liste condivise** — Un codice invito a 6 caratteri (es. `ABC123`) permette a più utenti di condividere una lista in tempo reale
 - **Sync multi-device** — Aggiornamenti istantanei su desktop, iOS e Android tramite Supabase Realtime
@@ -55,8 +55,8 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 - **Feedback aptico** — Vibrazione tattile su swipe, creazione, modifica ed eliminazione alimenti (su Android con browser basati su Chromium che implementano la Vibration API; non disponibile su iOS/Safari, e Firefox non la attiva)
 - **Dark mode** — Light, dark e automatico (segue il sistema)
 - **PWA installabile** — Installabile da browser su iOS e Android con esperienza offline nativa
-- **GDPR compliant** — Export dati personali (Art. 20), cancellazione account (Art. 17), Privacy Policy e T&C integrati
-- **Feature flags** — Barcode scanner, swipe gestures e liste condivise attivabili via variabili d'ambiente
+- **GDPR** — Export dei dati personali (Art. 20) e cancellazione dell'account (Art. 17) dalle Impostazioni; Privacy Policy, Termini e Cookie Policy su LegalBlink, linkate dal footer e dalla registrazione. Come funziona nel codice: [Come entro implementa il GDPR](docs/guides/privacy.md)
+- **Feature flag** — `VITE_ENABLE_SHARED_LISTS=false` nasconde la voce «Inviti» del menu utente
 
 ---
 
@@ -87,21 +87,27 @@ src/
 │   ├── auth/           # Login, signup, route protection
 │   ├── barcode/        # Scanner modale con ZXing
 │   ├── calendar/       # (cartella placeholder)
+│   ├── common/         # (cartella placeholder)
 │   ├── foods/          # Card, form, lista, vista calendario (agenda), swipe gestures
 │   ├── guide/          # Guida rapida e help in-app
 │   ├── layout/         # Header, navigation, app shell
 │   ├── settings/       # Account, notifiche, export dati, eliminazione
 │   ├── sharing/        # Inviti, codici, accettazione
 │   ├── pwa/            # Banner offline, prompt notifiche
+│   ├── theme/          # ThemeProvider: tema chiaro, scuro, automatico
 │   └── ui/             # Primitivi shadcn/ui
 ├── hooks/              # Custom hooks (auth, foods, theme, network, push)
-├── stores/             # Zustand stores (auth, session)
+├── stores/             # Zustand store (authStore: utente e sessione)
 ├── types/              # TypeScript types
 ├── utils/              # Utility functions
 ├── pages/              # Route pages
 ├── lib/                # Config Supabase, persistenza offline, push notifications
-├── sw.ts               # Service worker custom (cache, push handlers)
-└── supabase/functions/ # Edge Functions + helper condivisi (_shared)
+└── sw.ts               # Service worker custom (cache, push handlers)
+
+supabase/
+├── functions/          # Edge Functions (inviti, push, notifiche di scadenza) + helper condivisi (_shared)
+├── migrations/         # Catena canonica delle migrazioni
+└── tests/              # Test pgTAP del database
 ```
 
 ### Scelte tecniche
@@ -116,7 +122,9 @@ src/
 
 ### Schema database
 
-Il database PostgreSQL su Supabase include tabelle per utenti, alimenti, categorie, liste, membri e inviti, con 16+ migration incrementali. Le policy RLS garantiscono l'isolamento dei dati. La cancellazione account usa una funzione RPC con cascade delete manuale.
+Il database PostgreSQL su Supabase ha tabelle per alimenti, categorie, liste, membri, inviti, sottoscrizioni push e preferenze di notifica; gli utenti stanno in `auth.users`. La catena canonica delle migrazioni è in [`supabase/migrations/`](supabase/migrations/), a partire da una baseline dello schema; la cartella `migrations/` è un archivio delle migrazioni storiche e non va applicata. Le policy RLS isolano i dati tra utenti e liste.
+
+Togliere un alimento è una UPDATE, non una DELETE: imposta `deleted_at` e, se l'utente sceglie un esito, `status` (`consumed` o `wasted`). La cancellazione dell'account passa dalla RPC `delete_user()`; un trigger su `auth.users` elimina le liste di cui l'utente era l'unico membro, con i loro alimenti, e lascia agli altri membri le liste condivise.
 
 ---
 
@@ -124,7 +132,7 @@ Il database PostgreSQL su Supabase include tabelle per utenti, alimenti, categor
 
 ### Prerequisiti
 
-- Node.js 18+
+- Node.js 20.19+ o 22.12+ (lo richiede Vite 8; CI e Netlify usano Node 20)
 - Account [Supabase](https://supabase.com) (gratuito)
 
 ### Installazione
@@ -145,10 +153,13 @@ cp .env.example .env.local
 ```bash
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-public-key-here
-VITE_APP_URL=http://localhost:5173
+# Chiave pubblica VAPID: senza, le notifiche push non si attivano
+VITE_VAPID_PUBLIC_KEY=your-vapid-public-key-here
+# Facoltativa: vuota, il pulsante Ko-fi non compare
+VITE_KOFI_URL=
 ```
 
-4. Esegui le migration del database (vedi [`supabase/migrations/`](supabase/migrations/))
+4. Applica le migrazioni di [`supabase/migrations/`](supabase/migrations/) al tuo progetto: `supabase link --project-ref <ref>` e poi `supabase db push`
 
 5. Avvia il server di sviluppo:
 
@@ -158,15 +169,15 @@ npm run dev
 
 L'app sarà disponibile su `http://localhost:5173`
 
-### Feature flags
+### Feature flag
 
-Nel file `.env.local` puoi attivare o disattivare le funzionalità opzionali:
+L'unico flag che il codice legge è `VITE_ENABLE_SHARED_LISTS`: con un valore diverso da `true` sparisce la voce «Inviti» del menu utente (`src/components/sharing/InviteMenuItem.tsx`). Il resto della condivisione, come la pagina `/join/:code`, non lo legge.
 
 ```bash
-VITE_ENABLE_BARCODE_SCANNER=true
-VITE_ENABLE_SWIPE_GESTURES=true
 VITE_ENABLE_SHARED_LISTS=true
 ```
+
+`VITE_ENABLE_BARCODE_SCANNER`, `VITE_ENABLE_SWIPE_GESTURES` e `VITE_ENABLE_NOTIFICATIONS` compaiono ancora in `.env.example` e `netlify.toml`, ma nessun file di `src/` li legge: scansione, swipe e notifiche non dipendono da nessun flag.
 
 L'integrazione con Open Food Facts è gratuita e non richiede API key.
 
@@ -182,7 +193,8 @@ npm run preview    # Anteprima locale della build
 Il deploy avviene su **Netlify** con build automatica ad ogni push su `main`:
 - Build command: `npm run build`
 - Publish directory: `dist`
-- Variabili d'ambiente configurate nella dashboard Netlify
+- Alcune variabili sono fissate in `netlify.toml`; quelle che il file non contiene (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_VAPID_PUBLIC_KEY`, `VITE_KOFI_URL`) vanno nella dashboard Netlify
+- Edge Functions, secret e cron si pubblicano a parte su Supabase: vedi la [guida al deploy](docs/guides/DEPLOY.md)
 
 ---
 
@@ -190,10 +202,14 @@ Il deploy avviene su **Netlify** con build automatica ad ogni push su `main`:
 
 | Documento | Contenuto |
 |---|---|
-| [User Guide](docs/guides/USER_GUIDE.md) | Guida utente completa |
+| [Guida utente](docs/guides/USER_GUIDE.md) | Come si usa l'app; le sezioni sono le stesse della guida in app su `/guida` |
 | [Changelog](CHANGELOG.md) | Storico delle versioni e modifiche |
-| [Deploy Guide](docs/guides/DEPLOY.md) | Istruzioni di deploy |
-| [Privacy Policy](docs/guides/privacy.md) | Policy privacy e gestione dati |
+| [Contribuire](CONTRIBUTING.md) | Setup locale, comandi di verifica, regole database, release |
+| [Sicurezza](SECURITY.md) | Come segnalare una vulnerabilità |
+| [Design system](DESIGN.md) | Palette, tipografia, componenti |
+| [Deploy Guide](docs/guides/DEPLOY.md) | Deploy su Netlify e Supabase |
+| [Come entro implementa il GDPR](docs/guides/privacy.md) | Dati raccolti, export, cancellazione, terze parti, com'è fatto nel codice |
+| [Privacy Policy](https://app.legalblink.it/api/documents/697e24efc95cff002359012c/privacy-policy-per-siti-web-o-e-commerce-it) | La policy legale, su LegalBlink |
 
 ---
 

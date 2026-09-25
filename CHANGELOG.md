@@ -5,6 +5,21 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.26] - 2026-09-25
+
+### Changed
+- **`docs/guides/privacy.md` diventa «Come entro implementa il GDPR»** (#150). Era il piano di lavoro di gennaio, con prezzi e fasi, e il README lo linkava come «Privacy Policy». Ora descrive cosa fa il codice: cosa salva sul server e nel browser, cosa contiene l'esportazione, cosa sparisce e cosa resta cancellando l'account, quali terze parti ricevono dati. Ogni voce indica il file che la conferma. La privacy policy vera resta su LegalBlink, e il link «Privacy Policy» del README ora porta lì, come il footer dell'app.
+- **Il font dichiarato è quello che si vede** (#150). `src/index.css` metteva Inter in testa a `font-family`, ma l'app non lo carica: dove non è installato si vedeva `system-ui`. Tolto Inter, e `DESIGN.md` dice che il font è quello di sistema.
+- **`PHASE_6_LAUNCH_CHECKLIST.md` porta in testa un avviso**: è la checklist del lancio di inizio 2026, non aggiornata, con il vecchio dominio e file che non sono nel repo. Il testo sotto non cambia.
+
+### Fixed
+- **Le doc pubbliche descrivono il codice di oggi** (#150).
+  - `DESIGN.md`: la palette è quella della v1.12.2 (#127). Primario `#006e2d` con testo bianco, `#62df7d` con testo `#003914` in scuro, stesso verde per `ring`; tolta la nota su `ring-blue-500`, che in `src/` non c'è più.
+  - `vite.config.ts`: `theme_color` del manifest passa da `#16a34a` a `#006e2d`.
+  - `README.md`: Node 20.19+ o 22.12+ invece di 18+, perché lo chiede Vite 8. L'unico flag letto dal codice è `VITE_ENABLE_SHARED_LISTS`; gli altri tre sono documentati come non letti. `VITE_VAPID_PUBLIC_KEY` e `VITE_KOFI_URL` entrano nella configurazione. Nell'albero `supabase/functions/` esce da `src/`, compaiono `components/theme/` e `components/common/`, e `stores/` ha solo `authStore`. Lo schema dice che togliere un alimento è una UPDATE con `deleted_at` ed esito, e che la catena delle migrazioni è `supabase/migrations/`. La tabella della documentazione elenca anche CONTRIBUTING, SECURITY e DESIGN.
+  - `docs/guides/DEPLOY.md`: `VITE_APP_URL` la fissa `netlify.toml`, non la UI di Netlify. Aggiunti `VITE_VAPID_PUBLIC_KEY` e `VITE_KOFI_URL`, e un passo per Supabase: `supabase db push`, le cinque Edge Functions, i secret `VAPID_KEYS`, `VAPID_SUBJECT`, `CRON_SECRET` ed `ENTRO_ALLOWED_ORIGINS`, e il cron delle notifiche con il segreto nel Vault.
+  - `docs/README.md` elenca `DEPLOY.md` e non chiama più `privacy.md` «Privacy policy».
+  - `CLAUDE.md`: le migrazioni storiche in `migrations/` sono 20, non 22, e sparisce il rimando a `docs/development/DOMAIN_GLOSSARY.md`, che non è nel repo.
 ## [1.12.25] - 2026-09-25
 
 ### Added
@@ -906,7 +921,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.25...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.26...HEAD
+[1.12.26]: https://github.com/E-Lop/entro/compare/v1.12.25...v1.12.26
 [1.12.25]: https://github.com/E-Lop/entro/compare/v1.12.24...v1.12.25
 [1.12.24]: https://github.com/E-Lop/entro/compare/v1.12.23...v1.12.24
 [1.12.23]: https://github.com/E-Lop/entro/compare/v1.12.22...v1.12.23
