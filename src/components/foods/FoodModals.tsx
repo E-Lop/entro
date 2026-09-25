@@ -146,6 +146,11 @@ export function FoodModals({
           <DialogHeader>
             <DialogTitle>Modifica Alimento</DialogTitle>
           </DialogHeader>
+          {editingFood && isUpdating && (
+            <p role="status" className="text-sm text-muted-foreground">
+              Questo alimento ha una modifica in attesa di essere salvata: potrai modificarlo di nuovo quando sarà sincronizzata.
+            </p>
+          )}
           {editingFood && (
             <Suspense fallback={<FormSpinner />}>
               <FoodForm
@@ -222,6 +227,14 @@ export function FoodModals({
               finisce nella spazzatura — se è stato un errore, puoi togliere e basta.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          {/* Solo per l'alimento che ha già una scrittura non arrivata al
+              server (#153): gli altri si tolgono anche offline. */}
+          {isDeleting && (
+            <p role="status" className="text-sm text-muted-foreground">
+              Questo alimento ha una modifica in attesa di essere salvata: potrai toglierlo quando sarà sincronizzata.
+            </p>
+          )}
 
           {/* In colonna: sono tre scelte fra pari, non un'azione con due varianti.
               Su telefono resta anche l'unica disposizione che tiene i bersagli larghi. */}

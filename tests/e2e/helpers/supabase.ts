@@ -392,3 +392,14 @@ export async function removeE2EFoodImages(paths: string[]): Promise<void> {
   const { error } = await adminClient.storage.from('food-images').remove(paths)
   if (error) throw new Error(`Impossibile togliere le foto di prova: ${error.message}`)
 }
+
+/** Quanti alimenti della lista risultano tolti (`deleted_at` valorizzato) nel database. */
+export async function countRemovedFoods(listId: string): Promise<number> {
+  const { count, error } = await adminClient
+    .from('foods')
+    .select('id', { count: 'exact', head: true })
+    .eq('list_id', listId)
+    .not('deleted_at', 'is', null)
+  if (error) throw new Error(`Impossibile contare gli alimenti tolti: ${error.message}`)
+  return count ?? 0
+}

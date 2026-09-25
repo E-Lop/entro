@@ -8,6 +8,7 @@ import type { FoodFormData } from '@/lib/validations/food.schemas'
 import { triggerHaptic } from '@/lib/haptics'
 import { logError } from '@/lib/safeLog'
 import { restoreFocusTo } from '@/lib/focusAfterRemoval'
+import { useFoodHasPendingWrite } from './usePendingMutations'
 
 /** Quello che l'utente legge quando la foto non parte, online o offline. */
 const IMAGE_FAILED_MESSAGE = 'La foto non è stata caricata. Riprova.'
@@ -175,6 +176,9 @@ export function useFoodFormDialog() {
     setDeletingFood(food)
   }
 
+  const editingHasPendingWrite = useFoodHasPendingWrite(editingFood?.id)
+  const deletingHasPendingWrite = useFoodHasPendingWrite(deletingFood?.id)
+
   return {
     // State
     isAddDialogOpen,
@@ -192,7 +196,9 @@ export function useFoodFormDialog() {
     handleDeleteClick,
     // Mutation state
     isCreating: createMutation.isPending,
-    isUpdating: updateMutation.isPending,
-    isDeleting: deleteMutation.isPending,
+    // Per alimento, non globali (#153): una scrittura in coda offline su un
+    // alimento non deve bloccare le azioni sugli altri.
+    isUpdating: editingHasPendingWrite,
+    isDeleting: deletingHasPendingWrite,
   }
 }

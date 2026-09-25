@@ -41,6 +41,44 @@ function renderDialog(onDeleteFood = vi.fn(), isDeleting = false) {
   return onDeleteFood
 }
 
+describe('conferma eliminazione — alimento con una scrittura in attesa (#153)', () => {
+  it('gli esiti sono disabilitati, e il dialogo dice perché', () => {
+    renderDialog(vi.fn(), true)
+
+    for (const name of [/L'ho consumato/, /L'ho buttato/, /Toglilo e basta/]) {
+      expect(screen.getByRole('button', { name }).hasAttribute('disabled')).toBe(true)
+    }
+    expect(screen.getByText(/in attesa di essere salvata/)).toBeTruthy()
+  })
+
+  it('senza scritture in attesa non compare nessuna spiegazione', () => {
+    renderDialog()
+    expect(screen.queryByText(/in attesa di essere salvata/)).toBeNull()
+  })
+})
+
+describe('modifica — alimento con una scrittura in attesa (#153)', () => {
+  it('il dialogo dice perché non si può salvare di nuovo', () => {
+    render(
+      <FoodModals
+        isAddDialogOpen={false}
+        onAddDialogChange={vi.fn()}
+        onCreateFood={vi.fn()}
+        isCreating={false}
+        editingFood={FOOD}
+        onEditDialogChange={vi.fn()}
+        onUpdateFood={vi.fn()}
+        isUpdating={true}
+        deletingFood={null}
+        onDeleteDialogChange={vi.fn()}
+        onDeleteFood={vi.fn()}
+        isDeleting={false}
+      />
+    )
+    expect(screen.getByText(/potrai modificarlo di nuovo/)).toBeTruthy()
+  })
+})
+
 describe('conferma eliminazione — chiede l\'esito', () => {
   it('offre le tre uscite, non un sì/no', () => {
     renderDialog()
