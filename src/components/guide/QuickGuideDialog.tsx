@@ -26,12 +26,12 @@ const guideItems = [
   {
     icon: Plus,
     title: 'Aggiungi alimenti',
-    description: 'Premi "+ Alimento" per inserire manualmente o scansionare un barcode',
+    description: 'Tocca il pulsante tondo + in basso a destra (su computer "+ Alimento") per inserire a mano o scansionare il codice a barre',
   },
   {
     icon: ArrowLeftRight,
     title: 'Quantità ed elimina',
-    description: 'Swipe destra per cambiare la quantità al volo (poi "Modifica completa" per il resto), sinistra per eliminare. Su desktop usa i pulsanti',
+    description: 'Swipe a destra per cambiare la quantità al volo (poi "Modifica completa" per il resto), a sinistra per eliminare: l’app chiede com’è finita. Su telefono c’è anche il menu ⋮ della card, su computer i pulsanti',
   },
   {
     icon: Palette,
@@ -41,7 +41,7 @@ const guideItems = [
   {
     icon: Search,
     title: 'Filtri e ricerca',
-    description: 'Filtra per categoria, posizione o stato. Tocca le statistiche per filtri rapidi',
+    description: 'Filtra per categoria, posizione o scadenza, e ordina per scadenza, nome o data di aggiunta. Tocca le statistiche per i filtri rapidi',
   },
   {
     icon: Calendar,
@@ -51,7 +51,7 @@ const guideItems = [
   {
     icon: Users,
     title: 'Condividi lista',
-    description: 'Dal menu utente, genera un codice invito per condividere la lista',
+    description: 'Dal menu utente scegli "Inviti": crei un codice, accetti quello di qualcun altro o abbandoni la lista condivisa',
   },
   {
     icon: Bell,

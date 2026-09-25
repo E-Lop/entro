@@ -55,6 +55,14 @@ export function GuidePage() {
               <li>Per aggiungere foto o note, tocca <strong className="text-foreground">"Dettagli aggiuntivi"</strong></li>
               <li>Premi <strong className="text-foreground">"Aggiungi alimento"</strong></li>
             </ol>
+            <p className="text-sm text-muted-foreground mt-2">
+              Quando scegli la categoria, la posizione si compila da sola: Latticini va in frigo, Surgelati in freezer, Pane e Pasta in dispensa.
+              Se la posizione l'hai già scelta tu, la categoria non la cambia. Vale per gli alimenti nuovi: in modifica la posizione resta quella salvata.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Se chiudi il modulo dopo averci scritto qualcosa, l'app chiede <strong className="text-foreground">"Scartare le modifiche?"</strong>.
+              <strong className="text-foreground"> "Annulla"</strong> ti riporta al modulo com'era, <strong className="text-foreground">"Scarta"</strong> lo chiude e perde quello che hai scritto.
+            </p>
           </div>
           <div>
             <h3 className="font-medium mb-2 flex items-center gap-2">
@@ -62,11 +70,11 @@ export function GuidePage() {
               Scansione barcode
             </h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Premi <strong className="text-foreground">"+ Alimento"</strong></li>
+              <li>Apri il modulo con il pulsante tondo <strong className="text-foreground">+</strong> (su computer <strong className="text-foreground">"+ Alimento"</strong>)</li>
               <li>Premi <strong className="text-foreground">"Scansiona Barcode"</strong></li>
               <li>Inquadra il codice a barre con la fotocamera</li>
-              <li>L'app compilerà automaticamente i dati disponibili</li>
-              <li>Aggiungi la data di scadenza (non è sul barcode!) e salva</li>
+              <li>L'app compila nome, categoria e posizione, la quantità se è scritta sulla confezione, e nelle note la marca</li>
+              <li>Aggiungi la data di scadenza, che il codice a barre non contiene, e salva</li>
             </ol>
           </div>
         </CardContent>
@@ -90,7 +98,7 @@ export function GuidePage() {
           <div>
             <h3 className="font-medium mb-2">Modificare tutto il resto</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><strong className="text-foreground">Mobile:</strong> nell'editor rapido tocca <strong className="text-foreground">"Modifica completa"</strong> per aprire il modulo (nome, scadenza, unità, categoria, foto…)</li>
+              <li><strong className="text-foreground">Mobile:</strong> nell'editor rapido tocca <strong className="text-foreground">"Modifica completa"</strong> per aprire il modulo (nome, scadenza, unità, categoria, foto…), oppure usa il menu <strong className="text-foreground">⋮</strong> della card e scegli <strong className="text-foreground">"Modifica"</strong></li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Modifica"</li>
             </ul>
           </div>
@@ -100,12 +108,28 @@ export function GuidePage() {
               Eliminare
             </h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><strong className="text-foreground">Mobile:</strong> swipe verso sinistra sulla card (con vibrazione dove supportata)</li>
+              <li><strong className="text-foreground">Mobile:</strong> swipe verso sinistra sulla card, oppure menu <strong className="text-foreground">⋮</strong> e <strong className="text-foreground">"Elimina"</strong></li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Elimina"</li>
             </ul>
-            <p className="text-xs text-muted-foreground mt-2">
-              Il feedback aptico è disponibile dove il browser supporta la vibrazione (es. Android)
-              e si può disattivare da Impostazioni &gt; Feedback Aptico.
+            <p className="text-sm text-muted-foreground mt-2">
+              L'app chiede <strong className="text-foreground">"Com'è finita?"</strong> e propone tre risposte:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground mt-1">
+              <li><strong className="text-foreground">"L'ho consumato"</strong>: l'hai mangiato o usato</li>
+              <li><strong className="text-foreground">"L'ho buttato"</strong>: è finito nella spazzatura</li>
+              <li><strong className="text-foreground">"Toglilo e basta"</strong>: l'avevi inserito per sbaglio, e non conta né come consumato né come buttato</li>
+            </ul>
+            <p className="text-sm text-muted-foreground mt-2">
+              In tutti e tre i casi l'alimento esce dalla lista e la sua foto viene cancellata: la foto non si recupera.
+              <strong className="text-foreground"> "Annulla"</strong> lascia tutto com'era.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Il menu ⋮ su telefono</h3>
+            <p className="text-sm text-muted-foreground">
+              Sotto i 640 px di larghezza le card non hanno i pulsanti in basso: al loro posto c'è <strong className="text-foreground">⋮</strong> in alto a destra,
+              con <strong className="text-foreground">"Modifica"</strong> ed <strong className="text-foreground">"Elimina"</strong>. Fa le stesse cose degli swipe.
+              Con VoiceOver o TalkBack è la strada da usare, perché gli swipe sulla card non sono raggiungibili da uno screen reader.
             </p>
           </div>
           <div>
@@ -120,7 +144,7 @@ export function GuidePage() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-3">
                 <span className="inline-flex shrink-0 items-center rounded-md border border-success/30 bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
-                  5 giorni
+                  10 giorni
                 </span>
                 <span className="text-muted-foreground">Manca più di una settimana alla scadenza</span>
               </li>
@@ -159,9 +183,19 @@ export function GuidePage() {
             <h3 className="font-medium mb-2">Usare i filtri</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
               <li>Premi <strong className="text-foreground">"Filtri e Ricerca"</strong> per espandere</li>
-              <li>Filtra per categoria (es. Latticini), posizione (es. Frigo) o stato</li>
+              <li>Filtra per categoria (es. Latticini), posizione (es. Frigo) o scadenza: <strong className="text-foreground">"Non scaduti"</strong>, <strong className="text-foreground">"In scadenza (7gg)"</strong> o <strong className="text-foreground">"Scaduti"</strong></li>
               <li>Usa la barra di ricerca per cercare per nome</li>
             </ol>
+            <p className="text-sm text-muted-foreground mt-2">
+              Con almeno un filtro attivo compare <strong className="text-foreground">"Cancella"</strong>, che li toglie tutti insieme.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Ordinare la lista</h3>
+            <p className="text-sm text-muted-foreground">
+              Nello stesso pannello, <strong className="text-foreground">"Ordina per"</strong> mette gli alimenti in ordine di scadenza (prima i prossimi o prima i lontani),
+              di nome (A-Z o Z-A) o di data di aggiunta (prima i recenti o prima i vecchi). Si parte dalla scadenza più vicina.
+            </p>
           </div>
           <div>
             <h3 className="font-medium mb-2">Filtri rapidi</h3>
@@ -207,18 +241,39 @@ export function GuidePage() {
               Invitare qualcuno
             </h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Apri il menu utente in alto a destra</li>
+              <li>Apri il menu utente in alto a destra e scegli <strong className="text-foreground">"Inviti"</strong></li>
               <li>Seleziona <strong className="text-foreground">"Crea invito"</strong></li>
-              <li>Genera un codice invito di 6 caratteri</li>
-              <li>Condividi il codice via WhatsApp, Telegram, SMS o email</li>
+              <li>Premi <strong className="text-foreground">"Genera codice invito"</strong>: ricevi un codice di 6 caratteri e il link che lo contiene</li>
+              <li>Mandali con <strong className="text-foreground">"Condividi"</strong> (WhatsApp, Telegram, SMS, email…) o copia il codice con <strong className="text-foreground">"Copia"</strong></li>
             </ol>
           </div>
           <div>
             <h3 className="font-medium mb-2">Accettare un invito</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li><strong className="text-foreground">Link diretto:</strong> clicca il link ricevuto (es. entroapp.it/join/ABC123)</li>
-              <li><strong className="text-foreground">Codice manuale:</strong> in fase di registrazione, premi "Ho un codice invito" e inserisci il codice</li>
+              <li><strong className="text-foreground">Hai già un account:</strong> apri il link ricevuto (es. entroapp.it/join/ABC123) e premi <strong className="text-foreground">"Unisciti"</strong>. Oppure dal menu utente scegli <strong className="text-foreground">"Inviti"</strong> → <strong className="text-foreground">"Accetta invito"</strong>, scrivi il codice e premi <strong className="text-foreground">"Continua"</strong></li>
+              <li><strong className="text-foreground">Non hai un account:</strong> il link apre la registrazione con il codice già inserito. Senza link, nella registrazione premi <strong className="text-foreground">"Ho un codice invito"</strong>, scrivi il codice e premi <strong className="text-foreground">"Verifica"</strong>. Dopo la conferma dell'email sei già nella lista di chi ti ha invitato</li>
             </ul>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Se hai già una lista</h3>
+            <p className="text-sm text-muted-foreground mb-1">
+              Si appartiene a una lista sola. Accettando un invito lasci quella in cui sei, e l'app te lo dice prima di farlo:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+              <li><strong className="text-foreground">Se eri l'unico membro</strong>, la tua lista viene eliminata insieme ai suoi alimenti. L'avviso dice quanti sono</li>
+              <li><strong className="text-foreground">Se la lista era condivisa</strong>, ne esci e gli alimenti restano agli altri membri</li>
+            </ul>
+            <p className="text-sm text-muted-foreground mt-1">
+              Per procedere premi <strong className="text-foreground">"Conferma e unisciti"</strong>. Non si torna indietro.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-2">Abbandonare una lista condivisa</h3>
+            <p className="text-sm text-muted-foreground">
+              Dal menu utente scegli <strong className="text-foreground">"Inviti"</strong> → <strong className="text-foreground">"Abbandona lista condivisa"</strong>, poi <strong className="text-foreground">"Abbandona lista"</strong>.
+              La voce c'è solo se sei in una lista con altri. Ti ritrovi con una lista personale vuota; gli altri membri tengono la lista e i suoi alimenti.
+              Per rientrare serve un nuovo invito.
+            </p>
           </div>
           <div>
             <h3 className="font-medium mb-2">Come funziona</h3>
@@ -231,9 +286,10 @@ export function GuidePage() {
           <div>
             <h3 className="font-medium mb-2">Domande frequenti</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-              <li>Puoi generare più codici invito per la stessa lista</li>
-              <li>I codici scadono dopo 7 giorni</li>
-              <li>Un utente può appartenere a una sola lista alla volta</li>
+              <li>Ogni codice vale una volta sola: per invitare più persone, generane uno per ciascuna</li>
+              <li>I codici scadono dopo 7 giorni, e un codice generato non si può annullare</li>
+              <li>Il codice non è legato a un'email: entra chi lo usa per primo. Mandalo solo a persone di cui ti fidi</li>
+              <li>Non c'è ancora un elenco dei membri, e non si può togliere qualcuno dalla lista</li>
             </ul>
           </div>
         </CardContent>
@@ -293,9 +349,11 @@ export function GuidePage() {
           <div>
             <h3 className="font-medium mb-2">Come funziona</h3>
             <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-              <li>La scansione legge il codice EAN-13 del prodotto</li>
+              <li>La scansione legge il codice a barre del prodotto</li>
               <li>Cerca le informazioni su Open Food Facts (database pubblico)</li>
-              <li>Compila automaticamente: nome, categoria, posizione suggerita</li>
+              <li>Compila il nome e la categoria. La posizione segue la categoria, come nell'inserimento manuale, a meno che tu non l'abbia già scelta</li>
+              <li>Se la confezione dichiara un peso o un volume (es. 500 g), compila anche la quantità</li>
+              <li>Nelle note scrive la marca e le categorie di Open Food Facts; puoi cancellarle o cambiarle prima di salvare</li>
             </ol>
           </div>
           <div>
@@ -306,6 +364,25 @@ export function GuidePage() {
               <li>Serve buona illuminazione e il barcode deve essere ben inquadrato</li>
             </ul>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle as="h2" className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-muted-foreground" />
+            Feedback aptico
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            Dove il browser sa far vibrare il telefono (Android), entro vibra quando uno swipe arriva alla soglia,
+            quando salvi un alimento e quando lo togli dalla lista. Su iPhone e su computer il browser non lo permette.
+          </p>
+          <p>
+            Per spegnerlo o riaccenderlo vai in <strong className="text-foreground">Impostazioni</strong>, sezione <strong className="text-foreground">"Feedback aptico"</strong>.
+            La sezione c'è solo sui dispositivi che vibrano.
+          </p>
         </CardContent>
       </Card>
 
@@ -395,9 +472,13 @@ export function GuidePage() {
             <h3 className="font-medium mb-2 text-foreground/80">Cosa funziona sempre offline</h3>
             <ul className="list-disc list-inside space-y-1">
               <li>Visualizzare alimenti, scadenze, filtri e calendario</li>
-              <li>Aggiungere, modificare ed eliminare alimenti (con sync automatica)</li>
-              <li>Un banner ti mostra quante modifiche sono in attesa di sincronizzazione</li>
+              <li>Aggiungere, modificare ed eliminare alimenti, anche più di uno di seguito</li>
+              <li>Scattare o scegliere una foto, in un alimento nuovo o in uno che stai modificando: resta sul dispositivo e si carica quando torna la rete</li>
+              <li>Uscire con <strong className="text-foreground">"Disconnetti"</strong>: esci da questo dispositivo, gli altri su cui hai fatto l'accesso restano collegati</li>
             </ul>
+            <p className="mt-2">
+              Un alimento che ha già una modifica in attesa non si può modificare né togliere di nuovo finché quella non arriva al server: il dialogo lo dice.
+            </p>
           </div>
 
           <div>
@@ -408,8 +489,16 @@ export function GuidePage() {
               <li>Gestione liste condivise e inviti (creare, accettare, abbandonare)</li>
               <li>Esportazione dati</li>
               <li>Scansione barcode (richiede connessione a Open Food Facts)</li>
-              <li>Login e logout</li>
-              <li>Caricamento nuove foto</li>
+              <li>Accesso: per entrare serve la rete</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="font-medium mb-2 text-foreground/80">Quando torni online</h3>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Offline in cima alla pagina c'è un banner ambra, <strong className="text-foreground">"Sei offline"</strong>, con il numero di modifiche in attesa</li>
+              <li>Quando torna la rete le modifiche partono da sole, nell'ordine in cui le hai fatte, e il banner diventa verde con <strong className="text-foreground">"Sincronizzazione in corso..."</strong></li>
+              <li>Finito l'invio il banner sparisce</li>
             </ul>
           </div>
         </CardContent>
@@ -426,7 +515,7 @@ export function GuidePage() {
           <div>
             <h3 className="font-medium mb-1">Come cambio la mia password?</h3>
             <p className="text-sm text-muted-foreground">
-              Fai logout, vai alla pagina di login e clicca "Password dimenticata?" per ricevere un'email di reset.
+              Dal menu utente premi "Disconnetti", poi nella pagina di accesso clicca "Password dimenticata?": ricevi un'email con il link per sceglierne una nuova.
             </p>
           </div>
           <div>
@@ -439,6 +528,13 @@ export function GuidePage() {
             <h3 className="font-medium mb-1">Perché il barcode non riconosce il mio prodotto?</h3>
             <p className="text-sm text-muted-foreground">
               Il database Open Food Facts è mantenuto dalla comunità. Alcuni prodotti locali o nuovi potrebbero non essere presenti. Puoi inserire l'alimento manualmente.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-medium mb-1">Cosa succede se la foto non si carica?</h3>
+            <p className="text-sm text-muted-foreground">
+              Compare "La foto non è stata caricata. Riprova." e il modulo resta aperto, con la foto ancora dentro: l'alimento non è stato salvato.
+              Premi di nuovo il pulsante di salvataggio, oppure togli la foto e salva senza.
             </p>
           </div>
           <div>
