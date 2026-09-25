@@ -9,6 +9,7 @@ import type {
   ListMembersResponse,
 } from '../types/invite.types'
 import { userFacingError } from './userFacingError'
+import { inviteErrorMessage } from './inviteErrorMessage'
 
 /**
  * Invites Service Layer - Functions to manage shared lists and invitations
@@ -189,7 +190,8 @@ export async function acceptInviteByEmail(): Promise<AcceptInviteResponse> {
     }
     const row = Array.isArray(data) ? data[0] : data
     if (!row || !row.success) {
-      return { success: false, listId: null, error: row?.error_message ? new Error(row.error_message) : null }
+      // Senza messaggio non c'era un invito da accettare: nessun errore.
+      return { success: false, listId: null, error: row?.error_message ? new Error(inviteErrorMessage(row.error_message)) : null }
     }
     return { success: true, listId: row.list_id, error: null }
   } catch (error) {
@@ -375,7 +377,7 @@ export async function acceptInviteWithConfirmation(
       return { success: false, listId: null, requiresConfirmation: true, foodCount: row.food_count ?? 0, onlyMember: row.only_member ?? null, error: null }
     }
     if (!row.success) {
-      return { success: false, listId: null, requiresConfirmation: false, error: row.error_message ? new Error(row.error_message) : new Error('Accettazione non riuscita') }
+      return { success: false, listId: null, requiresConfirmation: false, error: new Error(inviteErrorMessage(row.error_message)) }
     }
     return { success: true, listId: row.list_id, requiresConfirmation: false, error: null }
   } catch (error) {

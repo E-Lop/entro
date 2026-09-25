@@ -23,9 +23,9 @@
  *   `Failed to create invite`), che non sono una fuga ma producono lo stesso
  *   effetto per chi legge.
  *
- * Resta fuori di proposito `row.error_message`, che le nostre RPC restituiscono
- * come prosa già destinata all'utente: è materia della #101, dove si decide se
- * debba diventare un codice.
+ * Dalla #101 anche `row.error_message`, cioè ciò che le RPC degli inviti
+ * restituiscono con `success: false`, passa da `inviteErrorMessage`: è un
+ * codice, e un testo che non conosce dà la frase generica.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -137,5 +137,24 @@ describe('il messaggio del server non arriva a schermo dagli inviti', () => {
     expect(error!.message).not.toMatch(
       /Unknown error|Not authenticated|Failed to|List not found|No data returned/i
     )
+  })
+})
+
+describe('la riga di una RPC d\'invito non porta a schermo il testo del server (#101)', () => {
+  const rpcCases: [string, () => Promise<{ error: Error | null }>][] = [
+    ['acceptInviteByEmail', () => acceptInviteByEmail()],
+    ['acceptInviteWithConfirmation', () => acceptInviteWithConfirmation('ABC123')],
+  ]
+
+  it.each(rpcCases)('%s traduce il codice', async (_name, call) => {
+    setResult({ data: [{ success: false, error_message: 'expired' }], error: null })
+    const { error } = await call()
+    expect(error?.message).toBe('Questo invito è scaduto')
+  })
+
+  it.each(rpcCases)('%s non mostra un testo che non conosce', async (_name, call) => {
+    setResult({ data: [{ success: false, error_message: DB_MESSAGE }], error: null })
+    const { error } = await call()
+    expect(error?.message).toBe("Non è stato possibile accettare l'invito. Riprova.")
   })
 })

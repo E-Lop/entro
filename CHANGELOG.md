@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.23] - 2026-09-25
+
+### Changed
+- **I messaggi di errore degli inviti li sceglie l'app, non il database** (#101, prima metà). Le funzioni del database che accettano un invito restituiscono una frase in caso d'errore, e l'app la mostrava così com'era: metà in italiano, una in inglese («User not authenticated»), e con il rischio che un giorno ci finisse un testo di Postgres. Ora l'app riconosce un codice e sceglie la frase; tutto ciò che non riconosce diventa «Non è stato possibile accettare l'invito. Riprova.». Le frasi che l'utente legge non cambiano. Nella seconda metà della #101 il database smetterà di restituire frasi e passerà ai codici: questa versione li capisce già, quindi l'ordine è sicuro.
+
 ## [1.12.22] - 2026-09-25
 
 ### Fixed
@@ -885,7 +890,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.22...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.23...HEAD
+[1.12.23]: https://github.com/E-Lop/entro/compare/v1.12.22...v1.12.23
 [1.12.22]: https://github.com/E-Lop/entro/compare/v1.12.21...v1.12.22
 [1.12.21]: https://github.com/E-Lop/entro/compare/v1.12.20...v1.12.21
 [1.12.20]: https://github.com/E-Lop/entro/compare/v1.12.19...v1.12.20
