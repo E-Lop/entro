@@ -215,5 +215,10 @@ jobs:
       - name: Reset local database
         run: supabase db reset
 
+      # I permessi delle funzioni si vedono solo sul database: a leggere le
+      # migrazioni l'EXECUTE a PUBLIC non compare, perché è un default (#160).
+      - name: Database tests (pgTAP)
+        run: supabase test db
+
       - name: Run Playwright E2E
         run: npm run test:e2e
