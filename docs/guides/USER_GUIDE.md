@@ -393,6 +393,12 @@ Un alimento che ha già una modifica in attesa non si può modificare né toglie
 
 I passaggi completi sono in [Password dimenticata](#password-dimenticata).
 
+### Ho perso il telefono: come chiudo entro lì sopra?
+
+Da un altro dispositivo in cui sei dentro, apri **Impostazioni** e premi **"Esci dagli altri dispositivi"**. Il telefono perso esce entro un'ora al massimo; su quello che stai usando resti dentro.
+
+Se non hai un altro dispositivo, cambia la password come in [Password dimenticata](#password-dimenticata): chiude l'accesso ovunque.
+
 ### I miei dati sono al sicuro?
 
 Sì, i tuoi dati sono:

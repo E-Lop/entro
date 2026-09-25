@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.25] - 2026-09-25
+
+### Added
+- **«Esci dagli altri dispositivi» nelle Impostazioni** (#143). Da quando «Disconnetti» chiude solo il browser da cui lo usi (1.12.17), un telefono perso restava dentro per sempre: sul piano Supabase in uso le sessioni non scadono, e l'unica via era il recupero della password, che nessuno collega a «ho perso il telefono». Ora nella card del profilo, sotto «Dispositivi», un pulsante chiude l'accesso su tutti gli altri telefoni e browser, e su quello che stai usando resti dentro. Gli altri dispositivi escono entro un'ora al massimo: il server revoca subito il loro rinnovo della sessione, ma l'accesso già in corso vale fino alla scadenza. Nessuna conferma prima, perché non si perde nessun dato; dopo, un messaggio dice com'è andata. Una nuova domanda nelle due guide, «Ho perso il telefono: come chiudo entro lì sopra?».
+
+  Provato con due sessioni vere dello stesso utente in due contesti del browser: dopo il pulsante premuto dal primo, il secondo non riesce più a rinnovare la sessione e il primo sì. Il pulsante è alto 44 px, misurato.
+
 ## [1.12.24] - 2026-09-25
 
 ### Added
@@ -899,7 +906,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.24...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.25...HEAD
+[1.12.25]: https://github.com/E-Lop/entro/compare/v1.12.24...v1.12.25
 [1.12.24]: https://github.com/E-Lop/entro/compare/v1.12.23...v1.12.24
 [1.12.23]: https://github.com/E-Lop/entro/compare/v1.12.22...v1.12.23
 [1.12.22]: https://github.com/E-Lop/entro/compare/v1.12.21...v1.12.22

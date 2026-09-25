@@ -203,6 +203,24 @@ export async function signOut(): Promise<SignOutResult> {
 }
 
 /**
+ * Chiude le sessioni degli altri dispositivi e lascia questa (#143): chi perde
+ * un telefono lo chiude da qui, senza passare dal recupero password.
+ *
+ * Con `scope: 'others'` la sessione corrente non riceve nessun evento
+ * (`@supabase/auth-js`), quindi l'esito lo legge chi chiama, dal risultato.
+ * Niente pulizia dello storage: questo browser resta dentro, qualunque sia
+ * l'esito. Non solleva mai.
+ */
+export async function signOutOtherDevices(): Promise<{ error: Error | null }> {
+  try {
+    const { error } = await supabase.auth.signOut({ scope: 'others' })
+    return { error: error ? shownError(error) : null }
+  } catch (error) {
+    return { error: shownError(error) }
+  }
+}
+
+/**
  * Check if an error message indicates a missing auth session.
  * This is expected when no user is logged in and should not be logged.
  */

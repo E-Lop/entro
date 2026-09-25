@@ -519,6 +519,12 @@ export function GuidePage() {
             </p>
           </div>
           <div>
+            <h3 className="font-medium mb-1">Ho perso il telefono: come chiudo entro lì sopra?</h3>
+            <p className="text-sm text-muted-foreground">
+              Da un altro dispositivo in cui sei dentro, apri le Impostazioni e premi "Esci dagli altri dispositivi". Il telefono perso esce entro un'ora al massimo; su quello che stai usando resti dentro. Se non hai un altro dispositivo, cambia la password dalla pagina di accesso con "Password dimenticata?": chiude l'accesso ovunque.
+            </p>
+          </div>
+          <div>
             <h3 className="font-medium mb-1">I miei dati sono al sicuro?</h3>
             <p className="text-sm text-muted-foreground">
               Sì. I dati sono salvati su server sicuri, accessibili solo con il tuo account. Le immagini sono protette con URL temporanei.
