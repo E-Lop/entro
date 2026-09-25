@@ -88,18 +88,28 @@ function authFailure(error: unknown): AuthResponse {
 }
 
 /**
- * Sign up a new user with email, password, and full name
+ * Sign up a new user with email, password, and full name.
+ *
+ * Il codice invito, se c'è, va nei metadati: il trigger `on_auth_user_created`
+ * lo legge e mette l'utente nella lista di chi l'ha invitato mentre lo crea
+ * (#165). Passato dopo, l'utente avrebbe già una lista sua.
  */
 export async function signUp(
   email: string,
   password: string,
-  fullName: string
+  fullName: string,
+  inviteCode?: string
 ): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: {
+          full_name: fullName,
+          ...(inviteCode ? { invite_code: inviteCode.toUpperCase() } : {}),
+        },
+      },
     })
 
     if (error) throw error

@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.20] - 2026-09-25
+
+### Fixed
+- **Chi si registra con un codice invito entra nella lista di chi l'ha invitato** (#165). Dal 22 settembre ogni utente nuovo riceve una lista sua dal database, appena creato (#94). Il codice invito però arrivava dopo: la pagina di registrazione lo registrava a registrazione finita, e al primo accesso l'app trovava già quella lista e non accettava più l'invito. L'invitato restava in una lista vuota tutta sua. Valeva per ogni utente nuovo invitato, anche per chi arrivava dal link, che porta alla stessa registrazione. In produzione non ha colpito nessuno: dal 22 settembre nessun invitato nuovo si è registrato.
+
+  Ora il codice viaggia con la registrazione, nei metadati dell'utente. Il database lo legge mentre crea l'account e, se l'invito è valido, mette l'utente direttamente nella lista che l'ha invitato, senza dargliene una sua. Con un codice scaduto, già usato o inesistente, l'utente nasce con la sua lista come prima.
+
+  Provato con un test end-to-end che si registra da `/signup?code=…` (rosso prima della correzione: l'utente finiva in una lista propria e l'invito restava in sospeso) e con un test pgTAP su tutti i rami del trigger.
+
 ## [1.12.19] - 2026-09-25
 
 ### Fixed
@@ -859,7 +868,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.19...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.20...HEAD
+[1.12.20]: https://github.com/E-Lop/entro/compare/v1.12.19...v1.12.20
 [1.12.19]: https://github.com/E-Lop/entro/compare/v1.12.18...v1.12.19
 [1.12.18]: https://github.com/E-Lop/entro/compare/v1.12.17...v1.12.18
 [1.12.17]: https://github.com/E-Lop/entro/compare/v1.12.16...v1.12.17

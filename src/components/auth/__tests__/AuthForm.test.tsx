@@ -52,6 +52,22 @@ describe('AuthForm — accessibilità ed errori', () => {
     expect(alert).toHaveTextContent('Credenziali non valide')
   })
 
+  it('in registrazione passa a signUp il codice invito che riceve (#165)', async () => {
+    mockSignUp.mockResolvedValue({ success: true, error: null })
+
+    const { container } = render(<AuthForm mode="signup" inviteCode="AB12CD" />)
+    const field = (name: string) => container.querySelector(`input[name="${name}"]`) as HTMLInputElement
+    await userEvent.type(field('full_name'), 'Anna Rossi')
+    await userEvent.type(field('email'), 'anna@example.com')
+    await userEvent.type(field('password'), 'Password!2026')
+    await userEvent.type(field('confirmPassword'), 'Password!2026')
+    await userEvent.click(screen.getByRole('button', { name: 'Registrati' }))
+
+    await vi.waitFor(() =>
+      expect(mockSignUp).toHaveBeenCalledWith('anna@example.com', 'Password!2026', 'Anna Rossi', 'AB12CD')
+    )
+  })
+
   it('non chiama signIn quando la email non è valida (la validazione blocca il submit)', async () => {
     render(<AuthForm mode="login" />)
     await userEvent.type(screen.getByPlaceholderText('tua@email.com'), 'non-una-email')
