@@ -19,7 +19,7 @@ Ogni affermazione qui sotto indica il file che la conferma. Se il codice cambia 
 | Alimenti tolti | tabella `foods` | Togliere un alimento non cancella la riga: imposta `deleted_at` e, se l'utente sceglie un esito, `status` (`consumed` o `wasted`) e `consumed_at`. La foto invece viene cancellata dallo Storage (`softDeleteFood` in `src/lib/foods.ts`). |
 | Foto | bucket Storage `food-images` | Un file per foto, nella cartella `{user_id}/` di chi l'ha caricata (`src/lib/storage.ts`). |
 | Liste e membri | tabelle `lists`, `list_members` | Nome della lista, chi l'ha creata, chi ne fa parte e da quando. |
-| Inviti | tabella `invites` | Codice di 6 caratteri, lista, chi l'ha creato, scadenza, stato; l'email dell'invitato se è stata indicata o se si è registrato con quel codice (`pending_user_email`). |
+| Inviti | tabella `invites` | Codice di 6 caratteri, lista, chi l'ha creato, scadenza, stato; l'email dell'invitato se l'invito è per email (`email`), oppure (`pending_user_email`) se l'invitato si è registrato con il codice prima della versione 1.12.20, quando il codice arrivava dopo la registrazione con `register_pending_invite`. Da allora arriva nei metadati dell'account (vedi la riga «Account»). |
 | Sottoscrizioni push | tabella `push_subscriptions` | Endpoint del servizio push del browser, le due chiavi della sottoscrizione, lo user agent del browser (`supabase/migrations/20260228_push_notifications.sql`, `src/lib/pushNotifications.ts`). |
 | Preferenze di notifica | tabella `notification_preferences` | Attivazione, giorni di anticipo, ore silenziose, limite giornaliero, fuso orario, e i contatori degli invii del giorno. |
 
