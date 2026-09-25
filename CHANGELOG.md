@@ -8,6 +8,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 ## [1.12.26] - 2026-09-25
 
 ### Changed
+- **Il verde della barra del browser e della pagina offline è quello di marca** (#150). Il `theme-color` di `index.html` e la pagina offline usavano ancora `#16a34a`, il verde di prima della #127, mentre il manifest ora dice `#006e2d`: due verdi nella stessa app installata. Il pulsante «Riprova» della pagina offline, bianco su quel verde, era a 3,3:1; sul verde di marca è a 6,4:1.
 - **`docs/guides/privacy.md` diventa «Come entro implementa il GDPR»** (#150). Era il piano di lavoro di gennaio, con prezzi e fasi, e il README lo linkava come «Privacy Policy». Ora descrive cosa fa il codice: cosa salva sul server e nel browser, cosa contiene l'esportazione, cosa sparisce e cosa resta cancellando l'account, quali terze parti ricevono dati. Ogni voce indica il file che la conferma. La privacy policy vera resta su LegalBlink, e il link «Privacy Policy» del README ora porta lì, come il footer dell'app.
 - **Il font dichiarato è quello che si vede** (#150). `src/index.css` metteva Inter in testa a `font-family`, ma l'app non lo carica: dove non è installato si vedeva `system-ui`. Tolto Inter, e `DESIGN.md` dice che il font è quello di sistema.
 - **`PHASE_6_LAUNCH_CHECKLIST.md` porta in testa un avviso**: è la checklist del lancio di inizio 2026, non aggiornata, con il vecchio dominio e file che non sono nel repo. Il testo sotto non cambia.
