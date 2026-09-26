@@ -59,7 +59,7 @@ export function NotificationSettings() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-inner">
           <Bell className="h-5 w-5 text-primary" />
           <CardTitle as="h2">Notifiche</CardTitle>
         </div>
@@ -67,9 +67,9 @@ export function NotificationSettings() {
           Ricevi avvisi quando i tuoi alimenti stanno per scadere
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-blocks">
         {status === 'unsupported' && (
-          <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+          <div className="flex items-start gap-inner p-3 bg-muted/50 rounded-lg">
             <BellOff className="h-5 w-5 text-muted-foreground mt-0.5" />
             <p className="text-sm text-muted-foreground">
               Il tuo browser non supporta le notifiche push.
@@ -78,7 +78,7 @@ export function NotificationSettings() {
         )}
 
         {status === 'ios-not-installed' && (
-          <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+          <div className="flex items-start gap-inner p-3 bg-warning/10 border border-warning/30 rounded-lg">
             <Smartphone className="h-5 w-5 text-warning mt-0.5" />
             <div className="text-sm">
               <p className="font-medium text-warning">
@@ -92,7 +92,7 @@ export function NotificationSettings() {
         )}
 
         {status === 'denied' && (
-          <div className="flex items-start gap-3 p-3 bg-destructive/10 rounded-lg">
+          <div className="flex items-start gap-inner p-3 bg-destructive/10 rounded-lg">
             <BellOff className="h-5 w-5 text-destructive mt-0.5" />
             <p className="text-sm text-muted-foreground">
               Permesso notifiche negato. Puoi riabilitarlo dalle impostazioni del tuo browser.
@@ -124,12 +124,12 @@ export function NotificationSettings() {
         )}
 
         {isSubscribed && prefs && (
-          <div className="border-t pt-4 space-y-4">
+          <div className="border-t pt-4 space-y-blocks">
             <div>
               <p className="font-medium text-sm mb-2">Quando avvisarti</p>
-              <div className="space-y-1">
+              <div className="space-y-inner">
                 {INTERVAL_OPTIONS.map(({ value, label }) => (
-                  <label key={value} className="flex items-center gap-3 cursor-pointer min-h-11">
+                  <label key={value} className="flex items-center gap-paired cursor-pointer min-h-11">
                     <input
                       type="checkbox"
                       checked={prefs.expiry_intervals.includes(value)}

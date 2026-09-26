@@ -79,7 +79,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-inner">
             <Camera className="h-5 w-5" />
             Scansiona Barcode
           </DialogTitle>
@@ -88,7 +88,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-blocks">
           {/* Scanner View */}
           <div className="relative min-h-[300px] bg-black rounded-lg overflow-hidden">
             {/* Video element for ZXing scanner */}
@@ -115,7 +115,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
             {/* Loading state overlay */}
             {state === 'idle' && (
               <div className="absolute inset-0 flex items-center justify-center" role="status" aria-live="polite">
-                <div className="flex flex-col items-center gap-3 text-white">
+                <div className="flex flex-col items-center gap-inner text-white">
                   <Loader2 className="h-8 w-8 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                   <p className="text-sm">Inizializzazione fotocamera...</p>
                 </div>
@@ -125,7 +125,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
             {/* Processing overlay */}
             {isProcessing && (
               <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center" role="status" aria-live="polite">
-                <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-2">
+                <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-inner">
                   <Loader2 className="h-6 w-6 animate-spin motion-reduce:animate-none text-primary" aria-hidden="true" />
                   <p className="text-sm font-medium">Elaborazione...</p>
                 </div>
@@ -135,7 +135,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
             {/* Success overlay */}
             {isSuccess && scannedCode && (
               <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center" role="status" aria-live="polite">
-                <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-2">
+                <div className="bg-background p-4 rounded-lg flex flex-col items-center gap-inner">
                   <CheckCircle2 className="h-8 w-8 text-success" aria-hidden="true" />
                   <p className="text-sm font-medium">Codice riconosciuto!</p>
                   <p className="text-xs text-muted-foreground font-mono">{scannedCode}</p>
@@ -146,7 +146,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
           {/* Error message */}
           {isError && error && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm" role="alert">
+            <div className="flex items-start gap-inner p-3 rounded-lg bg-destructive/10 text-destructive text-sm" role="alert">
               <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
                 <p className="font-medium">Errore</p>
@@ -157,11 +157,11 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
           {/* Instructions */}
           {isScanning && (
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-inner">
               <p className="text-sm text-muted-foreground">
                 Posiziona il codice a barre all'interno del riquadro
               </p>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-inner">
                 <div className="h-2 w-2 rounded-full bg-primary animate-pulse motion-reduce:animate-none" aria-hidden="true" />
                 <p className="text-xs text-muted-foreground">Scanner attivo</p>
               </div>
@@ -170,7 +170,7 @@ export function BarcodeScanner({ open, onOpenChange, onScanSuccess }: BarcodeSca
 
           {/* Retry button for errors */}
           {isError && (
-            <div className="flex gap-2">
+            <div className="flex gap-siblings">
               <Button onClick={startScanning} className="flex-1" variant="default">
                 <Camera className="mr-2 h-4 w-4" />
                 Riprova

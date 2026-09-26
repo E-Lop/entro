@@ -41,14 +41,14 @@ export function InviteMenuDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-3 py-4">
+        <div className="grid gap-siblings py-4">
           {/* Option 1: Create invite */}
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal"
+            className="h-auto flex-col items-start gap-inner p-4 text-left whitespace-normal"
             onClick={() => handleOptionClick(onCreateInvite)}
           >
-            <div className="flex items-center gap-3 w-full">
+            <div className="flex items-center gap-inner w-full">
               <UserPlus className="h-5 w-5 flex-shrink-0" />
               <div className="flex-1">
                 <div className="font-medium">Crea invito</div>
@@ -62,10 +62,10 @@ export function InviteMenuDialog({
           {/* Option 2: Accept invite */}
           <Button
             variant="outline"
-            className="h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal"
+            className="h-auto flex-col items-start gap-inner p-4 text-left whitespace-normal"
             onClick={() => handleOptionClick(onAcceptInvite)}
           >
-            <div className="flex items-center gap-3 w-full">
+            <div className="flex items-center gap-inner w-full">
               <LogIn className="h-5 w-5 flex-shrink-0" />
               <div className="flex-1">
                 <div className="font-medium">Accetta invito</div>
@@ -80,10 +80,10 @@ export function InviteMenuDialog({
           {isInSharedList && (
             <Button
               variant="outline"
-              className="h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal border-destructive/50 hover:bg-destructive/10"
+              className="h-auto flex-col items-start gap-inner p-4 text-left whitespace-normal border-destructive/50 hover:bg-destructive/10"
               onClick={() => handleOptionClick(onLeaveList)}
             >
-              <div className="flex items-center gap-3 w-full">
+              <div className="flex items-center gap-inner w-full">
                 <LogOut className="h-5 w-5 flex-shrink-0 text-destructive" />
                 <div className="flex-1">
                   <div className="font-medium text-destructive">Abbandona lista condivisa</div>

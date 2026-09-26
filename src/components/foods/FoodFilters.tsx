@@ -78,12 +78,12 @@ export function FoodFilters({
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="space-y-4">
+        <div className="space-y-blocks">
           {/* Header with Toggle Button */}
           <div className="flex w-full items-center justify-between">
             <button
               onClick={onToggle}
-              className="flex flex-1 items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-1 -m-1"
+              className="flex flex-1 items-center gap-inner text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-1 -m-1"
               aria-expanded={isExpanded}
               aria-label="Espandi o comprimi filtri"
             >
@@ -116,9 +116,9 @@ export function FoodFilters({
 
           {/* Collapsible Content */}
           {isExpanded && (
-            <div className="space-y-4 pt-4 border-t">
+            <div className="space-y-blocks pt-4 border-t">
               {/* Search Bar */}
-              <div className="space-y-2">
+              <div className="space-y-paired">
                 <Label htmlFor="search">Cerca per nome</Label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
@@ -134,9 +134,9 @@ export function FoodFilters({
               </div>
 
               {/* Filters Grid */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-blocks sm:grid-cols-2 lg:grid-cols-4">
                 {/* Category Filter */}
-                <div className="space-y-2">
+                <div className="space-y-paired">
                   <Label htmlFor="category">Categoria</Label>
                   <select
                     id="category"
@@ -154,7 +154,7 @@ export function FoodFilters({
                 </div>
 
                 {/* Storage Location Filter */}
-                <div className="space-y-2">
+                <div className="space-y-paired">
                   <Label htmlFor="storage">Posizione</Label>
                   <select
                     id="storage"
@@ -170,7 +170,7 @@ export function FoodFilters({
                 </div>
 
                 {/* Expiry Filter */}
-                <div className="space-y-2">
+                <div className="space-y-paired">
                   <Label htmlFor="expiry">Scadenza</Label>
                   <select
                     id="expiry"
@@ -186,7 +186,7 @@ export function FoodFilters({
                 </div>
 
                 {/* Sort */}
-                <div className="space-y-2">
+                <div className="space-y-paired">
                   <Label htmlFor="sort">Ordina per</Label>
                   <select
                     id="sort"

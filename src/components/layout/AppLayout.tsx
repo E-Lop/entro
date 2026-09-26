@@ -83,7 +83,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           {/* Logo / Brand */}
-          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Link to="/" className="flex items-center gap-inner hover:opacity-80 transition-opacity">
             <AppIcon size={40} className="rounded-lg" />
             <div>
               <div className="text-lg font-bold text-foreground">entro</div>
@@ -92,7 +92,7 @@ export function AppLayout() {
           </Link>
 
           {/* Actions - Navigation landmark */}
-          <nav aria-label="Menu principale" className="flex items-center gap-2">
+          <nav aria-label="Menu principale" className="flex items-center gap-siblings">
             <QuickGuideDialog />
             <ThemeToggle />
 
@@ -109,7 +109,7 @@ export function AppLayout() {
               </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
+                <div className="flex flex-col space-y-inner">
                   <p className="text-sm font-medium leading-none">
                     {user?.user_metadata?.full_name || 'Il mio account'}
                   </p>

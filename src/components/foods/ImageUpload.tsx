@@ -133,7 +133,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-inner">
       {/* Preview or Upload Button */}
       {displayPreview || isLoadingPreview || isConverting ? (
         <div className="relative">
@@ -184,14 +184,14 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-inner">
           {/* Two-button layout: Camera + Gallery */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-siblings">
             {/* Camera Button - Android 14+ compatible */}
             <Button
               type="button"
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-2 border-dashed border-2"
+              className="h-32 flex flex-col items-center justify-center gap-inner border-dashed border-2"
               onClick={handleCameraClick}
               disabled={disabled || isConverting}
               aria-label="Scatta foto con fotocamera"
@@ -207,7 +207,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
             <Button
               type="button"
               variant="outline"
-              className="h-32 flex flex-col items-center justify-center gap-2 border-dashed border-2"
+              className="h-32 flex flex-col items-center justify-center gap-inner border-dashed border-2"
               onClick={handleGalleryClick}
               disabled={disabled || isConverting}
               aria-label="Scegli foto dalla galleria"

@@ -85,8 +85,8 @@ export function AcceptInviteFlowDialog({
           </DialogHeader>
 
           <div className="py-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
+            <div className="space-y-blocks">
+              <div className="space-y-paired">
                 <Label htmlFor="invite-code">Codice invito</Label>
                 <Input
                   id="invite-code"

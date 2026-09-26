@@ -71,10 +71,10 @@ export function LeaveListDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="space-y-blocks py-4">
           <Alert variant="destructive">
             <AlertDescription>
-              <div className="space-y-1">
+              <div className="space-y-inner">
                 <p>
                   Abbandonando questa lista condivisa, verrà creata una nuova lista personale vuota.
                 </p>

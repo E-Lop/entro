@@ -83,7 +83,7 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-blocks">
         {/* Full Name Field (only for signup) */}
         {mode === 'signup' && (
           <FormField
@@ -168,9 +168,9 @@ export function AuthForm({ mode, onSuccess, prefillEmail, lockEmail, disableSubm
               </FormControl>
               <FormMessage />
               {mode === 'signup' && (
-                <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                <div className="mt-2 space-y-inner text-xs text-muted-foreground">
                   <p className="font-medium">La password deve contenere:</p>
-                  <ul className="space-y-0.5 ml-1">
+                  <ul className="space-y-inner ml-1">
                     <li>• Almeno 8 caratteri</li>
                     <li>• Una lettera maiuscola (A-Z)</li>
                     <li>• Una lettera minuscola (a-z)</li>

@@ -136,7 +136,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
         tabIndex={-1}
       >
         <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start justify-between gap-inner">
             <div className="flex-1">
               <CardTitle as="h3" className="text-lg font-semibold text-foreground line-clamp-2">
                 {food.name}
@@ -206,7 +206,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
           </div>
         </CardHeader>
 
-      <CardContent className="pb-3 space-y-2">
+      <CardContent className="pb-3 space-y-inner">
         {/* Food Image */}
         {(() => {
           const imageState = getImageState(!!food.image_url, imageLoading, !!imageError, signedUrl)
@@ -255,19 +255,19 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
         {/* Category + Storage Location (same row with space between) */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           {category && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-inner">
               <Package className="h-4 w-4 text-muted-foreground/70" />
               <span>{category.name_it}</span>
             </div>
           )}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-inner">
             <MapPin className="h-4 w-4 text-muted-foreground/70" />
             <span>{STORAGE_LABELS[food.storage_location]}</span>
           </div>
         </div>
 
         {/* Expiry Date */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-inner text-sm text-muted-foreground">
           <Calendar className="h-4 w-4 text-muted-foreground/70" />
           <span>Scadenza: {formattedExpiryDate}</span>
         </div>
@@ -289,7 +289,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
       </CardContent>
 
       {/* Action buttons - hidden on mobile (swipe gestures), visible on desktop */}
-      <CardFooter className="hidden sm:flex gap-2 pt-2">
+      <CardFooter className="hidden sm:flex gap-siblings pt-2">
         {onEdit && (
           <Button
             variant="outline"

@@ -33,9 +33,9 @@ export function AccountSection() {
         <CardTitle as="h2">Profilo</CardTitle>
         <CardDescription>Informazioni del tuo account</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-blocks">
         {/* Email */}
-        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-inner p-3 bg-muted/50 rounded-lg">
           <Mail className="h-5 w-5 text-muted-foreground" />
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">Email</p>
@@ -44,7 +44,7 @@ export function AccountSection() {
         </div>
 
         {/* Full Name */}
-        <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-center gap-inner p-3 bg-muted/50 rounded-lg">
           <User className="h-5 w-5 text-muted-foreground" />
           <div className="flex-1">
             <p className="text-sm font-medium text-muted-foreground">Nome</p>
@@ -53,9 +53,9 @@ export function AccountSection() {
         </div>
 
         {/* Dispositivi */}
-        <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+        <div className="flex items-start gap-inner p-3 bg-muted/50 rounded-lg">
           <MonitorSmartphone className="h-5 w-5 text-muted-foreground mt-0.5" aria-hidden="true" />
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 space-y-inner">
             <p className="text-sm font-medium text-muted-foreground">Dispositivi</p>
             <Button
               variant="outline"

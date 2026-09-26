@@ -165,7 +165,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 pb-20 sm:pb-6">
+    <div className="space-y-blocks pb-20 sm:pb-6">
       {/* Welcome Section - Compact on Mobile */}
       <div className="flex items-center justify-between">
         <div>
@@ -220,7 +220,7 @@ export function DashboardPage() {
       </h2>
       {foodsLoading ? (
         <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-inner">
             <div className="h-8 w-8 animate-spin motion-reduce:animate-none rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
             <div className="text-muted-foreground">Caricamento alimenti...</div>
           </div>
@@ -293,11 +293,11 @@ export function DashboardPage() {
         <div>
           {/* View Mode Toggle */}
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2" role="group" aria-label="Modalità visualizzazione">
+            <div className="flex items-center gap-siblings" role="group" aria-label="Modalità visualizzazione">
               <button
                 onClick={() => handleViewModeChange('list')}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'flex items-center gap-inner px-4 py-2 min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   viewMode === 'list'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -312,7 +312,7 @@ export function DashboardPage() {
               <button
                 onClick={() => handleViewModeChange('calendar')}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  'flex items-center gap-inner px-4 py-2 min-h-[44px] rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   viewMode === 'calendar'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -345,7 +345,7 @@ export function DashboardPage() {
             </Suspense>
           ) : (
             <SwipeableCardProvider>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-siblings sm:grid-cols-2 lg:grid-cols-3">
                 {foods.map((food, index) => (
                   <FoodCard
                     key={food.id}
