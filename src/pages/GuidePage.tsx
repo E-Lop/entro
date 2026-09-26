@@ -315,14 +315,12 @@ export function GuidePage() {
             <h3 className="font-medium mb-2">Personalizzare gli avvisi</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
               <li><strong className="text-foreground">Quando avvisarti:</strong> scegli quanti giorni prima della scadenza ricevere l'avviso (7, 3, 2, 1 giorni prima o il giorno stesso)</li>
-              <li><strong className="text-foreground">Ore silenziose:</strong> imposta una fascia oraria in cui non ricevere notifiche</li>
-              <li><strong className="text-foreground">Limite giornaliero:</strong> decidi quante notifiche ricevere al massimo ogni giorno</li>
             </ul>
           </div>
           <div>
             <h3 className="font-medium mb-2">Quando arrivano</h3>
             <p className="text-sm text-muted-foreground">
-              Le notifiche vengono inviate ogni giorno alle 10:00 (ora italiana). Riceverai un unico avviso
+              Le notifiche vengono inviate una volta al giorno, alle 10:00 d'estate e alle 9:00 d'inverno (ora italiana). Riceverai un unico avviso
               che raggruppa tutti gli alimenti in scadenza secondo le tue preferenze.
             </p>
           </div>
@@ -485,7 +483,7 @@ export function GuidePage() {
             <h3 className="font-medium mb-2 text-foreground/80">Non disponibile offline</h3>
             <ul className="list-disc list-inside space-y-1">
               <li>Attivazione notifiche push (richiede registrazione sul server)</li>
-              <li>Modifica preferenze notifiche (intervalli, ore silenziose, max giornaliere)</li>
+              <li>Modifica preferenze notifiche (quando avvisarti)</li>
               <li>Gestione liste condivise e inviti (creare, accettare, abbandonare)</li>
               <li>Esportazione dati</li>
               <li>Scansione barcode (richiede connessione a Open Food Facts)</li>

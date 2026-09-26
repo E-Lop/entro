@@ -5,6 +5,18 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.29] - 2026-09-26
+
+### Removed
+- **Le preferenze «Ore silenziose» e «Notifiche max al giorno»** (#154). La notifica di scadenza parte una volta al giorno, raggruppata, alle 8:00 UTC (le 10:00 d'estate, le 9:00 d'inverno). Il limite giornaliero con un invio solo non limitava niente. Le ore silenziose facevano peggio: se la fascia copriva l'ora dell'invio, `get_expiring_foods_for_notifications` scartava l'utente e la notifica saltava, senza essere rimandata e senza avviso. Una fascia 22–10 d'inverno lasciava senza notifiche per sempre. Ora le Impostazioni non mostrano più i due controlli, e chi aveva le ore silenziose attive torna a ricevere la notifica.
+
+  La migrazione è `20260926130000_notifications_ignore_quiet_hours_and_daily_limit.sql` e va in produzione con `supabase db push`. Le colonne restano in `notification_preferences`, inutilizzate, per non distruggere dati né cambiare i tipi di entro-mobile.
+
+  Provato: `expiry_notifications.test.sql` (pgTAP). I due casi nuovi, un utente con le ore silenziose sull'ora dell'invio e uno che ha già raggiunto il limite oggi, erano rossi prima della migrazione; i tre di non regressione (intervalli di default, intervalli scelti, notifiche disattivate) erano verdi prima e lo restano. `supabase test db` 37/37. Test di componente: i due controlli non compaiono nemmeno con valori salvati prima, e restano i cinque intervalli e l'attivazione. La prova è in jsdom, non nel browser: la sezione compare solo con una sottoscrizione push attiva.
+
+### Changed
+- **Le due guide dicono l'ora vera dell'invio**: le 10:00 d'estate e le 9:00 d'inverno, non «le 10:00» tutto l'anno, e non nominano più le due preferenze. Lo stesso nel README.
+
 ## [1.12.28] - 2026-09-26
 
 ### Fixed
@@ -939,7 +951,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.28...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.29...HEAD
+[1.12.29]: https://github.com/E-Lop/entro/compare/v1.12.28...v1.12.29
 [1.12.28]: https://github.com/E-Lop/entro/compare/v1.12.27...v1.12.28
 [1.12.27]: https://github.com/E-Lop/entro/compare/v1.12.26...v1.12.27
 [1.12.26]: https://github.com/E-Lop/entro/compare/v1.12.25...v1.12.26

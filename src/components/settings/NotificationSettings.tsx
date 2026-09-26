@@ -13,10 +13,6 @@ const INTERVAL_OPTIONS = [
   { value: 0, label: 'Giorno della scadenza' },
 ] as const
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i)
-const MAX_DAILY_OPTIONS = Array.from({ length: 10 }, (_, i) => i + 1)
-
-const SELECT_CLASS = 'h-11 text-sm border border-input rounded-md px-2 bg-background'
 const CHECKBOX_CLASS = 'h-5 w-5 rounded border-input text-primary focus:ring-primary'
 
 function getToggleButtonLabel(isLoading: boolean, isSubscribed: boolean): string {
@@ -151,58 +147,6 @@ export function NotificationSettings() {
               )}
             </div>
 
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer min-h-11">
-                <input
-                  type="checkbox"
-                  checked={prefs.quiet_hours_enabled}
-                  onChange={(e) => updatePrefs.mutate({ quiet_hours_enabled: e.target.checked })}
-                  className={CHECKBOX_CLASS}
-                />
-                <span className="text-sm font-medium">Ore silenziose</span>
-              </label>
-              {prefs.quiet_hours_enabled && (
-                <div className="flex items-center gap-2 ml-8 mt-1">
-                  <select
-                    value={prefs.quiet_hours_start}
-                    onChange={(e) => updatePrefs.mutate({ quiet_hours_start: Number(e.target.value) })}
-                    aria-label="Inizio ore silenziose"
-                    className={SELECT_CLASS}
-                  >
-                    {HOURS.map((h) => (
-                      <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
-                    ))}
-                  </select>
-                  <span className="text-sm text-muted-foreground">-</span>
-                  <select
-                    value={prefs.quiet_hours_end}
-                    onChange={(e) => updatePrefs.mutate({ quiet_hours_end: Number(e.target.value) })}
-                    aria-label="Fine ore silenziose"
-                    className={SELECT_CLASS}
-                  >
-                    {HOURS.map((h) => (
-                      <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between gap-3">
-              <label htmlFor="max-notifications-per-day" className="text-sm font-medium">
-                Notifiche max al giorno
-              </label>
-              <select
-                id="max-notifications-per-day"
-                value={prefs.max_notifications_per_day}
-                onChange={(e) => updatePrefs.mutate({ max_notifications_per_day: Number(e.target.value) })}
-                className={SELECT_CLASS}
-              >
-                {MAX_DAILY_OPTIONS.map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
           </div>
         )}
       </CardContent>
