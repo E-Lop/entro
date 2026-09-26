@@ -24,10 +24,6 @@ import { NotificationSettings } from '../NotificationSettings'
 function basePrefs(overrides: Record<string, unknown> = {}) {
   return {
     expiry_intervals: [7, 3],
-    quiet_hours_enabled: false,
-    quiet_hours_start: 22,
-    quiet_hours_end: 8,
-    max_notifications_per_day: 3,
     ...overrides,
   }
 }
@@ -73,14 +69,6 @@ describe('NotificationSettings — toggle push', () => {
     expect(toggle.getAttribute('aria-pressed')).toBe('true')
   })
 
-  it('le select delle ore silenziose hanno un nome accessibile', async () => {
-    prefsRef.current = basePrefs({ quiet_hours_enabled: true })
-    render(<NotificationSettings />)
-
-    expect(screen.getByRole('combobox', { name: 'Inizio ore silenziose' })).toBeTruthy()
-    expect(screen.getByRole('combobox', { name: 'Fine ore silenziose' })).toBeTruthy()
-  })
-
   it('con subscription persa (status lost) mostra "Attiva" e avvisa che le notifiche si sono disattivate', () => {
     prefsRef.current = basePrefs()
     pushState.status = 'lost'
@@ -88,5 +76,29 @@ describe('NotificationSettings — toggle push', () => {
 
     expect(screen.getByRole('button', { name: 'Attiva' })).toBeTruthy()
     expect(screen.getByText(/si sono disattivate/i)).toBeTruthy()
+  })
+})
+
+// Con un invio al giorno a ora fissa il limite non limitava niente, e le ore
+// silenziose facevano saltare la notifica invece di rimandarla (#154).
+describe('NotificationSettings — niente ore silenziose né limite giornaliero', () => {
+  it('non mostra le ore silenziose né il limite, anche con valori salvati prima', () => {
+    // Le colonne restano nel database: un utente che le aveva attivate non
+    // deve rivederle.
+    prefsRef.current = {
+      ...basePrefs(),
+      quiet_hours_enabled: true,
+      quiet_hours_start: 22,
+      quiet_hours_end: 10,
+      max_notifications_per_day: 3,
+    }
+    render(<NotificationSettings />)
+
+    expect(screen.queryByText(/ore silenziose/i)).toBeNull()
+    expect(screen.queryByText(/al giorno/i)).toBeNull()
+    expect(screen.queryAllByRole('combobox')).toHaveLength(0)
+    // Restano i cinque intervalli e l'attivazione.
+    expect(screen.getAllByRole('checkbox')).toHaveLength(5)
+    expect(screen.getByRole('button', { name: 'Disattiva' })).toBeTruthy()
   })
 })

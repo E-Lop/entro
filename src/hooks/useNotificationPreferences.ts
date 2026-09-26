@@ -5,10 +5,6 @@ import { useAuthStore } from '@/stores/authStore'
 export interface NotificationPreferences {
   enabled: boolean
   expiry_intervals: number[]
-  quiet_hours_enabled: boolean
-  quiet_hours_start: number
-  quiet_hours_end: number
-  max_notifications_per_day: number
   timezone: string
 }
 
@@ -18,17 +14,12 @@ const TEN_MINUTES = 1000 * 60 * 10
 const DEFAULT_PREFERENCES: NotificationPreferences = {
   enabled: true,
   expiry_intervals: [3, 1, 0],
-  quiet_hours_enabled: false,
-  quiet_hours_start: 22,
-  quiet_hours_end: 8,
-  max_notifications_per_day: 5,
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'Europe/Rome',
 }
 
-const PREFERENCE_FIELDS = [
-  'enabled', 'expiry_intervals', 'quiet_hours_enabled',
-  'quiet_hours_start', 'quiet_hours_end', 'max_notifications_per_day', 'timezone',
-] as const
+// Le colonne delle ore silenziose e del limite giornaliero restano nella
+// tabella, ma l'invio non le legge più (#154): non si leggono nemmeno qui.
+const PREFERENCE_FIELDS = ['enabled', 'expiry_intervals', 'timezone'] as const
 
 export function useNotificationPreferences() {
   const user = useAuthStore((s) => s.user)

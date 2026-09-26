@@ -261,12 +261,10 @@ Entro può inviarti notifiche push per avvisarti quando i tuoi alimenti stanno p
 ### Personalizzare gli avvisi
 
 - **Quando avvisarti**: scegli quanti giorni prima della scadenza ricevere l'avviso (7, 3, 2, 1 giorni prima o il giorno stesso)
-- **Ore silenziose**: imposta una fascia oraria in cui non ricevere notifiche
-- **Limite giornaliero**: decidi quante notifiche ricevere al massimo ogni giorno
 
 ### Quando arrivano
 
-Le notifiche vengono inviate ogni giorno alle **10:00 (ora italiana)**. Riceverai un unico avviso che raggruppa tutti gli alimenti in scadenza secondo le tue preferenze.
+Le notifiche vengono inviate una volta al giorno, alle **10:00 d'estate e alle 9:00 d'inverno (ora italiana)**. Riceverai un unico avviso che raggruppa tutti gli alimenti in scadenza secondo le tue preferenze.
 
 ### Note importanti
 
