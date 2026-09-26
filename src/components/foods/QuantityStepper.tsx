@@ -61,7 +61,7 @@ export function QuantityStepper({ value, unit, onChange, disabled = false, class
     <div
       role="group"
       aria-label="Quantità"
-      className={cn('flex items-center justify-center gap-4', className)}
+      className={cn('flex items-center justify-center gap-siblings', className)}
     >
       <Button
         type="button"

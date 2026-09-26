@@ -18,7 +18,7 @@ export function DashboardStats({ stats, currentExpiry, onQuickFilter }: Dashboar
   const selected = currentExpiry ?? 'all'
 
   return (
-    <div className="grid grid-cols-3 gap-3" role="group" aria-label="Statistiche rapide">
+    <div className="grid grid-cols-3 gap-siblings" role="group" aria-label="Statistiche rapide">
       <button
         onClick={() => onQuickFilter('all')}
         className={cn(STAT_CARD_BASE, selected === 'all' && STAT_CARD_SELECTED)}

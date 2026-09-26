@@ -169,7 +169,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
               </div>
 
               {/* Bottoni azione */}
-              <div className="grid grid-cols-2 gap-3 mt-6">
+              <div className="grid grid-cols-2 gap-siblings mt-6">
                 <Button
                   variant="outline"
                   onClick={handleCopyCode}

@@ -84,11 +84,11 @@ function PromptBanner({ tone, icon, message, onDismiss, children }: PromptBanner
     ? 'bg-warning/10 border-warning/30'
     : 'bg-primary/5 border-primary/20'
   return (
-    <div className={`relative flex items-start gap-3 p-4 border rounded-lg ${toneClass}`}>
+    <div className={`relative flex items-start gap-inner p-4 border rounded-lg ${toneClass}`}>
       {icon}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium">{message}</p>
-        <div className="flex gap-2 mt-3">{children}</div>
+        <div className="flex gap-siblings mt-3">{children}</div>
       </div>
       <button
         onClick={onDismiss}

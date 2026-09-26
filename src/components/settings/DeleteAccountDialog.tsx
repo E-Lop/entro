@@ -67,7 +67,7 @@ function DeletionScope({ preview }: { preview: PreviewState }) {
     return (
       <>
         <p>Saranno eliminati permanentemente:</p>
-        <ul className="list-disc pl-5 space-y-1">
+        <ul className="list-disc pl-5 space-y-inner">
           <li>Profilo utente</li>
           <li>Inviti pendenti</li>
         </ul>
@@ -80,7 +80,7 @@ function DeletionScope({ preview }: { preview: PreviewState }) {
   return (
     <>
       <p>Tutti i tuoi dati saranno eliminati permanentemente:</p>
-      <ul className="list-disc pl-5 space-y-1">
+      <ul className="list-disc pl-5 space-y-inner">
         <li>Profilo utente</li>
         <li>
           La tua lista, con{' '}
@@ -210,7 +210,7 @@ export function DeleteAccountDialog() {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-inner">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             <AlertDialogTitle>Elimina account</AlertDialogTitle>
           </div>
@@ -221,7 +221,7 @@ export function DeleteAccountDialog() {
 
         {/* Contenuto rich fuori da AlertDialogDescription (è un <p>): qui può
             contenere lista, disclosure e box senza nesting HTML non valido. */}
-        <div className="space-y-3 text-left text-sm">
+        <div className="space-y-blocks text-left text-sm">
           <DeletionScope preview={preview} />
 
           {/* Technical details collapsible */}
@@ -230,7 +230,7 @@ export function DeleteAccountDialog() {
             onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
             aria-expanded={showTechnicalDetails}
             aria-controls="delete-technical-details"
-            className="flex items-center gap-1.5 min-h-11 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-inner min-h-11 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <Info className="h-3.5 w-3.5" />
             <span>Dettagli tecnici</span>
@@ -244,10 +244,10 @@ export function DeleteAccountDialog() {
           {showTechnicalDetails && (
             <div
               id="delete-technical-details"
-              className="text-xs bg-muted/50 p-2.5 rounded-md space-y-1 border border-border/50"
+              className="text-xs bg-muted/50 p-2.5 rounded-md space-y-inner border border-border/50"
             >
               <p className="font-medium">Modalità cancellazione:</p>
-              <ul className="space-y-0.5 pl-2">
+              <ul className="space-y-inner pl-2">
                 <li>• Eliminazione permanente dal database</li>
                 <li>• Backup conservati max 6 mesi (policy provider)</li>
                 <li>• Conforme GDPR Art. 17</li>
@@ -256,7 +256,7 @@ export function DeleteAccountDialog() {
           )}
         </div>
 
-        <div className="space-y-2 py-4">
+        <div className="space-y-paired py-4">
           <Label htmlFor="password">Conferma con la tua password</Label>
           <Input
             id="password"

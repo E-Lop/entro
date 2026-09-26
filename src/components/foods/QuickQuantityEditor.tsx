@@ -63,12 +63,12 @@ export function QuickQuantityEditor({ food, onOpenFullEdit }: QuickQuantityEdito
   }, [])
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 bg-card px-4 py-3">
+    <div className="flex h-full flex-col items-center justify-center gap-inner bg-card px-4 py-3">
       <p className="max-w-full truncate text-sm font-medium text-foreground">{food.name}</p>
 
       <QuantityStepper value={value} unit={unit} onChange={handleChange} />
 
-      <Button variant="outline" size="sm" className="gap-2" onClick={onOpenFullEdit}>
+      <Button variant="outline" size="sm" className="gap-inner" onClick={onOpenFullEdit}>
         <Edit className="h-4 w-4" aria-hidden="true" />
         Modifica completa
       </Button>

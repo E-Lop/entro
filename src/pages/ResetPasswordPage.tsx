@@ -52,7 +52,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-sections">
         <div className="text-center">
           <h1 className="text-2xl font-bold tracking-tight">Reimposta password</h1>
           <p className="mt-2 text-muted-foreground">
@@ -62,7 +62,7 @@ export default function ResetPasswordPage() {
 
         <div className="rounded-lg border bg-card p-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-blocks">
               <FormField
                 control={form.control}
                 name="password"
@@ -95,9 +95,9 @@ export default function ResetPasswordPage() {
                       </div>
                     </FormControl>
                     <FormMessage />
-                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                    <div className="mt-2 space-y-inner text-xs text-muted-foreground">
                       <p className="font-medium">La password deve contenere:</p>
-                      <ul className="space-y-0.5 ml-1">
+                      <ul className="space-y-inner ml-1">
                         <li>• Almeno 8 caratteri</li>
                         <li>• Una lettera maiuscola (A-Z)</li>
                         <li>• Una lettera minuscola (a-z)</li>

@@ -124,7 +124,7 @@ export function VerifyEmailPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-sections">
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
               {resendSuccess ? (
@@ -137,7 +137,7 @@ export function VerifyEmailPage() {
             <p className="mt-2 text-muted-foreground">Ti abbiamo inviato un link di conferma</p>
           </div>
 
-          <div className="rounded-lg border bg-card p-6 space-y-4">
+          <div className="rounded-lg border bg-card p-6 space-y-blocks">
             <div className="rounded-lg bg-muted p-4 text-center">
               <p className="text-sm text-muted-foreground mb-2">
                 Email inviata a:
@@ -147,11 +147,11 @@ export function VerifyEmailPage() {
               </p>
             </div>
 
-            <div className="space-y-3 text-sm text-muted-foreground">
+            <div className="space-y-inner text-sm text-muted-foreground">
               <p>
                 <strong>Prossimi passi:</strong>
               </p>
-              <ol className="list-decimal list-inside space-y-2 ml-2">
+              <ol className="list-decimal list-inside space-y-inner ml-2">
                 <li>Apri la tua casella di posta elettronica</li>
                 <li>Cerca l'email di conferma da entro</li>
                 <li>Clicca sul link di conferma nell'email</li>
@@ -159,7 +159,7 @@ export function VerifyEmailPage() {
               </ol>
             </div>
 
-            <div className="pt-2 space-y-3">
+            <div className="pt-2 space-y-blocks">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
@@ -171,7 +171,7 @@ export function VerifyEmailPage() {
                 </div>
               </div>
 
-              <div className="text-sm text-muted-foreground space-y-2">
+              <div className="text-sm text-muted-foreground space-y-inner">
                 <p>Controlla la cartella spam o promozioni</p>
                 <Button
                   variant="outline"
@@ -185,7 +185,7 @@ export function VerifyEmailPage() {
             </div>
           </div>
 
-          <div className="space-y-2 text-center text-sm text-muted-foreground">
+          <div className="space-y-inner text-center text-sm text-muted-foreground">
             <div>
               <Link
                 to="/login"

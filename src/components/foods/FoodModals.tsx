@@ -238,7 +238,7 @@ export function FoodModals({
 
           {/* In colonna: sono tre scelte fra pari, non un'azione con due varianti.
               Su telefono resta anche l'unica disposizione che tiene i bersagli larghi. */}
-          <div className="flex flex-col gap-2 py-2">
+          <div className="flex flex-col gap-siblings py-2">
             <AlertDialogAction
               onClick={() => confirmDelete('consumed')}
               disabled={isDeleting}

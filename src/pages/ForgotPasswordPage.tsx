@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
   if (emailSent) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-sections">
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Mail className="h-8 w-8 text-primary" />
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
           <div className="text-center">
             <Link
               to="/login"
-              className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+              className="inline-flex min-h-11 items-center gap-inner text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
               Torna al login
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-sections">
         <div className="text-center">
           <h1 className="text-2xl font-bold tracking-tight">Password dimenticata?</h1>
           <p className="mt-2 text-muted-foreground">
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
 
         <div className="rounded-lg border bg-card p-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-blocks">
               <FormField
                 control={form.control}
                 name="email"
@@ -127,7 +127,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center">
           <Link
             to="/login"
-            className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            className="inline-flex min-h-11 items-center gap-inner text-sm text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Torna al login

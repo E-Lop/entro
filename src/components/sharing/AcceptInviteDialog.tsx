@@ -152,13 +152,13 @@ export function AcceptInviteDialog({
               </DialogHeader>
             )}
 
-            <div className="space-y-4 py-4">
+            <div className="space-y-blocks py-4">
               {confirmationData.onlyMember === false ? (
                 <p className="text-sm">Gli alimenti restano nella lista per gli altri membri.</p>
               ) : (
                 <Alert variant="destructive">
                   <AlertDescription>
-                    <div className="space-y-1">
+                    <div className="space-y-inner">
                       <p>
                         La tua lista contiene{' '}
                         <span className="font-semibold">

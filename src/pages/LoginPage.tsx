@@ -79,12 +79,12 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-sections">
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight">Accedi a entro</h1>
             <p className="mt-2 text-muted-foreground">
               {inviteLoading ? (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-inner">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Verifica invito...
                 </span>
@@ -102,7 +102,7 @@ export function LoginPage() {
             <AuthForm mode="login" onSuccess={handleSuccess} />
           </div>
 
-          <div className="space-y-2 text-center text-sm text-muted-foreground">
+          <div className="space-y-inner text-center text-sm text-muted-foreground">
             <div>
               Non hai un account?{' '}
               <Link

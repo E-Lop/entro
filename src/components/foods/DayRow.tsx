@@ -31,7 +31,7 @@ export function DayRow({ date, foods, onEdit }: DayRowProps) {
 
   return (
     <section className="py-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-inner">
         <h3
           className={cn(
             'text-sm font-medium',
@@ -61,7 +61,7 @@ export function DayRow({ date, foods, onEdit }: DayRowProps) {
       </div>
 
       {!isEmpty && (
-        <div className="mt-2 space-y-2">
+        <div className="mt-2 space-y-siblings">
           {foods.map(food => (
             <CalendarFoodCard key={food.id} food={food} onEdit={onEdit} />
           ))}

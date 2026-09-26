@@ -23,8 +23,8 @@ export function GuidePage() {
   useDocumentMeta('Guida')
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <Button asChild variant="ghost" className="min-h-[44px] -ml-2 gap-2">
+    <div className="max-w-4xl mx-auto space-y-sections">
+      <Button asChild variant="ghost" className="min-h-[44px] -ml-2 gap-inner">
         <Link to="/">
           <ArrowLeft className="h-4 w-4" />
           Torna alla dashboard
@@ -41,15 +41,15 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Plus className="h-5 w-5 text-muted-foreground" />
             Aggiungere alimenti
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-2">Inserimento manuale</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Tocca il pulsante per aggiungere un alimento: su smartphone è il <strong className="text-foreground">pulsante verde tondo in basso a destra</strong>, su computer il pulsante <strong className="text-foreground">"+ Alimento"</strong> in alto a destra</li>
               <li>Compila i dati nella sezione <strong className="text-foreground">"Dati alimento"</strong>: nome, categoria, posizione, scadenza e quantità</li>
               <li>Per aggiungere foto o note, tocca <strong className="text-foreground">"Dettagli aggiuntivi"</strong></li>
@@ -65,11 +65,11 @@ export function GuidePage() {
             </p>
           </div>
           <div>
-            <h3 className="font-medium mb-2 flex items-center gap-2">
+            <h3 className="font-medium mb-2 flex items-center gap-inner">
               <ScanBarcode className="h-4 w-4" />
               Scansione barcode
             </h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Apri il modulo con il pulsante tondo <strong className="text-foreground">+</strong> (su computer <strong className="text-foreground">"+ Alimento"</strong>)</li>
               <li>Premi <strong className="text-foreground">"Scansiona Barcode"</strong></li>
               <li>Inquadra il codice a barre con la fotocamera</li>
@@ -82,39 +82,39 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Pencil className="h-5 w-5 text-muted-foreground" />
             Gestire gli alimenti
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-2">Modificare la quantità (veloce)</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">Mobile:</strong> swipe verso destra sulla card: si apre l'editor rapido con i pulsanti <strong className="text-foreground">−</strong> e <strong className="text-foreground">+</strong> (o tocca il numero per digitarlo). Resta uno spicchio della card a destra per richiuderla; scorrendo la lista si chiude da sola. Con vibrazione dove supportata</li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Modifica" e cambia la quantità nel modulo</li>
             </ul>
           </div>
           <div>
             <h3 className="font-medium mb-2">Modificare tutto il resto</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">Mobile:</strong> nell'editor rapido tocca <strong className="text-foreground">"Modifica completa"</strong> per aprire il modulo (nome, scadenza, unità, categoria, foto…), oppure usa il menu <strong className="text-foreground">⋮</strong> della card e scegli <strong className="text-foreground">"Modifica"</strong></li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Modifica"</li>
             </ul>
           </div>
           <div>
-            <h3 className="font-medium mb-2 flex items-center gap-2">
+            <h3 className="font-medium mb-2 flex items-center gap-inner">
               <Trash2 className="h-4 w-4" />
               Eliminare
             </h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">Mobile:</strong> swipe verso sinistra sulla card, oppure menu <strong className="text-foreground">⋮</strong> e <strong className="text-foreground">"Elimina"</strong></li>
               <li><strong className="text-foreground">Desktop:</strong> clicca il pulsante "Elimina"</li>
             </ul>
             <p className="text-sm text-muted-foreground mt-2">
               L'app chiede <strong className="text-foreground">"Com'è finita?"</strong> e propone tre risposte:
             </p>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground mt-1">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground mt-1">
               <li><strong className="text-foreground">"L'ho consumato"</strong>: l'hai mangiato o usato</li>
               <li><strong className="text-foreground">"L'ho buttato"</strong>: è finito nella spazzatura</li>
               <li><strong className="text-foreground">"Toglilo e basta"</strong>: l'avevi inserito per sbaglio, e non conta né come consumato né come buttato</li>
@@ -133,7 +133,7 @@ export function GuidePage() {
             </p>
           </div>
           <div>
-            <h3 className="font-medium mb-2 flex items-center gap-2">
+            <h3 className="font-medium mb-2 flex items-center gap-inner">
               <Palette className="h-4 w-4" />
               Stato di scadenza
             </h3>
@@ -141,26 +141,26 @@ export function GuidePage() {
               Ogni alimento mostra un'etichetta con il colore e il testo dello stato, così lo riconosci
               a colpo d'occhio anche senza distinguere i colori:
             </p>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-3">
+            <ul className="space-y-inner text-sm">
+              <li className="flex items-center gap-inner">
                 <span className="inline-flex shrink-0 items-center rounded-md border border-success/30 bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
                   10 giorni
                 </span>
                 <span className="text-muted-foreground">Manca più di una settimana alla scadenza</span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-center gap-inner">
                 <span className="inline-flex shrink-0 items-center rounded-md border border-warning/30 bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
                   3 giorni
                 </span>
                 <span className="text-muted-foreground">Scade entro 7 giorni: consumalo presto</span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-center gap-inner">
                 <span className="inline-flex shrink-0 items-center rounded-md border border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
                   Scade oggi
                 </span>
                 <span className="text-muted-foreground">Scade in giornata</span>
               </li>
-              <li className="flex items-center gap-3">
+              <li className="flex items-center gap-inner">
                 <span className="inline-flex shrink-0 items-center rounded-md border border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground">
                   Scaduto
                 </span>
@@ -173,15 +173,15 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Search className="h-5 w-5 text-muted-foreground" />
             Filtri e ricerca
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-2">Usare i filtri</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Premi <strong className="text-foreground">"Filtri e Ricerca"</strong> per espandere</li>
               <li>Filtra per categoria (es. Latticini), posizione (es. Frigo) o scadenza: <strong className="text-foreground">"Non scaduti"</strong>, <strong className="text-foreground">"In scadenza (7gg)"</strong> o <strong className="text-foreground">"Scaduti"</strong></li>
               <li>Usa la barra di ricerca per cercare per nome</li>
@@ -211,14 +211,14 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Calendar className="h-5 w-5 text-muted-foreground" />
             Vista calendario
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
+        <CardContent className="space-y-inner text-sm text-muted-foreground">
           <p>Premi <strong className="text-foreground">"Calendario"</strong> (accanto a "Lista") per vedere le scadenze come agenda della settimana.</p>
-          <ul className="list-disc list-inside space-y-1">
+          <ul className="list-disc list-inside space-y-inner">
             <li>I giorni sono in ordine dall'alto: <strong className="text-foreground">"Oggi"</strong>, <strong className="text-foreground">"Domani"</strong>, poi il resto della settimana. Scorri in verticale per vederli tutti.</li>
             <li>Ogni giorno mostra <strong className="text-foreground">quanti alimenti scadono</strong> e con quale urgenza (oggi in rosso, i giorni successivi in ambra).</li>
             <li>I giorni senza scadenze restano visibili come riga "nessuna scadenza", così vedi a colpo d'occhio dove si concentrano.</li>
@@ -229,18 +229,18 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Users className="h-5 w-5 text-muted-foreground" />
             Condividere la lista
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
-            <h3 className="font-medium mb-2 flex items-center gap-2">
+            <h3 className="font-medium mb-2 flex items-center gap-inner">
               <Share2 className="h-4 w-4" />
               Invitare qualcuno
             </h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Apri il menu utente in alto a destra e scegli <strong className="text-foreground">"Inviti"</strong></li>
               <li>Seleziona <strong className="text-foreground">"Crea invito"</strong></li>
               <li>Premi <strong className="text-foreground">"Genera codice invito"</strong>: ricevi un codice di 6 caratteri e il link che lo contiene</li>
@@ -249,7 +249,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Accettare un invito</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">Hai già un account:</strong> apri il link ricevuto (es. entroapp.it/join/ABC123) e premi <strong className="text-foreground">"Unisciti"</strong>. Oppure dal menu utente scegli <strong className="text-foreground">"Inviti"</strong> → <strong className="text-foreground">"Accetta invito"</strong>, scrivi il codice e premi <strong className="text-foreground">"Continua"</strong></li>
               <li><strong className="text-foreground">Non hai un account:</strong> il link apre la registrazione con il codice già inserito. Senza link, nella registrazione premi <strong className="text-foreground">"Ho un codice invito"</strong>, scrivi il codice e premi <strong className="text-foreground">"Verifica"</strong>. Dopo la conferma dell'email sei già nella lista di chi ti ha invitato</li>
             </ul>
@@ -259,7 +259,7 @@ export function GuidePage() {
             <p className="text-sm text-muted-foreground mb-1">
               Si appartiene a una lista sola. Accettando un invito lasci quella in cui sei, e l'app te lo dice prima di farlo:
             </p>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">Se eri l'unico membro</strong>, la tua lista viene eliminata insieme ai suoi alimenti. L'avviso dice quanti sono</li>
               <li><strong className="text-foreground">Se la lista era condivisa</strong>, ne esci e gli alimenti restano agli altri membri</li>
             </ul>
@@ -277,7 +277,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Come funziona</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li>Tutti i membri vedono gli stessi alimenti in tempo reale</li>
               <li>Ognuno può aggiungere, modificare ed eliminare alimenti</li>
               <li>Le modifiche sono sincronizzate immediatamente</li>
@@ -285,7 +285,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Domande frequenti</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li>Ogni codice vale una volta sola: per invitare più persone, generane uno per ciascuna</li>
               <li>I codici scadono dopo 7 giorni, e un codice generato non si può annullare</li>
               <li>Il codice non è legato a un'email: entra chi lo usa per primo. Mandalo solo a persone di cui ti fidi</li>
@@ -297,15 +297,15 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Bell className="h-5 w-5 text-muted-foreground" />
             Notifiche di scadenza
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-2">Attivare le notifiche</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Vai in <strong className="text-foreground">Impostazioni</strong> (icona utente in alto a destra)</li>
               <li>Nella sezione <strong className="text-foreground">Notifiche</strong>, premi <strong className="text-foreground">"Attiva"</strong></li>
               <li>Consenti le notifiche quando il browser lo chiede</li>
@@ -313,7 +313,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Personalizzare gli avvisi</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">Quando avvisarti:</strong> scegli quanti giorni prima della scadenza ricevere l'avviso (7, 3, 2, 1 giorni prima o il giorno stesso)</li>
             </ul>
           </div>
@@ -326,7 +326,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Note importanti</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li><strong className="text-foreground">iPhone:</strong> le notifiche push funzionano solo con l'app installata sulla schermata Home, non dal browser Safari</li>
               <li><strong className="text-foreground">Ogni dispositivo va attivato separatamente:</strong> se usi entro su più dispositivi, attiva le notifiche su ognuno</li>
               <li>Le notifiche funzionano anche quando il browser è chiuso</li>
@@ -338,15 +338,15 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <ScanBarcode className="h-5 w-5 text-muted-foreground" />
             Scansione barcode
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-2">Come funziona</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>La scansione legge il codice a barre del prodotto</li>
               <li>Cerca le informazioni su Open Food Facts (database pubblico)</li>
               <li>Compila il nome e la categoria. La posizione segue la categoria, come nell'inserimento manuale, a meno che tu non l'abbia già scelta</li>
@@ -356,7 +356,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Limiti</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li>Non legge la data di scadenza: va inserita manualmente</li>
               <li>Non tutti i prodotti sono nel database</li>
               <li>Serve buona illuminazione e il barcode deve essere ben inquadrato</li>
@@ -367,12 +367,12 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Smartphone className="h-5 w-5 text-muted-foreground" />
             Feedback aptico
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
+        <CardContent className="space-y-inner text-sm text-muted-foreground">
           <p>
             Dove il browser sa far vibrare il telefono (Android), entro vibra quando uno swipe arriva alla soglia,
             quando salvi un alimento e quando lo togli dalla lista. Su iPhone e su computer il browser non lo permette.
@@ -386,15 +386,15 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <Smartphone className="h-5 w-5 text-muted-foreground" />
             Installare l'app
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-2">iPhone (Safari)</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Apri entroapp.it in Safari</li>
               <li>Tocca l'icona Condividi (quadrato con freccia verso l'alto)</li>
               <li>Seleziona <strong className="text-foreground">"Aggiungi alla schermata Home"</strong></li>
@@ -402,7 +402,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Android (Chrome)</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Apri entroapp.it in Chrome</li>
               <li>Tocca i tre puntini in alto a destra</li>
               <li>Seleziona <strong className="text-foreground">"Installa app"</strong> o "Aggiungi a schermata Home"</li>
@@ -410,7 +410,7 @@ export function GuidePage() {
           </div>
           <div>
             <h3 className="font-medium mb-2">Computer (Chrome/Edge)</h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-inner text-sm text-muted-foreground">
               <li>Apri il sito nel browser</li>
               <li>Cerca l'icona di installazione nella barra degli indirizzi</li>
               <li>Clicca e conferma "Installa"</li>
@@ -421,21 +421,21 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <WifiOff className="h-5 w-5 text-muted-foreground" />
             Utilizzo offline
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm text-muted-foreground">
+        <CardContent className="space-y-blocks text-sm text-muted-foreground">
           <p>Entro funziona anche senza connessione internet, ma l'esperienza varia in base a come usi l'app.</p>
 
           <div>
-            <h3 className="font-medium mb-2 text-foreground/80 flex items-center gap-2">
+            <h3 className="font-medium mb-2 text-foreground/80 flex items-center gap-inner">
               <Smartphone className="h-4 w-4" />
               Con l'app installata (consigliato)
             </h3>
             <p className="mb-1">Installando entro sulla schermata Home hai l'esperienza offline migliore:</p>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-inner">
               <li>I tuoi dati restano in cache <strong className="text-foreground">senza limiti di tempo</strong></li>
               <li>Puoi aggiungere, modificare ed eliminare alimenti anche offline</li>
               <li>Le modifiche vengono sincronizzate automaticamente quando torni online</li>
@@ -445,13 +445,13 @@ export function GuidePage() {
 
           <div>
             <h3 className="font-medium mb-2 text-foreground/80">Da browser mobile (senza installare)</h3>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-inner">
               <li>
                 <strong className="text-foreground">Android (Chrome):</strong> l'offline funziona come con l'app installata, incluse le notifiche push
               </li>
               <li>
                 <strong className="text-foreground">iPhone (Safari):</strong> puoi consultare i dati in cache, ma con limitazioni importanti:
-                <ul className="list-disc list-inside ml-5 mt-1 space-y-1">
+                <ul className="list-disc list-inside ml-5 mt-1 space-y-inner">
                   <li>Safari cancella i dati salvati dopo <strong className="text-foreground">7 giorni di non utilizzo</strong></li>
                   <li>Le notifiche push <strong className="text-foreground">non funzionano</strong> da Safari</li>
                   <li>Le modifiche offline potrebbero non essere salvate in modo affidabile</li>
@@ -468,7 +468,7 @@ export function GuidePage() {
 
           <div>
             <h3 className="font-medium mb-2 text-foreground/80">Cosa funziona sempre offline</h3>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-inner">
               <li>Visualizzare alimenti, scadenze, filtri e calendario</li>
               <li>Aggiungere, modificare ed eliminare alimenti, anche più di uno di seguito</li>
               <li>Scattare o scegliere una foto, in un alimento nuovo o in uno che stai modificando: resta sul dispositivo e si carica quando torna la rete</li>
@@ -481,7 +481,7 @@ export function GuidePage() {
 
           <div>
             <h3 className="font-medium mb-2 text-foreground/80">Non disponibile offline</h3>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-inner">
               <li>Attivazione notifiche push (richiede registrazione sul server)</li>
               <li>Modifica preferenze notifiche (quando avvisarti)</li>
               <li>Gestione liste condivise e inviti (creare, accettare, abbandonare)</li>
@@ -493,7 +493,7 @@ export function GuidePage() {
 
           <div>
             <h3 className="font-medium mb-2 text-foreground/80">Quando torni online</h3>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-inner">
               <li>Offline in cima alla pagina c'è un banner ambra, <strong className="text-foreground">"Sei offline"</strong>, con il numero di modifiche in attesa</li>
               <li>Quando torna la rete le modifiche partono da sole, nell'ordine in cui le hai fatte, e il banner diventa verde con <strong className="text-foreground">"Sincronizzazione in corso..."</strong></li>
               <li>Finito l'invio il banner sparisce</li>
@@ -504,12 +504,12 @@ export function GuidePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle as="h2" className="flex items-center gap-2">
+          <CardTitle as="h2" className="flex items-center gap-inner">
             <CircleHelp className="h-5 w-5 text-muted-foreground" />
             Domande frequenti
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-blocks">
           <div>
             <h3 className="font-medium mb-1">Come cambio la mia password?</h3>
             <p className="text-sm text-muted-foreground">

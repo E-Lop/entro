@@ -21,7 +21,7 @@ export function HapticSettings() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-inner">
           <Smartphone className="h-5 w-5 text-primary" />
           <CardTitle as="h2">Feedback aptico</CardTitle>
         </div>

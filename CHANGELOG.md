@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.30] - 2026-09-26
+
+### Changed
+- **Le distanze fra elementi seguono cinque gradini con un nome** (#106). Erano dodici valori diversi di `gap-*` e `space-y-*` (213 occorrenze in 43 file), e nessuno diceva perché fosse quel numero. Ora `tailwind.config.js` dichiara i cinque ruoli del bundle di famiglia (`conventions/distance-scale.md`), con gli stessi valori di entro-mobile scritti in `rem`: `paired` 6 px (etichetta e suo campo), `inner` 8 px (pezzi di uno stesso elemento: titolo e sottotitolo, icona e testo, voci di un elenco), `siblings` 12 px (card, opzioni, file di pulsanti), `blocks` 16 px (campi di un form, parti della dashboard), `sections` 24 px (sezioni di una schermata). Ogni occorrenza è stata assegnata per ruolo, non per il numero più vicino; `space-y-*` è dentro la regola con gli stessi nomi.
+
+  Le differenze visibili: la dashboard è più compatta (i blocchi da 24 a 16 px, le card da 16 a 12); le etichette si avvicinano al proprio campo (da 8 a 6); le testate dei dialoghi e delle card si allargano un poco (da 6 a 8); le file di pulsanti e le opzioni di «Com'è finita?» si separano di più (da 8 a 12); le voci degli elenchi passano a 8 px (erano 2 e 4), e la guida si allunga di conseguenza. Icona e testo nelle righe della card, prima metà a 6 px e metà a 8, sono tutte a 8.
+
+  Il guardiano è `src/__tests__/spacingScale.test.ts`: fallisce su una distanza scritta come numero nominando file e riga (provato reintroducendo un `gap-3`), controlla che la scansione trovi dei file e che ogni gradino dichiarato sia usato. Verificato con scatti prima e dopo di undici schermate a 390 e 1280 px, in chiaro e in scuro.
+
 ## [1.12.29] - 2026-09-26
 
 ### Removed
@@ -951,7 +960,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.29...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.30...HEAD
+[1.12.30]: https://github.com/E-Lop/entro/compare/v1.12.29...v1.12.30
 [1.12.29]: https://github.com/E-Lop/entro/compare/v1.12.28...v1.12.29
 [1.12.28]: https://github.com/E-Lop/entro/compare/v1.12.27...v1.12.28
 [1.12.27]: https://github.com/E-Lop/entro/compare/v1.12.26...v1.12.27

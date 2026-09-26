@@ -82,9 +82,9 @@ export function QuickGuideDialog() {
           <DialogDescription>Come usare entro in pochi passi</DialogDescription>
         </DialogHeader>
 
-        <div className="overflow-y-auto flex-1 space-y-3 py-2">
+        <div className="overflow-y-auto flex-1 space-y-siblings py-2">
           {guideItems.map((item) => (
-            <div key={item.title} className="flex items-start gap-3">
+            <div key={item.title} className="flex items-start gap-inner">
               <div className="flex-shrink-0 mt-0.5 rounded-md bg-muted p-2">
                 <item.icon className="h-4 w-4 text-foreground" />
               </div>

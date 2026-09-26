@@ -20,7 +20,7 @@ function getSignUpDescription(
 ): ReactNode {
   if (inviteLoading) {
     return (
-      <span className="flex items-center justify-center gap-2">
+      <span className="flex items-center justify-center gap-inner">
         <Loader2 className="h-4 w-4 animate-spin" />
         Verifica invito...
       </span>
@@ -126,7 +126,7 @@ export function SignUpPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-sections">
           <div className="text-center">
             <h1 className="text-2xl font-bold tracking-tight">Crea il tuo account</h1>
             <p className="mt-2 text-muted-foreground">
@@ -147,9 +147,9 @@ export function SignUpPage() {
                     Ho un codice invito
                   </Button>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-paired">
                     <Label>Codice invito</Label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-inner">
                       <Input
                         placeholder="ABC123"
                         value={manualCode}
@@ -183,7 +183,7 @@ export function SignUpPage() {
             />
 
             {/* Terms & Privacy Acceptance */}
-            <div className="flex items-start gap-2 mt-4">
+            <div className="flex items-start gap-paired mt-4">
               <input
                 type="checkbox"
                 id="terms"

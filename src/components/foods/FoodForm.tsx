@@ -73,7 +73,7 @@ function CollapsibleSection({ id, open, children }: { id: string; open: boolean;
       )}
     >
       <div className="overflow-hidden">
-        <div className="space-y-4">{children}</div>
+        <div className="space-y-blocks">{children}</div>
       </div>
     </div>
   )
@@ -400,7 +400,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
         <Suspense
           fallback={
             <div
-              className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground"
+              className="flex items-center justify-center gap-inner py-4 text-sm text-muted-foreground"
               role="status"
               aria-live="polite"
             >
@@ -423,10 +423,10 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
           if (MAIN_SECTION_FIELDS.some(f => f in errors)) {
             setOpenSection('main')
           }
-        })} className="space-y-4">
+        })} className="space-y-blocks">
           {/* Conflict Warning Banner */}
           {hasRemoteUpdate && (
-            <div className="flex items-start gap-3 p-4 rounded-lg border border-warning/30 bg-warning/10" role="alert">
+            <div className="flex items-start gap-inner p-4 rounded-lg border border-warning/30 bg-warning/10" role="alert">
               <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-warning">
@@ -445,7 +445,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             type="button"
             onClick={() => setOpenSection('main')}
             className={cn(
-              'flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -mx-2',
+              'flex w-full items-center gap-inner text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md p-2 -mx-2',
               openSection !== 'main' && 'bg-muted/50'
             )}
             aria-expanded={openSection === 'main'}
@@ -589,7 +589,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             />
 
             {/* Quantity Fields */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-blocks">
               <FormField
                 control={form.control}
                 name="quantity"
@@ -671,7 +671,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
             type="button"
             onClick={() => setOpenSection('details')}
             className={cn(
-              'flex w-full items-center gap-2 text-left border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 pb-2 -mx-2',
+              'flex w-full items-center gap-inner text-left border-t pt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md px-2 pb-2 -mx-2',
               openSection !== 'details' && 'bg-muted/50'
             )}
             aria-expanded={openSection === 'details'}
@@ -730,7 +730,7 @@ export function FoodForm({ mode, initialData, onSubmit, onCancel, isSubmitting =
           </CollapsibleSection>
 
           {/* Form Actions - Always visible outside accordion sections */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-siblings pt-4 border-t">
             {onCancel && (
               <Button
                 type="button"

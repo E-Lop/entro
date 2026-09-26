@@ -23,7 +23,7 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
     >
       <Card className="border-2 border-dashed border-primary/30 bg-primary/5">
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-inner">
             <Info className="h-5 w-5 text-primary" />
             <CardTitle as="h3" className="text-lg font-semibold text-foreground">
               Come funziona
@@ -31,13 +31,13 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4 pb-4">
+        <CardContent className="space-y-blocks pb-4">
           {/* Instructions: one bordered container with two rows (no nested cards) */}
-          <div className="space-y-3 text-sm">
+          <div className="space-y-inner text-sm">
             <p className="text-muted-foreground text-xs font-medium">Su smartphone</p>
 
             <div className="divide-y divide-border rounded-lg border border-border bg-card">
-              <div className="flex items-start gap-3 p-3">
+              <div className="flex items-start gap-inner p-3">
                 <ArrowRight className="h-5 w-5 text-success flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Swipe verso destra</p>
@@ -45,7 +45,7 @@ export function InstructionCard({ onDismiss }: InstructionCardProps) {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3 p-3">
+              <div className="flex items-start gap-inner p-3">
                 <ArrowLeft className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Swipe verso sinistra</p>
