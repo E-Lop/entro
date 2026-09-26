@@ -51,8 +51,8 @@ select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000
 set local role authenticated;
 select results_eq(
   $$ select success, error_message from public.join_list_via_invite('T74CCC', true) $$,
-  $$ values (false, 'Non è stato possibile accettare l''invito. Riprova.'::text) $$,
-  'join_list_via_invite restituisce success = false con un messaggio fisso, non l''errore di Postgres'
+  $$ values (false, 'unexpected'::text) $$,
+  'join_list_via_invite restituisce success = false con il codice unexpected, non l''errore di Postgres'
 );
 
 -- 3. accept_pending_invite_by_email per C senza liste.
@@ -61,8 +61,8 @@ delete from public.list_members where user_id = '00000000-0000-0000-0000-0000000
 set local role authenticated;
 select results_eq(
   $$ select success, error_message from public.accept_pending_invite_by_email() $$,
-  $$ values (false, 'Non è stato possibile accettare l''invito. Riprova.'::text) $$,
-  'accept_pending_invite_by_email restituisce success = false con un messaggio fisso'
+  $$ values (false, 'unexpected'::text) $$,
+  'accept_pending_invite_by_email restituisce success = false con il codice unexpected'
 );
 reset role;
 drop trigger fail_74 on public.list_members;

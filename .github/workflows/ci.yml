@@ -133,13 +133,15 @@ jobs:
           repository: E-Lop/entro-mobile
           token: ${{ secrets.ENTRO_MOBILE_TOKEN }}
           path: .entro-mobile
-          # Due guardiani leggono di qui: lo schema di validazione (#120) e la
+          # Tre guardiani leggono di qui: lo schema di validazione (#120), la
           # tabella dei messaggi di autenticazione (#100), che
-          # `authErrorMessageParity.family.test.ts` confronta col nostro. Un file solo e
-          # non la cartella `src/shared/lib`: serve quello, non un progetto.
+          # `authErrorMessageParity.family.test.ts` confronta col nostro, e quella
+          # degli inviti (#101), per `inviteErrorMessageParity.family.test.ts`. File
+          # singoli e non la cartella `src/shared/lib`: serve quello, non un progetto.
           sparse-checkout: |
             src/shared/validations
             src/shared/lib/authErrorMessage.ts
+            src/shared/lib/inviteErrorMessage.ts
           # ⚠️ Non-cone **di proposito**, ed è il passo che ha reso rossa la
           # prima corsa di questa PR. In modalità cone lo sparse-checkout porta
           # sempre anche i file di radice, `tsconfig.json` compreso — che su
