@@ -121,7 +121,7 @@ test('join_list_via_invite: codice inesistente → errore, nessun join', async (
     const { data } = await client.rpc('join_list_via_invite', { p_short_code: 'NOPE0000' })
     const row = Array.isArray(data) ? data[0] : data
     expect(row?.success).toBe(false)
-    expect(row?.error_message).toBeTruthy()
+    expect(row?.error_message).toBe('invalid_or_expired') // un codice, la frase la sceglie il client (#101)
   } finally { await deleteE2EUserByEmail(user.email) }
 })
 
@@ -160,7 +160,7 @@ test('join_list_via_invite: codice scaduto → errore, invito marcato expired, n
     const { data } = await client.rpc('join_list_via_invite', { p_short_code: shortCode })
     const row = Array.isArray(data) ? data[0] : data
     expect(row?.success).toBe(false)
-    expect(row?.error_message).toBeTruthy()
+    expect(row?.error_message).toBe('expired')
     expect(await getInviteStatusByShortCode(shortCode)).toBe('expired') // marcato scaduto dalla RPC
     expect(await isMember(listId, joiner.id)).toBe(false)
   } finally {

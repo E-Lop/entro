@@ -5,6 +5,16 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.28] - 2026-09-26
+
+### Fixed
+- **Le RPC degli inviti restituiscono un codice, non una frase** (#101, seconda metà). `join_list_via_invite`, `accept_pending_invite_by_email` e `create_personal_list` mettevano in `error_message` il testo per l'utente, metà in inglese («User not authenticated») e metà in italiano; `create_personal_list` sugli errori imprevisti restituiva il testo di Postgres. Ora restituiscono `not_authenticated`, `invalid_code`, `invalid_or_expired`, `expired` o `unexpected`, e la frase la sceglie `inviteErrorMessage`, che dalla v1.12.23 conosce sia i codici sia le frasi di prima: a schermo non cambia niente. Il `sqlstate` degli errori imprevisti di `create_personal_list` va nel log del server, come già per le altre due.
+
+  La migrazione è `20260926120000_invite_error_codes.sql` e va in produzione con `supabase db push`, **dopo** questa versione ed entro-mobile#196: un client più vecchio mostrerebbe il codice a schermo.
+
+  Provato: `invite_error_codes.test.sql` (8 casi pgTAP, uno per ramo più un controllo che nel corpo delle tre funzioni ogni testo restituito sia un codice) e i due casi di `join_rpcs.test.sql` sul ramo `exception`, rossi prima della migrazione e verdi dopo; `supabase test db` 32/32. Gli E2E degli inviti asseriscono il codice invece di «c'è un messaggio», 16/16 sul Supabase locale.
+- **La tabella dei messaggi degli inviti ha un guardiano di parità anche da questo lato**: `inviteErrorMessageParity.family.test.ts` la confronta con la copia di entro-mobile, come `authErrorMessageParity`. Provato rosso cambiando una frase solo qui. La CI porta il file gemello nel clone parziale di entro-mobile.
+
 ## [1.12.27] - 2026-09-25
 
 ### Changed
@@ -929,7 +939,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.27...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.28...HEAD
+[1.12.28]: https://github.com/E-Lop/entro/compare/v1.12.27...v1.12.28
 [1.12.27]: https://github.com/E-Lop/entro/compare/v1.12.26...v1.12.27
 [1.12.26]: https://github.com/E-Lop/entro/compare/v1.12.25...v1.12.26
 [1.12.25]: https://github.com/E-Lop/entro/compare/v1.12.24...v1.12.25
