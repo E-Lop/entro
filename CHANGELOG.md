@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.31] - 2026-09-27
+
+### Fixed
+- **La lista era vuota per tutti, dal 25 settembre** (#179). La v1.12.19 (#74) ha fissato `search_path = ''` su `get_user_list_ids()` e `get_shared_list_member_ids()`, le due funzioni con cui la RLS trova le liste di un utente. In produzione il loro corpo scriveva `from list_members` senza schema, e con il search_path vuoto quel nome non si risolve: Postgres rispondeva 42P01, PostgREST lo traduceva in 404, e le letture di `lists` e `foods` fallivano. I client mostravano una lista vuota senza nessun messaggio, anche entro-mobile, che usa lo stesso backend. Le policy dello storage usano la seconda funzione, quindi anche le foto. **Nessun dato è andato perso**: le righe erano intatte, verificato in produzione in sola lettura.
+
+  Il 27 settembre la correzione è stata applicata subito in produzione, prima di questa release. La migrazione è `20260927090000_rls_helpers_qualified_names.sql`: stesso corpo, con `public.` davanti a `list_members`. È idempotente, e `supabase db push` la registra nello storico senza cambiare niente.
+
+  I test locali non potevano accorgersene. Lo schema di base del repo (`20260109_baseline_core_schema.sql`) qualifica già i nomi, quello di produzione no, quindi i test provavano un corpo che in produzione non c'era. Il guardiano nuovo è `supabase/tests/search_path_qualified_names.test.sql`: nessuna funzione con search_path vuoto nomina una tabella di `public` senza schema, le due funzioni si eseguono, e `authenticated` legge `lists` e `foods` attraverso la RLS. Provato riproducendo in locale la forma di produzione, cioè il corpo senza schema più l'`alter function` della #74: 5/5 rossi, con lo stesso 42P01. Dopo la migrazione `supabase test db` passa per intero.
+
 ## [1.12.30] - 2026-09-26
 
 ### Changed
@@ -960,7 +969,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.30...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.31...HEAD
+[1.12.31]: https://github.com/E-Lop/entro/compare/v1.12.30...v1.12.31
 [1.12.30]: https://github.com/E-Lop/entro/compare/v1.12.29...v1.12.30
 [1.12.29]: https://github.com/E-Lop/entro/compare/v1.12.28...v1.12.29
 [1.12.28]: https://github.com/E-Lop/entro/compare/v1.12.27...v1.12.28
