@@ -5,6 +5,26 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.14.0] - 2026-09-28
+
+### Added
+- **Un pre-push che prova le migrazioni sulla forma di produzione prima di ogni `db push`** (#188). Il 25 settembre una migrazione verde su pgTAP e sugli E2E ha rotto ogni lettura in produzione per circa 41 ore (#179): i test giravano sullo schema ricostruito dalle migrazioni del repo, non su quello di produzione. `npm run db:prepush -- <issue>`, lanciato dal maintainer con il token, fa quattro cose:
+  - controlla che in produzione manchino esattamente le migrazioni del ramo;
+  - fa i due backup;
+  - stampa il diff pg-delta, per ora non bloccante (#182);
+  - carica la forma di produzione in uno stack Supabase separato, `entro-prodshape`, e ci prova le migrazioni nuove con pgTAP e la suite di smoke (#187).
+
+  La copia deve avere la stessa **impronta** della produzione, letta dal solo catalogo: funzioni con corpo, `search_path` e permessi; policy; trigger su `auth.users`; permessi, RLS e privilegi di default; bucket; categorie. Se non ce l'ha, il comando si ferma nominando gli oggetti diversi. Il dump di schema da solo non basta: nello stack ombra gli oggetti nascono con i privilegi di default di Supabase, e `anon` avrebbe avuto tutto su `foods`. Per questo il comando rimette i permessi esatti. Lo stack di sviluppo si ferma durante la prova e riparte alla fine, anche su errore o Ctrl-C, con un controllo su utenti, alimenti e volumi. **Il push resta a mano**: il comando stampa i due comandi da lanciare.
+
+  Provato mordendo in modalità locale (`--local`, dove lo sviluppo fa la parte della produzione):
+  - una policy di `storage.objects` o il trigger su `auth.users` tolti dallo stack ombra fermano il comando al passo 5, e ne nominano il nome;
+  - una migrazione con la forma della #179 lo ferma al passo 6, mentre la stessa col corpo qualificato passa;
+  - una migrazione mancante che non è del ramo lo ferma al passo 1;
+  - un Ctrl-C durante la prova lascia sviluppo e volumi come prima;
+  - nessun output contiene JWT, token, URL con password o email.
+
+  Prima corsa vera contro la produzione con una migrazione di prova, fino al `db push --dry-run` e senza push: verde in 129 secondi, con impronta identica al primo colpo. La procedura «prima lo schema, poi il client» è ora in `CONTRIBUTING.md`.
+
 ## [1.13.0] - 2026-09-28
 
 ### Added
@@ -992,7 +1012,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.13.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/E-Lop/entro/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/E-Lop/entro/compare/v1.12.32...v1.13.0
 [1.12.32]: https://github.com/E-Lop/entro/compare/v1.12.31...v1.12.32
 [1.12.31]: https://github.com/E-Lop/entro/compare/v1.12.30...v1.12.31

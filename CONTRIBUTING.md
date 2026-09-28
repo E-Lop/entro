@@ -122,6 +122,50 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.my_table TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.my_table TO service_role;
 ```
 
+## Migrazioni in produzione
+
+Il 25 settembre 2026 una migrazione verde su pgTAP e sugli E2E ha rotto ogni lettura in produzione per circa 41 ore (#179). I test giravano sullo schema ricostruito dalle migrazioni del repo, e in produzione c'era un corpo di funzione diverso. Da allora vale questo.
+
+**Prima lo schema, poi il client.**
+- Le migrazioni sono additive (*expand/contract*): il client in produzione deve continuare a funzionare con lo schema nuovo.
+- Il `db push` si fa dal ramo della PR, dopo la CI verde; poi il merge.
+- Dopo il push un file di migrazione non si tocca più: la correzione è una migrazione nuova.
+- Una migrazione che non si può scrivere additiva si spezza in due PR: prima quella che aggiunge, poi, a client aggiornato, quella che toglie.
+
+**Il pre-push.** Prima di ogni `db push`, dal ramo della PR e con l'albero pulito, nel terminale dove è esportato `SUPABASE_ACCESS_TOKEN`:
+
+```bash
+npm run db:prepush -- <numero della issue>
+```
+
+Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza build. I passi:
+
+1. **Precondizioni**: token, albero pulito, e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
+2. **Backup**: `backup_pre<issue>_<data>_{schema,data}.sql` nella radice, ignorati da git, permessi 600.
+3. **Diff pg-delta** fra produzione e migrazioni, da leggere. Non blocca finché la #182 non chiude la deriva di oggi.
+4. **Impronta di produzione**, solo catalogo:
+   - funzioni di `public` con corpo, `search_path` e permessi;
+   - policy di `public` e `storage`;
+   - trigger su `auth.users`;
+   - permessi, RLS e privilegi di default di `public`;
+   - bucket e categorie.
+5. **Stack ombra** `entro-prodshape`, con lo stack di sviluppo fermo ma i suoi volumi conservati. Ci si carica la forma di produzione: il dump di schema, più ciò che il dump non porta (policy di storage, trigger su `auth.users`, bucket, i permessi esatti e le categorie). La sua impronta deve essere identica a quella di produzione, o il comando si ferma con «forma di produzione non fedele» e nomina gli oggetti.
+6. **Prova**: le migrazioni del ramo, poi pgTAP e la suite di smoke (`npm run smoke:local`) sullo stack ombra.
+7. **Pulizia**, anche su errore o Ctrl-C:
+   - si toglie lo stack ombra, con i soli volumi `com.supabase.cli.project=entro-prodshape`;
+   - riparte lo stack di sviluppo;
+   - il comando controlla che utenti, alimenti e volumi siano quelli di prima.
+8. **Esito**: se è tutto verde stampa `supabase db push --linked --dry-run` e `supabase db push --linked`. **Il push lo fai tu**: il comando non lo fa mai.
+
+Durate misurate: **129 secondi** per la prima corsa vera contro la produzione, il 28 settembre 2026, backup compresi; da 70 a 80 secondi in modalità locale. In tutte e due, circa 30 secondi sono l'avvio dello stack ombra. Lo stack di sviluppo resta fermo per circa un minuto e mezzo.
+
+**Quando si ferma**, il messaggio dice il passo e cosa guardare; i dettagli stanno nel log, di cui stampa il percorso.
+- Al passo 1, una migrazione mancante che non è del ramo si decide prima: o entra in una sua PR, o si spiega perché va con questa.
+- Al passo 5, un oggetto diverso vuol dire che la copia non è fedele: la prova non vale finché non lo è.
+- Al passo 6, la migrazione ha rotto qualcosa sulla forma di produzione: è esattamente il caso della #179.
+
+**Autoverifica.** `npm run db:prepush -- <issue> --local` fa tutto uguale, ma con lo stack di sviluppo al posto della produzione: nessun token e nessun push, e i backup vanno nella cartella temporanea della corsa. Con `PREPUSH_TAMPER_SQL=<file.sql>`, accettato solo in locale, il file si esegue sullo stack ombra fra il caricamento e il confronto delle impronte. Serve a provare che il confronto se ne accorge, per esempio togliendo una policy di `storage.objects`.
+
 ## Pull request
 
 Prima di aprire una PR:

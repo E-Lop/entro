@@ -1,7 +1,7 @@
 {
   "name": "entro",
   "private": true,
-  "version": "1.13.0",
+  "version": "1.14.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b && tsc -p tsconfig.tests.json",
     "supabase:types": "supabase gen types typescript --local > src/lib/supabase.types.ts",
+    "db:prepush": "bash scripts/prepush/db-prepush.sh",
     "detect:design": "node scripts/detect-design.mjs",
     "preview": "vite preview",
     "test": "vitest run",
