@@ -5,6 +5,7 @@ import {
   deleteE2EUserByEmail,
   makeUserListShared,
   type E2EUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -30,7 +31,7 @@ import {
  *   Edge Function, e quel testo arrivava intatto nel toast: la **fuga** vera.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 /** Come lo direbbe Postgres su una DELETE rifiutata. */
 const DB_MESSAGE = 'permission denied for table list_members'

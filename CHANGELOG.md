@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.12.32] - 2026-09-28
+
+### Fixed
+- **Gli helper E2E rifiutano ogni Supabase che non sia locale** (#186). `tests/e2e/helpers/supabase.ts` crea un client `service_role` con URL e chiave presi dall'ambiente, e crea e cancella utenti. Con le variabili di produzione esportate per errore, la suite avrebbe scritto in produzione. Ora `assertLocalSupabase` gira al caricamento del modulo, prima di ogni client: rifiuta un host diverso da `127.0.0.1`, `localhost` e `[::1]`, un URL che non si interpreta e una chiave diversa da quella demo. Nessuna variabile d'ambiente la disattiva.
+
+  Provata mordendo con una sonda che registra e blocca le connessioni verso l'host. Su `main`, con `E2E_SUPABASE_URL=https://example.supabase.co`, la prima spec ha tentato `GET /auth/v1/admin/users` su quell'host. Con la guardia le 19 spec che importano gli helper falliscono al caricamento con il suo messaggio, Playwright non avvia nessun test e la sonda resta vuota.
+
+- **La password degli utenti E2E ha una fonte sola** (#186). Era scritta a mano in 19 spec su 20; ora è `E2E_PASSWORD` negli helper. `tests/e2ePassword.test.ts`, dentro `npm test`, fallisce se una spec contiene la password canonica o assegna un letterale a un nome che contiene «password»; controlla anche di aver trovato le spec. Provato aggiungendone due a una spec, poi tolte. Resta permessa una password sbagliata passata direttamente a un campo, che è il dato di un test.
+
+- **La ricerca di un utente per email scorre tutte le pagine** (#186). `deleteE2EUserByEmail` e `countFoodsByUserEmail` leggevano solo la prima pagina di `listUsers()`, cioè i 50 utenti più recenti: un utente più vecchio risultava inesistente, senza errore. Ora passano da `findUserByEmail`, che chiede pagine con un `perPage` esplicito e si ferma alla prima più corta. Non usa `nextPage`, che in `@supabase/auth-js` 2.98 è sbagliato dalla pagina 10 in poi. `find-user-by-email.spec.ts` lo prova con pagine da un utente, trovando un utente che non sta nella prima: rosso con la ricerca a pagina sola, verde dopo.
+
 ## [1.12.31] - 2026-09-27
 
 ### Fixed
@@ -969,7 +980,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.31...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.32...HEAD
+[1.12.32]: https://github.com/E-Lop/entro/compare/v1.12.31...v1.12.32
 [1.12.31]: https://github.com/E-Lop/entro/compare/v1.12.30...v1.12.31
 [1.12.30]: https://github.com/E-Lop/entro/compare/v1.12.29...v1.12.30
 [1.12.29]: https://github.com/E-Lop/entro/compare/v1.12.28...v1.12.29

@@ -7,13 +7,14 @@ import {
   getInviteStatusByShortCode,
   seedPendingInviteByCode,
   signInAsUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 // Chi si registra con un codice invito entra nella lista di chi l'ha invitato
 // (#165). Il link /join/:codice porta chi non ha un account a
 // /signup?code=…, quindi questo è il percorso di ogni utente nuovo invitato.
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 test('registrandosi con un codice invito si entra nella lista di chi ha invitato', async ({ page }) => {
   const ownerEmail = createE2EEmail()

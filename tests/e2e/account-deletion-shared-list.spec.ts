@@ -12,6 +12,7 @@ import {
   signInAsUser,
   uploadE2EFoodImage,
   type E2EUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -29,7 +30,7 @@ import {
  * l'altro membro le vede.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 async function categoryId(client: SupabaseClient): Promise<string> {
   const { data, error } = await client.from('categories').select('id').eq('name', 'dairy').single()

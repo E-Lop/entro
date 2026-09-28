@@ -1,5 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
-import { createE2EEmail, createE2EUser, deleteE2EUserByEmail } from './helpers/supabase'
+import { E2E_PASSWORD, createE2EEmail, createE2EUser, deleteE2EUserByEmail } from './helpers/supabase'
 
 // «Esci dagli altri dispositivi» (#143), con due sessioni vere dello stesso
 // utente: due contesti del browser, cioè due dispositivi.
@@ -10,7 +10,7 @@ import { createE2EEmail, createE2EUser, deleteE2EUserByEmail } from './helpers/s
 // refresh token, direttamente contro l'API di Auth: il secondo dev'essere
 // rifiutato, il primo no.
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 const supabaseUrl = process.env.E2E_SUPABASE_URL ?? 'http://127.0.0.1:54321'
 const anonKey = process.env.E2E_SUPABASE_ANON_KEY!
 

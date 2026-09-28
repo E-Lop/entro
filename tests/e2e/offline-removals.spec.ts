@@ -6,6 +6,7 @@ import {
   createListForUser,
   deleteE2EUserByEmail,
   seedFoods,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 // Offline si tolgono più alimenti, e al ritorno della rete arrivano tutti al
@@ -17,7 +18,7 @@ import {
 // la coda ripartire solo ricaricando, senza poter dire se fosse un limite della
 // simulazione.
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 test('offline si tolgono tre alimenti, e tornata la rete arrivano tutti al database', async ({ page, context }) => {
   const email = createE2EEmail()

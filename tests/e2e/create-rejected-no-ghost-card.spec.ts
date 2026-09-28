@@ -5,6 +5,7 @@ import {
   createListForUser,
   deleteE2EUserByEmail,
   seedFoods,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -20,7 +21,7 @@ import {
  * lascia il database locale in uno stato da ripristinare.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 const GHOST = 'Card Fantasma'
 
 const inFiveDays = () => new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10)

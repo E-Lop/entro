@@ -5,6 +5,7 @@ import {
   createListForUser,
   deleteE2EUserByEmail,
   seedFoods,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 // Dove finisce il fuoco dopo un'eliminazione (entro#87).
@@ -26,7 +27,7 @@ import {
 // va il fuoco non è sapere cosa viene *pronunciato*: l'annuncio richiede uno
 // screen reader reale e resta fuori da qui.
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 test.describe('fuoco dopo l’eliminazione', () => {
   let email: string

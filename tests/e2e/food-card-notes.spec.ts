@@ -6,6 +6,7 @@ import {
   deleteE2EUserByEmail,
   seedFoods,
   signInAsUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -17,7 +18,7 @@ import {
  * vede: qui si contano le righe che il browser disegna davvero.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 /** Come le scrive `openfoodfacts.ts` dopo una scansione: due voci, un a capo. */
 const SCANNED = 'Marca: Coop\nCategorie OFF: Snacks, Snacks dolci, Cacao e derivati, Cioccolato'

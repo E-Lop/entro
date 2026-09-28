@@ -5,6 +5,7 @@ import {
   createListForUser,
   deleteE2EUserByEmail,
   signInAsUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -17,7 +18,7 @@ import {
  * nativa dei vincoli, quindi solo il browser lo può provare.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 const daysFromToday = (days: number) => new Date(Date.now() + days * 864e5).toISOString().slice(0, 10)
 
 async function signIn(page: Page, email: string) {

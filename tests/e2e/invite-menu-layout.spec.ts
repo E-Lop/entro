@@ -5,9 +5,10 @@ import {
   deleteE2EUserByEmail,
   makeUserListShared,
   type E2EUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 // Regressione #59 — "Broken mobile layout": su viewport mobile il dialog
 // "Inviti" sforava a destra perché le descrizioni dentro i <Button>
