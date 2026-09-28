@@ -5,6 +5,18 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.13.0] - 2026-09-28
+
+### Added
+- **Una suite di smoke API che dice se l'app funziona contro un database vero** (#187). pgTAP ed E2E girano sullo schema ricostruito dalle migrazioni del repo: il 25 settembre erano verdi mentre in produzione ogni lettura di `lists` e `foods` rispondeva 404 (#179). La suite nuova, in `tests/smoke/`, usa due account sentinella, A e B, con la sola chiave anon e le loro sessioni, mai `service_role`. Si configura dall'ambiente, quindi lo stesso codice gira in locale, sulla forma di produzione (#188) e in produzione (#189).
+  - **Dati noti.** Cinque alimenti di A con id fissi, uno per stato di scadenza, e una foto. Le date sono offset dal giorno del ripristino ricavati dalle soglie di `getExpiryStatus()`; il giorno è quello di `Europe/Rome`.
+  - **Ripristino idempotente** (`npm run smoke:restore`). Se B è rimasto nella lista di A lo fa uscire; toglie da A gli alimenti estranei e riscrive i noti; rimette la foto; svuota lista e cartella di B. Non fa mai uscire una sentinella dalla propria lista, e se una delle due ha più di una lista si ferma senza scrivere. Gli inviti non li tocca, perché con la sola sessione di A non si possono chiudere (#194).
+  - **Livelli** (`SMOKE_LEVELS=a,b,c npm run smoke`). (a) lettura: la lista, le due funzioni della RLS, i cinque alimenti con date e stati confrontati col giorno del loro ultimo ripristino, così il giro di mezzanotte non dà falsi allarmi, e la foto da un URL firmato. (b) un alimento creato, modificato, con un esito, tolto e cancellato, riletto dopo ogni passo. (c) A invita con `create-invite`, B aderisce con `join_list_via_invite`, vedono la stessa lista, B esce. Ogni `{ error }` di supabase-js fa fallire il test.
+  - **Output**: solo nome del test e una categoria scritta nel codice, perché i log di questo repo sono pubblici. `tests/smokeOutput.test.ts`, in `npm test`, lancia due corse volutamente rosse e controlla che non escano JWT, token di URL firmati, l'host o le email. Provato facendo stampare `error.message` al reporter: rosso, con dentro il JWT e l'email della fixture.
+  - **In CI**: `npm run smoke:local` crea le sentinelle con gli helper E2E (sotto la guardia della #186), poi ripristino, livelli a, b e c, ripristino, sul Supabase locale del job E2E.
+
+  Provato mordendo sul locale. Un alimento cancellato, una data spostata, la foto tolta e `get_user_list_ids()` ricreata come nella #179 fanno diventare rosso il livello (a), ognuno con la sua categoria. B lasciato nella lista di A viene fatto uscire dal ripristino; B con due liste lo ferma, e il database resta identico, `updated_at` compresi. Dopo una corsa di (a) `updated_at` e oggetti del bucket sono identici a prima, e due ripristini di fila lasciano gli stessi id, le stesse date e un solo oggetto.
+
 ## [1.12.32] - 2026-09-28
 
 ### Fixed
@@ -980,7 +992,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.12.32...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.13.0...HEAD
+[1.13.0]: https://github.com/E-Lop/entro/compare/v1.12.32...v1.13.0
 [1.12.32]: https://github.com/E-Lop/entro/compare/v1.12.31...v1.12.32
 [1.12.31]: https://github.com/E-Lop/entro/compare/v1.12.30...v1.12.31
 [1.12.30]: https://github.com/E-Lop/entro/compare/v1.12.29...v1.12.30

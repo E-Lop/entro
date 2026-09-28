@@ -243,5 +243,11 @@ jobs:
       - name: Database tests (pgTAP)
         run: supabase test db
 
+      # La suite di smoke API (#187) sullo stesso stack: crea le sentinelle A e
+      # B, ripristino, livelli a, b e c, di nuovo ripristino. Prima dell'E2E
+      # perché dura pochi secondi, e un rosso qui arriva quattro minuti prima.
+      - name: Suite di smoke API
+        run: npm run smoke:local
+
       - name: Run Playwright E2E
         run: npm run test:e2e
