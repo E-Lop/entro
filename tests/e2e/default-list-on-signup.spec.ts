@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { countFoodsByUserEmail, createE2EEmail, deleteE2EUserByEmail } from './helpers/supabase'
+import { E2E_PASSWORD, countFoodsByUserEmail, createE2EEmail, deleteE2EUserByEmail } from './helpers/supabase'
 
 // La lista personale nasce con l'utente, nel database (#94).
 //
@@ -12,7 +12,7 @@ import { countFoodsByUserEmail, createE2EEmail, deleteE2EUserByEmail } from './h
 // e mostrava all'utente `new row violates row-level security policy for table
 // "foods"`: il messaggio di Postgres, in inglese, col nome della tabella.
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 function futureDateInputValue(daysFromToday: number): string {
   const date = new Date()

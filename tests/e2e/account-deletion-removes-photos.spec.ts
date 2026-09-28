@@ -13,6 +13,7 @@ import {
   uploadE2EFoodImage,
   userExists,
   type E2EUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -29,7 +30,7 @@ import {
  * Si passa dal dialogo vero, nel browser: è lì che stava il difetto.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 const inFiveDays = () => new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10)
 
 async function addFood(

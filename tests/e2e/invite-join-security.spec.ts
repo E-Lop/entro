@@ -13,9 +13,10 @@ import {
   seedPendingInviteByCode,
   seedPendingInviteByEmail,
   signInAsUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 test.describe('sicurezza join list_members', () => {
   test('un utente autenticato legge la propria lista', async () => {

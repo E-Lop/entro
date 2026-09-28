@@ -1,14 +1,20 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js'
+import {
+  assertLocalSupabase,
+  LOCAL_ANON_KEY,
+  LOCAL_SERVICE_ROLE_KEY,
+  LOCAL_SUPABASE_URL,
+} from './localSupabase'
 
-const LOCAL_SUPABASE_URL = 'http://127.0.0.1:54321'
-const LOCAL_SERVICE_ROLE_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
-const LOCAL_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+export { assertLocalSupabase }
 
 const supabaseUrl = process.env.E2E_SUPABASE_URL ?? LOCAL_SUPABASE_URL
 const serviceRoleKey = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ?? LOCAL_SERVICE_ROLE_KEY
 const anonKey = process.env.E2E_SUPABASE_ANON_KEY ?? LOCAL_ANON_KEY
+
+// Al caricamento del modulo, prima di ogni client: una spec che importa questi
+// helper fallisce così prima di aprire una connessione.
+assertLocalSupabase(supabaseUrl, serviceRoleKey)
 
 const adminClient = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
@@ -16,6 +22,13 @@ const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     persistSession: false,
   },
 })
+
+/**
+ * La password degli utenti E2E, e questa è la sua unica fonte: le spec la
+ * importano, e `tests/e2ePassword.test.ts` fallisce se una ne scrive una sua.
+ * Vale solo sullo stack locale. È una per repo: entro-mobile ha la sua.
+ */
+export const E2E_PASSWORD = 'E2ePassword!2026'
 
 export interface E2EUser {
   id: string
@@ -47,13 +60,36 @@ export async function createE2EUser(email: string, password: string): Promise<E2
   return { id: data.user.id, email, password }
 }
 
-export async function deleteE2EUserByEmail(email: string): Promise<void> {
-  const { data, error } = await adminClient.auth.admin.listUsers()
+/** Una pagina di `auth.admin.listUsers()`, dal più recente (via service-role). */
+export async function listUsersPage(page: number, perPage: number): Promise<User[]> {
+  const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage })
   if (error) {
     throw new Error(`Impossibile leggere gli utenti E2E. Supabase locale e' avviato? ${error.message}`)
   }
+  return data.users
+}
 
-  const user = data.users.find((candidate) => candidate.email === email)
+/**
+ * L'utente con quella email, o `null`, cercato in **tutte** le pagine.
+ *
+ * `listUsers()` senza parametri restituisce solo i 50 utenti più recenti: un
+ * utente più vecchio risultava inesistente, senza errore (#186). Si scorre
+ * finché una pagina arriva più corta di `perPage`, e non si usa `nextPage`:
+ * `@supabase/auth-js` 2.98 lo ricava dall'header `link` leggendo una cifra
+ * sola, quindi dalla pagina 10 in poi è sbagliato. In modalità offset GoTrue
+ * non mette un tetto a `per_page`, quindi una pagina corta è davvero l'ultima.
+ */
+export async function findUserByEmail(email: string, perPage = 1000): Promise<User | null> {
+  for (let page = 1; ; page++) {
+    const users = await listUsersPage(page, perPage)
+    const user = users.find((candidate) => candidate.email === email)
+    if (user) return user
+    if (users.length < perPage) return null
+  }
+}
+
+export async function deleteE2EUserByEmail(email: string): Promise<void> {
+  const user = await findUserByEmail(email)
   if (!user) return
 
   const { error: deleteError } = await adminClient.auth.admin.deleteUser(user.id)
@@ -71,10 +107,7 @@ export async function deleteE2EUserByEmail(email: string): Promise<void> {
  * dato ci sia; solo questa interrogazione lo prova.
  */
 export async function countFoodsByUserEmail(email: string): Promise<number> {
-  const { data, error } = await adminClient.auth.admin.listUsers()
-  if (error) throw new Error(`Impossibile leggere gli utenti E2E: ${error.message}`)
-
-  const user = data.users.find((candidate) => candidate.email === email)
+  const user = await findUserByEmail(email)
   if (!user) return 0
 
   const { count, error: countError } = await adminClient

@@ -5,6 +5,7 @@ import {
   createListForUser,
   deleteE2EUserByEmail,
   seedFoods,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -24,7 +25,7 @@ import {
  * è deterministico e non lascia il database locale in uno stato da ripristinare.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 /** Come lo direbbe la RLS: inglese, col nome della tabella dentro. */
 const DB_MESSAGE = 'permission denied for table foods'

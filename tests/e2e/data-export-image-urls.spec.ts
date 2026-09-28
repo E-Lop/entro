@@ -9,6 +9,7 @@ import {
   seedFoods,
   signInAsUser,
   uploadE2EFoodImage,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -20,7 +21,7 @@ import {
  * suo percorso, e non ferma l'esportazione né la foto accanto.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 test.describe('l’esportazione dei dati', () => {
   let email: string

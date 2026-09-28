@@ -9,6 +9,7 @@ import {
   makeUserListShared,
   seedPendingInviteByCode,
   signInAsUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -21,7 +22,7 @@ import {
  * (`only_member`) e conta solo gli alimenti in lista.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 async function addFoods(email: string, listId: string, userId: string, names: string[], removed: string[] = []) {
   const client = await signInAsUser(email, password)

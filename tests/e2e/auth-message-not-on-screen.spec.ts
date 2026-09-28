@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { createE2EEmail, createE2EUser, deleteE2EUserByEmail } from './helpers/supabase'
+import { E2E_PASSWORD, createE2EEmail, createE2EUser, deleteE2EUserByEmail } from './helpers/supabase'
 
 /**
  * Il messaggio di Supabase Auth non arriva a schermo (entro#100).
@@ -16,7 +16,7 @@ import { createE2EEmail, createE2EUser, deleteE2EUserByEmail } from './helpers/s
  * serializzata.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 
 test.describe('il messaggio di Supabase Auth non arriva a schermo', () => {
   let email: string

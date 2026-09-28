@@ -6,6 +6,7 @@ import {
   deleteE2EUserByEmail,
   seedFoods,
   signInAsUser,
+  E2E_PASSWORD,
 } from './helpers/supabase'
 
 /**
@@ -21,7 +22,7 @@ import {
  * lo stesso, e un oggetto che manca è uno stato previsto.
  */
 
-const password = 'E2ePassword!2026'
+const password = E2E_PASSWORD
 const CARDS = 4
 
 test.describe('le signed URL della lista', () => {
