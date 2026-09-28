@@ -1,7 +1,7 @@
 {
   "name": "entro",
   "private": true,
-  "version": "1.12.32",
+  "version": "1.13.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:ci": "vitest run --no-file-parallelism --maxWorkers=1",
     "test:family": "vitest run --config vitest.family.config.ts",
+    "smoke": "vitest run --config vitest.smoke.config.ts",
+    "smoke:restore": "SMOKE_RUN=restore vitest run --config vitest.smoke.config.ts",
+    "smoke:local": "vitest run --config vitest.smoke-local.config.ts",
     "test:watch": "vitest"
   },
   "dependencies": {

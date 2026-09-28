@@ -89,6 +89,16 @@ Se preferisci usare Chrome gia' installato invece del browser scaricato da Playw
 E2E_BROWSER_CHANNEL=chrome npm run test:e2e
 ```
 
+## Suite di smoke API
+
+`tests/smoke/` dice se l'app funziona contro un database vero, con due account sentinella, A e B, e senza mai una chiave `service_role`. Ha tre livelli: (a) lettura, (b) scritture reversibili sulla lista di A, (c) inviti fra A e B. Sul Supabase locale un comando solo crea le sentinelle, rimette i dati noti, lancia i tre livelli e rimette di nuovo i dati:
+
+```bash
+npm run smoke:local
+```
+
+Contro un altro database la suite si configura dall'ambiente (`SMOKE_SUPABASE_URL`, `SMOKE_SUPABASE_ANON_KEY`, `SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL`, `SMOKE_B_PASSWORD`): `npm run smoke:restore` rimette i dati noti, `SMOKE_LEVELS=a npm run smoke` lancia i livelli scelti. L'output riporta solo il nome del test e una categoria d'errore, perché gira anche in produzione e i log di questo repo sono pubblici.
+
 ## Regole database
 
 Ogni nuova tabella o funzione nello schema `public` deve includere:
