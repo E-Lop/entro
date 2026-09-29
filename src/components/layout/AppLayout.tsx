@@ -10,6 +10,7 @@ import { InviteDialog } from '../sharing/InviteDialog'
 import { InviteMenuDialog } from '../sharing/InviteMenuDialog'
 import { AcceptInviteFlowDialog } from '../sharing/AcceptInviteFlowDialog'
 import { LeaveListDialog } from '../sharing/LeaveListDialog'
+import { WriteErrorAnnouncer } from '../pwa/WriteErrorAnnouncer'
 import { getUserList, getListMembers } from '../../lib/invites'
 import { logError } from '@/lib/safeLog'
 import {
@@ -160,6 +161,11 @@ export function AppLayout() {
 
       {/* Leave List Dialog */}
       <LeaveListDialog open={leaveListOpen} onOpenChange={setLeaveListOpen} />
+
+      {/* Gli errori di scrittura, per gli screen reader (#121). Qui e non in
+          App: si scrive solo nell'area autenticata, e sulle pagine d'accesso
+          l'unico alert resta quello del modulo. */}
+      <WriteErrorAnnouncer />
 
       {/* Main Content */}
       <main id="main-content" className="container mx-auto px-4 py-8">
