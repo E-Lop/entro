@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.2] - 2026-09-29
+
+### Fixed
+- **Il banner offline usa il singolare per una sola modifica in attesa** (#170). Con una sola operazione in coda diceva «Sei offline - 1 modifiche in attesa di sincronizzazione». Ora dice «1 modifica». Con due o più il testo resta al plurale, e senza modifiche in coda resta «i tuoi dati sono disponibili dalla cache». Il test del banner controlla il testo esatto per 0, 1 e 2.
+
 ## [1.15.1] - 2026-09-29
 
 ### Changed
@@ -1060,7 +1065,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.2...HEAD
+[1.15.2]: https://github.com/E-Lop/entro/compare/v1.15.1...v1.15.2
 [1.15.1]: https://github.com/E-Lop/entro/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/E-Lop/entro/compare/v1.14.4...v1.15.0
 [1.14.4]: https://github.com/E-Lop/entro/compare/v1.14.3...v1.14.4
