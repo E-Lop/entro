@@ -287,7 +287,7 @@ export function GuidePage() {
             <h3 className="font-medium mb-2">Domande frequenti</h3>
             <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li>Ogni codice vale una volta sola: per invitare più persone, generane uno per ciascuna</li>
-              <li>I codici scadono dopo 7 giorni, e un codice generato non si può annullare</li>
+              <li>I codici scadono dopo 7 giorni. Un codice non ancora usato si può revocare: in <strong className="text-foreground">"Crea invito"</strong>, sotto <strong className="text-foreground">"I tuoi inviti attivi"</strong>, premi <strong className="text-foreground">"Revoca"</strong>. Chi è già entrato resta nella lista</li>
               <li>Il codice non è legato a un'email: entra chi lo usa per primo. Mandalo solo a persone di cui ti fidi</li>
               <li>Non c'è ancora un elenco dei membri, e non si può togliere qualcuno dalla lista</li>
             </ul>

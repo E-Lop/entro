@@ -18,6 +18,14 @@ export interface InviteResponse {
   error: Error | null
 }
 
+/** Un invito ancora usabile, come lo mostra il dialogo «Crea invito» (#194). */
+export type ActiveInvite = Pick<Invite, 'id' | 'short_code' | 'created_at' | 'expires_at'>
+
+export interface ActiveInvitesResponse {
+  invites: ActiveInvite[]
+  error: Error | null
+}
+
 export interface InvitesResponse {
   invites: Invite[]
   error: Error | null

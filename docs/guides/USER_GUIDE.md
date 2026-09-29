@@ -241,7 +241,7 @@ No. Entra chi lo usa per primo, quindi mandalo solo a persone di cui ti fidi.
 Sì, dopo 7 giorni dalla creazione. Poi serve un codice nuovo.
 
 **Posso annullare un invito?**
-No: un codice generato resta valido finché qualcuno lo usa o finché scade.
+Sì. Dal menu utente scegli **"Inviti"** → **"Crea invito"**: sotto **"I tuoi inviti attivi"** premi **"Revoca"** accanto al codice e conferma. Da quel momento il codice non fa più entrare nessuno; chi è già entrato con quel codice resta nella lista.
 
 **Posso vedere chi è nella lista, o togliere qualcuno?**
 Non ancora: non c'è un elenco dei membri, e non si può togliere nessuno.

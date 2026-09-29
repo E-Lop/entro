@@ -7,6 +7,7 @@ import type {
   AcceptInviteConfirmationResponse,
   ListResponse,
   ListMembersResponse,
+  ActiveInvitesResponse,
 } from '../types/invite.types'
 import { userFacingError } from './userFacingError'
 import { inviteErrorMessage } from './inviteErrorMessage'
@@ -55,6 +56,75 @@ export async function createInvite(
       success: false,
       shortCode: null,
       error: error instanceof Error ? error : new Error('Non è stato possibile creare l\'invito. Riprova.'),
+    }
+  }
+}
+
+/**
+ * Gli inviti dell'utente che si possono ancora usare: creati da lui, pending,
+ * non scaduti, dal più vicino alla scadenza (#194). La policy di lettura li
+ * mostra già tutti a chi sta nella lista; il filtro su `created_by` tiene
+ * fuori quelli degli altri membri, che l'utente non può revocare.
+ */
+export async function getMyActiveInvites(): Promise<ActiveInvitesResponse> {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    const userId = sessionData.session?.user.id
+    if (!userId) {
+      throw new Error('Sessione scaduta. Accedi di nuovo.')
+    }
+
+    const { data, error } = await supabase
+      .from('invites')
+      .select('id, short_code, created_at, expires_at')
+      .eq('created_by', userId)
+      .eq('status', 'pending')
+      .gt('expires_at', new Date().toISOString())
+      .order('expires_at', { ascending: true })
+
+    if (error) {
+      throw userFacingError('Non è stato possibile caricare i tuoi inviti. Riprova.', error)
+    }
+
+    return { invites: data ?? [], error: null }
+  } catch (error) {
+    logError('[getMyActiveInvites] Failed:', error)
+    return {
+      invites: [],
+      error: error instanceof Error ? error : new Error('Non è stato possibile caricare i tuoi inviti. Riprova.'),
+    }
+  }
+}
+
+/**
+ * Revoca un invito: lo cancella, e il suo codice non fa più entrare (#194).
+ * Chi è già entrato con quel codice resta nella lista.
+ *
+ * La policy consente la DELETE solo a chi ha creato l'invito. Una DELETE che
+ * la policy filtra non è un errore: risponde 200 e tocca zero righe. Per
+ * questo si chiede indietro la riga, e zero righe è un fallimento.
+ */
+export async function revokeInvite(inviteId: string): Promise<{ success: boolean; error: Error | null }> {
+  try {
+    const { data, error } = await supabase
+      .from('invites')
+      .delete()
+      .eq('id', inviteId)
+      .select('id')
+
+    if (error) {
+      throw userFacingError('Non è stato possibile revocare l\'invito. Riprova.', error)
+    }
+    if (!data || data.length === 0) {
+      throw new Error('Invito non trovato: forse è già stato revocato.')
+    }
+
+    return { success: true, error: null }
+  } catch (error) {
+    logError('[revokeInvite] Failed:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error : new Error('Non è stato possibile revocare l\'invito. Riprova.'),
     }
   }
 }

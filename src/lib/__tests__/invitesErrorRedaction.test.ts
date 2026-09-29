@@ -85,6 +85,8 @@ import {
   createPersonalList,
   acceptInviteWithConfirmation,
   leaveSharedList,
+  getMyActiveInvites,
+  revokeInvite,
 } from '@/lib/invites'
 
 beforeEach(() => {
@@ -115,6 +117,8 @@ const cases: [string, () => Promise<{ error: Error | null }>][] = [
   ['createPersonalList', () => createPersonalList()],
   ['acceptInviteWithConfirmation', () => acceptInviteWithConfirmation('ABC123')],
   ['leaveSharedList', () => leaveSharedList()],
+  ['getMyActiveInvites', () => getMyActiveInvites()],
+  ['revokeInvite', () => revokeInvite('invite-1')],
 ]
 
 describe('il messaggio del server non arriva a schermo dagli inviti', () => {

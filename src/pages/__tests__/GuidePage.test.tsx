@@ -49,7 +49,7 @@ describe('GuidePage — legenda stato di scadenza', () => {
 describe('GuidePage — etichette UI allineate al reale', () => {
   it('usa l\'etichetta corrente "Crea invito" (non più "Invita membro")', () => {
     renderGuide()
-    expect(screen.getByText(/Crea invito/)).toBeTruthy()
+    expect(screen.getAllByText(/Crea invito/).length).toBeGreaterThan(0)
     expect(screen.queryByText(/Invita membro/)).toBeNull()
   })
 })

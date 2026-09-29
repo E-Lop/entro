@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.0] - 2026-09-29
+
+### Added
+- **Chi ha creato un invito lo può revocare** (#194). Fino a oggi un invito non si ritirava: restava valido 7 giorni per chiunque avesse il codice, e la riga restava per sempre. Ora nel dialogo «Crea invito» compare l'elenco dei propri inviti attivi. Per ognuno ci sono il codice, quando è stato creato («Creato oggi alle 15:32») e quanto manca alla scadenza, e l'azione «Revoca», che chiede conferma. Un invito non ha destinatario, perché entra chi usa il codice per primo: accanto al codice il giorno e l'ora aiutano a riconoscerlo (decisione del maintainer). Un codice revocato non si valida più e non fa entrare, con gli stessi esiti di un codice mai esistito. Chi era già entrato con quel codice resta nella lista. Sul database una policy di DELETE consente al creatore di cancellare i propri inviti in qualunque stato, e a nessun altro, nemmeno agli altri membri della lista. Guida utente e guida in app dicono come si fa.
+
 ## [1.14.4] - 2026-09-29
 
 ### Security
@@ -1049,7 +1054,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/E-Lop/entro/compare/v1.14.4...v1.15.0
 [1.14.4]: https://github.com/E-Lop/entro/compare/v1.14.3...v1.14.4
 [1.14.3]: https://github.com/E-Lop/entro/compare/v1.14.2...v1.14.3
 [1.14.2]: https://github.com/E-Lop/entro/compare/v1.14.1...v1.14.2
