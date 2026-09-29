@@ -8,6 +8,7 @@ import {
   deleteList,
   listExists,
   makeUserListShared,
+  orphanUserList,
   removeE2EFoodImages,
   signInAsUser,
   uploadE2EFoodImage,
@@ -248,17 +249,17 @@ test.describe('cancellazione account e lista condivisa (#152)', () => {
   })
 
   test('una lista creata dall\'utente e rimasta senza membri va via con il suo account', async () => {
-    // Si può uscire dalla propria lista (policy «Users can remove themselves
-    // from lists»): la lista resta vuota, con i suoi alimenti. Sono dati single
-    // di chi l'ha creata.
+    // Una lista rimasta vuota, con i suoi alimenti: prima della #184 ci si
+    // arrivava uscendo dalla propria lista con un DELETE diretto. Oggi un
+    // utente non può più crearla, ma quelle nate prima vanno ancora portate via
+    // con l'account. Sono dati di chi l'ha creata.
     const email = createE2EEmail()
     const user = await createE2EUser(email, password)
     const listId = await createListForUser(user.id)
     try {
       const client = await signInAsUser(user.email, password)
       await addFood(client, user, listId, 'nella lista lasciata')
-      const { error } = await client.from('list_members').delete().eq('user_id', user.id)
-      expect(error).toBeNull()
+      await orphanUserList(user.id)
 
       await deleteOwnAccount(client)
 

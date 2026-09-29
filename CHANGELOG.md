@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.14.4] - 2026-09-29
+
+### Security
+- **Si esce da una lista solo con `leave_list()`** (#184, seconda metà). `authenticated` non ha più il permesso di cancellare righe di `list_members`, e la policy «Users can remove themselves from lists» è tolta. Con la cancellazione diretta un utente poteva uscire dalla propria lista personale e lasciarla orfana, invisibile e con gli alimenti dentro. Dalla v1.14.3 i client escono con la RPC, che fa uscita e lista nuova in una transazione e rifiuta chi è l'unico membro. Un client più vecchio che prova a uscire riceve un errore di permesso, e a schermo la frase generica. Il test E2E sulle liste orfane portate via con l'account ora crea lo stato con la service role, perché un utente non ci arriva più.
+
 ## [1.14.3] - 2026-09-29
 
 ### Security
@@ -1044,7 +1049,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.4...HEAD
+[1.14.4]: https://github.com/E-Lop/entro/compare/v1.14.3...v1.14.4
 [1.14.3]: https://github.com/E-Lop/entro/compare/v1.14.2...v1.14.3
 [1.14.2]: https://github.com/E-Lop/entro/compare/v1.14.1...v1.14.2
 [1.14.1]: https://github.com/E-Lop/entro/compare/v1.14.0...v1.14.1

@@ -168,6 +168,17 @@ export async function removeUserList(userId: string): Promise<void> {
 }
 
 /**
+ * Toglie la riga di `userId` da `list_members` e lascia la lista, senza membri.
+ *
+ * È lo stato delle liste orfane nate prima della #184, quando un utente poteva
+ * cancellare la propria riga. Dalla #184 un utente non ci arriva più, ma la
+ * cancellazione dell'account le deve ancora portare via.
+ */
+export async function orphanUserList(userId: string): Promise<void> {
+  await adminClient.from('list_members').delete().eq('user_id', userId)
+}
+
+/**
  * Crea una lista per `ownerId` e un invito pending indirizzato a `inviteeEmail`.
  * Ritorna il list_id. Usa il service-role (bypassa RLS).
  */
