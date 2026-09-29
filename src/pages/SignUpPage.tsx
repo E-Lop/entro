@@ -40,6 +40,9 @@ export function SignUpPage() {
   useDocumentMeta('Registrati')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  // «Accedi» porta il codice: chi ha già un account lo accetta su /join dopo l'accesso (#183).
+  const codeParam = searchParams.get('code')
+  const loginHref = codeParam ? `/login?code=${encodeURIComponent(codeParam.toUpperCase())}` : '/login'
   const { isAuthenticated, loading } = useAuth()
 
   // Solo short code
@@ -217,7 +220,7 @@ export function SignUpPage() {
           <div className="text-center text-sm text-muted-foreground">
             Hai già un account?{' '}
             <Link
-              to="/login"
+              to={loginHref}
               className="font-medium text-primary hover:underline"
             >
               Accedi

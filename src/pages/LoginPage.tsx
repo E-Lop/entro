@@ -6,7 +6,7 @@ import { AuthLoadingScreen } from '../components/auth/AuthLoadingScreen'
 import { Footer } from '../components/layout/Footer'
 import { useAuth } from '../hooks/useAuth'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
-import { validateInvite, acceptInvite } from '../lib/invites'
+import { validateInvite } from '../lib/invites'
 import { Loader2 } from 'lucide-react'
 
 export function LoginPage() {
@@ -15,19 +15,22 @@ export function LoginPage() {
   const [searchParams] = useSearchParams()
   const { isAuthenticated, loading } = useAuth()
 
-  const [inviteToken, setInviteToken] = useState<string | null>(null)
+  // Il codice arriva dalla registrazione, che lo riceve da /join/CODICE (#183).
+  const inviteCode = searchParams.get('code')?.toUpperCase() ?? null
   const [inviteValid, setInviteValid] = useState<boolean>(false)
-  const [inviteLoading, setInviteLoading] = useState<boolean>(false)
+  const [inviteLoading, setInviteLoading] = useState<boolean>(() => Boolean(inviteCode))
   const [inviteCreatorName, setInviteCreatorName] = useState<string>('')
 
-  // Validate invite token if present in URL
+  // L'invito lo accetta solo /join/CODICE, con il dialogo di conferma sopra
+  // join_list_via_invite. Con un codice non valido si va alla dashboard.
+  const destination = inviteCode && inviteValid ? `/join/${encodeURIComponent(inviteCode)}` : '/'
+
+  // Validate invite code if present in URL
   useEffect(() => {
-    const token = searchParams.get('invite_token')
-    if (token) {
-      setInviteToken(token)
+    if (inviteCode) {
       setInviteLoading(true)
 
-      validateInvite(token)
+      validateInvite(inviteCode)
         .then(({ valid, invite, error }) => {
           if (valid && invite) {
             setInviteValid(true)
@@ -45,30 +48,17 @@ export function LoginPage() {
           setInviteLoading(false)
         })
     }
-  }, [searchParams])
+  }, [inviteCode])
 
-  // Redirect to home if already authenticated
+  // Chi è già autenticato va avanti, ma solo dopo che il codice è stato controllato
   useEffect(() => {
-    if (!loading && isAuthenticated) {
-      navigate('/', { replace: true })
+    if (!loading && isAuthenticated && !inviteLoading) {
+      navigate(destination, { replace: true })
     }
-  }, [isAuthenticated, loading, navigate])
+  }, [isAuthenticated, loading, inviteLoading, destination, navigate])
 
-  const handleSuccess = async () => {
-    // If there's a valid invite token, accept it before navigating
-    if (inviteToken && inviteValid) {
-      const { success, error } = await acceptInvite(inviteToken)
-
-      if (success) {
-        toast.success(`Ti sei unito con successo alla lista di ${inviteCreatorName}!`)
-      } else {
-        toast.warning(
-          error?.message || 'Impossibile accettare l\'invito, ma hai effettuato l\'accesso'
-        )
-      }
-    }
-
-    navigate('/', { replace: true })
+  const handleSuccess = () => {
+    navigate(destination, { replace: true })
   }
 
   // Show loading or nothing while checking auth status
@@ -106,7 +96,7 @@ export function LoginPage() {
             <div>
               Non hai un account?{' '}
               <Link
-                to={inviteToken ? `/signup?invite_token=${inviteToken}` : '/signup'}
+                to={inviteCode ? `/signup?code=${encodeURIComponent(inviteCode)}` : '/signup'}
                 className="font-medium text-primary hover:underline"
               >
                 Registrati
