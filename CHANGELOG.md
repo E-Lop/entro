@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.5] - 2026-09-29
+
+### Fixed
+- **Gli errori di scrittura arrivano allo screen reader come alert** (#121). Quando una creazione, una modifica, un cambio di stato o una rimozione falliscono, il rollback rimette la lista com'era e un toast spiega perché. sonner però mette tutti i toast in una sola live region `polite` (letto sul DOM reso e nella sorgente installata, 2.0.7), e lo screen reader accodava l'errore invece di interrompere. MDN, *ARIA: alert role*, nomina alla lettera questo caso: «The connection to the server was lost so local changes will not be saved». Ora lo stesso messaggio va anche in una regione con `role="alert"`, visibile solo agli screen reader. La regione è nel DOM, vuota, prima di qualunque scrittura, e ogni annuncio la svuota e la riempie: MDN avverte che un alert creato già pieno spesso non viene letto. Il toast visivo non cambia, e successi e informazioni restano `polite`.
+
 ## [1.15.4] - 2026-09-29
 
 ### Fixed
@@ -1081,7 +1086,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.5...HEAD
+[1.15.5]: https://github.com/E-Lop/entro/compare/v1.15.4...v1.15.5
 [1.15.4]: https://github.com/E-Lop/entro/compare/v1.15.3...v1.15.4
 [1.15.3]: https://github.com/E-Lop/entro/compare/v1.15.2...v1.15.3
 [1.15.2]: https://github.com/E-Lop/entro/compare/v1.15.1...v1.15.2

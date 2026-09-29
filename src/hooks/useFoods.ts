@@ -10,6 +10,17 @@ import {
   type FilterParams,
 } from '@/lib/foods'
 import { mutationKeys, type DeleteFoodVariables } from '@/lib/mutationDefaults'
+import { announceWriteError } from '@/lib/writeErrorAnnouncer'
+
+/**
+ * Un errore di scrittura, dopo il rollback: il toast per chi guarda, e
+ * l'annuncio assertivo per chi usa uno screen reader (#121). Il toast da solo
+ * sta nella live region `polite` di sonner, che accoda invece di interrompere.
+ */
+function reportWriteError(message: string) {
+  toast.error(message)
+  announceWriteError(message)
+}
 
 /**
  * Le scritture sugli alimenti vanno al server in fila, nell'ordine in cui sono
@@ -232,7 +243,7 @@ export function useCreateFood() {
         { queryKey: foodsKeys.lists() },
         (old) => old?.filter((food) => food.id !== variables.id),
       )
-      toast.error(error.message || 'Errore nella creazione dell\'alimento')
+      reportWriteError(error.message || 'Errore nella creazione dell\'alimento')
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
@@ -261,7 +272,7 @@ export function useUpdateFood() {
     onError: (error: Error, { id }: { id: string; data: FoodUpdate }, context) => {
       revertFoodPatch(queryClient, context?.patch)
       queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
-      toast.error(error.message || 'Errore nell\'aggiornamento dell\'alimento')
+      reportWriteError(error.message || 'Errore nell\'aggiornamento dell\'alimento')
     },
     onSettled: (_data, _error, { id }: { id: string; data: FoodUpdate }) => {
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
@@ -288,7 +299,7 @@ export function useDeleteFood() {
     },
     onError: (error: Error, _variables: DeleteFoodVariables, context) => {
       restoreRemovedFood(queryClient, context?.removal)
-      toast.error(error.message || 'Errore nell\'eliminazione dell\'alimento')
+      reportWriteError(error.message || 'Errore nell\'eliminazione dell\'alimento')
     },
     onSuccess: () => onlineToast('Alimento eliminato con successo'),
     onSettled: () => {
@@ -323,7 +334,7 @@ export function useUpdateFoodStatus() {
     onError: (error: Error, { id }: { id: string; status: Food['status'] }, context) => {
       revertFoodPatch(queryClient, context?.patch)
       queryClient.invalidateQueries({ queryKey: foodsKeys.detail(id) })
-      toast.error(error.message || 'Errore nell\'aggiornamento dello stato')
+      reportWriteError(error.message || 'Errore nell\'aggiornamento dello stato')
     },
     onSettled: (_data, _error, { id }: { id: string; status: Food['status'] }) => {
       queryClient.invalidateQueries({ queryKey: foodsKeys.lists() })
