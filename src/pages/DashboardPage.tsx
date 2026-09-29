@@ -2,7 +2,7 @@ import { useState, useMemo, lazy, Suspense } from 'react'
 import { FoodModals } from '../components/foods/FoodModals'
 import { LIST_HEADING_ATTR } from '@/lib/focusAfterRemoval'
 import { useSearchParams } from 'react-router-dom'
-import { Plus, ShoppingBasket, X, List, Calendar } from 'lucide-react'
+import { Plus, ShoppingBasket, X, List, Calendar, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useWelcomeToast } from '../hooks/useWelcomeToast'
 import { useDocumentMeta } from '../hooks/useDocumentMeta'
@@ -12,6 +12,7 @@ import { useDebounce } from '../hooks/useDebounce'
 import { useSwipeHint } from '../hooks/useSwipeHint'
 import { SwipeableCardProvider } from '../hooks/useSwipeableCardController'
 import { useRealtimeFoods } from '../hooks/useRealtimeFoods'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import { usePrefetchSignedUrls } from '../hooks/useSignedUrl'
 import { FoodCard } from '../components/foods/FoodCard'
 import { FoodFilters } from '../components/foods/FoodFilters'
@@ -26,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button'
 import type { Food, FilterParams } from '@/lib/foods'
 import { deriveDashboardData } from '@/lib/foodFilters'
+import { foodsLoadState } from '@/lib/foodsLoadState'
 import { parseFilterParams, buildSearchParams } from '@/lib/foodFilterParams'
 import { cn } from '@/lib/utils'
 
@@ -87,7 +89,12 @@ export function DashboardPage() {
   // Una sola query non filtrata: chiave di cache stabile, caricata a ogni visita
   // online → persistita e disponibile offline. Filtro/ordinamento/conteggi sono
   // derivati client-side dagli stessi dati (vedi @/lib/foodFilters).
-  const { data: allFoods = [], isLoading: foodsLoading } = useFoods()
+  const foodsQuery = useFoods()
+  const allFoods = useMemo(() => foodsQuery.data ?? [], [foodsQuery.data])
+  // Una lettura fallita non è una dispensa vuota (#181): dal 25 al 27 set 2026
+  // la dashboard ha detto «Nessun alimento ancora» a tutti per ~41 ore (#179).
+  const loadState = foodsLoadState(foodsQuery)
+  const isOnline = useOnlineStatus()
 
   // Tutte le foto della lista in una richiesta di firma sola, prima che le card
   // le chiedano una a una (#119). Anche quelle nascoste da un filtro: una lista
@@ -218,13 +225,48 @@ export function DashboardPage() {
       >
         I tuoi alimenti
       </h2>
-      {foodsLoading ? (
+      {loadState === 'refresh-failed' && isOnline && (
+        // Offline l'avviso non serve: c'è già il banner offline.
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex flex-wrap items-center justify-between gap-siblings rounded-lg border border-warning bg-warning/10 px-4 py-3 text-sm"
+        >
+          <span className="flex items-center gap-inner">
+            <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Non riusciamo ad aggiornare gli alimenti. Riprova tra poco.
+          </span>
+          <Button variant="outline" className="min-h-11" onClick={() => void foodsQuery.refetch()}>
+            <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
+            Riprova
+          </Button>
+        </div>
+      )}
+      {loadState === 'loading' ? (
         <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
           <div className="flex flex-col items-center gap-inner">
             <div className="h-8 w-8 animate-spin motion-reduce:animate-none rounded-full border-4 border-border border-t-primary" aria-hidden="true"></div>
             <div className="text-muted-foreground">Caricamento alimenti...</div>
           </div>
         </div>
+      ) : loadState === 'unavailable' ? (
+        <Card>
+          <CardContent className="py-12">
+            <div role="status" aria-live="polite" className="flex flex-col items-center justify-center text-center">
+              <AlertTriangle className="h-16 w-16 text-muted-foreground/50 mb-4" aria-hidden="true" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Non riusciamo a caricare gli alimenti
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-sm mb-6">
+                {isOnline ? 'Riprova tra poco.' : 'Controlla la connessione e riprova.'}
+              </p>
+              <Button onClick={() => void foodsQuery.refetch()} className="min-h-11">
+                <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
+                Riprova
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       ) : foods.length === 0 ? (
         // Render appropriate empty state based on context
         (() => {
