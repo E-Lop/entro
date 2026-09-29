@@ -31,7 +31,7 @@ export function OfflineBanner() {
       <span>
         Sei offline
         {pendingCount > 0
-          ? ` - ${pendingCount} modifiche in attesa di sincronizzazione`
+          ? ` - ${pendingCount} ${pendingCount === 1 ? 'modifica' : 'modifiche'} in attesa di sincronizzazione`
           : ' - i tuoi dati sono disponibili dalla cache'}
       </span>
     </div>

@@ -35,6 +35,19 @@ describe('OfflineBanner', () => {
     expect(banner.className).not.toMatch(/bg-amber/)
   })
 
+  // Il testo esatto offline, con 0, 1 e 2 modifiche in coda (#170): con una
+  // sola il banner diceva «1 modifiche».
+  it.each([
+    [0, 'Sei offline - i tuoi dati sono disponibili dalla cache'],
+    [1, 'Sei offline - 1 modifica in attesa di sincronizzazione'],
+    [2, 'Sei offline - 2 modifiche in attesa di sincronizzazione'],
+  ])('offline con %i modifiche in coda dice «%s»', (pending, text) => {
+    mockOnline.mockReturnValue(false)
+    mockPending.mockReturnValue(pending)
+    render(<OfflineBanner />)
+    expect(screen.getByRole('status').textContent).toBe(text)
+  })
+
   it('shows a tokenized primary sync status while flushing pending mutations online', () => {
     mockOnline.mockReturnValue(true)
     mockPending.mockReturnValue(3)
