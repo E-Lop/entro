@@ -243,6 +243,11 @@ jobs:
       - name: Database tests (pgTAP)
         run: supabase test db
 
+      # La gara fra due create_personal_list concorrenti (#195): pgTAP gira
+      # in una transazione sola e non la può provare, qui le sessioni sono due.
+      - name: Database concurrency (create_personal_list)
+        run: bash supabase/tests/concurrency/create_personal_list_race.sh
+
       # La suite di smoke API (#187) sullo stesso stack: crea le sentinelle A e
       # B, ripristino, livelli a, b e c, di nuovo ripristino. Prima dell'E2E
       # perché dura pochi secondi, e un rosso qui arriva quattro minuti prima.
