@@ -5,6 +5,12 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.1] - 2026-09-29
+
+### Changed
+- **La guida rapida e il README dicono che un invito si può revocare** (#194). La v1.15.0 aveva aggiornato la guida completa, in app e in `USER_GUIDE.md`. La guida rapida elencava ancora solo «crei un codice, accetti quello di qualcun altro o abbandoni la lista condivisa», e il README non nominava la revoca.
+- **Il nome dei backup del pre-push porta anche l'ora**: `backup_pre<issue>_<data>-<ora>_{schema,data}.sql`. Il 29 settembre due pre-push della #184 nello stesso giorno hanno dato lo stesso nome ai backup, e il secondo ha sovrascritto il primo. La fotografia di prima della prima migrazione è rimasta solo nei backup giornalieri di Supabase.
+
 ## [1.15.0] - 2026-09-29
 
 ### Added
@@ -1054,7 +1060,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.1...HEAD
+[1.15.1]: https://github.com/E-Lop/entro/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/E-Lop/entro/compare/v1.14.4...v1.15.0
 [1.14.4]: https://github.com/E-Lop/entro/compare/v1.14.3...v1.14.4
 [1.14.3]: https://github.com/E-Lop/entro/compare/v1.14.2...v1.14.3

@@ -112,7 +112,7 @@ describe('checkMigrations', () => {
 
 describe('db-prepush.sh', () => {
   // Letto come testo: il comando ferma lo stack di sviluppo, e qui si
-  // controllano solo le due regole che, violate, toccano dati veri.
+  // controllano solo le regole che, violate, toccano dati veri.
   const script = readFileSync(join(__dirname, '..', 'scripts', 'prepush', 'db-prepush.sh'), 'utf8')
   const commands = script.split('\n').filter((line) => !line.trimStart().startsWith('#'))
 
@@ -125,5 +125,14 @@ describe('db-prepush.sh', () => {
     expect(calls.length).toBeGreaterThanOrEqual(5)
     const implicit = calls.filter((line) => !/--local|--linked|"\$SOURCE_FLAG"|"\$@"/.test(line))
     expect(implicit).toEqual([])
+  })
+
+  // Il 29 set 2026 due pre-push della #184 nello stesso giorno: il secondo ha
+  // sovrascritto il backup del primo, e la fotografia di prima della prima
+  // migrazione è andata persa.
+  it('il nome dei backup di produzione porta anche l\'ora, così due corse nello stesso giorno non si sovrascrivono', () => {
+    const naming = commands.filter((line) => line.includes('BACKUP="$ROOT/backup_pre'))
+    expect(naming).toHaveLength(1)
+    expect(naming[0]).toMatch(/date \+%Y%m%d-%H%M%S/)
   })
 })

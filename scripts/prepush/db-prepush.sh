@@ -136,7 +136,7 @@ fi
 # --- 2. Backup
 step "2. backup"
 if [[ "$MODE" == linked ]]; then
-  BACKUP="$ROOT/backup_pre${ISSUE}_$(date +%Y%m%d)"
+  BACKUP="$ROOT/backup_pre${ISSUE}_$(date +%Y%m%d-%H%M%S)"
 else
   BACKUP="$WORK/backup_pre${ISSUE}"
 fi
