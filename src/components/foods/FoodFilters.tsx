@@ -121,6 +121,11 @@ export function FoodFilters({
               <div className="space-y-paired">
                 <Label htmlFor="search">Cerca per nome</Label>
                 <div className="relative">
+                  {/* Esente da WCAG 1.4.11 (contrasto non testuale, 3:1), per scelta
+                      dichiarata (#162): la lente è decorativa, lucide la marca
+                      aria-hidden, e il campo ha l'etichetta «Cerca per nome». Il
+                      criterio vale per la grafica «required to understand the
+                      content», e qui non serve a capire niente. In chiaro sta a 2,81:1. */}
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
                   <Input
                     id="search"

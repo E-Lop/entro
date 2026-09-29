@@ -15,7 +15,10 @@
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
+    /* 43% e non 45,1%: sopra --muted il 45,1% dava 4,35:1, sotto la soglia di
+       4,5:1 (#162). È la luminosità più alta che passa con un margine: 4,68:1
+       su --muted, 5,10:1 sulla card, 4,89:1 su --muted al 50%. Lo tiene mutedForegroundContrast.test.ts. */
+    --muted-foreground: 0 0% 43%;
     --accent: 0 0% 96.1%;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
