@@ -141,7 +141,7 @@ npm run db:prepush -- <numero della issue>
 Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza build. I passi:
 
 1. **Precondizioni**: token, albero pulito, e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
-2. **Backup**: `backup_pre<issue>_<data>_{schema,data}.sql` nella radice, ignorati da git, permessi 600.
+2. **Backup**: `backup_pre<issue>_<data>-<ora>_{schema,data}.sql` nella radice (per esempio `backup_pre184_20260929-153012_schema.sql`: due corse nello stesso giorno non si sovrascrivono), ignorati da git, permessi 600.
 3. **Diff pg-delta** fra produzione e migrazioni, da leggere. Non blocca finché la #182 non chiude la deriva di oggi.
 4. **Impronta di produzione**, solo catalogo:
    - funzioni di `public` con corpo, `search_path` e permessi;
