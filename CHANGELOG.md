@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.4] - 2026-09-29
+
+### Fixed
+- **Il testo tenue regge 4,5:1 anche sopra i riquadri grigi, nel tema chiaro** (#162). `--muted-foreground` passa da 45,1% a 43% di luminosità, cioè da `#737373` a `#6e6e6e`. Sopra `bg-muted` (`#f5f5f5`), nei riquadri informativi dei dialoghi «Invito creato», «Abbandona lista» e «Unisciti alla lista», stava a 4,35:1, sotto la soglia di WCAG 1.4.3. Ora è a 4,68:1. Nell'account delle Impostazioni, su `bg-muted/50`, passa da 4,54:1 a 4,89:1, e sulla card da 4,74:1 a 5,10:1. Il tema scuro non cambia. Un test legge i token da `src/index.css` e calcola il contrasto sulle quattro superfici nei due temi. La lente decorativa della ricerca resta a 2,81:1, dichiarata esente da WCAG 1.4.11 perché accanto c'è l'etichetta «Cerca per nome».
+
 ## [1.15.3] - 2026-09-29
 
 ### Fixed
@@ -1076,7 +1081,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.4...HEAD
+[1.15.4]: https://github.com/E-Lop/entro/compare/v1.15.3...v1.15.4
 [1.15.3]: https://github.com/E-Lop/entro/compare/v1.15.2...v1.15.3
 [1.15.2]: https://github.com/E-Lop/entro/compare/v1.15.1...v1.15.2
 [1.15.1]: https://github.com/E-Lop/entro/compare/v1.15.0...v1.15.1
