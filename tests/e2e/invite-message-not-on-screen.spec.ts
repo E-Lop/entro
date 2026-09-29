@@ -33,8 +33,8 @@ import {
 
 const password = E2E_PASSWORD
 
-/** Come lo direbbe Postgres su una DELETE rifiutata. */
-const DB_MESSAGE = 'permission denied for table list_members'
+/** Come lo direbbe Postgres su una chiamata rifiutata. */
+const DB_MESSAGE = 'permission denied for function leave_list'
 
 /** Come lo direbbe una Edge Function nel corpo della risposta. */
 const FUNCTION_MESSAGE = 'JWT expired at 1755000000'
@@ -54,7 +54,7 @@ test.describe('il messaggio del server non arriva a schermo dagli inviti', () =>
     if (coMember) await deleteE2EUserByEmail(coMember.email)
   })
 
-  test('una DELETE rifiutata mostra un avviso italiano, non il testo di Postgres', async ({
+  test('un\'uscita rifiutata mostra un avviso italiano, non il testo di Postgres', async ({
     page,
   }) => {
     await page.goto('/login')
@@ -63,10 +63,11 @@ test.describe('il messaggio del server non arriva a schermo dagli inviti', () =>
     await page.getByRole('button', { name: 'Accedi' }).click()
     await expect(page.getByRole('heading', { name: /Ciao, Utente E2E!/ })).toBeVisible()
 
-    // Solo la rimozione dalla lista viene rifiutata: le letture che la
-    // precedono devono riuscire, altrimenti si proverebbe un altro ramo.
-    await page.route('**/rest/v1/list_members*', async (route) => {
-      if (route.request().method() !== 'DELETE') {
+    // Solo l'uscita viene rifiutata: dalla #184 è una chiamata sola a
+    // leave_list(), e le letture della dashboard devono riuscire, altrimenti
+    // si proverebbe un altro ramo.
+    await page.route('**/rest/v1/rpc/leave_list', async (route) => {
+      if (route.request().method() !== 'POST') {
         return route.continue()
       }
       await route.fulfill({
