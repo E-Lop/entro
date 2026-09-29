@@ -346,84 +346,43 @@ export async function acceptInviteWithConfirmation(
   }
 }
 
+const LEAVE_LIST_ERROR = 'Non è stato possibile abbandonare la lista. Riprova.'
+
 /**
- * Leaves the current shared list and creates a new personal list
- * Only works if current list is shared (>1 member)
- * @returns Response with success status
+ * I rifiuti di `leave_list()` sono codici (#184): la frase la sceglie il
+ * client, come per le altre RPC degli inviti (#101). Sono le frasi che il
+ * client diceva quando i controlli li faceva lui.
+ */
+const LEAVE_LIST_MESSAGES: Record<string, string> = {
+  not_authenticated: 'Sessione scaduta. Accedi di nuovo.',
+  not_a_member: 'Non sei membro di alcuna lista',
+  only_member: 'Non puoi abbandonare una lista personale',
+}
+
+/**
+ * Esce dalla lista condivisa e torna a una lista personale.
+ *
+ * Una chiamata sola: `leave_list()` toglie la riga e crea la lista personale
+ * nella stessa transazione, e rifiuta chi è l'unico membro della sua lista
+ * (#184). Prima erano due chiamate del client, e se la seconda falliva
+ * l'utente restava senza lista.
  */
 export async function leaveSharedList(): Promise<{ success: boolean; error: Error | null }> {
   try {
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) {
-      console.error('[leaveSharedList] User not authenticated')
-      throw new Error('Sessione scaduta. Accedi di nuovo.')
+    const { data, error } = await supabase.rpc('leave_list')
+    if (error) {
+      throw userFacingError(LEAVE_LIST_ERROR, error)
     }
-
-    const userId = userData.user.id
-
-    // Step 1: Get user's current list
-    const { data: currentMemberData, error: currentMemberError } = await supabase
-      .from('list_members')
-      .select('list_id')
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (currentMemberError) {
-      logError('[leaveSharedList] Error getting current list:', currentMemberError)
-      throw userFacingError('Non è stato possibile abbandonare la lista. Riprova.', currentMemberError)
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row?.success) {
+      throw new Error(LEAVE_LIST_MESSAGES[row?.error_message ?? ''] ?? LEAVE_LIST_ERROR)
     }
-
-    if (!currentMemberData) {
-      console.warn('[leaveSharedList] User is not a member of any list')
-      throw new Error('Non sei membro di alcuna lista')
-    }
-
-    const currentListId = currentMemberData.list_id
-
-    // Step 2: Check if list is shared (>1 member)
-    const { count: memberCount, error: memberCountError } = await supabase
-      .from('list_members')
-      .select('*', { count: 'exact', head: true })
-      .eq('list_id', currentListId)
-
-    if (memberCountError) {
-      logError('[leaveSharedList] Error counting members:', memberCountError)
-      throw userFacingError('Non è stato possibile abbandonare la lista. Riprova.', memberCountError)
-    }
-
-    if (memberCount === null || memberCount <= 1) {
-      console.warn('[leaveSharedList] Cannot leave personal list')
-      throw new Error('Non puoi abbandonare una lista personale')
-    }
-
-    // Step 3: Remove user from current list
-    const { error: removeError } = await supabase
-      .from('list_members')
-      .delete()
-      .eq('list_id', currentListId)
-      .eq('user_id', userId)
-
-    if (removeError) {
-      logError('[leaveSharedList] Error removing user from list:', removeError)
-      throw userFacingError('Non è stato possibile abbandonare la lista. Riprova.', removeError)
-    }
-
-    // Step 4: Create new personal list
-    const createResult = await createPersonalList()
-    if (!createResult.success) {
-      logError('[leaveSharedList] Failed to create personal list:', createResult.error)
-      throw createResult.error || userFacingError('Non è stato possibile abbandonare la lista. Riprova.', null)
-    }
-
-    return {
-      success: true,
-      error: null,
-    }
+    return { success: true, error: null }
   } catch (error) {
     logError('[leaveSharedList] Leave list flow failed:', error)
     return {
       success: false,
-      error: error instanceof Error ? error : new Error('Non è stato possibile abbandonare la lista. Riprova.'),
+      error: error instanceof Error ? error : new Error(LEAVE_LIST_ERROR),
     }
   }
 }
