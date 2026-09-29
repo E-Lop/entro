@@ -120,13 +120,13 @@ export async function restore(a: Sentinel, b: Sentinel): Promise<RestoreOutcome>
   if (listsOfA.length === 0) await createPersonalList(a, 'A')
 
   if (shared) {
-    // Come fa il client (#184 cambierà questo in `leave_list()`).
-    mustSucceed(
-      await b.client.from('list_members').delete().eq('list_id', listsOfA[0]).eq('user_id', b.userId),
-      'uscita di B dalla lista di A'
-    )
+    // Come fa il client: `leave_list()` toglie B e gli crea la lista personale (#184).
+    const rows = must(await b.client.rpc('leave_list'), 'uscita di B dalla lista di A')
+    const row = Array.isArray(rows) ? rows[0] : rows
+    check(row?.success === true, 'uscita di B dalla lista di A')
+  } else if (listsOfB.length === 0) {
+    await createPersonalList(b, 'B')
   }
-  if (shared || listsOfB.length === 0) await createPersonalList(b, 'B')
 
   const [listOfA] = await listIdsOf(a, 'A')
   const [listOfB] = await listIdsOf(b, 'B')

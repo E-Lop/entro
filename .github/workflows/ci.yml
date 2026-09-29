@@ -248,6 +248,10 @@ jobs:
       - name: Database concurrency (create_personal_list)
         run: bash supabase/tests/concurrency/create_personal_list_race.sh
 
+      # Due membri di una lista di due che escono insieme (#184).
+      - name: Database concurrency (leave_list)
+        run: bash supabase/tests/concurrency/leave_list_race.sh
+
       # La suite di smoke API (#187) sullo stesso stack: crea le sentinelle A e
       # B, ripristino, livelli a, b e c, di nuovo ripristino. Prima dell'E2E
       # perché dura pochi secondi, e un rosso qui arriva quattro minuti prima.

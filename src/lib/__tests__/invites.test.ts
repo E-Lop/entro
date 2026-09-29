@@ -154,91 +154,48 @@ describe('registerPendingInvite', () => {
 
 // ─── leaveSharedList ───────────────────────────────────────────────
 
+// Dalla #184 l'uscita è una RPC sola, leave_list(): toglie la riga e crea la
+// lista personale nella stessa transazione. Il client non scrive più in
+// list_members, e i rifiuti arrivano come codici.
 describe('leaveSharedList', () => {
-  beforeEach(() => {
-    mockAuth.getUser.mockResolvedValue({
-      data: { user: { id: 'u1' } },
-    })
-  })
-
-  it('returns error when user is not in any list', async () => {
-    mockBuilder.maybeSingle.mockResolvedValue({ data: null, error: null })
-
-    const result = await leaveSharedList()
-
-    expect(result.success).toBe(false)
-    expect(result.error?.message).toContain('lista')
-  })
-
-  it('returns error when list has only 1 member (personal list)', async () => {
-    let fromCallCount = 0
-    mockFrom.mockImplementation((() => {
-      fromCallCount++
-      if (fromCallCount === 1) {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({
-            data: { list_id: 'list1' },
-            error: null,
-          }),
-        }
-      }
-      return {
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ count: 1, error: null }),
-        }),
-      }
-    }    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any)
-
-    const result = await leaveSharedList()
-
-    expect(result.success).toBe(false)
-    expect(result.error?.message).toContain('personale')
-  })
-
-  it('happy path: removes member and creates personal list via RPC', async () => {
-    let fromCallCount = 0
-    mockFrom.mockImplementation((() => {
-      fromCallCount++
-      if (fromCallCount === 1) {
-        return {
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({
-            data: { list_id: 'shared-list' },
-            error: null,
-          }),
-        }
-      }
-      if (fromCallCount === 2) {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ count: 3, error: null }),
-          }),
-        }
-      }
-      return {
-        delete: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ error: null }),
-          }),
-        }),
-      }
-    }    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any)
-
-    mockRpc.mockReturnValue({
-      single: vi.fn().mockResolvedValue({
-        data: { success: true, list_id: 'new-personal', error_message: null },
-        error: null,
-      }),
+  it('chiama leave_list e nient\'altro', async () => {
+    mockRpc.mockResolvedValue({
+      data: [{ success: true, list_id: 'new-personal', error_message: null }],
+      error: null,
     })
 
     const result = await leaveSharedList()
 
-    expect(result.success).toBe(true)
-    expect(mockRpc).toHaveBeenCalledWith('create_personal_list')
+    expect(result).toEqual({ success: true, error: null })
+    expect(mockRpc).toHaveBeenCalledTimes(1)
+    expect(mockRpc).toHaveBeenCalledWith('leave_list')
+    expect(mockFrom).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['only_member', 'Non puoi abbandonare una lista personale'],
+    ['not_a_member', 'Non sei membro di alcuna lista'],
+    ['not_authenticated', 'Sessione scaduta. Accedi di nuovo.'],
+    ['unexpected', 'Non è stato possibile abbandonare la lista. Riprova.'],
+    ['un codice che non conosce', 'Non è stato possibile abbandonare la lista. Riprova.'],
+  ])('il rifiuto «%s» diventa «%s»', async (code, message) => {
+    mockRpc.mockResolvedValue({
+      data: [{ success: false, list_id: null, error_message: code }],
+      error: null,
+    })
+
+    const result = await leaveSharedList()
+
+    expect(result.success).toBe(false)
+    expect(result.error?.message).toBe(message)
+  })
+
+  it('senza risposta dal server dà la frase generica', async () => {
+    mockRpc.mockResolvedValue({ data: [], error: null })
+
+    const result = await leaveSharedList()
+
+    expect(result.success).toBe(false)
+    expect(result.error?.message).toBe('Non è stato possibile abbandonare la lista. Riprova.')
   })
 })

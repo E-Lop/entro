@@ -10,7 +10,7 @@
  */
 import { beforeAll, describe, it } from 'vitest'
 import { signIn, type Sentinel } from './env'
-import { check, must, mustSucceed } from './failure'
+import { check, must } from './failure'
 import { KNOWN_FOODS } from './knownFoods'
 import { listIdsOf } from './restore'
 
@@ -89,14 +89,9 @@ describe('livello c', () => {
   })
 
   it('B esce come fa il client, e torna ad avere solo la propria lista', async () => {
-    // Come `leaveSharedList()`: la propria riga, poi `create_personal_list`.
-    // Con la #184 diventerà `leave_list()`.
-    mustSucceed(
-      await b.client.from('list_members').delete().eq('list_id', listOfA).eq('user_id', b.userId),
-      'uscita di B dalla lista di A'
-    )
-    const created = firstRow(must(await b.client.rpc('create_personal_list'), 'create_personal_list in errore'))
-    check(created?.success === true, 'create_personal_list: success = false')
+    // Come `leaveSharedList()`: una chiamata sola a `leave_list()` (#184).
+    const left = firstRow(must(await b.client.rpc('leave_list'), 'leave_list in errore'))
+    check(left?.success === true, 'leave_list: success = false')
 
     const listsOfB = await listIdsOf(b, 'B')
     check(listsOfB.length === 1 && listsOfB[0] !== listOfA, 'B non ha una sola lista, la propria')

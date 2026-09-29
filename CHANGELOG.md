@@ -5,6 +5,18 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.14.3] - 2026-09-29
+
+### Security
+- **Tre permessi più larghi di quanto i client usassero** (#184). Con chiamate API fatte a mano, un utente autenticato poteva:
+  - scrivere un invito direttamente in `invites`, scegliendo codice, scadenza e stato, saltando `create-invite`. Ora `authenticated` non ha più né il permesso né la policy di insert: gli inviti nascono solo dalla Edge Function;
+  - inserire un alimento con il `user_id` di un altro utente, o cambiarlo in update. Ora l'insert vuole il proprio `user_id`, e un trigger rifiuta il cambio di `user_id` quando a scrivere è un client. Il divieto guarda il ruolo e non il cambio in sé, perché la cancellazione di un account mette a NULL `user_id` degli alimenti rimasti in una lista condivisa, e quella scrittura la fa Postgres. Un membro di una lista condivisa continua a modificare gli alimenti inseriti dagli altri.
+
+  Nessuno dei due esponeva dati di altri utenti.
+
+### Fixed
+- **Abbandonare una lista condivisa è una chiamata sola** (#184). «Abbandona lista» erano due chiamate del client: la cancellazione della propria riga in `list_members`, poi `create_personal_list`. Se la seconda falliva, l'utente restava senza lista. Ora c'è la RPC `leave_list()`, che fa le due cose nella stessa transazione. Rifiuta chi è l'unico membro della sua lista, che prima poteva uscirne via API lasciandola orfana e invisibile. Due membri di una lista di due che escono insieme non la lasciano senza membri: la RPC blocca la lista mentre conta. Senza il blocco succedeva tre volte su tre, e la prova ora gira in CI (`supabase/tests/concurrency/leave_list_race.sh`). Le frasi che l'utente legge non cambiano. Il permesso di cancellare direttamente la propria riga resta finché i client vecchi non sono aggiornati: lo toglie una seconda migrazione.
+
 ## [1.14.2] - 2026-09-29
 
 ### Fixed
@@ -1032,7 +1044,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.3...HEAD
+[1.14.3]: https://github.com/E-Lop/entro/compare/v1.14.2...v1.14.3
 [1.14.2]: https://github.com/E-Lop/entro/compare/v1.14.1...v1.14.2
 [1.14.1]: https://github.com/E-Lop/entro/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/E-Lop/entro/compare/v1.13.0...v1.14.0

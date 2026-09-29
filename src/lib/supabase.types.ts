@@ -424,6 +424,14 @@ export type Database = {
           success: boolean
         }[]
       }
+      leave_list: {
+        Args: never
+        Returns: {
+          error_message: string
+          list_id: string
+          success: boolean
+        }[]
+      }
       register_pending_invite: {
         Args: { p_email: string; p_short_code: string }
         Returns: boolean
