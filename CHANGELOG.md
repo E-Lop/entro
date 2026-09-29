@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.3] - 2026-09-29
+
+### Fixed
+- **Una lettura degli alimenti fallita non è più una dispensa vuota** (#181). Se la lettura falliva, la dashboard mostrava «Nessun alimento ancora», come se la lista fosse vuota. Dal 25 al 27 settembre 2026 è successo a tutti gli utenti per circa 41 ore, e nessuno ha visto un errore (#179). Ora la dashboard distingue quattro stati:
+  - **caricamento**: invariato;
+  - **alimenti non disponibili**: nessun dato da mostrare. Compaiono «Non riusciamo a caricare gli alimenti» e un pulsante «Riprova». Il testo dipende dalla connessione: online «Riprova tra poco.», offline «Controlla la connessione e riprova.» (decisione del maintainer). Offline React Query non fallisce, mette la lettura in pausa, e fino a oggi anche quello diventava una dispensa vuota;
+  - **aggiornamento fallito**: la lista resta visibile e sopra compare «Non riusciamo ad aggiornare gli alimenti. Riprova tra poco.» con «Riprova». Offline l'avviso non c'è, perché c'è già il banner offline;
+  - **dispensa davvero vuota**: «Nessun alimento ancora», solo quando la lettura è riuscita.
+
+  Il messaggio del server non arriva mai a schermo, e messaggio e avviso sono annunciati dagli screen reader come gli altri stati.
+
 ## [1.15.2] - 2026-09-29
 
 ### Fixed
@@ -1065,7 +1076,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.3...HEAD
+[1.15.3]: https://github.com/E-Lop/entro/compare/v1.15.2...v1.15.3
 [1.15.2]: https://github.com/E-Lop/entro/compare/v1.15.1...v1.15.2
 [1.15.1]: https://github.com/E-Lop/entro/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/E-Lop/entro/compare/v1.14.4...v1.15.0
