@@ -121,13 +121,12 @@ La catena canonica è `supabase/migrations/`. La cartella `migrations/` nella ra
 
 ### Edge Functions
 
-Le funzioni sono cinque, in `supabase/functions/`:
+Le funzioni sono quattro, in `supabase/functions/`:
 
 | Funzione | Cosa fa |
 |---|---|
 | `create-invite` | Crea un codice invito per la lista dell'utente |
 | `validate-invite` | Controlla un codice durante la registrazione; è pubblica |
-| `accept-invite` | Fa entrare l'utente nella lista dell'invito |
 | `register-push` | Salva o toglie la sottoscrizione push del browser |
 | `send-expiry-notifications` | Manda le notifiche di scadenza; la chiama il cron |
 
@@ -135,7 +134,7 @@ Le funzioni sono cinque, in `supabase/functions/`:
 supabase functions deploy <nome-funzione> --project-ref <project-ref>
 ```
 
-`supabase/config.toml` dichiara `verify_jwt = false` per tutte e cinque: le quattro che servono a un utente o al cron controllano da sole il token (`supabase/functions/_shared/auth.ts`).
+`supabase/config.toml` dichiara `verify_jwt = false` per tutte e quattro: le tre che servono a un utente o al cron controllano da sole il token (`supabase/functions/_shared/auth.ts`).
 
 ### Secret delle Edge Functions
 

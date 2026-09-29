@@ -5,6 +5,16 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.14.2] - 2026-09-29
+
+### Fixed
+- **Un invito aperto da chi ha già un account si accetta su `/join/CODICE`, e la Edge Function `accept-invite` non esiste più** (#183). Con un `invite_token` nell'URL la pagina di accesso accettava l'invito da sé, con `accept-invite`. La funzione usava la chiave `service_role` e inseriva l'utente nella lista dell'invito senza toglierlo dalla sua: due righe in `list_members`, e da lì ogni lettura della sua lista in errore. Da un'interfaccia non ci si arrivava dal 21 gennaio 2026, e in produzione non ha fatto vittime. Dalla v1.14.1 il database la rifiutava già. Ma chi apriva un invito da non autenticato e passava dalla registrazione all'accesso perdeva il codice. Da questa versione:
+  - il link «Accedi» della registrazione porta il codice (`/login?code=…`), e «Registrati» della pagina di accesso lo riporta indietro;
+  - dopo l'accesso, con un codice valido, si va a `/join/CODICE`, dove il dialogo esistente chiede conferma e accetta l'invito con `join_list_via_invite`; senza codice, o con un codice non valido, si va alla dashboard come prima;
+  - `acceptInvite()`, la Edge Function `accept-invite` e la sua voce in `supabase/config.toml` sono tolte, e il parametro `invite_token` non si legge più.
+
+  Verificato nel browser sul Supabase locale: un utente con un alimento nella sua lista apre `/join/CODICE` da non autenticato, passa dalla registrazione all'accesso, accede, vede l'avviso sulla perdita dei dati, conferma, e alla fine ha una sola riga in `list_members`, nella lista dell'invito. Nessuna chiamata ad `accept-invite`. La funzione pubblicata in produzione la toglie il maintainer, dopo il rilascio.
+
 ## [1.14.1] - 2026-09-29
 
 ### Fixed
@@ -1022,7 +1032,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.2...HEAD
+[1.14.2]: https://github.com/E-Lop/entro/compare/v1.14.1...v1.14.2
 [1.14.1]: https://github.com/E-Lop/entro/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/E-Lop/entro/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/E-Lop/entro/compare/v1.12.32...v1.13.0

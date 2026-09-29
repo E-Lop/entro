@@ -136,45 +136,6 @@ export async function registerPendingInvite(
 }
 
 /**
- * Accepts an invite by short code
- */
-export async function acceptInvite(shortCode: string): Promise<AcceptInviteResponse> {
-  try {
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData.session) {
-      throw new Error('Sessione scaduta. Accedi di nuovo.')
-    }
-
-    const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/accept-invite`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionData.session.access_token}`,
-      },
-      body: JSON.stringify({ shortCode: shortCode.toUpperCase() }),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw userFacingError('Non è stato possibile accettare l\'invito. Riprova.', data.error)
-    }
-
-    return {
-      success: data.success,
-      listId: data.listId,
-      error: null,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      listId: null,
-      error: error instanceof Error ? error : new Error('Non è stato possibile accettare l\'invito. Riprova.'),
-    }
-  }
-}
-
-/**
  * Accepts a pending invite by the authenticated user's email
  * Used when user confirms email after signup with invite
  * Runs server-side via SECURITY DEFINER RPC (issue #70/#71) so the client
