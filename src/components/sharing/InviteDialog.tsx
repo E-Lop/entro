@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Copy, Share2, Check, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -9,8 +9,49 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../ui/alert-dialog'
 import { Button } from '../ui/button'
-import { createInvite, getUserList } from '../../lib/invites'
+import { createInvite, getMyActiveInvites, getUserList, revokeInvite } from '../../lib/invites'
+import type { ActiveInvite } from '../../types/invite.types'
+
+/**
+ * Quanto manca alla scadenza di un invito. Gli inviti durano 7 giorni
+ * (create-invite), quindi bastano i giorni interi, e sotto il giorno una
+ * forma sola.
+ */
+const TIME = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' })
+const DAY = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short' })
+
+/**
+ * Quando è stato creato un invito. Un invito non ha destinatario (entra chi
+ * usa il codice per primo), e il codice da solo non si riconosce: chi l'ha
+ * mandato ricorda quando. Deciso dal maintainer il 29 set 2026 (#194).
+ */
+function creationLabel(createdAt: string): string {
+  const created = new Date(createdAt)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  const time = TIME.format(created)
+  if (created.toDateString() === today.toDateString()) return `Creato oggi alle ${time}`
+  if (created.toDateString() === yesterday.toDateString()) return `Creato ieri alle ${time}`
+  return `Creato il ${DAY.format(created)} alle ${time}`
+}
+
+function expiryLabel(expiresAt: string): string {
+  const days = Math.floor((new Date(expiresAt).getTime() - Date.now()) / (24 * 3600 * 1000))
+  if (days < 1) return 'Scade tra meno di un giorno'
+  return days === 1 ? 'Scade tra 1 giorno' : `Scade tra ${days} giorni`
+}
 
 interface InviteDialogProps {
   open: boolean
@@ -21,6 +62,35 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  // I propri inviti ancora usabili, con l'azione «Revoca» (#194).
+  const [activeInvites, setActiveInvites] = useState<ActiveInvite[]>([])
+  const [activeInvitesError, setActiveInvitesError] = useState<string | null>(null)
+  const [revoking, setRevoking] = useState<ActiveInvite | null>(null)
+  const [isRevoking, setIsRevoking] = useState(false)
+
+  const loadActiveInvites = useCallback(async () => {
+    const { invites, error } = await getMyActiveInvites()
+    setActiveInvites(invites)
+    setActiveInvitesError(error ? error.message : null)
+  }, [])
+
+  useEffect(() => {
+    if (open) void loadActiveInvites()
+  }, [open, loadActiveInvites])
+
+  const handleRevoke = async () => {
+    if (!revoking) return
+    setIsRevoking(true)
+    const { success, error } = await revokeInvite(revoking.id)
+    setIsRevoking(false)
+    if (success) {
+      toast.success(`Invito ${revoking.short_code} revocato`)
+    } else {
+      toast.error(error?.message || 'Non è stato possibile revocare l\'invito. Riprova.')
+    }
+    setRevoking(null)
+    await loadActiveInvites()
+  }
 
   const handleCreateInvite = async () => {
     setIsLoading(true)
@@ -92,6 +162,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
   const handleClose = () => {
     setInviteCode(null)
     setCopied(false)
+    setRevoking(null)
     onOpenChange(false)
   }
 
@@ -126,6 +197,37 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
                 )}
               </Button>
             </div>
+
+            {activeInvitesError ? (
+              <p className="text-sm text-destructive">{activeInvitesError}</p>
+            ) : activeInvites.length > 0 ? (
+              <section aria-labelledby="active-invites-title" className="space-y-inner">
+                <h3 id="active-invites-title" className="text-sm font-medium">
+                  I tuoi inviti attivi
+                </h3>
+                <ul aria-labelledby="active-invites-title" className="divide-y rounded-lg border">
+                  {activeInvites.map((invite) => (
+                    <li key={invite.id} className="flex items-center justify-between gap-siblings p-3">
+                      <div>
+                        <p className="font-mono font-semibold tracking-wider">{invite.short_code}</p>
+                        {invite.created_at && (
+                          <p className="text-xs text-muted-foreground">{creationLabel(invite.created_at)}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">{expiryLabel(invite.expires_at)}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="min-h-11"
+                        aria-label={`Revoca l'invito ${invite.short_code}`}
+                        onClick={() => setRevoking(invite)}
+                      >
+                        Revoca
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
             <DialogFooter>
               <Button
@@ -216,6 +318,31 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
           </>
         )}
       </DialogContent>
+
+      <AlertDialog open={revoking !== null} onOpenChange={(isOpen) => !isOpen && setRevoking(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revocare l'invito {revoking?.short_code}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Chi ha il codice non potrà più usarlo per unirsi alla tua lista. Chi è già
+              entrato resta nella lista.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRevoking}>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault()
+                void handleRevoke()
+              }}
+              disabled={isRevoking}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Revoca
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   )
 }
