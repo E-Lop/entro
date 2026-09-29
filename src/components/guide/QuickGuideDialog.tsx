@@ -51,7 +51,7 @@ const guideItems = [
   {
     icon: Users,
     title: 'Condividi lista',
-    description: 'Dal menu utente scegli "Inviti": crei un codice, accetti quello di qualcun altro o abbandoni la lista condivisa',
+    description: 'Dal menu utente scegli "Inviti": crei un codice, revochi quelli che hai creato, accetti quello di qualcun altro o abbandoni la lista condivisa',
   },
   {
     icon: Bell,

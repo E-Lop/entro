@@ -46,7 +46,7 @@ Il progetto copre l'intero ciclo di vita di un'applicazione web: dal design del 
 
 - **CRUD completo** — Aggiungi, modifica e togli alimenti con immagini, categorie, luogo di conservazione e note. Togliendo un alimento l'app chiede «Com'è finita?» (consumato, buttato, o tolto e basta): la riga resta nel database con `deleted_at` e l'esito, e la foto viene cancellata
 - **Scansione barcode** — Riconosce EAN-13, UPC e QR Code tramite la fotocamera; auto-compila i dati da Open Food Facts
-- **Liste condivise** — Un codice invito a 6 caratteri (es. `ABC123`) permette a più utenti di condividere una lista in tempo reale
+- **Liste condivise** — Un codice invito a 6 caratteri (es. `ABC123`) permette a più utenti di condividere una lista in tempo reale. Chi ha creato un codice lo può revocare finché nessuno l'ha usato
 - **Sync multi-device** — Aggiornamenti istantanei su desktop, iOS e Android tramite Supabase Realtime
 - **Supporto offline completo** — Cache persistente in IndexedDB, CRUD offline con coda mutazioni e sync automatica al ritorno della connessione
 - **Push notifications** — Un avviso al giorno per gli alimenti in scadenza, con i giorni di anticipo a scelta
