@@ -5,6 +5,16 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.14.1] - 2026-09-29
+
+### Fixed
+- **Un utente sta in una lista sola, e ora lo garantisce il database** (#195). Due utenti in produzione avevano due liste personali ciascuno, create a meno di un millisecondo l'una dall'altra fra febbraio e marzo 2026. Al primo accesso `checkAndAcceptInvite` parte due volte, e `create_personal_list` controllava e poi inseriva senza lock: due chiamate concorrenti creavano due liste. Con due righe in `list_members` la lettura della lista dell'utente va in errore, e per quei due utenti salvare un alimento non ha mai funzionato. La pulizia in produzione l'ha fatta il maintainer il 28 settembre. Da questa versione:
+  - un indice unico su `list_members(user_id)` rifiuta la seconda riga, qualunque sia la lista;
+  - `create_personal_list` sotto concorrenza restituisce a tutte e due le chiamate la stessa lista, invece di crearne una seconda o di rispondere `unexpected`;
+  - la Edge Function `accept-invite`, che mette un utente in una seconda lista (#183), viene rifiutata dal database invece di scrivere.
+
+  Provato con due sessioni `psql` che si sovrappongono per costruzione: col corpo vecchio e senza indice ogni giro produce due liste, col corpo vecchio e l'indice la seconda chiamata risponde `unexpected`, con la migrazione 20 giri su 20 danno una lista sola. La prova gira in CI dopo pgTAP (`supabase/tests/concurrency/create_personal_list_race.sh`). I client non cambiano.
+
 ## [1.14.0] - 2026-09-28
 
 ### Added
@@ -1012,7 +1022,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.14.1...HEAD
+[1.14.1]: https://github.com/E-Lop/entro/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/E-Lop/entro/compare/v1.13.0...v1.14.0
 [1.13.0]: https://github.com/E-Lop/entro/compare/v1.12.32...v1.13.0
 [1.12.32]: https://github.com/E-Lop/entro/compare/v1.12.31...v1.12.32
