@@ -104,20 +104,22 @@ test.describe('la dashboard quando la lettura degli alimenti fallisce', () => {
     await expectNoServerText(page)
   })
 
-  test('offline e senza dati: «Controlla la connessione e riprova.»', async ({ page, context }) => {
+  test('offline e senza dati: «Controlla la connessione e riprova.», e al ritorno della rete si aggiorna da sé', async ({ page, context }) => {
     // La prima lettura resta appesa finché non si va offline, poi cade come
-    // cade una richiesta senza rete.
+    // cade una richiesta senza rete. Tornati online, le letture passano.
     let pending: Route | undefined
+    let offline = false
     await page.route(FOODS_READ, (route) => {
       if (!pending) {
         pending = route
         return
       }
-      return route.abort('internetdisconnected')
+      return offline ? route.abort('internetdisconnected') : route.continue()
     })
 
     await signIn(page, user)
     await expect.poll(() => pending !== undefined).toBe(true)
+    offline = true
     await context.setOffline(true)
     await pending!.abort('internetdisconnected')
 
@@ -125,7 +127,14 @@ test.describe('la dashboard quando la lettura degli alimenti fallisce', () => {
     await expect(status).toBeVisible()
     await expect(status).toContainText('Controlla la connessione e riprova.')
     await expect(page.getByText(EMPTY)).toHaveCount(0)
+
+    // Nessun «Riprova»: la lettura era in pausa, e riparte con la rete. Lista
+    // e conteggi vengono dagli stessi dati, quindi tornano insieme.
+    offline = false
     await context.setOffline(false)
+    await expect(page.getByRole('heading', { name: /Food E2E 0/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Visualizza come lista' })).toContainText('(2)')
+    await expect(status).toHaveCount(0)
   })
 
   test('una dispensa davvero vuota dice ancora «Nessun alimento ancora»', async ({ page }) => {
