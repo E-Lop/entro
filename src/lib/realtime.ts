@@ -13,6 +13,7 @@ import type {
 } from './realtime.types';
 import { foodsKeys } from '../hooks/useFoods';
 import { RecentMutationsTracker } from '../utils/realtimeHelpers';
+import { clearSignedImageCaches } from './signedImageCache';
 
 // Shared mutation tracker instance
 export const mutationTracker = new RecentMutationsTracker();
@@ -137,6 +138,8 @@ export function handleListMemberDelete(
   if (removedMember.user_id === currentUserId) {
     toast.error('Sei stato rimosso da questa lista');
     queryClient.clear();
+    // Le foto della lista non sono più sue da vedere (#213).
+    clearSignedImageCaches().catch(() => {});
     setTimeout(() => {
       window.location.href = '/';
     }, 2000);

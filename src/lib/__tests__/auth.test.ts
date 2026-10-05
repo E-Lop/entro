@@ -10,11 +10,13 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockSignOut, mockUnsubscribeFromPush, mockClearPersistedCache } = vi.hoisted(() => ({
-  mockSignOut: vi.fn(),
-  mockUnsubscribeFromPush: vi.fn(),
-  mockClearPersistedCache: vi.fn(),
-}))
+const { mockSignOut, mockUnsubscribeFromPush, mockClearPersistedCache, mockClearSignedImageCaches } =
+  vi.hoisted(() => ({
+    mockSignOut: vi.fn(),
+    mockUnsubscribeFromPush: vi.fn(),
+    mockClearPersistedCache: vi.fn(),
+    mockClearSignedImageCaches: vi.fn(),
+  }))
 
 vi.mock('@/lib/supabase', () => ({
   supabase: { auth: { signOut: mockSignOut } },
@@ -26,6 +28,10 @@ vi.mock('@/lib/pushNotifications', () => ({
 
 vi.mock('@/lib/queryPersister', () => ({
   clearPersistedCache: mockClearPersistedCache,
+}))
+
+vi.mock('@/lib/signedImageCache', () => ({
+  clearSignedImageCaches: mockClearSignedImageCaches,
 }))
 
 import { signOut } from '@/lib/auth'
@@ -47,6 +53,7 @@ beforeEach(() => {
   sessionStorage.clear()
   mockUnsubscribeFromPush.mockResolvedValue(undefined)
   mockClearPersistedCache.mockResolvedValue(undefined)
+  mockClearSignedImageCaches.mockResolvedValue(undefined)
   mockSignOut.mockResolvedValue({ error: null })
 })
 
@@ -104,6 +111,41 @@ describe('signOut', () => {
     const { error } = await signOut()
 
     expect(error?.message).toBe('Network request failed')
+    expect(localStorage.getItem('sb-rmbmmwcxtnanacxbkihc-auth-token')).toBeNull()
+  })
+
+  it('svuota la cache delle foto: chi entra dopo non deve trovare quelle di chi è uscito', async () => {
+    // #213: il service worker tiene le foto viste per 7 giorni sotto una chiave
+    // senza token, quindi le serve a chiunque usi questo browser dopo.
+    await signOut()
+
+    expect(mockClearSignedImageCaches).toHaveBeenCalledTimes(1)
+  })
+
+  it('svuota la cache delle foto anche quando Supabase rifiuta il logout', async () => {
+    mockSignOut.mockResolvedValue({ error: { message: 'Session non trovata' } })
+
+    await signOut()
+
+    expect(mockClearSignedImageCaches).toHaveBeenCalledTimes(1)
+  })
+
+  it('svuota la cache delle foto anche quando la chiamata a Supabase solleva', async () => {
+    mockSignOut.mockRejectedValue(new Error('Network request failed'))
+
+    await signOut()
+
+    expect(mockClearSignedImageCaches).toHaveBeenCalledTimes(1)
+  })
+
+  it('se la cache delle foto non si svuota il logout resta un logout', async () => {
+    seedSession()
+    mockClearSignedImageCaches.mockRejectedValue(new Error('Cache bloccata'))
+
+    const { error, localSessionCleared } = await signOut()
+
+    expect(error).toBeNull()
+    expect(localSessionCleared).toBe(true)
     expect(localStorage.getItem('sb-rmbmmwcxtnanacxbkihc-auth-token')).toBeNull()
   })
 

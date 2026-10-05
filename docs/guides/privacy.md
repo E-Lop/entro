@@ -34,6 +34,12 @@ L'app non imposta cookie propri. Salva invece queste chiavi:
 - **IndexedDB**: la copia delle liste per l'uso offline (chiave `entro-react-query-cache`, `src/lib/queryPersister.ts`) e le foto scattate offline in attesa di caricamento (store `pending-images`, `src/lib/pendingImages.ts`).
 - **Cache del service worker**: i file dell'app e le foto degli alimenti già viste, fino a 200 per 7 giorni (`supabase-images-v2`, regole in `src/lib/signedImageCache.ts`).
 
+Cosa sparisce quando si esce, si cancella l'account o si lascia una lista:
+
+- **All'uscita («Disconnetti») e alla cancellazione dell'account**: la sessione, la copia delle liste in IndexedDB e le foto nella cache del service worker.
+- **Lasciando una lista condivisa, o venendone tolti mentre l'app è aperta**: le foto nella cache del service worker.
+- **Non coperto**: chi viene tolto da una lista mentre l'app è chiusa conserva su quel dispositivo le foto già viste, finché la cache non scade (7 giorni) o non esce. La cache serve le foto senza richiederle al server, quindi senza che il permesso venga ricontrollato: è ciò che le rende visibili offline.
+
 Il codice non contiene un banner dei cookie, né script di analytics o di tracciamento degli errori.
 
 ## Esportare i dati (art. 20)

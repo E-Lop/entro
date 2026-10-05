@@ -13,6 +13,7 @@ import {
 import { Button } from '../ui/button'
 import { Alert, AlertDescription } from '../ui/alert'
 import { leaveSharedList } from '../../lib/invites'
+import { clearSignedImageCaches } from '../../lib/signedImageCache'
 import { foodsKeys } from '../../hooks/useFoods'
 
 interface LeaveListDialogProps {
@@ -41,6 +42,10 @@ export function LeaveListDialog({
       if (result.success) {
         toast.success('Hai abbandonato la lista condivisa')
         onOpenChange(false)
+
+        // Le foto della lista lasciata non devono restare su questo dispositivo
+        // (#213). Se non si svuota, l'uscita è avvenuta lo stesso.
+        await clearSignedImageCaches().catch(() => {})
 
         // Invalida TUTTA la cache dei foods per forzare il reload della nuova lista personale
         await queryClient.invalidateQueries({ queryKey: foodsKeys.all })

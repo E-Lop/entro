@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import { unsubscribeFromPush } from './pushNotifications'
 import { clearPersistedCache } from './queryPersister'
+import { clearSignedImageCaches } from './signedImageCache'
 import { logError } from './safeLog'
 import { authErrorMessage } from './authErrorMessage'
 import { userFacingError } from './userFacingError'
@@ -56,6 +57,10 @@ export function clearAuthStorage(): void {
 
   // Clear persisted React Query cache (IndexedDB) — best-effort, fire and forget
   clearPersistedCache().catch(() => {})
+
+  // E le foto che il service worker tiene per l'offline (#213): senza, chi
+  // entra dopo su questo browser le ritrova. Stessa regola: non blocca l'uscita.
+  clearSignedImageCaches().catch(() => {})
 }
 
 /**
