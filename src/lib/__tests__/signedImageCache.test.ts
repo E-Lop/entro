@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   OBSOLETE_IMAGE_CACHES,
   SIGNED_IMAGE_CACHE,
   SIGNED_IMAGE_CACHEABLE_STATUSES,
+  clearSignedImageCaches,
   isSignedImageUrl,
   signedImageCacheKey,
 } from '../signedImageCache'
@@ -49,5 +50,47 @@ describe('la cache delle foto nel service worker (#211)', () => {
   it('la cache di prima è fra quelle da cancellare, e non è quella in uso', () => {
     expect(OBSOLETE_IMAGE_CACHES).toContain('supabase-images-cache')
     expect(OBSOLETE_IMAGE_CACHES).not.toContain(SIGNED_IMAGE_CACHE)
+  })
+})
+
+describe('svuotare la cache delle foto quando il dispositivo perde l\'accesso (#213)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('cancella la cache in uso e quelle di prima, e nessun\'altra', async () => {
+    const deleted: string[] = []
+    vi.stubGlobal('caches', {
+      delete: async (name: string) => {
+        deleted.push(name)
+        return true
+      },
+    })
+
+    await clearSignedImageCaches()
+
+    expect(deleted.sort()).toEqual([SIGNED_IMAGE_CACHE, ...OBSOLETE_IMAGE_CACHES].sort())
+    // I file dell'app e i font non sono di nessun utente: restano.
+    expect(deleted.some((name) => name.includes('workbox') || name.includes('fonts'))).toBe(false)
+  })
+
+  it('dove la Cache API non c\'è non fa niente e non solleva', async () => {
+    vi.stubGlobal('caches', undefined)
+
+    await expect(clearSignedImageCaches()).resolves.toBeUndefined()
+  })
+
+  it('se una cancellazione fallisce prova lo stesso le altre, poi lo dice', async () => {
+    const attempted: string[] = []
+    vi.stubGlobal('caches', {
+      delete: async (name: string) => {
+        attempted.push(name)
+        if (name === SIGNED_IMAGE_CACHE) throw new Error('Cache bloccata')
+        return true
+      },
+    })
+
+    await expect(clearSignedImageCaches()).rejects.toThrow('Cache bloccata')
+    expect(attempted).toEqual(expect.arrayContaining(OBSOLETE_IMAGE_CACHES))
   })
 })

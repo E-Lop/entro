@@ -60,3 +60,26 @@ export const SIGNED_IMAGE_CACHE = 'supabase-images-v2'
  * può contenere risposte d'errore opache salvate al posto delle foto.
  */
 export const OBSOLETE_IMAGE_CACHES = ['supabase-images-cache']
+
+/**
+ * Svuota la cache delle foto: si chiama quando chi usa questo dispositivo
+ * perde l'accesso alle foto che ha visto (#213).
+ *
+ * Serve perché la cache risponde **prima** di Storage, e sotto una chiave senza
+ * token: una foto già vista si rilegge senza che nessuno controlli più se chi
+ * la chiede può ancora vederla. Finché l'utente è lo stesso è il suo scopo,
+ * le foto offline. Dopo un'uscita, o fuori da una lista condivisa, no.
+ *
+ * Gira nella pagina, non nel service worker: la Cache API è la stessa. Prova
+ * tutte le cancellazioni anche se una fallisce, poi rilancia il primo errore:
+ * chi chiama decide che farne, e di solito non deve fermarsi.
+ */
+export async function clearSignedImageCaches(): Promise<void> {
+  if (typeof caches === 'undefined') return
+
+  const results = await Promise.allSettled(
+    [SIGNED_IMAGE_CACHE, ...OBSOLETE_IMAGE_CACHES].map((name) => caches.delete(name))
+  )
+  const failure = results.find((result) => result.status === 'rejected')
+  if (failure) throw failure.reason
+}

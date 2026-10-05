@@ -11,12 +11,19 @@ const mocks = vi.hoisted(() => ({
   acceptInviteByEmail: vi.fn(),
   createPersonalList: vi.fn(),
   invalidateQueries: vi.fn(),
+  clearAuthStorage: vi.fn(),
+  clearSignedImageCaches: vi.fn(),
 }))
 
 vi.mock('../../lib/auth', () => ({
   getSession: mocks.getSession,
   getCurrentUser: mocks.getCurrentUser,
   onAuthStateChange: mocks.onAuthStateChange,
+  clearAuthStorage: mocks.clearAuthStorage,
+}))
+
+vi.mock('../../lib/signedImageCache', () => ({
+  clearSignedImageCaches: mocks.clearSignedImageCaches,
 }))
 
 vi.mock('../../lib/invites', () => ({
@@ -102,6 +109,8 @@ describe('authStore.initialize', () => {
       return vi.fn()
     })
     mocks.invalidateQueries.mockResolvedValue(undefined)
+    mocks.clearSignedImageCaches.mockResolvedValue(undefined)
+    mocks.getUserList.mockResolvedValue({ list: { id: 'list-1' }, error: null })
   })
 
   it('marks an authenticated user as initialized when a list already exists', async () => {
@@ -185,5 +194,48 @@ describe('authStore.initialize', () => {
     expect(mocks.acceptInviteByEmail).not.toHaveBeenCalled()
     expect(mocks.createPersonalList).not.toHaveBeenCalled()
     expect(reload).not.toHaveBeenCalled()
+  })
+
+  // #213: a session can end without the user pressing «Disconnetti» — revoked
+  // from another device, expired, account deleted elsewhere.
+  it('clears what this browser keeps of the user when the session ends on its own', async () => {
+    await useAuthStore.getState().initialize()
+
+    authCallback!('SIGNED_OUT', null, null)
+
+    expect(mocks.clearAuthStorage).toHaveBeenCalledTimes(1)
+    expect(useAuthStore.getState().isAuthenticated).toBe(false)
+  })
+
+  it('still signs the user out of the store when that cleanup throws', async () => {
+    mocks.clearAuthStorage.mockImplementationOnce(() => {
+      throw new Error('Storage disabilitato')
+    })
+    await useAuthStore.getState().initialize()
+
+    expect(() => authCallback!('SIGNED_OUT', null, null)).not.toThrow()
+    expect(useAuthStore.getState().user).toBeNull()
+  })
+
+  it('keeps local data and offline photos while the same session goes on', async () => {
+    await useAuthStore.getState().initialize()
+
+    authCallback!('TOKEN_REFRESHED', user, session)
+    authCallback!('USER_UPDATED', user, session)
+
+    expect(mocks.clearAuthStorage).not.toHaveBeenCalled()
+    expect(mocks.clearSignedImageCaches).not.toHaveBeenCalled()
+  })
+
+  it('starts a new sign-in from an empty photo cache, without touching the new session', async () => {
+    mocks.getSession.mockResolvedValue(null)
+    mocks.getCurrentUser.mockResolvedValue(null)
+    await useAuthStore.getState().initialize()
+
+    authCallback!('SIGNED_IN', user, session)
+
+    expect(mocks.clearSignedImageCaches).toHaveBeenCalledTimes(1)
+    // `clearAuthStorage` would delete the `sb-*` keys just written by the sign-in.
+    expect(mocks.clearAuthStorage).not.toHaveBeenCalled()
   })
 })
