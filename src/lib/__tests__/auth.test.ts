@@ -35,6 +35,7 @@ vi.mock('@/lib/signedImageCache', () => ({
 }))
 
 import { signOut } from '@/lib/auth'
+import { queryClient } from '@/lib/queryClient'
 
 /** Le chiavi che un utente loggato si trova in `localStorage`. */
 function seedSession(): void {
@@ -112,6 +113,47 @@ describe('signOut', () => {
 
     expect(error?.message).toBe('Network request failed')
     expect(localStorage.getItem('sb-rmbmmwcxtnanacxbkihc-auth-token')).toBeNull()
+  })
+
+  it('svuota la cache in memoria: chi entra dopo nella stessa scheda non vede la lista di chi è uscito', async () => {
+    // L'uscita non ricarica la pagina, e le chiavi delle query non portano
+    // l'utente: senza questo, il prossimo accesso monta la dashboard sopra i
+    // dati ancora «freschi» di chi c'era prima. Visto nel browser: tre card
+    // di un altro account a schermo finché la lista non viene riletta.
+    queryClient.setQueryData(['foods', 'list'], [{ id: 'di-chi-esce' }])
+    queryClient.setQueryData(['signed-url', 'utente/foto.jpg'], 'https://esempio/firmata')
+
+    await signOut()
+
+    expect(queryClient.getQueryData(['foods', 'list'])).toBeUndefined()
+    expect(queryClient.getQueryData(['signed-url', 'utente/foto.jpg'])).toBeUndefined()
+  })
+
+  it('svuota la cache in memoria anche quando Supabase rifiuta il logout', async () => {
+    queryClient.setQueryData(['foods', 'list'], [{ id: 'di-chi-esce' }])
+    mockSignOut.mockResolvedValue({ error: { message: 'Session non trovata' } })
+
+    await signOut()
+
+    expect(queryClient.getQueryData(['foods', 'list'])).toBeUndefined()
+  })
+
+  it('svuota la cache in memoria anche quando la chiamata a Supabase solleva', async () => {
+    queryClient.setQueryData(['foods', 'list'], [{ id: 'di-chi-esce' }])
+    mockSignOut.mockRejectedValue(new Error('Network request failed'))
+
+    await signOut()
+
+    expect(queryClient.getQueryData(['foods', 'list'])).toBeUndefined()
+  })
+
+  it('con la cache in memoria se ne vanno le scritture in coda: non devono partire con la sessione di un altro', async () => {
+    const mutation = queryClient.getMutationCache().build(queryClient, { mutationFn: async () => 'ok' })
+    expect(queryClient.getMutationCache().getAll()).toContain(mutation)
+
+    await signOut()
+
+    expect(queryClient.getMutationCache().getAll()).toHaveLength(0)
   })
 
   it('svuota la cache delle foto: chi entra dopo non deve trovare quelle di chi è uscito', async () => {
