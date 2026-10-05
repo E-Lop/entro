@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.6] - 2026-10-05
+
+### Fixed
+- **Una foto non resta più rotta per giorni dopo essere stata chiesta con un indirizzo scaduto** (#211). Le foto si leggono con indirizzi firmati che valgono un'ora. Il service worker le teneva in cache per 7 giorni sotto una chiave senza la firma, e accettava anche le risposte «opache», quelle di cui non può leggere lo stato: l'`<img>` della card chiedeva la foto senza CORS, quindi ogni risposta era opaca. Bastava che una foto venisse chiesta una volta con un indirizzo scaduto, per esempio scorrendo la lista dopo aver lasciato l'app aperta più di un'ora, e in cache finiva il rifiuto del server. Da lì quella foto restava un riquadro rotto su quel dispositivo, anche con indirizzi nuovi e validi e anche dopo aver chiuso e riaperto l'app. Le foto nel bucket erano intatte, e sugli altri dispositivi si vedevano. Segnalata dal maintainer sulla PWA installata su iPhone.
+
+  Tre correzioni. La card chiede la foto in CORS (`crossorigin="anonymous"`), così la risposta si può leggere. La cache tiene solo le risposte 200, che è il default che Workbox dà a `CacheFirst` e che `sw.ts` scavalcava con `statuses: [0, 200]`. E la cache cambia nome, da `supabase-images-cache` a `supabase-images-v2`: la vecchia viene cancellata quando il nuovo service worker si attiva, così i dispositivi già colpiti si riparano da soli. Si attiva alla prima riapertura dell'app dopo l'aggiornamento.
+
+  Riprodotto e provato in Chromium sulla build vera contro la Supabase locale: con la regola di prima, dopo un indirizzo scaduto due indirizzi validi danno ancora la foto rotta, e in cache c'è una voce `opaque`; con la regola nuova la foto torna al primo indirizzo valido. **Non provato su Safari di iOS**, che è dove il difetto è stato visto. Resta l'innesco: con l'app aperta da più di un'ora una foto mai vista può non caricarsi finché l'indirizzo non viene rinnovato. Non resta più rotta, ed è il seguito della #211.
+
 ## [1.15.5] - 2026-09-29
 
 ### Fixed
@@ -1086,7 +1095,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.6...HEAD
+[1.15.6]: https://github.com/E-Lop/entro/compare/v1.15.5...v1.15.6
 [1.15.5]: https://github.com/E-Lop/entro/compare/v1.15.4...v1.15.5
 [1.15.4]: https://github.com/E-Lop/entro/compare/v1.15.3...v1.15.4
 [1.15.3]: https://github.com/E-Lop/entro/compare/v1.15.2...v1.15.3

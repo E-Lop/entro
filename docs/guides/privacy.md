@@ -32,7 +32,7 @@ L'app non imposta cookie propri. Salva invece queste chiavi:
 - **localStorage**: la sessione di Supabase (chiavi `sb-*`), il tema (`entro-theme`), il feedback aptico (`entro_haptics_enabled`), e dei segnali «già visto» per suggerimenti e avvisi (`entro_hasSeenSwipeHint`, `entro_hasSeenSwipeAnimation`, `entro_hasSeenInstructionCard`, `entro_notification_prompt_dismissed`, `show_welcome_toast`).
 - **sessionStorage**: `explicit_auth`, `verify_email` (l'indirizzo appena registrato, per la pagina di verifica) e `user_initialized_<email>`.
 - **IndexedDB**: la copia delle liste per l'uso offline (chiave `entro-react-query-cache`, `src/lib/queryPersister.ts`) e le foto scattate offline in attesa di caricamento (store `pending-images`, `src/lib/pendingImages.ts`).
-- **Cache del service worker**: i file dell'app e le foto degli alimenti già viste, fino a 200 per 7 giorni (`supabase-images-cache` in `src/sw.ts`).
+- **Cache del service worker**: i file dell'app e le foto degli alimenti già viste, fino a 200 per 7 giorni (`supabase-images-v2`, regole in `src/lib/signedImageCache.ts`).
 
 Il codice non contiene un banner dei cookie, né script di analytics o di tracciamento degli errori.
 

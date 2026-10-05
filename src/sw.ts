@@ -5,6 +5,13 @@ import { CacheFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 import { resubscribeOnChange } from './lib/pushResubscribe'
+import {
+  OBSOLETE_IMAGE_CACHES,
+  SIGNED_IMAGE_CACHE,
+  SIGNED_IMAGE_CACHEABLE_STATUSES,
+  isSignedImageUrl,
+  signedImageCacheKey,
+} from './lib/signedImageCache'
 
 declare let self: ServiceWorkerGlobalScope
 
@@ -35,26 +42,26 @@ registerRoute(
   })
 )
 
-// Supabase Storage signed image URLs contain a unique token in the query string.
-// We strip the query params so the same image always hits the same cache entry,
-// regardless of which signed URL was generated.
+// Le foto degli alimenti: quali richieste, sotto che chiave e quali risposte
+// lo decide `signedImageCache`, dove si può provare.
 registerRoute(
-  /^https:\/\/.*\.supabase\.co\/storage\/v1\/object\/sign\/.*/i,
+  ({ url }) => isSignedImageUrl(url),
   new CacheFirst({
-    cacheName: 'supabase-images-cache',
+    cacheName: SIGNED_IMAGE_CACHE,
     plugins: [
-      {
-        cacheKeyWillBeUsed: async ({ request }) => {
-          const url = new URL(request.url)
-          url.search = ''
-          return url.href
-        },
-      },
+      { cacheKeyWillBeUsed: async ({ request }) => signedImageCacheKey(request.url) },
       new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 }),
-      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new CacheableResponsePlugin({ statuses: SIGNED_IMAGE_CACHEABLE_STATUSES }),
     ],
   })
 )
+
+// Le voci della cache di prima non scadono da sole in tempo utile, e fra loro
+// possono esserci risposte d'errore salvate al posto delle foto (#211).
+// `cleanupOutdatedCaches` qui sopra guarda solo le precache.
+self.addEventListener('activate', (event) => {
+  event.waitUntil(Promise.all(OBSOLETE_IMAGE_CACHES.map((name) => caches.delete(name))))
+})
 
 // SPA navigation fallback
 registerRoute(new NavigationRoute(createHandlerBoundToURL('/index.html'), {

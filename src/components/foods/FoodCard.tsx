@@ -237,6 +237,9 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
                   <img
                     src={signedUrl!}
                     alt={food.name}
+                    // In CORS, o la risposta è opaca e il service worker non
+                    // distingue la foto da un errore (#211, `signedImageCache`).
+                    crossOrigin="anonymous"
                     loading="lazy"
                     className="w-full h-full object-cover"
                   />
