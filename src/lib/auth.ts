@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { unsubscribeFromPush } from './pushNotifications'
+import { queryClient } from './queryClient'
 import { clearPersistedCache } from './queryPersister'
 import { clearSignedImageCaches } from './signedImageCache'
 import { logError } from './safeLog'
@@ -54,6 +55,13 @@ export function clearAuthStorage(): void {
     'explicit_auth',
     'verify_email',
   ])
+
+  // La cache in memoria, prima di quella persistita: l'uscita non ricarica la
+  // pagina e le chiavi delle query non portano l'utente, quindi chi entra dopo
+  // nella stessa scheda monterebbe la dashboard sopra i dati di chi è uscito.
+  // Porta via anche le scritture in coda, che altrimenti partirebbero con la
+  // sessione del prossimo.
+  queryClient.clear()
 
   // Clear persisted React Query cache (IndexedDB) — best-effort, fire and forget
   clearPersistedCache().catch(() => {})

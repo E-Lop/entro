@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.8] - 2026-10-05
+
+### Security
+- **Entrando dopo un altro account, nella stessa scheda, non si vede più la sua lista per un istante**. «Disconnetti» non ricarica la pagina, e la cache in memoria degli alimenti non veniva svuotata: le sue chiavi non portano l'utente, quindi chi accedeva subito dopo si trovava la dashboard montata sopra i dati di chi era appena uscito, finché la lista non veniva riletta. Riprodotto in Chromium contro la Supabase locale: il secondo account, con zero alimenti, vedeva le tre card del primo. Ora all'uscita la cache in memoria si svuota insieme a quella persistita, anche quando il server rifiuta il logout e quando la sessione finisce da sola; dopo la correzione le card viste dal secondo account sono zero. Trovato dalla revisione di sicurezza automatica della 1.15.7; il comportamento c'era da prima.
+
+  Con la cache se ne vanno anche le scritture ancora in coda: una modifica fatta offline e non ancora sincronizzata al momento dell'uscita va persa. Prima sarebbe partita al ritorno della rete con la sessione di chi era entrato dopo. La copia persistita di quella coda veniva già cancellata all'uscita.
+
 ## [1.15.7] - 2026-10-05
 
 ### Security
@@ -1106,7 +1113,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.7...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.8...HEAD
+[1.15.8]: https://github.com/E-Lop/entro/compare/v1.15.7...v1.15.8
 [1.15.7]: https://github.com/E-Lop/entro/compare/v1.15.6...v1.15.7
 [1.15.6]: https://github.com/E-Lop/entro/compare/v1.15.5...v1.15.6
 [1.15.5]: https://github.com/E-Lop/entro/compare/v1.15.4...v1.15.5
