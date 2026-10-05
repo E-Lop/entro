@@ -44,6 +44,15 @@ describe('rimozione da una lista e cache delle foto', () => {
     expect(mockClearSignedImageCaches).toHaveBeenCalledTimes(1)
   })
 
+  it('la svuota di nuovo subito prima di lasciare la pagina: nel frattempo una foto può rientrare', async () => {
+    handleListMemberDelete(removal('io'), queryClient, 'io')
+    expect(mockClearSignedImageCaches).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(2000)
+
+    expect(mockClearSignedImageCaches).toHaveBeenCalledTimes(2)
+  })
+
   it('se esce un altro membro le foto restano: l\'accesso non è cambiato', () => {
     handleListMemberDelete(removal('un-altro'), queryClient, 'io')
 

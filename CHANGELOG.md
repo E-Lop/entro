@@ -10,11 +10,11 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 ### Security
 - **Uscendo, le foto viste non restano più nel browser** (#213). Il service worker tiene in cache le foto degli alimenti già viste, fino a 200 per 7 giorni, per mostrarle offline. La chiave non contiene la firma dell'indirizzo, quindi la cache risponde senza che il server ricontrolli il permesso. Niente la svuotava: dopo «Disconnetti», chi usava lo stesso browser poteva ancora leggere le foto di chi c'era prima, e chi lasciava una lista condivisa conservava le foto degli altri membri. Trovato dalla revisione di sicurezza del commit della 1.15.6; il comportamento c'era da prima. Riguarda solo il dispositivo dove le foto erano già state viste.
 
-  Ora la cache delle foto si svuota in quattro momenti: all'uscita, anche quando il server rifiuta il logout; alla cancellazione dell'account; quando si lascia una lista condivisa; quando si viene tolti da una lista con l'app aperta. Se la cancellazione della cache fallisce, l'uscita avviene lo stesso. I file dell'app e i font non vengono toccati.
+  Ora la cache delle foto si svuota all'uscita, anche quando il server rifiuta il logout; alla cancellazione dell'account; quando si lascia una lista condivisa; quando si viene tolti da una lista con l'app aperta. Vale anche quando la sessione finisce senza passare da «Disconnetti»: chiusa da un altro dispositivo con «Esci dagli altri dispositivi», scaduta, o sparita con l'account. In quel caso sparisce anche la copia delle liste in IndexedDB, che prima restava. Lasciando una lista la cache si svuota due volte, subito e un attimo prima che la pagina si ricarichi, perché nel mezzo le card sono ancora a schermo e una foto potrebbe rientrarci. E chi accede parte comunque da una cache vuota. Se la cancellazione della cache fallisce, l'uscita avviene lo stesso. I file dell'app e i font non vengono toccati.
 
   **Non coperto**: chi viene tolto da una lista mentre l'app è chiusa conserva le foto già viste finché la cache non scade o non esce. `docs/guides/privacy.md` ora dice cosa sparisce e quando, e questo limite.
 
-  Provato in Chromium sulla build contro la Supabase locale: dopo l'accesso la cache ha la foto della card, dopo «Disconnetti» la cache non esiste più. Gli altri tre momenti sono coperti dai test unitari, non provati nel browser.
+  Provato in Chromium sulla build contro la Supabase locale: dopo l'accesso la cache ha la foto della card, dopo «Disconnetti» la cache non esiste più. Gli altri momenti sono coperti dai test unitari, non provati nel browser. I due buchi della prima stesura, la sessione chiusa da fuori e la cache che si riempiva di nuovo prima del reload, li ha trovati la revisione di sicurezza automatica.
 
 ## [1.15.6] - 2026-10-05
 

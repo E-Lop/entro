@@ -44,12 +44,14 @@ afterEach(() => {
 })
 
 describe('LeaveListDialog — la cache delle foto', () => {
-  it('uscita riuscita: la cache delle foto si svuota', async () => {
+  it('uscita riuscita: la cache delle foto si svuota, e di nuovo prima del reload', async () => {
     leaveSharedList.mockResolvedValue({ success: true, error: null })
 
     await confirmLeave()
 
-    await waitFor(() => expect(clearSignedImageCaches).toHaveBeenCalledTimes(1))
+    // Subito, e poi quando la pagina sta per ricaricarsi: finché le card della
+    // lista lasciata sono a schermo una foto può rientrare in cache.
+    await waitFor(() => expect(clearSignedImageCaches).toHaveBeenCalledTimes(2))
   })
 
   it('uscita rifiutata: l\'utente è ancora nella lista, e le foto restano', async () => {

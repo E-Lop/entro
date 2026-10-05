@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
-import { onAuthStateChange, getSession, getCurrentUser } from '../lib/auth'
+import { onAuthStateChange, getSession, getCurrentUser, clearAuthStorage } from '../lib/auth'
+import { clearSignedImageCaches } from '../lib/signedImageCache'
 import { logError, redactUrl } from '../lib/safeLog'
 import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
 import { queryClient } from '../lib/queryClient'
@@ -206,6 +207,27 @@ export const useAuthStore = create<AuthStore>((set) => ({
           isAuthenticated: isNowAuthenticated,
           loading: false,
         })
+
+        // Un'uscita non passa sempre da «Disconnetti»: la sessione può essere
+        // chiusa da un altro dispositivo («Esci dagli altri dispositivi»),
+        // scadere, o sparire con l'account. Qui arriva lo stesso `SIGNED_OUT`,
+        // e ciò che questo browser tiene dell'utente deve sparire lo stesso
+        // (#213). Su «Disconnetti» gira due volte, ed è innocuo.
+        if (event === 'SIGNED_OUT') {
+          try {
+            clearAuthStorage()
+          } catch (error) {
+            logError('Pulizia locale fallita dopo SIGNED_OUT', error)
+          }
+        }
+
+        // E chi entra parte da una cache delle foto vuota, qualunque cosa sia
+        // rimasta da prima: una richiesta ancora in volo può riscrivere una
+        // voce dopo la pulizia dell'uscita. Solo all'accesso vero, non
+        // all'avvio con una sessione già aperta: lì le foto servono offline.
+        if (!wasAuthenticated && isNowAuthenticated) {
+          clearSignedImageCaches().catch(() => {})
+        }
 
         // Skip invite checks and redirects during password recovery flow
         if (event === 'PASSWORD_RECOVERY') {

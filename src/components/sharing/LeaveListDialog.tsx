@@ -52,7 +52,11 @@ export function LeaveListDialog({
 
         // Reload page to show new personal list
         setTimeout(() => {
-          window.location.reload()
+          // Di nuovo prima del reload: finché la pagina è questa, le card della
+          // lista lasciata possono ancora caricare una foto e rimetterla in cache.
+          clearSignedImageCaches()
+            .catch(() => {})
+            .finally(() => window.location.reload())
         }, 100)
       }
     } catch {

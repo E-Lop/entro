@@ -141,7 +141,14 @@ export function handleListMemberDelete(
     // Le foto della lista non sono più sue da vedere (#213).
     clearSignedImageCaches().catch(() => {});
     setTimeout(() => {
-      window.location.href = '/';
+      // Di nuovo, subito prima di andarsene: nei due secondi del messaggio le
+      // card sono ancora a schermo con indirizzi firmati validi, e una foto
+      // caricata in quel tempo rientrerebbe in cache.
+      clearSignedImageCaches()
+        .catch(() => {})
+        .finally(() => {
+          window.location.href = '/';
+        });
     }, 2000);
     return;
   }
