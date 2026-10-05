@@ -5,11 +5,16 @@ import { FoodCard } from '../FoodCard'
 import type { Food } from '@/lib/foods'
 
 // useSignedUrl hits Supabase storage; stub it so the card renders offline.
+const signedUrlState = vi.hoisted(() => ({ signedUrl: null as string | null }))
+
 vi.mock('@/hooks/useSignedUrl', () => ({
-  useSignedUrl: () => ({ signedUrl: null, isLoading: false, error: null }),
+  useSignedUrl: () => ({ signedUrl: signedUrlState.signedUrl, isLoading: false, error: null }),
 }))
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  signedUrlState.signedUrl = null
+})
 
 /** Build an expiry_date exactly `n` calendar days from today (timezone-safe). */
 function daysFromNow(n: number): string {
@@ -204,5 +209,17 @@ describe('FoodCard — a ogni larghezza esiste esattamente una strada', () => {
 
     expect(screen.getByRole('button', { name: 'Modifica Latte' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Elimina Latte' })).toBeTruthy()
+  })
+})
+
+describe('FoodCard — la foto (#211)', () => {
+  it('chiede la foto in CORS, così il service worker ne legge lo stato', () => {
+    signedUrlState.signedUrl =
+      'https://abcdefgh.supabase.co/storage/v1/object/sign/food-images/u/latte.jpg?token=t'
+    render(<FoodCard food={makeFood({ image_url: 'u/latte.jpg' })} />)
+
+    const photo = screen.getByAltText('Latte')
+    expect(photo.getAttribute('src')).toBe(signedUrlState.signedUrl)
+    expect(photo.getAttribute('crossorigin')).toBe('anonymous')
   })
 })
