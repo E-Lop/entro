@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.9] - 2026-10-07
+
+### Fixed
+- **«Riprova» sulla dashboard rilancia anche le categorie, quando mancano** ([#210](https://github.com/E-Lop/entro/issues/210), gemella di entro-mobile#216). Se all'apertura cadevano sia la lettura degli alimenti sia quella delle categorie, «Riprova» riportava gli alimenti e lasciava le categorie in errore finché la pagina non veniva ricaricata: sono due letture, e il pulsante rilanciava solo la prima. Il browser non rimediava da solo, perché il rilancio al ritorno sulla scheda è spento per tutta l'app. Di solito non si vedeva, perché chi ha già usato l'app ha le categorie in cache; colpiva la prima apertura. Ora i due «Riprova» rilanciano gli alimenti e, se le categorie non ci sono, anche loro; le categorie già caricate non vengono rilette. Vale anche per chi tocca «Riprova» mentre le categorie stanno ancora ritentando. Provato nel browser sul Supabase locale: l'E2E nuovo cade senza la correzione e passa con lei.
+
 ## [1.15.8] - 2026-10-05
 
 ### Security
@@ -1113,7 +1118,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.8...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.9...HEAD
+[1.15.9]: https://github.com/E-Lop/entro/compare/v1.15.8...v1.15.9
 [1.15.8]: https://github.com/E-Lop/entro/compare/v1.15.7...v1.15.8
 [1.15.7]: https://github.com/E-Lop/entro/compare/v1.15.6...v1.15.7
 [1.15.6]: https://github.com/E-Lop/entro/compare/v1.15.5...v1.15.6

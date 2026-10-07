@@ -28,6 +28,7 @@ import { Button } from '../components/ui/button'
 import type { Food, FilterParams } from '@/lib/foods'
 import { deriveDashboardData } from '@/lib/foodFilters'
 import { foodsLoadState } from '@/lib/foodsLoadState'
+import { reloadDashboard } from '@/lib/dashboardReload'
 import { parseFilterParams, buildSearchParams } from '@/lib/foodFilterParams'
 import { cn } from '@/lib/utils'
 
@@ -106,7 +107,10 @@ export function DashboardPage() {
     [allFoods, debouncedFilters],
   )
 
-  const { data: categories = [] } = useCategories()
+  const categoriesQuery = useCategories()
+  const categories = categoriesQuery.data ?? []
+  // «Riprova» rilancia anche le categorie, se sono loro a essere fallite (#210).
+  const reload = () => void reloadDashboard(foodsQuery, categoriesQuery)
 
   // Food CRUD dialogs and handlers
   const {
@@ -236,7 +240,7 @@ export function DashboardPage() {
             <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
             Non riusciamo ad aggiornare gli alimenti. Riprova tra poco.
           </span>
-          <Button variant="outline" className="min-h-11" onClick={() => void foodsQuery.refetch()}>
+          <Button variant="outline" className="min-h-11" onClick={reload}>
             <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
             Riprova
           </Button>
@@ -260,7 +264,7 @@ export function DashboardPage() {
               <p className="text-sm text-muted-foreground max-w-sm mb-6">
                 {isOnline ? 'Riprova tra poco.' : 'Controlla la connessione e riprova.'}
               </p>
-              <Button onClick={() => void foodsQuery.refetch()} className="min-h-11">
+              <Button onClick={reload} className="min-h-11">
                 <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
                 Riprova
               </Button>

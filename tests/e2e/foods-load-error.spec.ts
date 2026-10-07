@@ -31,6 +31,9 @@ const EMPTY = 'Nessun alimento ancora'
 /** Solo la lettura della lista degli alimenti: le scritture passano. */
 const FOODS_READ = '**/rest/v1/foods?select=*&deleted_at=is.null*'
 
+/** La lettura delle categorie: un'altra query, con la sua freschezza di un'ora. */
+const CATEGORIES_READ = '**/rest/v1/categories?select=*'
+
 function failWith500(route: Route) {
   return route.fulfill({
     status: 500,
@@ -81,6 +84,38 @@ test.describe('la dashboard quando la lettura degli alimenti fallisce', () => {
     await status.getByRole('button', { name: 'Riprova' }).click()
     await expect(page.getByRole('heading', { name: /Food E2E 0/ })).toBeVisible()
     await expect(status).toHaveCount(0)
+  })
+
+  test('se cadono anche le categorie, «Riprova» rilancia anche loro (#210)', async ({ page }) => {
+    // `refetchOnWindowFocus` è spento per tutta l'app: senza il rilancio di
+    // «Riprova» le categorie restavano in errore finché la pagina non veniva
+    // ricaricata. Un contesto nuovo non ha la cache di una sessione prima.
+    let failing = true
+    let categoryReads = 0
+    await page.route(FOODS_READ, (route) => (failing ? failWith500(route) : route.continue()))
+    await page.route(CATEGORIES_READ, (route) => {
+      categoryReads++
+      return failing ? failWith500(route) : route.continue()
+    })
+
+    await signIn(page, user)
+
+    const status = page.getByRole('status').filter({ hasText: UNAVAILABLE })
+    await expect(status).toBeVisible()
+    // Il tentativo e il suo unico ritentativo (`retry: 1`), entrambi falliti.
+    await expect.poll(() => categoryReads).toBeGreaterThanOrEqual(2)
+    const readsBeforeRetry = categoryReads
+
+    failing = false
+    const categoriesBack = page.waitForResponse(
+      (response) => response.url().includes('/rest/v1/categories') && response.status() === 200,
+    )
+    await status.getByRole('button', { name: 'Riprova' }).click()
+
+    await categoriesBack
+    expect(categoryReads).toBeGreaterThan(readsBeforeRetry)
+    await expect(page.getByRole('heading', { name: /Food E2E 0/ })).toBeVisible()
+    await expectNoServerText(page)
   })
 
   test('con la lista già caricata: un aggiornamento fallito lascia le card e mostra un avviso', async ({ page }) => {
