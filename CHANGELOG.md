@@ -5,6 +5,15 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.13] - 2026-10-08
+
+### Fixed
+- **Chi ha chiesto più contrasto al sistema ora vede il contorno dei campi** ([#217](https://github.com/E-Lop/entro/issues/217), gemella di entro-mobile#243). Il contorno di campi, menu a tendina e pulsanti con contorno stava a 1,26:1 sul fondo in chiaro e a 1,31:1 in scuro: sotto il 3:1 che WCAG 1.4.11 chiede al confine di un controllo. Con «Aumenta contrasto» attivo nel sistema (`prefers-contrast: more`) ora sta a 3,69:1 in chiaro e a 4,61:1 in scuro, e non scende sotto 3,38:1 sul fondo grigio più sfavorevole.
+
+  **Per tutti gli altri non cambia niente**: senza quella preferenza gli scatti di login e form, in chiaro e in scuro, sono identici pixel per pixel a quelli di prima. Card, separatori, contorno d'errore e anello del fuoco non cambiano in nessuna condizione: la regola tocca solo il colore dei campi.
+
+  Misurato dagli scatti in Chromium, emulando la preferenza, su login e form di modifica nei due temi. Non provato su un sistema con «Aumenta contrasto» acceso davvero, né su Safari e Firefox. I colori forzati di Windows (`forced-colors`) restano fuori.
+
 ## [1.15.12] - 2026-10-08
 
 ### Fixed
@@ -1151,7 +1160,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.12...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.13...HEAD
+[1.15.13]: https://github.com/E-Lop/entro/compare/v1.15.12...v1.15.13
 [1.15.12]: https://github.com/E-Lop/entro/compare/v1.15.11...v1.15.12
 [1.15.11]: https://github.com/E-Lop/entro/compare/v1.15.10...v1.15.11
 [1.15.10]: https://github.com/E-Lop/entro/compare/v1.15.9...v1.15.10

@@ -74,6 +74,24 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  /* Chi ha chiesto più contrasto al sistema ha il contorno dei campi ad almeno
+     3:1 sul fondo (WCAG 1.4.11, #217): di base sta a 1,26:1 in chiaro e 1,31:1
+     in scuro, e per gli altri resta così. Cambia solo --input, il ruolo di
+     campi, select e pulsanti con contorno; --border, che disegna card e
+     separatori, no. Il fondo peggiore è --muted: 3,38:1 in chiaro, 3,52:1 in
+     scuro. Lo tiene inputBorderContrast.test.ts.
+     Supporto (BCD css.at-rules.media.prefers-contrast, letto l'8 ott 2026):
+     Chrome 96, Firefox 101, Safari 14.1, Safari iOS 14.5. */
+  @media (prefers-contrast: more) {
+    :root {
+      --input: 0 0% 52%;
+    }
+
+    .dark {
+      --input: 0 0% 48%;
+    }
+  }
 }
 
 @layer base {
