@@ -1,4 +1,4 @@
-import { UserPlus, LogIn, LogOut } from 'lucide-react'
+import { UserPlus, LogIn, LogOut, UserMinus } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from '../ui/dialog'
 import { Button } from '../ui/button'
+import type { RemovableMember } from '../../lib/invites'
 
 interface InviteMenuDialogProps {
   open: boolean
@@ -15,6 +16,9 @@ interface InviteMenuDialogProps {
   onCreateInvite: () => void
   onAcceptInvite: () => void
   onLeaveList: () => void
+  /** I membri che l'utente può togliere. Vuoto per chi non può: l'elenco non compare. */
+  removableMembers: RemovableMember[]
+  onRemoveMember: (member: RemovableMember) => void
 }
 
 export function InviteMenuDialog({
@@ -24,6 +28,8 @@ export function InviteMenuDialog({
   onCreateInvite,
   onAcceptInvite,
   onLeaveList,
+  removableMembers,
+  onRemoveMember,
 }: InviteMenuDialogProps) {
   const handleOptionClick = (action: () => void) => {
     onOpenChange(false)
@@ -93,6 +99,32 @@ export function InviteMenuDialog({
                 </div>
               </div>
             </Button>
+          )}
+
+          {/* I membri, solo per chi li può togliere (#196) */}
+          {removableMembers.length > 0 && (
+            <section aria-labelledby="list-members-heading" className="rounded-md border p-4">
+              <h3 id="list-members-heading" className="font-medium">
+                Membri della lista
+              </h3>
+              <ul className="mt-2 divide-y">
+                {removableMembers.map((member) => (
+                  <li key={member.userId} className="flex items-center justify-between gap-inner py-2">
+                    <span className="min-w-0 break-words text-sm">{member.displayName}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-h-[44px] flex-shrink-0 border-destructive/50 text-destructive hover:bg-destructive/10"
+                      aria-label={`Togli ${member.displayName} dalla lista`}
+                      onClick={() => handleOptionClick(() => onRemoveMember(member))}
+                    >
+                      <UserMinus className="mr-1 h-4 w-4" aria-hidden="true" />
+                      Togli
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
       </DialogContent>

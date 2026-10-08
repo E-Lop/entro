@@ -19,11 +19,16 @@ Ogni affermazione qui sotto indica il file che la conferma. Se il codice cambia 
 | Alimenti tolti | tabella `foods` | Togliere un alimento non cancella la riga: imposta `deleted_at` e, se l'utente sceglie un esito, `status` (`consumed` o `wasted`) e `consumed_at`. La foto invece viene cancellata dallo Storage (`softDeleteFood` in `src/lib/foods.ts`). |
 | Foto | bucket Storage `food-images` | Un file per foto, nella cartella `{user_id}/` di chi l'ha caricata (`src/lib/storage.ts`). |
 | Liste e membri | tabelle `lists`, `list_members` | Nome della lista, chi l'ha creata, chi ne fa parte e da quando. |
+| Avviso di rimozione | tabella `list_removal_notices` | Per chi è stato tolto da una lista condivisa: l'utente, la lista da cui è stato tolto, quando. Non dice chi l'ha tolto. La riga la legge e la cancella solo lui: sparisce la prima volta che l'app gli mostra l'avviso (`supabase/migrations/20261008120000_remove_list_member.sql`). |
 | Inviti | tabella `invites` | Codice di 6 caratteri, lista, chi l'ha creato, scadenza, stato; l'email dell'invitato se l'invito è per email (`email`), oppure (`pending_user_email`) se l'invitato si è registrato con il codice prima della versione 1.12.20, quando il codice arrivava dopo la registrazione con `register_pending_invite`. Da allora arriva nei metadati dell'account (vedi la riga «Account»). |
 | Sottoscrizioni push | tabella `push_subscriptions` | Endpoint del servizio push del browser, le due chiavi della sottoscrizione, lo user agent del browser (`supabase/migrations/20260228_push_notifications.sql`, `src/lib/pushNotifications.ts`). |
 | Preferenze di notifica | tabella `notification_preferences` | Attivazione, giorni di anticipo, ore silenziose, limite giornaliero, fuso orario, e i contatori degli invii del giorno. |
 
 Le tabelle con i dati degli utenti hanno la RLS attiva: un utente legge e scrive le proprie righe e quelle delle liste di cui è membro.
+
+**Chi vede il nome degli altri membri.** `list_members` contiene solo gli identificativi. Il nome completo di un membro, o la sua email quando il nome manca, lo legge una persona sola per lista: chi può togliere membri, cioè chi ha creato la lista o, se non ne fa più parte, il membro entrato da più tempo (RPC `list_members_for_removal`). Agli altri membri la stessa lettura risponde zero righe.
+
+**Quando un membro viene tolto** (RPC `remove_list_member`), gli alimenti che aveva inserito restano nella lista, e le loro foto restano leggibili a chi resta (tabella `inherited_food_images`, come alla cancellazione di un account). Chi è stato tolto non legge più gli alimenti della lista né le foto caricate dagli altri. Le foto che aveva caricato lui stanno nella sua cartella dello Storage, e quelle continua a poterle leggere e cancellare.
 
 ### Nel browser
 
@@ -38,8 +43,9 @@ Cosa sparisce quando si esce, si cancella l'account o si lascia una lista:
 
 - **All'uscita («Disconnetti»), alla cancellazione dell'account, e quando la sessione finisce da sola** (chiusa da un altro dispositivo, o scaduta): la sessione, la copia delle liste in IndexedDB e le foto nella cache del service worker.
 - **A ogni nuovo accesso**: le foto nella cache del service worker, qualunque cosa fosse rimasta.
-- **Lasciando una lista condivisa, o venendone tolti mentre l'app è aperta**: le foto nella cache del service worker.
-- **Non coperto**: chi viene tolto da una lista mentre l'app è chiusa conserva su quel dispositivo le foto già viste, finché la cache non scade (7 giorni) o non esce. La cache serve le foto senza richiederle al server, quindi senza che il permesso venga ricontrollato: è ciò che le rende visibili offline.
+- **Lasciando una lista condivisa**: le foto nella cache del service worker.
+- **Venendone tolti**: alla prima apertura dell'app le foto nella cache del service worker; se l'app era aperta, al ritorno in primo piano anche la copia delle liste in IndexedDB, e la pagina si ricarica.
+- **Non coperto**: fra il momento in cui viene tolto e quello in cui riapre l'app con la rete, o ci torna sopra, chi è stato tolto conserva su quel dispositivo le foto già viste, finché la cache non scade (7 giorni) o non esce. La cache serve le foto senza richiederle al server, quindi senza che il permesso venga ricontrollato: è ciò che le rende visibili offline.
 
 Il codice non contiene un banner dei cookie, né script di analytics o di tracciamento degli errori.
 
