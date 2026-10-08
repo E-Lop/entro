@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.10] - 2026-10-08
+
+### Security
+- **Undici delle dodici segnalazioni Dependabot aperte si chiudono aggiornando il lockfile** ([#219](https://github.com/E-Lop/entro/issues/219)). `undici` 7.29.0 → 7.30.0 (sei segnalazioni, arriva da `jsdom`, cioè dai test), `brace-expansion` sulle tre linee dell'albero (1.1.21, 2.1.7, 5.0.12), `sharp` 0.35.4 → 0.35.5 e `source-map-js` 1.2.1 → 1.2.2. Tutte in dipendenze di **sviluppo**. Il `package.json` cambia solo nel numero di versione: gli intervalli e gli override accettavano già le versioni corrette, era fermo il lockfile.
+
+  In più `fast-uri` 3.1.7 → 3.1.8: `npm audit` la segnalava (GHSA-hrr3-gc8f-f4qj) e Dependabot non ancora. Stessa cura, stessa PR.
+
+  **Restano aperte due advisory, tutte e due sotto Tailwind 3.** `postcss-selector-parser`: la correzione è nella serie 7, e Tailwind 3 chiede la 6. `braces` (GHSA-vfj7-8cjw-p6xm): non esiste una versione corretta. Girano quando si genera il CSS, sui selettori e sui percorsi di questo repo. Sono le stesse valutate in entro-mobile#249 ed entro-mobile#246. `npm audit` passa da 12 voci a 7, che sono queste due risalite lungo la catena fino a `tailwindcss`.
+
+  Provato: lint, typecheck, 774 test, build, la suite di smoke e i 61 E2E sul Supabase locale; `sharp` ridimensionando un'immagine fuori dal repo. Non provato: che il bundle servito sia identico byte per byte a quello della 1.15.9.
+
 ## [1.15.9] - 2026-10-07
 
 ### Fixed
@@ -1118,7 +1129,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.9...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.10...HEAD
+[1.15.10]: https://github.com/E-Lop/entro/compare/v1.15.9...v1.15.10
 [1.15.9]: https://github.com/E-Lop/entro/compare/v1.15.8...v1.15.9
 [1.15.8]: https://github.com/E-Lop/entro/compare/v1.15.7...v1.15.8
 [1.15.7]: https://github.com/E-Lop/entro/compare/v1.15.6...v1.15.7
