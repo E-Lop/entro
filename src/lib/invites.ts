@@ -456,3 +456,113 @@ export async function leaveSharedList(): Promise<{ success: boolean; error: Erro
     }
   }
 }
+
+/** Un membro che chi è connesso può togliere dalla lista. */
+export interface RemovableMember {
+  userId: string
+  /** Il nome completo, o l'email quando il nome manca: lo decide il server. */
+  displayName: string
+}
+
+const LIST_MEMBERS_ERROR = 'Non è stato possibile caricare i membri della lista. Riprova.'
+
+/**
+ * I membri che l'utente può togliere dalla sua lista (#196).
+ *
+ * `list_members_for_removal()` risponde solo a chi può togliere: il creatore
+ * della lista, o il membro entrato da più tempo se il creatore non ne fa
+ * parte. A chiunque altro dà zero righe, che qui è «nessuno da togliere» e
+ * non un errore. È l'unica lettura che porta i nomi degli altri membri.
+ */
+export async function getRemovableMembers(): Promise<{ members: RemovableMember[]; error: Error | null }> {
+  try {
+    const { data, error } = await supabase.rpc('list_members_for_removal')
+    if (error) {
+      throw userFacingError(LIST_MEMBERS_ERROR, error)
+    }
+    return {
+      members: (data ?? []).map((row) => ({ userId: row.user_id, displayName: row.display_name })),
+      error: null,
+    }
+  } catch (error) {
+    logError('[getRemovableMembers] Failed:', error)
+    return { members: [], error: error instanceof Error ? error : new Error(LIST_MEMBERS_ERROR) }
+  }
+}
+
+const REMOVE_MEMBER_ERROR = 'Non è stato possibile togliere il membro. Riprova.'
+
+/** I rifiuti di `remove_list_member()` sono codici, come quelli di `leave_list()`. */
+const REMOVE_MEMBER_MESSAGES: Record<string, string> = {
+  not_authenticated: 'Sessione scaduta. Accedi di nuovo.',
+  not_authorized: 'Non puoi togliere membri da questa lista.',
+  not_a_member: 'Questa persona non fa più parte della lista.',
+  cannot_remove_self: 'Per uscire dalla lista usa «Abbandona lista condivisa».',
+}
+
+/**
+ * Toglie un membro dalla lista condivisa (#196).
+ *
+ * Una chiamata sola: `remove_list_member()` toglie la riga, dà alla persona
+ * una lista personale vuota, revoca gli inviti attivi della lista e le lascia
+ * l'avviso, nella stessa transazione. Gli alimenti che aveva inserito restano.
+ */
+export async function removeListMember(userId: string): Promise<{ success: boolean; error: Error | null }> {
+  try {
+    const { data, error } = await supabase.rpc('remove_list_member', { p_user_id: userId })
+    if (error) {
+      throw userFacingError(REMOVE_MEMBER_ERROR, error)
+    }
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row?.success) {
+      throw new Error(REMOVE_MEMBER_MESSAGES[row?.error_message ?? ''] ?? REMOVE_MEMBER_ERROR)
+    }
+    return { success: true, error: null }
+  } catch (error) {
+    logError('[removeListMember] Failed:', error)
+    return { success: false, error: error instanceof Error ? error : new Error(REMOVE_MEMBER_ERROR) }
+  }
+}
+
+/**
+ * C'è un avviso per chi è stato tolto da una lista? (#196)
+ *
+ * Solo una lettura, senza consumarlo: serve a chi torna sull'app in primo
+ * piano, per decidere se ricaricare. `null` quando non c'è, o quando la
+ * lettura non riesce: un avviso che non si legge non deve disturbare nessuno.
+ */
+export async function peekRemovalNotice(): Promise<{ listId: string | null } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('list_removal_notices')
+      .select('list_id')
+      .maybeSingle()
+    if (error || !data) return null
+    return { listId: data.list_id }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Consuma l'avviso di chi è stato tolto da una lista (#196).
+ *
+ * Il server lascia una riga per utente. Qui la si cancella chiedendola
+ * indietro, in un'istruzione sola: fra due schede o due dispositivi che
+ * aprono insieme la riceve uno solo, e l'avviso compare una volta. Risponde
+ * `true` quando c'è da dirlo all'utente. Chi nel frattempo è rientrato nella
+ * stessa lista non va avvisato: la riga sparisce e basta. Non solleva mai.
+ */
+export async function takeRemovalNotice(userId: string, currentListId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('list_removal_notices')
+      .delete()
+      .eq('user_id', userId)
+      .select('list_id')
+    if (error || !data || data.length === 0) return false
+    return data[0].list_id !== currentListId
+  } catch {
+    return false
+  }
+}

@@ -252,6 +252,10 @@ jobs:
       - name: Database concurrency (leave_list)
         run: bash supabase/tests/concurrency/leave_list_race.sh
 
+      # Il creatore toglie un membro mentre quel membro esce da sé (#196).
+      - name: Database concurrency (remove_list_member)
+        run: bash supabase/tests/concurrency/remove_list_member_race.sh
+
       # La suite di smoke API (#187) sullo stesso stack: crea le sentinelle A e
       # B, ripristino, livelli a, b e c, di nuovo ripristino. Prima dell'E2E
       # perché dura pochi secondi, e un rosso qui arriva quattro minuti prima.

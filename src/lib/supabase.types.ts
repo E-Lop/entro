@@ -247,6 +247,32 @@ export type Database = {
           },
         ]
       }
+      list_removal_notices: {
+        Row: {
+          created_at: string
+          list_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          list_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          list_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "list_removal_notices_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lists: {
         Row: {
           created_at: string | null
@@ -432,9 +458,25 @@ export type Database = {
           success: boolean
         }[]
       }
+      list_members_for_removal: {
+        Args: never
+        Returns: {
+          display_name: string
+          joined_at: string
+          user_id: string
+        }[]
+      }
+      list_remover: { Args: { p_list_id: string }; Returns: string }
       register_pending_invite: {
         Args: { p_email: string; p_short_code: string }
         Returns: boolean
+      }
+      remove_list_member: {
+        Args: { p_user_id: string }
+        Returns: {
+          error_message: string
+          success: boolean
+        }[]
       }
     }
     Enums: {

@@ -5,6 +5,23 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.16.0] - 2026-10-08
+
+### Added
+- **Chi ha creato una lista condivisa può togliere un membro** ([#196](https://github.com/E-Lop/entro/issues/196)). Fino a oggi chi entrava in una lista per errore ci restava finché non usciva da sé: revocare un invito previene, non rimedia. Ora chi ha creato la lista trova in fondo al menu «Inviti» l'elenco «Membri della lista», con «Togli» accanto a ogni nome: il nome completo, o l'email quando il nome manca. Se chi l'ha creata non ne fa più parte, l'elenco lo vede il membro entrato da più tempo. Gli altri membri non lo vedono, e il server i nomi li dà solo a chi può togliere.
+
+  Prima di togliere l'app chiede conferma, col nome della persona e le tre conseguenze: gli alimenti che ha inserito restano nella lista, con le loro foto; lei riparte da una lista personale vuota; gli inviti ancora attivi della lista smettono di funzionare, di chiunque siano, perché un codice non ha destinatario. Il rientro con un invito nuovo non è impedito.
+
+  Chi è stato tolto lo legge alla prossima apertura dell'app, o tornando sull'app se l'aveva aperta: «Non fai più parte della lista condivisa. I tuoi alimenti sono rimasti lì.» Una volta sola, su qualunque dispositivo, e senza dire chi l'ha tolto. In quel momento spariscono dal dispositivo le foto della lista tenute per l'uso offline.
+
+  Sul database è una funzione sola, `remove_list_member`, che fa tutto nella stessa transazione: se un passo fallisce non resta niente a metà, e nessuno resta senza lista. Una rimozione e un'uscita volontaria della stessa persona nello stesso momento lasciano una lista sola (provato con due sessioni sovrapposte, nei due ordini).
+
+  **Diverso da quanto deciso al triage**: il messaggio in tempo reale per chi ha l'app aperta non esisteva. Il gestore era nel codice ma nessuno lo chiamava, e `list_members` non è fra le tabelle che il server annuncia. Deciso l'8 ott 2026: niente realtime, l'avviso compare al ritorno in primo piano.
+
+  **Non coperto**: le foto che la persona tolta aveva caricato stanno nella sua cartella, e quelle continua a poterle leggere e cancellare. Chi resta le vede; se lei le cancella, l'alimento resta senza foto.
+
+  Provato in Chromium sul Supabase locale, con due utenti in due contesti: A toglie B con B collegato, e B tornando sulla scheda trova l'avviso e una lista vuota; A toglie B a app chiusa, e B alla riapertura trova l'avviso una volta sola. **Richiede la migrazione `20261008120000_remove_list_member.sql` in produzione prima di questa versione.**
+
 ## [1.15.13] - 2026-10-08
 
 ### Fixed
@@ -1160,7 +1177,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.13...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.16.0...HEAD
+[1.16.0]: https://github.com/E-Lop/entro/compare/v1.15.13...v1.16.0
 [1.15.13]: https://github.com/E-Lop/entro/compare/v1.15.12...v1.15.13
 [1.15.12]: https://github.com/E-Lop/entro/compare/v1.15.11...v1.15.12
 [1.15.11]: https://github.com/E-Lop/entro/compare/v1.15.10...v1.15.11

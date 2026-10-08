@@ -223,6 +223,18 @@ Per procedere clicca **"Conferma e unisciti"**. Non si torna indietro.
 
 Dal menu utente scegli **"Inviti"** → **"Abbandona lista condivisa"**, poi **"Abbandona lista"**. La voce c'è solo se sei in una lista con altri. Ti ritrovi con una lista personale vuota; gli altri membri tengono la lista e i suoi alimenti. Per rientrare serve un nuovo invito.
 
+### Togliere un membro dalla lista
+
+Chi ha creato la lista vede, in fondo al menu **"Inviti"**, l'elenco **"Membri della lista"**, con **"Togli"** accanto a ogni nome. Se chi l'ha creata non ne fa più parte, l'elenco lo vede il membro entrato da più tempo. Gli altri membri non lo vedono.
+
+Prima di togliere, l'app chiede conferma e dice cosa succede:
+
+- gli alimenti che quella persona ha inserito restano nella lista, con le loro foto;
+- lei riparte da una lista personale vuota, e non vede più la lista condivisa;
+- gli inviti ancora attivi della lista smettono di funzionare, di chiunque siano.
+
+Chi è stato tolto lo legge alla prossima apertura dell'app, o tornando sull'app se l'aveva aperta: **"Non fai più parte della lista condivisa. I tuoi alimenti sono rimasti lì."** L'avviso non dice chi l'ha tolto. Può rientrare con un invito nuovo.
+
 ### Come funziona
 
 - Tutti i membri vedono gli stessi alimenti in tempo reale
@@ -368,7 +380,7 @@ Un alimento che ha già una modifica in attesa non si può modificare né toglie
 |--------------|--------|
 | Attivazione notifiche push | Richiede registrazione sul server |
 | Modifica preferenze notifiche | Richiede salvataggio sul server |
-| Gestione liste condivise e inviti (creare, accettare, abbandonare) | Richiede comunicazione con il server |
+| Gestione liste condivise e inviti (creare, accettare, abbandonare, togliere un membro) | Richiede comunicazione con il server |
 | Esportazione dati | Richiede recupero dati dal server |
 | Scansione barcode | Richiede connessione a Open Food Facts |
 | Accesso | Per entrare serve la rete |

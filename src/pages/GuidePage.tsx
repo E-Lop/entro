@@ -276,6 +276,25 @@ export function GuidePage() {
             </p>
           </div>
           <div>
+            <h3 className="font-medium mb-2">Togliere un membro dalla lista</h3>
+            <p className="text-sm text-muted-foreground">
+              Chi ha creato la lista vede, in fondo al menu <strong className="text-foreground">"Inviti"</strong>, l'elenco <strong className="text-foreground">"Membri della lista"</strong>, con <strong className="text-foreground">"Togli"</strong> accanto a ogni nome.
+              Se chi l'ha creata non ne fa più parte, l'elenco lo vede il membro entrato da più tempo. Gli altri membri non lo vedono.
+            </p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Prima di togliere, l'app chiede conferma e dice cosa succede:
+            </p>
+            <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground mt-2">
+              <li>gli alimenti che quella persona ha inserito restano nella lista, con le loro foto;</li>
+              <li>lei riparte da una lista personale vuota, e non vede più la lista condivisa;</li>
+              <li>gli inviti ancora attivi della lista smettono di funzionare, di chiunque siano.</li>
+            </ul>
+            <p className="text-sm text-muted-foreground mt-2">
+              Chi è stato tolto lo legge alla prossima apertura dell'app, o tornando sull'app se l'aveva aperta: <strong className="text-foreground">"Non fai più parte della lista condivisa. I tuoi alimenti sono rimasti lì."</strong>{' '}
+              L'avviso non dice chi l'ha tolto. Può rientrare con un invito nuovo.
+            </p>
+          </div>
+          <div>
             <h3 className="font-medium mb-2">Come funziona</h3>
             <ul className="list-disc list-inside space-y-inner text-sm text-muted-foreground">
               <li>Tutti i membri vedono gli stessi alimenti in tempo reale</li>
@@ -484,7 +503,7 @@ export function GuidePage() {
             <ul className="list-disc list-inside space-y-inner">
               <li>Attivazione notifiche push (richiede registrazione sul server)</li>
               <li>Modifica preferenze notifiche (quando avvisarti)</li>
-              <li>Gestione liste condivise e inviti (creare, accettare, abbandonare)</li>
+              <li>Gestione liste condivise e inviti (creare, accettare, abbandonare, togliere un membro)</li>
               <li>Esportazione dati</li>
               <li>Scansione barcode (richiede connessione a Open Food Facts)</li>
               <li>Accesso: per entrare serve la rete</li>
