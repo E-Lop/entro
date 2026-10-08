@@ -69,7 +69,7 @@ vi.mock('@/lib/supabase', () => ({
   },
 }))
 
-import { getCurrentUser, getSession } from '@/lib/auth'
+import { getCurrentUser, getSession, readStoredSession } from '@/lib/auth'
 import { registerPendingInvite } from '@/lib/invites'
 import { getSignedImageUrl, getSignedImageUrls } from '@/lib/storage'
 import { redactSecrets, redactUrl, logError } from '@/lib/safeLog'
@@ -343,6 +343,22 @@ describe('flussi auth — niente segreti in console', () => {
     await getSession()
 
     expectNoSentinels()
+  })
+})
+
+describe('sessione salvata illeggibile — niente pezzi di token in console (#216)', () => {
+  afterEach(() => localStorage.clear())
+
+  it('readStoredSession con un contenuto che non è JSON', () => {
+    // Il messaggio di `JSON.parse` cita l'inizio del testo che non ha capito.
+    // Un token di rinnovo è opaco: `redactSecrets` non lo riconosce, quindi o
+    // l'errore non si logga, o un pezzo esce.
+    localStorage.setItem('sb-rmbmmwcxtnanacxbkihc-auth-token', OPAQUE_SECRET)
+
+    expect(readStoredSession()).toBeNull()
+
+    expect(output()).toContain('Sessione salvata illeggibile')
+    expect(output()).not.toContain(OPAQUE_SECRET.slice(0, 6))
   })
 })
 

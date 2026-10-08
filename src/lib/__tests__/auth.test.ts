@@ -10,16 +10,17 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockSignOut, mockUnsubscribeFromPush, mockClearPersistedCache, mockClearSignedImageCaches } =
+const { mockSignOut, mockGetUser, mockUnsubscribeFromPush, mockClearPersistedCache, mockClearSignedImageCaches } =
   vi.hoisted(() => ({
     mockSignOut: vi.fn(),
+    mockGetUser: vi.fn(),
     mockUnsubscribeFromPush: vi.fn(),
     mockClearPersistedCache: vi.fn(),
     mockClearSignedImageCaches: vi.fn(),
   }))
 
 vi.mock('@/lib/supabase', () => ({
-  supabase: { auth: { signOut: mockSignOut } },
+  supabase: { auth: { signOut: mockSignOut, getUser: mockGetUser } },
 }))
 
 vi.mock('@/lib/pushNotifications', () => ({
@@ -34,7 +35,7 @@ vi.mock('@/lib/signedImageCache', () => ({
   clearSignedImageCaches: mockClearSignedImageCaches,
 }))
 
-import { signOut } from '@/lib/auth'
+import { readStoredSession, signOut, verifySession } from '@/lib/auth'
 import { queryClient } from '@/lib/queryClient'
 
 /** Le chiavi che un utente loggato si trova in `localStorage`. */
@@ -258,5 +259,102 @@ describe('signOut', () => {
     const { localSessionCleared } = await signOut()
 
     expect(localSessionCleared).toBe(true)
+  })
+})
+
+/** La chiave con cui auth-js salva la sessione: `sb-<ref del progetto>-auth-token`. */
+const SESSION_KEY = 'sb-rmbmmwcxtnanacxbkihc-auth-token'
+
+/** Una sessione come la scrive auth-js, col token d'accesso scaduto da un'ora. */
+function storedSession(overrides: Record<string, unknown> = {}): string {
+  return JSON.stringify({
+    access_token: 'access',
+    refresh_token: 'refresh',
+    expires_at: Math.floor(Date.now() / 1000) - 3600,
+    user: { id: 'u1', email: 'utente@example.test' },
+    ...overrides,
+  })
+}
+
+describe('readStoredSession (#216)', () => {
+  it('con il token scaduto la sessione torna lo stesso, senza chiedere niente al server', () => {
+    localStorage.setItem(SESSION_KEY, storedSession())
+
+    expect(readStoredSession()?.user.id).toBe('u1')
+    expect(mockGetUser).not.toHaveBeenCalled()
+  })
+
+  it('archivio vuoto: nessuna sessione, e nessun errore nei log', () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    expect(readStoredSession()).toBeNull()
+    expect(logged).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['non è JSON', 'token-di-sessione'],
+    ['è JSON ma non un oggetto', 'null'],
+    ['manca l’utente', storedSession({ user: undefined })],
+    ['manca il token di rinnovo', storedSession({ refresh_token: undefined })],
+  ])('il contenuto %s: vale come nessuna sessione', (_label, content) => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    localStorage.setItem(SESSION_KEY, content)
+
+    expect(readStoredSession()).toBeNull()
+  })
+
+  it('le altre chiavi di auth-js non sono una sessione', () => {
+    localStorage.setItem(`${SESSION_KEY}-code-verifier`, storedSession())
+    localStorage.setItem('supabase.auth.token', storedSession())
+
+    expect(readStoredSession()).toBeNull()
+  })
+
+  it('se il browser blocca lo storage non solleva', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(localStorage, 'key').mockImplementation(() => {
+      throw new Error('SecurityError')
+    })
+    localStorage.setItem(SESSION_KEY, storedSession())
+
+    expect(readStoredSession()).toBeNull()
+  })
+})
+
+describe('verifySession (#216)', () => {
+  /** Un errore come lo dà auth-js: nome della classe e `status` HTTP. */
+  const authError = (name: string, status: number, message = 'errore') =>
+    Object.assign(new Error(message), { name, status })
+
+  it('il server riconosce l’utente: valida', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+
+    await expect(verifySession()).resolves.toBe('valid')
+  })
+
+  it.each([
+    ['la richiesta non parte', authError('AuthRetryableFetchError', 0, 'Failed to fetch')],
+    ['il server è in errore', authError('AuthApiError', 500)],
+    ['il gateway non risponde', authError('AuthRetryableFetchError', 503)],
+  ])('%s: non si sa, e non è un rifiuto', async (_label, error) => {
+    mockGetUser.mockResolvedValue({ data: { user: null }, error })
+
+    await expect(verifySession()).resolves.toBe('unknown')
+  })
+
+  it('anche se il client solleva invece di restituire l’errore: non si sa', async () => {
+    mockGetUser.mockRejectedValue(new TypeError('Failed to fetch'))
+
+    await expect(verifySession()).resolves.toBe('unknown')
+  })
+
+  it.each([
+    ['la sessione non c’è più', authError('AuthSessionMissingError', 400, 'Auth session missing!')],
+    ['il token non è accettato', authError('AuthApiError', 401)],
+    ['l’utente non esiste più', authError('AuthApiError', 403)],
+  ])('%s: rifiutata', async (_label, error) => {
+    mockGetUser.mockResolvedValue({ data: { user: null }, error })
+
+    await expect(verifySession()).resolves.toBe('rejected')
   })
 })
