@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.11] - 2026-10-08
+
+### Fixed
+- **Aprire l'app senza rete non porta più al login chi una sessione ce l'ha** ([#216](https://github.com/E-Lop/entro/issues/216), gemella di entro-mobile#235). Dopo più di un'ora dall'ultimo uso il token d'accesso è scaduto e va rinnovato. Se in quel momento il server non rispondeva, l'avvio prendeva il rinnovo fallito per un'uscita: 77 secondi di attesa a tutto schermo, poi la pagina di accesso. La sessione era ancora nel browser, e con lei la lista salvata per l'uso offline, che così non si vedeva.
+
+  Ora fra dashboard e login decide la sessione salvata, non la rete. Chi ne ha una entra subito e trova la lista che il dispositivo aveva già; se la sessione vale ancora lo dice il server dopo, senza far aspettare nessuno. Si esce solo quando è il server a rifiutarla, con la stessa pulizia di «Disconnetti», o quando una sessione salvata non c'è. Al ritorno della rete il token si rinnova da solo. I link di reimpostazione password e di conferma, che portano la sessione nell'indirizzo, passano dal percorso di prima.
+
+  Provato in Chromium sul Supabase locale. Sulla build col service worker e la rete spenta davvero: dashboard in meno di un secondo con le due card salvate, ancora lì dopo 86 secondi, e a rete tornata la lista è passata a cinque senza toccare niente. L'E2E nuovo fa cadere solo Supabase, perché gira sul server di sviluppo che non ha service worker: senza la correzione cade, e cade anche togliendo la sola parte che ignora la sessione vuota consegnata da auth-js.
+
+  **Non cambia** cosa si può fare senza rete una volta dentro. Con più progetti Supabase sulla stessa origine, cosa che succede solo in sviluppo, la sessione letta all'avvio è la prima trovata: se non è quella giusta il server la rifiuta e si esce.
+
 ## [1.15.10] - 2026-10-08
 
 ### Security
@@ -1129,7 +1140,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.10...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.11...HEAD
+[1.15.11]: https://github.com/E-Lop/entro/compare/v1.15.10...v1.15.11
 [1.15.10]: https://github.com/E-Lop/entro/compare/v1.15.9...v1.15.10
 [1.15.9]: https://github.com/E-Lop/entro/compare/v1.15.8...v1.15.9
 [1.15.8]: https://github.com/E-Lop/entro/compare/v1.15.7...v1.15.8

@@ -242,6 +242,69 @@ function isSessionMissingError(message: string): boolean {
   return lower.includes('session') && lower.includes('missing')
 }
 
+/** La chiave con cui auth-js salva la sessione: `sb-<ref del progetto>-auth-token`. */
+const STORED_SESSION_KEY = /^sb-.+-auth-token$/
+
+/**
+ * La sessione che questo browser ha in `localStorage`, **senza chiedere niente
+ * al server** e senza guardare se il token d'accesso è scaduto (#216).
+ *
+ * `supabase.auth.getSession()` non serve a questo: con il token scaduto prova
+ * a rinnovarlo, e se il server non risponde restituisce `null` pur lasciando
+ * la sessione in archivio. All'avvio quel `null` mandava al login chi una
+ * sessione l'aveva. Chi è dentro lo decide ciò che è salvato; se vale ancora
+ * lo dice poi `verifySession`, o il rinnovo di auth-js.
+ *
+ * Un contenuto illeggibile vale come nessuna sessione. Nel log va una frase
+ * fissa e non l'errore: il messaggio di `JSON.parse` cita il testo che non ha
+ * capito, cioè pezzi di token.
+ */
+export function readStoredSession(): Session | null {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (!key || !STORED_SESSION_KEY.test(key)) continue
+
+      const stored = localStorage.getItem(key)
+      if (!stored) return null
+
+      const session = JSON.parse(stored) as Partial<Session> | null
+      if (!session?.user?.id || !session.refresh_token) return null
+
+      return session as Session
+    }
+    return null
+  } catch {
+    logError('Sessione salvata illeggibile:', 'trattata come assente')
+    return null
+  }
+}
+
+/** Che cosa dice il server della sessione salvata. `unknown`: non ha risposto. */
+export type SessionVerdict = 'valid' | 'rejected' | 'unknown'
+
+/**
+ * Chiede al server se la sessione vale ancora.
+ *
+ * `rejected` solo quando è il server a dirlo: la sessione non c'è più, il
+ * token non è accettato (401), l'utente non esiste più (403). Una richiesta
+ * che non parte, un 5xx, un gateway che non risponde sono `unknown`, e
+ * `unknown` non è un'uscita.
+ */
+export async function verifySession(): Promise<SessionVerdict> {
+  try {
+    const { data, error } = await supabase.auth.getUser()
+
+    if (!error) return data.user ? 'valid' : 'unknown'
+    if (isSessionMissingError(error.message ?? '')) return 'rejected'
+
+    const { name, status } = error as { name?: string; status?: number }
+    return name === 'AuthApiError' && (status === 401 || status === 403) ? 'rejected' : 'unknown'
+  } catch {
+    return 'unknown'
+  }
+}
+
 /**
  * Get the currently authenticated user
  */

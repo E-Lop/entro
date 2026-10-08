@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 import type { User, Session } from '@supabase/supabase-js'
-import { onAuthStateChange, getSession, getCurrentUser, clearAuthStorage } from '../lib/auth'
+import {
+  onAuthStateChange,
+  getSession,
+  getCurrentUser,
+  clearAuthStorage,
+  readStoredSession,
+  signOut,
+  verifySession,
+} from '../lib/auth'
 import { clearSignedImageCaches } from '../lib/signedImageCache'
 import { logError, redactUrl } from '../lib/safeLog'
 import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
@@ -82,9 +90,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
    */
   initialize: async () => {
     try {
-      // Get initial session
-      const session = await getSession()
-      const user = await getCurrentUser()
+      // Password reset e magic link portano la sessione nell'URL: la legge
+      // auth-js, e lì si aspetta lui. In ogni altro avvio fra dashboard e
+      // login decide la sessione salvata, non la rete: un server che non
+      // risponde non è un'uscita, e l'attesa dura quanto la lettura
+      // dell'archivio (#216).
+      const sessionInUrl =
+        window.location.hash.includes('access_token') || window.location.hash.includes('refresh_token')
+      const session = sessionInUrl ? await getSession() : readStoredSession()
+      const user = sessionInUrl ? await getCurrentUser() : (session?.user ?? null)
 
       set({
         user,
@@ -154,7 +168,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // Security: Remove auth tokens from URL after they've been processed
       // This prevents accidental sharing of URLs with active tokens
-      if (window.location.hash.includes('access_token') || window.location.hash.includes('refresh_token')) {
+      if (sessionInUrl) {
         // Use replaceState to avoid adding to browser history
         const cleanUrl = window.location.pathname + window.location.search
         window.history.replaceState({}, document.title, cleanUrl)
@@ -165,6 +179,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       // Setup auth state change listener
       const unsubscribe = onAuthStateChange((event, user, session) => {
+        // Una sessione vuota è un'uscita solo se lo dice `SIGNED_OUT`. Con il
+        // token scaduto e il server irraggiungibile auth-js consegna
+        // `INITIAL_SESSION` con `null` e lascia la sessione in archivio:
+        // prenderlo per un'uscita mandava al login chi era dentro (#216).
+        if (user === null && event !== 'SIGNED_OUT') return
+
         const isNowAuthenticated = user !== null
 
         // Check if this is an explicit user action or auto-login
@@ -241,6 +261,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
         wasAuthenticated = isNowAuthenticated
       })
+
+      // Se la sessione salvata vale ancora lo dice il server, dopo e senza far
+      // aspettare nessuno. Esce solo chi il server rifiuta, con la pulizia di
+      // «Disconnetti»; e solo se è ancora lui, non chi è entrato nel frattempo.
+      if (user && !sessionInUrl) {
+        void verifySession().then(async (verdict) => {
+          if (verdict !== 'rejected') return
+          if (useAuthStore.getState().user?.id !== user.id) return
+          await signOut()
+          set({ user: null, session: null, isAuthenticated: false, loading: false })
+        })
+      }
 
       return unsubscribe
     } catch (error) {
