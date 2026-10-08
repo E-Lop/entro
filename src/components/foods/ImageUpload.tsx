@@ -27,7 +27,13 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
 
   // Generate signed URL for existing image path (edit mode with string path)
   const existingImagePath = typeof value === 'string' ? value : null
-  const { signedUrl, isLoading: signedUrlLoading, error: signedUrlError } = useSignedUrl(existingImagePath)
+  const {
+    signedUrl,
+    isLoading: signedUrlLoading,
+    error: signedUrlError,
+    loadFailed: signedUrlLoadFailed,
+    onLoadError: onSignedUrlLoadError,
+  } = useSignedUrl(existingImagePath)
 
   // Update local preview when value changes
   useEffect(() => {
@@ -153,7 +159,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
                   <p className="text-sm">Conversione immagine HEIC...</p>
                 </div>
               </div>
-            ) : signedUrlError ? (
+            ) : signedUrlError || (!localPreview && signedUrlLoadFailed) ? (
               <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
                 <ImageIcon className="w-12 h-12 mb-2" aria-hidden="true" />
                 <span className="text-xs">Errore caricamento</span>
@@ -163,6 +169,7 @@ export function ImageUpload({ value, onChange, disabled = false }: ImageUploadPr
                 src={displayPreview}
                 alt="Anteprima immagine alimento"
                 loading="lazy"
+                onError={localPreview ? undefined : onSignedUrlLoadError}
                 className="w-full h-full object-cover"
               />
             ) : null}

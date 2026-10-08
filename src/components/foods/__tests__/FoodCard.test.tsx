@@ -5,15 +5,27 @@ import { FoodCard } from '../FoodCard'
 import type { Food } from '@/lib/foods'
 
 // useSignedUrl hits Supabase storage; stub it so the card renders offline.
-const signedUrlState = vi.hoisted(() => ({ signedUrl: null as string | null }))
+const signedUrlState = vi.hoisted(() => ({
+  signedUrl: null as string | null,
+  loadFailed: false,
+  onLoadError: vi.fn(),
+}))
 
 vi.mock('@/hooks/useSignedUrl', () => ({
-  useSignedUrl: () => ({ signedUrl: signedUrlState.signedUrl, isLoading: false, error: null }),
+  useSignedUrl: () => ({
+    signedUrl: signedUrlState.signedUrl,
+    isLoading: false,
+    error: null,
+    loadFailed: signedUrlState.loadFailed,
+    onLoadError: signedUrlState.onLoadError,
+  }),
 }))
 
 afterEach(() => {
   cleanup()
   signedUrlState.signedUrl = null
+  signedUrlState.loadFailed = false
+  signedUrlState.onLoadError.mockClear()
 })
 
 /** Build an expiry_date exactly `n` calendar days from today (timezone-safe). */
@@ -221,5 +233,27 @@ describe('FoodCard — la foto (#211)', () => {
     const photo = screen.getByAltText('Latte')
     expect(photo.getAttribute('src')).toBe(signedUrlState.signedUrl)
     expect(photo.getAttribute('crossorigin')).toBe('anonymous')
+  })
+
+  it('se la foto non si carica lo dice all’hook, che ne richiede l’indirizzo', () => {
+    signedUrlState.signedUrl = 'https://abcdefgh.supabase.co/storage/v1/object/sign/food-images/u/latte.jpg?token=t'
+    render(<FoodCard food={makeFood({ image_url: 'u/latte.jpg' })} />)
+
+    fireEvent.error(screen.getByAltText('Latte'))
+
+    expect(signedUrlState.onLoadError).toHaveBeenCalledTimes(1)
+  })
+
+  it('una foto che non si carica lascia il segnaposto degli alimenti senza foto, non un’immagine rotta', () => {
+    signedUrlState.signedUrl = 'https://abcdefgh.supabase.co/storage/v1/object/sign/food-images/u/latte.jpg?token=t'
+    signedUrlState.loadFailed = true
+    const { container } = render(<FoodCard food={makeFood({ image_url: 'u/latte.jpg' })} />)
+    const withoutPhoto = render(<FoodCard food={makeFood({ id: 'food-2', name: 'Burro' })} />)
+
+    expect(screen.queryByAltText('Latte')).toBeNull()
+    expect(screen.queryByText('Errore caricamento')).toBeNull()
+    const placeholder = (root: HTMLElement) => root.querySelector('.border-dashed')?.outerHTML
+    expect(placeholder(container)).toBeTruthy()
+    expect(placeholder(container)).toBe(placeholder(withoutPhoto.container))
   })
 })

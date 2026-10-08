@@ -90,7 +90,13 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
   const formattedExpiryDate = format(new Date(food.expiry_date), 'dd MMM yyyy', { locale: it })
 
   // Generate signed URL for private image
-  const { signedUrl, isLoading: imageLoading, error: imageError } = useSignedUrl(food.image_url)
+  const {
+    signedUrl,
+    isLoading: imageLoading,
+    error: imageError,
+    loadFailed: imageLoadFailed,
+    onLoadError: onImageLoadError,
+  } = useSignedUrl(food.image_url)
 
   // Check if this is a remote update
   const foodWithMetadata = food as FoodWithRealtimeMetadata
@@ -209,7 +215,14 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
       <CardContent className="pb-3 space-y-inner">
         {/* Food Image */}
         {(() => {
-          const imageState = getImageState(!!food.image_url, imageLoading, !!imageError, signedUrl)
+          // Una foto che non si carica si mostra come un alimento senza foto,
+          // non con l'icona dell'immagine rotta del browser (#211).
+          const imageState = getImageState(
+            !!food.image_url && !imageLoadFailed,
+            imageLoading,
+            !!imageError,
+            signedUrl
+          )
 
           switch (imageState) {
             case 'loading':
@@ -241,6 +254,7 @@ export function FoodCard({ food, category, onEdit, onDelete, showHintAnimation =
                     // distingue la foto da un errore (#211, `signedImageCache`).
                     crossOrigin="anonymous"
                     loading="lazy"
+                    onError={onImageLoadError}
                     className="w-full h-full object-cover"
                   />
                 </div>
