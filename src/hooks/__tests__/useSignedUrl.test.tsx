@@ -9,7 +9,7 @@
  * passaggio Calendario → Lista.
  */
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, focusManager, useQuery } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -24,7 +24,7 @@ vi.mock('@/lib/pendingImages', () => ({
 }))
 vi.mock('@/lib/safeLog', () => ({ logError: mocks.logError }))
 
-import { usePrefetchSignedUrls, useSignedUrl } from '../useSignedUrl'
+import { SIGNED_URL_STALE_MS, usePrefetchSignedUrls, useSignedUrl } from '../useSignedUrl'
 
 const urlOf = (path: string) => `https://ref.supabase.co/sign/${path}?token=t`
 
@@ -184,5 +184,188 @@ describe('usePrefetchSignedUrls', () => {
     expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(1)
     expect(mocks.getSignedImageUrls).toHaveBeenCalledWith(['u/a.jpg', 'u/b.jpg'], 3600)
     list.unmount()
+  })
+})
+
+/**
+ * Una signed URL vale un'ora, e prima della #211 niente la rinnovava mentre la
+ * card restava montata: le foto più in basso, che il browser chiede solo
+ * scorrendo, partivano con un token scaduto.
+ */
+describe('il rinnovo delle signed URL (#211)', () => {
+  /** Ogni firma è diversa dalla precedente, come quelle vere. */
+  let round: number
+
+  beforeEach(() => {
+    round = 0
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    // Come il client dell'app: al fuoco non si rilegge niente, salvo eccezioni.
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false, staleTime: 5 * 60 * 1000 } },
+    })
+    mocks.getSignedImageUrls.mockImplementation(async (paths: string[]) => {
+      round++
+      return new Map(paths.map((p) => [p, `${urlOf(p)}${round}`]))
+    })
+  })
+
+  afterEach(() => {
+    focusManager.setFocused(undefined)
+    vi.useRealTimers()
+  })
+
+  const loaded = (result: { current: { signedUrl: string | null }[] }) =>
+    waitFor(() => expect(result.current.every((r) => r.signedUrl)).toBe(true))
+
+  it('con le card montate, passata la freschezza le firme si richiedono di nuovo, in una richiesta sola', async () => {
+    const { result } = mountCards(['u/a.jpg', 'u/b.jpg', 'u/c.jpg'])
+    await loaded(result)
+    expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(1)
+
+    await act(() => vi.advanceTimersByTimeAsync(SIGNED_URL_STALE_MS + 1000))
+
+    await waitFor(() => expect(result.current[0].signedUrl).toBe(`${urlOf('u/a.jpg')}2`))
+    expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(2)
+    expect(mocks.getSignedImageUrls).toHaveBeenLastCalledWith(['u/a.jpg', 'u/b.jpg', 'u/c.jpg'], 3600)
+  })
+
+  it('il rinnovo arriva prima della scadenza', () => {
+    expect(SIGNED_URL_STALE_MS).toBeLessThan(3600 * 1000)
+  })
+
+  it('al ritorno in primo piano dopo un’assenza si rinnovano le firme, e le altre query dell’app no', async () => {
+    const other = vi.fn(async () => 'alimenti')
+    const { result } = renderHook(
+      () => ({
+        cards: ['u/a.jpg', 'u/b.jpg'].map((ref) => useSignedUrl(ref)),
+        foods: useQuery({ queryKey: ['foods'], queryFn: other }),
+      }),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.cards.every((r) => r.signedUrl)).toBe(true))
+    await waitFor(() => expect(result.current.foods.data).toBe('alimenti'))
+
+    // In background i timer del browser non girano: passa più di un'ora
+    // senza che l'intervallo scatti.
+    focusManager.setFocused(false)
+    vi.setSystemTime(Date.now() + 2 * 3600 * 1000)
+    await act(async () => focusManager.setFocused(true))
+
+    await waitFor(() => expect(result.current.cards[0].signedUrl).toBe(`${urlOf('u/a.jpg')}2`))
+    expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(2)
+    expect(mocks.getSignedImageUrls).toHaveBeenLastCalledWith(['u/a.jpg', 'u/b.jpg'], 3600)
+    expect(other).toHaveBeenCalledTimes(1)
+  })
+
+  it('un ritorno in primo piano con le firme ancora fresche non richiede niente', async () => {
+    const { result } = mountCards(['u/a.jpg'])
+    await loaded(result)
+
+    focusManager.setFocused(false)
+    vi.setSystemTime(Date.now() + 10 * 60 * 1000)
+    await act(async () => focusManager.setFocused(true))
+    await act(() => vi.advanceTimersByTimeAsync(50))
+
+    expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(1)
+  })
+
+  it('durante il rinnovo la foto a schermo resta: stessa URL, nessun caricamento', async () => {
+    let release: () => void = () => {}
+    const { result } = mountCards(['u/a.jpg'])
+    await loaded(result)
+    const before = result.current[0].signedUrl
+    mocks.getSignedImageUrls.mockImplementation(
+      (paths: string[]) =>
+        new Promise((resolve) => {
+          release = () => resolve(new Map(paths.map((p) => [p, `${urlOf(p)}nuova`])))
+        })
+    )
+
+    await act(() => vi.advanceTimersByTimeAsync(SIGNED_URL_STALE_MS + 1000))
+    await waitFor(() => expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(2))
+
+    expect(result.current[0]).toMatchObject({ signedUrl: before, isLoading: false, error: null })
+
+    await act(async () => release())
+    await waitFor(() => expect(result.current[0].signedUrl).toBe(`${urlOf('u/a.jpg')}nuova`))
+  })
+
+  it('se il rinnovo fallisce la foto a schermo resta, senza errore', async () => {
+    const { result } = mountCards(['u/a.jpg'])
+    await loaded(result)
+    const before = result.current[0].signedUrl
+    mocks.getSignedImageUrls.mockRejectedValue(new Error('giù'))
+
+    await act(() => vi.advanceTimersByTimeAsync(SIGNED_URL_STALE_MS + 1000))
+    await waitFor(() => expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(2))
+    await act(() => vi.advanceTimersByTimeAsync(50))
+
+    expect(result.current[0]).toMatchObject({ signedUrl: before, isLoading: false, error: null, loadFailed: false })
+  })
+})
+
+/** Rete di sicurezza: una foto che non si carica non resta rotta (#211). */
+describe('una foto che non si carica (#211)', () => {
+  let round: number
+
+  beforeEach(() => {
+    round = 0
+    mocks.getSignedImageUrls.mockImplementation(async (paths: string[]) => {
+      round++
+      return new Map(paths.map((p) => [p, `${urlOf(p)}${round}`]))
+    })
+  })
+
+  it('chiede di nuovo l’indirizzo, una volta, e intanto dice che la foto non c’è', async () => {
+    const { result } = mountCards(['u/a.jpg'])
+    await waitFor(() => expect(result.current[0].signedUrl).toBe(`${urlOf('u/a.jpg')}1`))
+    expect(result.current[0].loadFailed).toBe(false)
+
+    act(() => result.current[0].onLoadError())
+    expect(result.current[0].loadFailed).toBe(true)
+
+    await waitFor(() => expect(result.current[0].signedUrl).toBe(`${urlOf('u/a.jpg')}2`))
+    expect(result.current[0].loadFailed).toBe(false)
+    expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(2)
+  })
+
+  it('se fallisce anche l’indirizzo nuovo resta senza foto, e non chiede più niente', async () => {
+    const { result } = mountCards(['u/a.jpg'])
+    await waitFor(() => expect(result.current[0].signedUrl).toBeTruthy())
+
+    act(() => result.current[0].onLoadError())
+    await waitFor(() => expect(result.current[0].signedUrl).toBe(`${urlOf('u/a.jpg')}2`))
+    act(() => result.current[0].onLoadError())
+    act(() => result.current[0].onLoadError())
+    await new Promise((resolve) => setTimeout(resolve, 20))
+
+    expect(result.current[0].loadFailed).toBe(true)
+    expect(mocks.getSignedImageUrls).toHaveBeenCalledTimes(2)
+  })
+
+  it('una foto sostituita riparte da capo', async () => {
+    const { result, rerender } = renderHook(({ path }) => useSignedUrl(path), {
+      wrapper,
+      initialProps: { path: 'u/a.jpg' },
+    })
+    await waitFor(() => expect(result.current.signedUrl).toBeTruthy())
+    act(() => result.current.onLoadError())
+    await waitFor(() => expect(result.current.signedUrl).toBe(`${urlOf('u/a.jpg')}2`))
+    act(() => result.current.onLoadError())
+    expect(result.current.loadFailed).toBe(true)
+
+    rerender({ path: 'u/b.jpg' })
+    await waitFor(() => expect(result.current.signedUrl).toContain('u/b.jpg'))
+
+    expect(result.current.loadFailed).toBe(false)
+  })
+
+  it('per una foto che non si firma non c’è niente da richiedere', () => {
+    const { result } = mountCards(['https://vecchio.example/intero.jpg'])
+
+    act(() => result.current[0].onLoadError())
+
+    expect(result.current[0].loadFailed).toBe(true)
+    expect(mocks.getSignedImageUrls).not.toHaveBeenCalled()
   })
 })

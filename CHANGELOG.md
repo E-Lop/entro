@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.15.12] - 2026-10-08
+
+### Fixed
+- **Con la lista aperta da più di un'ora, le foto più in basso non restano rotte** ([#211](https://github.com/E-Lop/entro/issues/211)). L'indirizzo firmato di una foto vale un'ora e niente lo rinnovava mentre la card restava a schermo. Il browser chiede le foto più in basso solo quando ci si scorre sopra: dopo un'ora le chiedeva con un indirizzo scaduto, l'archivio rifiutava, e al posto della foto restava l'icona dell'immagine rotta fino al riavvio dell'app. È l'innesco del difetto corretto nella 1.15.6, dove quel rifiuto finiva anche nella cache.
+
+  Ora gli indirizzi si rinnovano da soli dopo 55 minuti finché la foto è a schermo, tutti in una richiesta. Tornando sull'app dopo averla lasciata in background si rinnovano quelli invecchiati nel frattempo: con la pagina nascosta i timer del browser non girano, e l'intervallo da solo non bastava. Solo le foto rileggono al ritorno; il resto dell'app no, come prima. Durante il rinnovo la foto a schermo resta, e resta anche se il rinnovo fallisce.
+
+  Se una foto non si carica lo stesso, la card ne richiede l'indirizzo una volta. Se non si carica nemmeno così mostra il riquadro degli alimenti senza foto, e non chiede altro. Nel form di modifica l'anteprima fa lo stesso, e al posto della foto dice «Errore caricamento»; la foto si può ancora togliere.
+
+  Provato in Chromium sul Supabase locale, con la scadenza della firma portata a 3 secondi: quattordici card, attesa, scorrimento fino in fondo. Prima 10 foto su 14, ora 14. Il rinnovo dopo 55 minuti è provato nel browser spostando l'orologio della pagina; quello al ritorno in primo piano solo nei test unitari.
+
 ## [1.15.11] - 2026-10-08
 
 ### Fixed
@@ -1140,7 +1151,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.11...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.15.12...HEAD
+[1.15.12]: https://github.com/E-Lop/entro/compare/v1.15.11...v1.15.12
 [1.15.11]: https://github.com/E-Lop/entro/compare/v1.15.10...v1.15.11
 [1.15.10]: https://github.com/E-Lop/entro/compare/v1.15.9...v1.15.10
 [1.15.9]: https://github.com/E-Lop/entro/compare/v1.15.8...v1.15.9

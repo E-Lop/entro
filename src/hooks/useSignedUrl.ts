@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSignedImageUrls } from '@/lib/storage'
 import { getPendingImage, isPendingUrl } from '@/lib/pendingImages'
@@ -18,6 +18,8 @@ const SIGNED_URL_SECONDS = 3600
 /**
  * Cinque minuti prima della scadenza: il rinnovo deve precedere l'ora, o una
  * card rimontata riceverebbe dalla cache un token già morto.
+ *
+ * È anche l'intervallo con cui una foto a schermo rinnova la sua firma (#211).
  */
 export const SIGNED_URL_STALE_MS = (SIGNED_URL_SECONDS - 5 * 60) * 1000
 
@@ -159,6 +161,17 @@ function usePendingImageUrl(pendingUrl: string | null) {
  * `signedUrl` è `null` anche quando l'oggetto non esiste più: è uno stato
  * previsto, non un errore, e l'alimento si mostra senza foto. Una foto
  * sostituita non riusa la URL vecchia dalla cache perché ha un percorso nuovo.
+ *
+ * Una firma vale un'ora, e una foto resta a schermo anche di più (#211). Per
+ * questo la firma si rinnova da sola finché qualcuno la guarda, e al ritorno
+ * in primo piano se nel frattempo è invecchiata: in background i timer del
+ * browser non girano, e l'intervallo da solo non basterebbe. Il fuoco è
+ * riacceso solo qui; per il resto dell'app resta spento in `queryClient`.
+ * Durante il rinnovo resta la URL di prima, e se il rinnovo fallisce pure.
+ *
+ * `onLoadError` va all'`onError` dell'immagine: l'indirizzo si richiede una
+ * volta, e finché non ne arriva uno diverso `loadFailed` dice di non mostrarla.
+ * Se non si carica nemmeno quello, non si chiede altro.
  */
 export function useSignedUrl(storagePath: string | null | undefined) {
   const path = remotePath(storagePath)
@@ -169,13 +182,35 @@ export function useSignedUrl(storagePath: string | null | undefined) {
     queryFn: () => loadSignedUrl(path as string),
     enabled: path !== null,
     staleTime: SIGNED_URL_STALE_MS,
+    refetchInterval: SIGNED_URL_STALE_MS,
+    refetchOnWindowFocus: true,
   })
   const local = usePendingImageUrl(pendingUrl)
 
-  if (pendingUrl) return { signedUrl: local.url, isLoading: local.isLoading, error: local.error }
-  if (path) {
-    return { signedUrl: remote.data ?? null, isLoading: remote.isPending, error: remote.error }
-  }
   // Niente da firmare: nessuna foto, o un URL intero che si usa com'è.
-  return { signedUrl: storagePath ?? null, isLoading: false, error: null }
+  const state = pendingUrl
+    ? { signedUrl: local.url, isLoading: local.isLoading, error: local.error }
+    : path
+      ? {
+          signedUrl: remote.data ?? null,
+          isLoading: remote.isPending,
+          error: remote.data ? null : remote.error,
+        }
+      : { signedUrl: storagePath ?? null, isLoading: false, error: null }
+
+  const [failure, setFailure] = useState<{
+    ref: string | null | undefined
+    url: string | null
+  } | null>(null)
+  // Di un'altra foto: non conta più.
+  const failed = failure?.ref === storagePath ? failure : null
+  const { signedUrl } = state
+  const { refetch } = remote
+
+  const onLoadError = useCallback(() => {
+    setFailure({ ref: storagePath, url: signedUrl })
+    if (path && !failed) void refetch()
+  }, [storagePath, signedUrl, path, failed, refetch])
+
+  return { ...state, loadFailed: failed !== null && failed.url === signedUrl, onLoadError }
 }
