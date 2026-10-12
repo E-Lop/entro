@@ -72,6 +72,23 @@ Un test nuovo che legge i repo affiancati va chiamato `*.family.test.ts`. Se non
 - **Codice in inglese.** Nomi di variabili, funzioni, tipi, proprietà e file sono in inglese; prosa, commenti e testo a schermo in italiano. Lo controlla `englishNames.family.test.ts`, che fa parte dei guardiani di famiglia perché la lista delle parole italiane sta in `entro-family`.
 - **Niente dati della risposta nei log.** `console.error`, `console.warn` e simili non possono ricevere un secondo argomento: ne stamperebbero le proprietà, dove i client Supabase mettono i dati della risposta. Si usano `logError` e `logWarn` da `@/lib/safeLog`. È la regola `no-restricted-syntax` in `eslint.config.js`, quindi `npm run lint` la fa rispettare.
 
+## Controllo settimanale delle dipendenze
+
+Ogni lunedì il workflow «Controllo settimanale delle dipendenze» confronta `npm audit` con l'elenco delle segnalazioni già valutate, `ACCEPTED` in `scripts/weekly-audit.mjs`. Si lancia anche a mano dalla scheda Actions. È verde finché non cambia niente, anche se `npm audit` riporta segnalazioni: quelle in elenco sono state valutate e accettate nella [#222](https://github.com/E-Lop/entro/issues/222).
+
+Quando esce rosso il log dice quale dei tre casi è:
+
+- **una segnalazione non ancora valutata**: si aggiorna il pacchetto, se una versione corretta è installabile. Altrimenti si scrive la valutazione in una issue di questo repo (perché non si corregge, dove gira il codice, quando si rilegge) e si aggiunge la voce ad `ACCEPTED` con il numero della issue;
+- **una accettata non compare più**: si toglie la voce da `ACCEPTED` e dalla issue che la valutava;
+- **una accettata ha ora una versione corretta**: si rilegge la valutazione. Se la correzione è installabile si aggiorna il pacchetto e si toglie la voce; se non lo è si aggiorna `patched` nella voce e si scrive il perché nella issue.
+
+In locale:
+
+```bash
+node scripts/weekly-audit.mjs --accepted | while read -r id; do gh api "/advisories/$id"; done | jq -s . > /tmp/advisories.json
+npm audit --json --audit-level none | node scripts/weekly-audit.mjs --advisories /tmp/advisories.json
+```
+
 ## Test end-to-end
 
 I test Playwright usano Supabase locale e creano utenti temporanei con la service role key locale standard:
