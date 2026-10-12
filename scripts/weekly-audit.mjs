@@ -60,6 +60,12 @@ export const ACCEPTED = {
     patched: '7.1.6',
     why: 'la correzione è nella serie 7 e Tailwind 3 chiede la 6; gira solo quando si genera il CSS',
   },
+  'GHSA-vfj7-8cjw-p6xm': {
+    issue: 222,
+    package: 'braces',
+    patched: null,
+    why: 'nessuna versione corretta pubblicata; gira solo dentro Tailwind 3, sui glob di questo repo',
+  },
 }
 
 /** Sollevata quando un input non ha la forma che questo script sa leggere. */
