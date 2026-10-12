@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.17.0] - 2026-10-12
+
+### Added
+- **Un controllo settimanale delle segnalazioni di sicurezza delle dipendenze** ([#221](https://github.com/E-Lop/entro/issues/221)). Le segnalazioni si scoprivano aprendo la scheda Security o leggendo l'output di `git push`, e la scheda da sola non le mostrava tutte: l'8 ottobre `npm audit` ne dava due, `fast-uri` e `braces`, che Dependabot non aveva aperto. Ora ogni lunedì un workflow confronta `npm audit` con l'elenco delle segnalazioni già valutate (`scripts/weekly-audit.mjs`), e si può lanciare a mano.
+
+  Non esce rosso perché «ci sono vulnerabilità»: le due che restano, `postcss-selector-parser` e `braces`, arrivano da Tailwind 3 e sono accettate nella [#222](https://github.com/E-Lop/entro/issues/222), e un rosso permanente insegnerebbe a ignorarlo. Esce rosso quando c'è qualcosa da fare: una segnalazione non ancora valutata, una accettata che non compare più, una accettata che ha ora una versione corretta diversa da quella del giorno della valutazione. Che una correzione esista lo legge dall'advisory su GitHub e non da `fixAvailable` di npm, che per `braces` propone il passaggio a Tailwind 4 mentre una versione corretta di `braces` non esiste.
+
+  Se non capisce il proprio input (un rapporto che non è JSON, una forma cambiata, un'advisory che manca) fallisce invece di passare. Cosa fare quando esce rosso sta in `CONTRIBUTING.md`.
+
+  L'app non cambia: nessun file che il browser scarica è stato toccato.
+
 ## [1.16.0] - 2026-10-08
 
 ### Added
@@ -1177,7 +1188,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.16.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.0...HEAD
+[1.17.0]: https://github.com/E-Lop/entro/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/E-Lop/entro/compare/v1.15.13...v1.16.0
 [1.15.13]: https://github.com/E-Lop/entro/compare/v1.15.12...v1.15.13
 [1.15.12]: https://github.com/E-Lop/entro/compare/v1.15.11...v1.15.12

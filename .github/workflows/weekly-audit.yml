@@ -1,0 +1,72 @@
+# Le segnalazioni di sicurezza delle dipendenze, guardate una volta a settimana
+# in un posto che si guarda (#221).
+#
+# Prima si scoprivano aprendo la scheda Security o leggendo l'output di
+# `git push`, e la scheda da sola non le mostrava tutte: l'8 ott 2026
+# `npm audit` ne dava due che Dependabot non aveva aperto.
+#
+# Il giudizio lo dà `scripts/weekly-audit.mjs`, che esce rosso solo quando
+# qualcuno ha qualcosa da fare: una segnalazione nuova, una accettata che non
+# c'è più, una accettata che ha ora una versione corretta. Cosa fare quando
+# esce rosso sta in `CONTRIBUTING.md`, «Controllo settimanale delle dipendenze».
+
+name: Controllo settimanale delle dipendenze
+
+on:
+  schedule:
+    # Lunedì alle 07:00 UTC. Settimanale e non giornaliero: un controllo che
+    # parla ogni giorno viene filtrato via come il rosso permanente che
+    # sostituisce.
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+  # Chi cambia il controllo lo vede girare prima del merge. `workflow_dispatch`
+  # da solo non basta: un workflow che non è ancora su `main` non si lancia a mano.
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/weekly-audit.mjs'
+      - '.github/workflows/weekly-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: È cambiato qualcosa?
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      # Dal lockfile: si guarda l'albero che `main` installa davvero.
+      - name: Install dependencies
+        run: npm ci
+
+      # Se una accettata ha una versione corretta lo dice l'advisory, non
+      # `fixAvailable` di npm. L'elenco lo stampa lo script, così gli
+      # identificatori stanno scritti in un posto solo.
+      - name: Advisory delle segnalazioni accettate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node scripts/weekly-audit.mjs --accepted | while read -r id; do
+            gh api "/advisories/$id"
+          done | jq -s . > "$RUNNER_TEMP/advisories.json"
+          echo "advisory lette: $(jq length "$RUNNER_TEMP/advisories.json")"
+
+      # `--audit-level none`: `npm audit --json` esce 1 quando ci sono
+      # segnalazioni e romperebbe il pipe. Con `none` esce 0 e il rapporto
+      # resta completo: il giudizio è dello script.
+      - name: Segnalazioni di sicurezza
+        run: |
+          set -euo pipefail
+          npm audit --json --audit-level none | node scripts/weekly-audit.mjs --advisories "$RUNNER_TEMP/advisories.json"
