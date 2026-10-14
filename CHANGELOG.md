@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.17.1] - 2026-10-14
+
+### Changed
+- **Le pull request ricevono una revisione automatica di CodeRabbit, in prova** ([#232](https://github.com/E-Lop/entro/issues/232)). Dura le prossime dieci PR: ogni commento si conta come vero, doppione, falso o rumore, e alla fine CodeRabbit resta solo se ha trovato difetti che CI, plugin di sicurezza e revisione prima della PR non avevano visto, senza costare più di quanto ha reso. La configurazione è `.coderabbit.yaml`: revisioni in italiano, `CLAUDE.md` e `CONTRIBUTING.md` come linee guida, il corpo della PR non viene riscritto, e un controllo avvisa quando mancano la versione, la sezione del CHANGELOG o la sua link reference. È consultivo: non blocca il merge.
+
+  L'app non cambia: nessun file che il browser scarica è stato toccato.
+
 ## [1.17.0] - 2026-10-12
 
 ### Added
@@ -1188,7 +1195,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.1...HEAD
+[1.17.1]: https://github.com/E-Lop/entro/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/E-Lop/entro/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/E-Lop/entro/compare/v1.15.13...v1.16.0
 [1.15.13]: https://github.com/E-Lop/entro/compare/v1.15.12...v1.15.13
