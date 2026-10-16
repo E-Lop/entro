@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 // generatore perde. Passando di qui vale per tutti i consumatori e per il
 // client stesso, che così rifiuta anche le scritture fuori vocabolario.
 import type { Database } from './supabase.overrides'
+import { createSessionBoundFetch, userIsInside } from './sessionBoundFetch'
+import { declareSessionCheck, pausingOnHeldBack, releaseOnAuthEvent } from './heldBackRequests'
 
 export type { Database } from './supabase.overrides'
 
@@ -29,6 +31,14 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
   },
+  global: {
+    // Chi è dentro non manda richieste da anonimo, e una richiesta trattenuta
+    // mette in pausa React Query come una rete assente: il perché in
+    // `sessionBoundFetch.ts` e `heldBackRequests.ts` (#229).
+    fetch: pausingOnHeldBack(
+      createSessionBoundFetch({ publicKey: supabaseAnonKey, hasUser: userIsInside })
+    ),
+  },
   realtime: {
     params: {
       eventsPerSecond: 10,
@@ -38,3 +48,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     timeout: 20000,
   },
 })
+
+// Al rinnovo del token, o all'uscita, le scritture in pausa ripartono (#229).
+// E se il rinnovo è riuscito prima che la pausa scattasse, la toglie il
+// controllo della sessione: il perché in `heldBackRequests.ts`.
+supabase.auth.onAuthStateChange((event) => releaseOnAuthEvent(event))
+declareSessionCheck(async () => (await supabase.auth.getSession()).data.session !== null)
