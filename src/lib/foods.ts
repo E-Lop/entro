@@ -6,7 +6,7 @@ import { logError, logWarn } from './safeLog'
 import { EXPIRY_SOON_DAYS } from './expiry'
 import type { StorageLocation } from './validations/food.schemas'
 import { userFacingError } from './userFacingError'
-import { heldBackSessionError } from './heldBackRequests'
+import { heldBackSessionError, isHeldBackRequest } from './heldBackRequests'
 
 /**
  * Foods Service Layer - Wrapper functions around Supabase Foods API
@@ -257,7 +257,9 @@ export async function createFood(
       error: null,
     }
   } catch (error) {
-    await discardUploadedImage(foodData.image_url)
+    // Trattenuta, la scrittura riparte con lo stesso percorso: l'oggetto deve
+    // esserci ancora (#229).
+    if (!isHeldBackRequest(error)) await discardUploadedImage(foodData.image_url)
     return {
       food: null,
       error: error instanceof Error ? error : new Error('Errore nella creazione dell\'alimento'),

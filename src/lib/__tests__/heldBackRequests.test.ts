@@ -158,3 +158,25 @@ describe('il rinnovo riuscito mentre la richiesta falliva', () => {
     expect(onlineManager.isOnline()).toBe(false)
   })
 })
+
+describe('un controllo vecchio non toglie una pausa nuova', () => {
+  // Segnalato da CodeRabbit sulla PR #238: il controllo di una pausa già tolta
+  // da un evento può rispondere dopo che è scattata la pausa successiva.
+  afterEach(() => declareSessionCheck(async () => false))
+
+  it('il controllo della prima pausa non toglie la seconda', async () => {
+    let answerFirst: (back: boolean) => void = () => {}
+    declareSessionCheck(() => new Promise<boolean>((resolve) => (answerFirst = resolve)))
+    holdUntilTokenRefreshed()
+
+    releaseOnAuthEvent('TOKEN_REFRESHED')
+    declareSessionCheck(async () => false)
+    holdUntilTokenRefreshed()
+
+    answerFirst(true)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(onlineManager.isOnline()).toBe(false)
+  })
+})

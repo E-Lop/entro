@@ -59,6 +59,8 @@ export function heldBackSessionError(authError: unknown): TypeError | null {
 }
 
 let holding = false
+/** Quale pausa è in corso: un controllo risponde solo per la sua. */
+let holdGeneration = 0
 
 let sessionIsBack: () => Promise<boolean> = async () => false
 
@@ -83,10 +85,13 @@ export function declareSessionCheck(check: () => Promise<boolean>): void {
 export function holdUntilTokenRefreshed(): void {
   if (holding) return
   holding = true
+  const generation = ++holdGeneration
   onlineManager.setOnline(false)
   sessionIsBack().then(
     (back) => {
-      if (back) release()
+      // Un controllo nato da una pausa già tolta non tocca quella dopo
+      // (segnalato da CodeRabbit sulla PR #238).
+      if (back && generation === holdGeneration) release()
     },
     () => {},
   )
