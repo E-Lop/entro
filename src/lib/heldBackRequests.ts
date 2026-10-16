@@ -96,8 +96,9 @@ function release(): void {
   if (!holding) return
   holding = false
   // Come `onlineManager`, che «assumes an active network connection»: offline
-  // solo se il browser lo dice.
-  onlineManager.setOnline(navigator.onLine !== false)
+  // solo se il browser lo dice. Senza `navigator` (Node 20, dove gira la CI)
+  // non lo dice nessuno.
+  onlineManager.setOnline(typeof navigator === 'undefined' || navigator.onLine !== false)
 }
 
 /**
