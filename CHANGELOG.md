@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.17.3] - 2026-10-16
+
+### Security
+- **Una foto ereditata da una lista condivisa la leggono, la sostituiscono e la cancellano solo i membri di quella lista** ([#228](https://github.com/E-Lop/entro/issues/228)). Quando qualcuno esce da una lista condivisa, i suoi alimenti restano agli altri e le loro foto pure: la lista le eredita. Le foto però restano nella cartella di chi le ha caricate, e le regole dello Storage lasciavano ancora passare due persone. La prima era chi era uscito. La seconda erano i suoi nuovi compagni di lista, se entrava in un'altra, anche senza essere mai stati nella lista di prima. Tutti e due potevano leggerle, sostituirle e cancellarle, e se le cancellavano chi restava perdeva la foto. Nessuno dei due client ci arrivava: serviva una chiamata allo Storage scritta a mano. Ora, quando una lista ha ereditato una foto, la cartella non basta più: passano solo i membri di quella lista, e chi ci rientra riprende l'accesso. Le foto che nessuna lista ha ereditato restano a chi le ha caricate, come prima.
+
+  È una migrazione del database. L'app non cambia.
+
 ## [1.17.2] - 2026-10-16
 
 ### Fixed
@@ -1202,7 +1209,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.3...HEAD
+[1.17.3]: https://github.com/E-Lop/entro/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/E-Lop/entro/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/E-Lop/entro/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/E-Lop/entro/compare/v1.16.0...v1.17.0
