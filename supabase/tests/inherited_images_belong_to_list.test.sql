@@ -20,6 +20,15 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(20);
 
+-- Le versioni recenti dello Storage rifiutano ogni DELETE diretta su
+-- storage.objects con un trigger per istruzione, a meno che
+-- storage.allow_delete_query valga 'true' (migrations/tenant/
+-- 0055-prevent-direct-deletes.sql di supabase/storage). L'API dello Storage
+-- lo imposta insieme alle claim dell'utente e cancella con il suo ruolo,
+-- sotto RLS (src/internal/database/postgres/scope.ts): qui si fa lo stesso,
+-- così le DELETE qui sotto provano le policy e non il trigger.
+select set_config('storage.allow_delete_query', 'true', true);
+
 -- A crea L1 e B ci entra. C sta da sola in L2.
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at) values
   ('00000000-0000-0000-0000-000000228a01', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a228@example.test', '{"full_name":"Anna Arancio"}', now(), now()),
