@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.17.4] - 2026-10-16
+
+### Fixed
+- **Tornando all'app con la rete che va e viene, nessuna richiesta parte più senza il tuo accesso, e una modifica fatta in quel momento resta in coda invece di andare persa** ([#229](https://github.com/E-Lop/entro/issues/229), gemella di entro-mobile#259). Con la scheda lasciata in background più di un'ora il token d'accesso scade. Se poi il rinnovo non arriva al server, la libreria di Supabase dice che la sessione non c'è, e succedevano due cose. Tornando alla scheda, la rilettura della lista partiva come anonima e il server la rifiutava. E una modifica fatta in quel momento, per esempio togliere un alimento, si annullava con «Utente non autenticato», e la riga tolta tornava in lista. Ora una richiesta senza il tuo token non parte, e per l'app è come una rete assente. Le modifiche si mettono in pausa e partono da sole, una volta sola, appena il rinnovo riesce.
+
+  Riprodotto e provato in Chromium sul Supabase locale (`tests/e2e/expired-token-no-anonymous-requests.spec.ts`). A scheda sempre visibile il difetto non c'era. Safari e l'iPhone non sono stati provati.
+
 ## [1.17.3] - 2026-10-16
 
 ### Security
@@ -1209,7 +1216,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.4...HEAD
+[1.17.4]: https://github.com/E-Lop/entro/compare/v1.17.3...v1.17.4
 [1.17.3]: https://github.com/E-Lop/entro/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/E-Lop/entro/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/E-Lop/entro/compare/v1.17.0...v1.17.1

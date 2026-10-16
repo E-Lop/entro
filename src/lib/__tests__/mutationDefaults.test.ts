@@ -11,7 +11,8 @@
  * Si prova la `mutationFn` vera, presa da `getMutationDefaults`: è quella che
  * riprende una mutazione in pausa dopo un ricaricamento.
  */
-import { QueryClient } from '@tanstack/react-query'
+import { QueryClient, onlineManager } from '@tanstack/react-query'
+import { AuthRetryableFetchError } from '@supabase/supabase-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { mocks } = vi.hoisted(() => ({
@@ -42,6 +43,8 @@ vi.mock('@/lib/realtime', () => ({ mutationTracker: { track: vi.fn() } }))
 vi.mock('@/lib/safeLog', () => ({ logWarn: vi.fn() }))
 
 import { mutationKeys, registerMutationDefaults } from '@/lib/mutationDefaults'
+import { declareSignedInCheck } from '@/lib/sessionBoundFetch'
+import { isHeldBackRequest } from '@/lib/heldBackRequests'
 
 const PHOTO = new File(['x'], 'foto.jpg', { type: 'image/jpeg' })
 
@@ -157,5 +160,49 @@ describe('createFood in coda — resta com’era', () => {
     expect(mocks.uploadFoodImage).not.toHaveBeenCalled()
     const [data] = mocks.createFood.mock.calls[0] as [Record<string, unknown>]
     expect(data.image_url).toBeNull()
+  })
+
+  // #229: la sessione manca perché il rinnovo non arriva al server, e c'è un
+  // utente dentro. Senza `user_id` nel payload la cartella si prende dalla
+  // sessione: prima la foto non si caricava e la riga riceveva `null`.
+  it('se la sessione manca per rete con un utente dentro, la scrittura è trattenuta e la foto resta', async () => {
+    declareSignedInCheck(() => true)
+    mocks.getSession.mockResolvedValue({
+      data: { session: null },
+      error: new AuthRetryableFetchError('Failed to fetch', 0),
+    })
+    const run = mutationFn<{ id: string; data: Record<string, unknown> }>(mutationKeys.createFood)
+
+    const failure = await run({ id: 'f1', data: { name: 'Latte', image_url: 'pending://abc' } }).catch(
+      (error: unknown) => error
+    )
+
+    expect(isHeldBackRequest(failure)).toBe(true)
+    expect(mocks.uploadFoodImage).not.toHaveBeenCalled()
+    expect(mocks.createFood).not.toHaveBeenCalled()
+    expect(mocks.deletePendingImage).not.toHaveBeenCalled()
+    declareSignedInCheck(() => false)
+    onlineManager.setOnline(true)
+  })
+
+  // #229: il caricamento non è partito perché il token è scaduto e il rinnovo
+  // non arriva al server. Non è un caricamento fallito: la scrittura deve
+  // fallire con lo stesso errore, così va in pausa e riparte col token, con la
+  // sua foto.
+  it('se il caricamento è trattenuto, la scrittura fallisce con quell’errore e la foto in attesa resta', async () => {
+    const heldBack = new TypeError('Request held back: no session token available')
+    mocks.uploadFoodImage.mockRejectedValueOnce({
+      name: 'StorageUnknownError',
+      message: heldBack.message,
+      originalError: heldBack,
+    })
+    const run = mutationFn<{ id: string; data: Record<string, unknown> }>(mutationKeys.createFood)
+
+    await expect(
+      run({ id: 'f1', data: { name: 'Latte', user_id: 'u1', image_url: 'pending://abc' } })
+    ).rejects.toMatchObject({ originalError: heldBack })
+
+    expect(mocks.createFood).not.toHaveBeenCalled()
+    expect(mocks.deletePendingImage).not.toHaveBeenCalled()
   })
 })

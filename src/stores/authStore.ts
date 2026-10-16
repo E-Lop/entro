@@ -14,6 +14,7 @@ import { logError, redactUrl } from '../lib/safeLog'
 import { acceptInviteByEmail, getUserList, createPersonalList } from '../lib/invites'
 import { queryClient } from '../lib/queryClient'
 import { notifyWelcomeToast } from '../lib/welcomeToast'
+import { declareSignedInCheck } from '../lib/sessionBoundFetch'
 
 /**
  * Auth Store State
@@ -287,3 +288,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 }))
+
+// Dichiarato qui, e non dal client: è lo store a sapere se c'è un utente
+// dentro, anche quando la libreria dice di no (#229).
+declareSignedInCheck(() => useAuthStore.getState().user !== null)

@@ -6,6 +6,7 @@ import { logError, logWarn } from './safeLog'
 import { EXPIRY_SOON_DAYS } from './expiry'
 import type { StorageLocation } from './validations/food.schemas'
 import { userFacingError } from './userFacingError'
+import { heldBackSessionError } from './heldBackRequests'
 
 /**
  * Foods Service Layer - Wrapper functions around Supabase Foods API
@@ -198,7 +199,9 @@ export async function createFood(
     const { data: { session }, error: authError } = await supabase.auth.getSession()
 
     if (authError || !session?.user) {
-      throw new Error('Utente non autenticato')
+      // Sessione assente perché il rinnovo non arriva al server, con un
+      // utente dentro: la scrittura è trattenuta e va in coda (#229).
+      throw heldBackSessionError(authError) ?? new Error('Utente non autenticato')
     }
 
     const user = session.user
@@ -275,7 +278,9 @@ export async function updateFood(id: string, foodData: FoodUpdate): Promise<Food
     const { data: { session }, error: authError } = await supabase.auth.getSession()
 
     if (authError || !session?.user) {
-      throw new Error('Utente non autenticato')
+      // Sessione assente perché il rinnovo non arriva al server, con un
+      // utente dentro: la scrittura è trattenuta e va in coda (#229).
+      throw heldBackSessionError(authError) ?? new Error('Utente non autenticato')
     }
 
     // If image_url is being updated, get the old image to delete it.
@@ -412,7 +417,9 @@ export async function softDeleteFood(id: string, outcome?: FoodOutcome): Promise
     const { data: { session }, error: authError } = await supabase.auth.getSession()
 
     if (authError || !session?.user) {
-      throw new Error('Utente non autenticato')
+      // Sessione assente perché il rinnovo non arriva al server, con un
+      // utente dentro: la scrittura è trattenuta e va in coda (#229).
+      throw heldBackSessionError(authError) ?? new Error('Utente non autenticato')
     }
 
     const { data: existing } = await supabase

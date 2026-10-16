@@ -362,3 +362,18 @@ describe('authStore.initialize', () => {
     })
   })
 })
+
+describe('lo store dice alle richieste se c’è un utente dentro (#229)', () => {
+  it('nessuno dentro all’inizio, qualcuno dopo l’accesso, nessuno dopo l’uscita', async () => {
+    const { userIsInside } = await import('../../lib/sessionBoundFetch')
+
+    useAuthStore.getState().setUser(null)
+    expect(userIsInside()).toBe(false)
+
+    useAuthStore.getState().setUser({ id: 'user-a' } as User)
+    expect(userIsInside()).toBe(true)
+
+    useAuthStore.getState().setUser(null)
+    expect(userIsInside()).toBe(false)
+  })
+})

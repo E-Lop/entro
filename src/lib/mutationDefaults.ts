@@ -14,6 +14,7 @@ import { supabase } from './supabase'
 import { logWarn } from './safeLog'
 import { uploadFoodImage } from './storage'
 import { isPendingUrl, pendingImageToFile, deletePendingImage } from './pendingImages'
+import { heldBackSessionError, isHeldBackRequest } from './heldBackRequests'
 
 /**
  * Mutation keys -- must match the keys used in useFoods.ts hooks.
@@ -56,10 +57,24 @@ async function resolvePendingImage(
     await deletePendingImage(imageUrl)
     return storagePath
   } catch (error) {
+    // Trattenuto, non fallito: la scrittura va in pausa con la sua foto (#229).
+    if (isHeldBackRequest(error)) throw error
     logWarn('Pending image upload failed, creating food without image:', error)
     await deletePendingImage(imageUrl).catch(() => {})
     return null
   }
+}
+
+/**
+ * Lo user id della sessione, per scegliere la cartella di una foto in coda. Se
+ * la sessione manca perché il rinnovo non arriva al server, la scrittura è
+ * trattenuta e va in pausa con la sua foto, invece di partire senza (#229).
+ */
+async function sessionUserId(): Promise<string | undefined> {
+  const { data, error } = await supabase.auth.getSession()
+  const heldBack = data.session ? null : heldBackSessionError(error)
+  if (heldBack) throw heldBack
+  return data.session?.user.id
 }
 
 /**
@@ -76,7 +91,7 @@ export function registerMutationDefaults(queryClient: QueryClient): void {
       // è nullable nello schema (un membro che ha cancellato l'account), quindi
       // il tipo non lo garantisce più: si ripiega sulla sessione, come in modifica.
       const userId =
-        variables.data.user_id ?? (await supabase.auth.getSession()).data.session?.user.id
+        variables.data.user_id ?? (await sessionUserId())
       variables.data.image_url = userId
         ? (await resolvePendingImage(variables.data.image_url, userId)) ?? null
         : null
@@ -93,7 +108,7 @@ export function registerMutationDefaults(queryClient: QueryClient): void {
       // scegliere la cartella del caricamento; chi autorizza è la RLS.
       if (isPendingUrl(variables.data.image_url)) {
         const userId =
-          variables.data.user_id ?? (await supabase.auth.getSession()).data.session?.user.id
+          variables.data.user_id ?? (await sessionUserId())
         const resolved = userId
           ? await resolvePendingImage(variables.data.image_url, userId)
           : null
