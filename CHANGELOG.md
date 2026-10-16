@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.17.2] - 2026-10-16
+
+### Fixed
+- **Chi esce da una lista condivisa non fa più sparire le foto dei suoi alimenti a chi resta** ([#226](https://github.com/E-Lop/entro/issues/226)). Quando un membro usciva con «Abbandona lista condivisa», i suoi alimenti restavano nella lista com'è deciso, ma le loro foto non si leggevano più: chi restava vedeva il riquadro degli alimenti senza foto. La foto sta nella cartella di chi l'ha caricata, e gli altri la leggono solo finché lui è nella lista. Alla cancellazione dell'account e quando chi ha creato la lista toglie un membro, le foto degli alimenti che restano erano già messe da parte per chi resta; uscendo da sé no. Ora `leave_list()` fa lo stesso. Chi è uscito non vede più niente della lista, come prima.
+
+  Le liste che hanno già perso un membro prima di oggi non si recuperano con questo rilascio: prima si conta in produzione quante sono. L'app non cambia: è una migrazione del database.
+
 ## [1.17.1] - 2026-10-14
 
 ### Changed
@@ -1195,7 +1202,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.2...HEAD
+[1.17.2]: https://github.com/E-Lop/entro/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/E-Lop/entro/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/E-Lop/entro/compare/v1.16.0...v1.17.0
 [1.16.0]: https://github.com/E-Lop/entro/compare/v1.15.13...v1.16.0
