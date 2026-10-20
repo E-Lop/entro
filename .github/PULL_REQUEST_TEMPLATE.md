@@ -20,3 +20,9 @@
 - [ ] Nessuna modifica UI
 - [ ] Verificata in viewport mobile
 - [ ] Testi e documentazione aggiornati se cambia il comportamento utente
+
+## Rischio del merge
+
+**Porta:** a senso unico | a doppio senso
+
+**Raggio:**

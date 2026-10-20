@@ -83,7 +83,7 @@ Per nuove API molto sensibili considerare uno schema dedicato (`api`, `internal`
 - **Code simplifier**: invocare la skill `code-simplifier:code-simplifier` dopo ogni feature significativa, prima di committare.
 - **Test automatici**: per ogni feature, coprire validation + authorization + business rules + destructive action safeguards (vedi `~/.claude/CLAUDE.md`).
 - **Due suite di test**: `npm test` è autosufficiente e passa in un clone nuovo; i guardiani che leggono `../entro-family` ed `../entro-mobile` si chiamano `*.family.test.ts` e girano con `npm run test:family` (#149). Prima di una PR si lanciano **tutte e due**, dopo `git add`: `englishNames` legge `git ls-files`, e un file nuovo non aggiunto non viene controllato.
-- **Dominio**: il glossario è `../entro-family/core/`; non creare un `CONTEXT.md` in questo repo. Regole di consumo del bundle e collocazione degli ADR in `docs/agents/domain.md`.
+- **Dominio**: il glossario è `../entro-family/core/`; non creare un `GLOSSARY.md` in questo repo, né un `GLOSSARY-MAP.md` o il `CONTEXT.md` delle skill fino alla 1.2. Regole di consumo del bundle e collocazione degli ADR in `docs/agents/domain.md`.
 - **Lingua**: prosa in italiano — commenti, documentazione, testo a schermo. Codice in inglese, e «codice» comprende i nomi dei file e i `data-testid`, non solo variabili e tipi. Questo repo la rispettava senza averla scritta, finché il commit `922914b` dell'8 set 2026 non ha portato dentro `avvisa`, `intercetta`, `scarta` e `sporco`: ora la tiene `src/lib/__tests__/englishNames.family.test.ts`. Il perché sta in `../entro-family/conventions/code-in-english.md`.
 
 ## Edge Functions deploy
@@ -105,7 +105,7 @@ Genera token da https://supabase.com/dashboard/account/tokens e **revocalo dopo 
 
 ## Agent skills
 
-Il set `mattpocock-skills` legge i tre file in `docs/agents/`. Si modificano a mano: rilanciare `/setup-matt-pocock-skills` serve solo per cambiare tracker o ricominciare da zero.
+Il set `mattpocock-skills` legge tre dei quattro file in `docs/agents/`; il quarto, `pull-requests.md`, corregge la skill `pr`, che non legge niente da lì. Si modificano a mano: rilanciare `/setup-matt-pocock-skills` serve solo per cambiare tracker o ricominciare da zero.
 
 ### Issue tracker
 
@@ -118,3 +118,7 @@ I cinque ruoli canonici con i nomi di default, tabella identità. Vedi `docs/age
 ### Documentazione di dominio
 
 Single-context, ma il glossario **non** vive in questo repo: è `../entro-family/core/`. Vedi `docs/agents/domain.md`.
+
+### Corpo delle PR
+
+Vince `.github/PULL_REQUEST_TEMPLATE.md`, con la sezione «Rischio del merge» presa dalla skill `pr`: la skill cede al template. Vedi `docs/agents/pull-requests.md`.

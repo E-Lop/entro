@@ -1,6 +1,6 @@
 # Domain docs — regole di consumo
 
-> Scritto a mano, **non** generato da `/setup-matt-pocock-skills`: diverge dal template della skill su un punto sostanziale, cioè che in questo repo un `CONTEXT.md` non ci va. Se il setup viene rilanciato, questo file va conservato, non rigenerato dal seed.
+> Scritto a mano, **non** generato da `/setup-matt-pocock-skills`: diverge dal template della skill su un punto sostanziale, cioè che in questo repo un glossario non ci va: né `GLOSSARY.md`, né `GLOSSARY-MAP.md`, né il `CONTEXT.md` delle versioni della skill fino alla 1.2. Se il setup viene rilanciato, questo file va conservato, non rigenerato dal seed.
 
 ## Prima di esplorare il codice, leggi il bundle
 
@@ -13,9 +13,9 @@ Si leggono i due indici, poi le pagine che toccano l'area su cui stai lavorando.
 
 Se la cartella affiancata non c'è (un runner di CI, una macchina nuova), dillo invece di procedere a memoria: le regole non sono ricostruibili dal codice.
 
-## Non creare `CONTEXT.md` in questo repo
+## Non creare `GLOSSARY.md` in questo repo
 
-La skill `domain-modeling` crea `CONTEXT.md` alla radice al primo termine risolto. Qui **non va fatto**: sarebbe un secondo glossario accanto a `core/`, e due glossari divergono. È già successo esattamente qui: il glossario di dominio viveva in questo repo, e il bundle è nato per smettere di tenerne una copia per client.
+La skill `domain-modeling` crea `GLOSSARY.md` alla radice al primo termine risolto, e se trova un `GLOSSARY-MAP.md` legge il repo come multi-contesto. Fino alla 1.2 di `mattpocock-skills` lo stesso file si chiamava `CONTEXT.md`: il divieto vale per tutti e tre i nomi. Qui **non va fatto**: sarebbe un secondo glossario accanto a `core/`, e due glossari divergono. È già successo esattamente qui: il glossario di dominio viveva in questo repo, e il bundle è nato per smettere di tenerne una copia per client.
 
 Un termine da risolvere o correggere si scrive **nel bundle**, in tre modifiche coordinate: la pagina in `core/` o `conventions/` col frontmatter OKF, la riga nell'`index.md` della cartella, la voce datata in cima a `log.md`. E `viewer/index.html` non si committa mai.
 
