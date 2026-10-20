@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.17.6] - 2026-10-20
+
+### Changed
+- **Il controllo «Versione e CHANGELOG» di CodeRabbit non avvisa più sulle PR di sola documentazione** ([#232](https://github.com/E-Lop/entro/issues/232)). Quelle PR non portano una release, come la #104 e la #105, ma la #242 ha avuto l'avviso lo stesso. Ora il controllo passa se ogni file cambiato è documentazione. Conta come documentazione ciò che la CI già salta: i file `.md`, la cartella `docs/`, `LICENSE` e `.github/ISSUE_TEMPLATE/`. Basta un file fuori da quei percorsi perché tornino a valere versione, sezione del CHANGELOG e link reference.
+
+  L'app non cambia: nessun file che il browser scarica è stato toccato.
+
 ## [1.17.5] - 2026-10-19
 
 ### Security
@@ -1223,7 +1230,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.6...HEAD
+[1.17.6]: https://github.com/E-Lop/entro/compare/v1.17.5...v1.17.6
 [1.17.5]: https://github.com/E-Lop/entro/compare/v1.17.4...v1.17.5
 [1.17.4]: https://github.com/E-Lop/entro/compare/v1.17.3...v1.17.4
 [1.17.3]: https://github.com/E-Lop/entro/compare/v1.17.2...v1.17.3

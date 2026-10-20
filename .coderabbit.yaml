@@ -24,10 +24,15 @@ reviews:
     custom_checks:
       # La regola che sfugge più spesso (CONTRIBUTING.md, «Release»): le link
       # reference si erano fermate a [1.9.0] per quattro release.
+      # Le PR di sola documentazione non si rilasciano (#104, #105), e la #242
+      # ha avuto l'avviso lo stesso. I percorsi sono quelli che `ci.yml` salta
+      # in `paths-ignore`: se cambia una lista, va cambiata anche l'altra.
       - name: "Versione e CHANGELOG"
         mode: warning
         instructions: |
-          Passa se la PR fa tutte e tre le cose seguenti, fallisce se ne manca anche una.
+          Se ogni file cambiato dalla PR è documentazione, il controllo passa senza guardare i tre punti qui sotto: le PR di sola documentazione non portano una release. È documentazione un file che finisce in `.md`, che sta sotto `docs/`, che è `LICENSE` o che sta sotto `.github/ISSUE_TEMPLATE/`. Basta un file fuori da questi percorsi perché valgano i tre punti.
+
+          Altrimenti passa se la PR fa tutte e tre le cose seguenti, fallisce se ne manca anche una.
 
           1. In `package.json` il campo `version` è diverso da quello del ramo base, ed è un incremento semver.
           2. In cima a `CHANGELOG.md`, sotto l'introduzione, c'è una sezione nuova `## [X.Y.Z] - AAAA-MM-GG`, dove X.Y.Z è la nuova `version` di `package.json`.
