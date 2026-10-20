@@ -11,7 +11,8 @@ Le sezioni del template, nel loro ordine:
 3. **Database e sicurezza**: le caselle, spuntate. Una migrazione dice anche come è andato `npm run db:prepush` (`CONTRIBUTING.md`, *Migrazioni in produzione*).
 4. **UI/mobile**: le caselle, spuntate.
 5. **Rischio del merge**: l'unica sezione presa dalla skill, perché il template non l'aveva.
-6. **Fuori da qui**, quando serve: ciò che il brief esclude, e le issue aperte strada facendo, con il numero.
+
+Dopo il template, solo quando serve, si aggiunge **Fuori da qui**: ciò che il brief esclude, e le issue aperte strada facendo, con il numero. Il template non ce l'ha.
 
 ## Cosa si prende dalla skill
 
