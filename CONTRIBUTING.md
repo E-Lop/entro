@@ -200,6 +200,8 @@ Usa Conventional Commits per i messaggi principali, per esempio `feat:`, `fix:`,
 
 Entro **non ha un commit di release separato**: la PR di feature porta anche il rilascio. Il tag punta poi al commit di squash-merge di quella stessa PR.
 
+Una PR di sola documentazione non porta una release: niente versione, niente sezione nel CHANGELOG, niente tag (#104, #105). È di sola documentazione quando ogni file che cambia è uno di quelli che la CI salta in `paths-ignore` (`.github/workflows/ci.yml`): un file `.md`, la cartella `docs/`, `LICENSE`, `.github/ISSUE_TEMPLATE/`. Basta un file fuori da questi percorsi perché valga quanto segue.
+
 Dentro la PR:
 
 - porta la versione secondo [Semantic Versioning](https://semver.org/lang/it/) con `npm version --no-git-tag-version X.Y.Z`, che aggiorna insieme `package.json` e `package-lock.json`;
