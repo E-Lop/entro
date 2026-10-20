@@ -8,7 +8,7 @@ Le sezioni del template, nel loro ordine:
 
 1. **Cosa cambia**
 2. **Verifiche**: le caselle di lint, typecheck, test e build, spuntate.
-3. **Database e sicurezza**: le caselle, spuntate. Una migrazione dice anche come è andato `npm run db:prepush` (`CONTRIBUTING.md`, *Migrazioni in produzione*).
+3. **Database e sicurezza**: le caselle, spuntate. Con una migrazione, prima del `db push` dal ramo della PR si lancia `npm run db:prepush` (`CONTRIBUTING.md`, *Migrazioni in produzione*).
 4. **UI/mobile**: le caselle, spuntate.
 5. **Rischio del merge**: l'unica sezione presa dalla skill, perché il template non l'aveva.
 
