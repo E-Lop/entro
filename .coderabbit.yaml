@@ -24,9 +24,10 @@ reviews:
     custom_checks:
       # La regola che sfugge più spesso (CONTRIBUTING.md, «Release»): le link
       # reference si erano fermate a [1.9.0] per quattro release.
-      # Le PR di sola documentazione non si rilasciano (#104, #105), e la #242
-      # ha avuto l'avviso lo stesso. I percorsi sono quelli che `ci.yml` salta
-      # in `paths-ignore`: se cambia una lista, va cambiata anche l'altra.
+      # Le PR di sola documentazione non si rilasciano (CONTRIBUTING.md,
+      # «Release»), e la #242 ha avuto l'avviso lo stesso. I percorsi sono
+      # quelli che `ci.yml` salta in `paths-ignore`: se cambia quella lista,
+      # vanno cambiate questa e quella di CONTRIBUTING.md.
       - name: "Versione e CHANGELOG"
         mode: warning
         instructions: |

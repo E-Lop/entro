@@ -8,7 +8,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 ## [1.17.6] - 2026-10-20
 
 ### Changed
-- **Il controllo «Versione e CHANGELOG» di CodeRabbit non avvisa più sulle PR di sola documentazione** ([#232](https://github.com/E-Lop/entro/issues/232)). Quelle PR non portano una release, come la #104 e la #105, ma la #242 ha avuto l'avviso lo stesso. Ora il controllo passa se ogni file cambiato è documentazione. Conta come documentazione ciò che la CI già salta: i file `.md`, la cartella `docs/`, `LICENSE` e `.github/ISSUE_TEMPLATE/`. Basta un file fuori da quei percorsi perché tornino a valere versione, sezione del CHANGELOG e link reference.
+- **Il controllo «Versione e CHANGELOG» di CodeRabbit non avvisa più sulle PR di sola documentazione** ([#232](https://github.com/E-Lop/entro/issues/232)). Quelle PR non portano una release, come la #104 e la #105, ma la #242 ha avuto l'avviso lo stesso. Ora il controllo passa se ogni file cambiato è documentazione. Conta come documentazione ciò che la CI già salta: i file `.md`, la cartella `docs/`, `LICENSE` e `.github/ISSUE_TEMPLATE/`. Basta un file fuori da quei percorsi perché tornino a valere versione, sezione del CHANGELOG e link reference. La regola ora è scritta anche in `CONTRIBUTING.md`, nella sezione «Release».
 
   L'app non cambia: nessun file che il browser scarica è stato toccato.
 
