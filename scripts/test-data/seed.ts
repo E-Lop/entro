@@ -36,8 +36,10 @@ import {
   removeE2EFoodImages,
   signInAsUser,
 } from '../../tests/e2e/helpers/supabase.ts'
-import { romeDay } from '../../tests/smoke/calendarDay.ts'
-import { parseSeed, seedExpiryDate, type SeedFood } from './seedRows.ts'
+import { addDays, romeDay, statusOn } from '../../tests/smoke/calendarDay.ts'
+import { EXPIRY_IMMINENT_DAYS, EXPIRY_SOON_DAYS } from '../../src/lib/expiry.ts'
+import { quantityUnitEnum, storageLocationEnum } from '../../src/lib/validations/food.schemas.ts'
+import { parseSeed, seedExpiryDate, seedProblems, type SeedFood, type SeedVocabulary } from './seedRows.ts'
 
 /** L'utente canonico locale: il modello del ruolo in `conventions/test-data.md`. */
 export const CANONICAL_EMAIL = 'e2e@example.test'
@@ -98,8 +100,40 @@ async function removeFoods(userId: string): Promise<number> {
   return data.length
 }
 
-async function seed(recreate: boolean): Promise<void> {
+/**
+ * Il vocabolario contro cui si valida il seme prima di scrivere: le categorie
+ * del database, le conservazioni e le unità degli enum di entro (che i
+ * guardiani di famiglia tengono uguali al bundle), e i cinque stati, uno per
+ * soglia di `getExpiryStatus`, come i dati noti della suite smoke.
+ */
+function vocabulary(categories: readonly string[], today: string): SeedVocabulary {
+  const offsets = [-1, 0, EXPIRY_IMMINENT_DAYS, EXPIRY_SOON_DAYS, EXPIRY_SOON_DAYS + 1]
+  return {
+    categories,
+    storages: storageLocationEnum.options,
+    units: quantityUnitEnum.options,
+    statuses: offsets.map((days) => statusOn(addDays(today, days), today)),
+  }
+}
+
+export async function seed(recreate: boolean): Promise<void> {
   const foods = readBundleSeed()
+
+  const { data: categories, error: categoriesError } = await adminClient.from('categories').select('id, name')
+  if (categoriesError) throw new Error(`non riesco a leggere le categorie: ${categoriesError.message}`)
+  // Per nome: gli id sono generati e cambiano da un database all'altro.
+  const categoryId = new Map(categories.map((c) => [c.name, c.id]))
+
+  // Prima di ogni scrittura. Il seme può venire da un bundle a metà lavoro
+  // (`ENTRO_FAMILY_DIR`): uno stato sbagliato verrebbe scritto lo stesso, e
+  // un'unità sbagliata la fermerebbe il `CHECK` solo dopo aver tolto gli
+  // alimenti di prima. Il `CHECK` resta l'ultima difesa, non la prima.
+  const today = romeDay(new Date())
+  const problems = seedProblems(foods, vocabulary([...categoryId.keys()], today), statusOn, today)
+  if (problems.length > 0) {
+    throw new Error(`il seme non è valido, nessuna scrittura fatta:\n  ${problems.join('\n  ')}`)
+  }
+
   const userId = await canonicalUser(recreate)
 
   // Dalla entro#94 la lista personale la crea un trigger: qui la si ritrova.
@@ -107,16 +141,8 @@ async function seed(recreate: boolean): Promise<void> {
   // di lettura di `foods` passa da `list_members`.
   const listId = await createListForUser(userId)
 
-  const { data: categories, error: categoriesError } = await adminClient.from('categories').select('id, name')
-  if (categoriesError) throw new Error(`non riesco a leggere le categorie: ${categoriesError.message}`)
-  // Per nome: gli id sono generati e cambiano da un database all'altro.
-  const categoryId = new Map(categories.map((c) => [c.name, c.id]))
-  const missing = [...new Set(foods.map((f) => f.category))].filter((name) => !categoryId.has(name))
-  if (missing.length > 0) throw new Error(`categorie assenti nel database: ${missing.join(', ')}`)
-
   console.log(`tolti ${await removeFoods(userId)} alimenti precedenti`)
 
-  const today = romeDay(new Date())
   const { error: insertError } = await adminClient.from('foods').insert(
     foods.map((food) => ({
       user_id: userId,

@@ -32,16 +32,24 @@ const ALLOWED_LITERALS = new Set([
 ])
 
 /**
- * Un indirizzo letterale, anche composto: `${id}@example.test` conta, e il
- * dominio deve finire con lettere, così `react@18.3.1` resta un pacchetto.
+ * Un indirizzo letterale, anche composto: `${id}@example.test` conta. Il
+ * dominio si prende intero, con le lettere di ogni alfabeto: fermarsi alle
+ * lettere ASCII lascerebbe solo `example.com` di un indirizzo che finisce in
+ * `.中国`, o in un TLD in punycode, e quel prefisso è riservato mentre il
+ * dominio non lo è (revisione di CodeRabbit sulla PR #245).
  */
-const ADDRESS = /([A-Za-z0-9._%+-]*[A-Za-z0-9._%+}-])@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/g
+const ADDRESS = /([A-Za-z0-9._%+}-]+)@([\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+)/gu
+
+/** `react@18.3.1` è un pacchetto: un dominio vero finisce con un'etichetta che ha lettere. */
+function endsWithLetters(domain: string): boolean {
+  return /\p{L}/u.test(domain.slice(domain.lastIndexOf('.') + 1))
+}
 
 /** Gli indirizzi su un dominio registrabile, come `riga → indirizzo`. */
 function unreservedAddresses(source: string): string[] {
   return source.split('\n').flatMap((line, index) =>
     [...line.matchAll(ADDRESS)]
-      .filter(([address, , domain]) => !isReservedDomain(domain) && !ALLOWED_LITERALS.has(address))
+      .filter(([address, , domain]) => endsWithLetters(domain) && !isReservedDomain(domain) && !ALLOWED_LITERALS.has(address))
       .map(([address]) => `${index + 1} → ${address}`)
   )
 }
@@ -72,6 +80,8 @@ describe('il guardiano degli indirizzi', () => {
   // I domini da rifiutare si compongono, o questo file li conterrebbe.
   const outside = ['altro', 'dominio'].join('.')
   const lookalike = ['notexample', 'com'].join('.')
+  const idn = '中国'
+  const punycode = 'xn--fiqs8s'
 
   it.each(['a@example.test', 'b@sub.example.com', 'c@evil.example', 'd@EXAMPLE.TEST', "`${id}@example.test`"])(
     'accetta %s',
@@ -80,7 +90,7 @@ describe('il guardiano degli indirizzi', () => {
     }
   )
 
-  it.each([`a@${outside}`, `\`\${id}@${outside}\``, `x@example.test.${outside}`, `y@${lookalike}`])(
+  it.each([`a@${outside}`, `\`\${id}@${outside}\``, `x@example.test.${outside}`, `y@${lookalike}`, `z@example.com.${idn}`, `w@example.test.${punycode}`, `v@${idn}.${idn}`])(
     'rifiuta %s',
     (text) => {
       expect(unreservedAddresses(text)).toHaveLength(1)
