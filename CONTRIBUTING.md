@@ -48,6 +48,21 @@ npm run supabase:types
 
 La catena canonica delle migration vive in `supabase/migrations/`. I tipi TypeScript generati vivono in `src/lib/supabase.types.ts` e vengono riesportati dal client in `src/lib/supabase.ts`. La cartella storica `migrations/` resta solo come archivio finche' non viene consolidata.
 
+### Dati di prova
+
+L'utente canonico locale, `e2e@example.test`, e i suoi undici alimenti si creano con:
+
+```bash
+npm run seed:local                 # crea l'utente se manca, poi ne riscrive gli alimenti
+npm run seed:local -- --recreate   # cancella e ricrea l'utente, con le foto della sua cartella
+```
+
+Le righe del seme non stanno qui: sono `conventions/test-data-seed.json` del repo `entro-family`, affiancato a questo (o nella cartella indicata da `ENTRO_FAMILY_DIR`). Il perché di ogni riga, i ruoli degli account e la regola dei domini sono in `conventions/test-data.md` dello stesso repo. Le date sono contate dal giorno di oggi a Roma, quindi i badge della dashboard tornano quelli attesi a ogni esecuzione. La password è `E2E_PASSWORD` degli helper E2E, la stessa degli utenti delle spec.
+
+Lo script si ferma se URL o chiave non sono quelli del Supabase locale: usa la guardia degli helper E2E. Come `npm run db:prepush`, serve Node ≥ 22.18, che esegue i file TypeScript senza build.
+
+Gli indirizzi email negli script e nei test stanno su domini che nessuno può registrare: `.test`, `.example`, `example.com`, `example.net`, `example.org`. Gli indirizzi nuovi si scrivono su `@example.test`. Lo controlla `tests/testEmailDomains.test.ts`, dentro `npm test`.
+
 ## Comandi di verifica
 
 ```bash

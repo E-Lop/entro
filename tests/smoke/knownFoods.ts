@@ -6,11 +6,11 @@
  * scritte qui: sono offset dal giorno del ripristino, ricavati dalle soglie di
  * `getExpiryStatus()`, così una soglia che cambia sposta anche l'offset.
  */
-import { EXPIRY_IMMINENT_DAYS, EXPIRY_SOON_DAYS, getExpiryStatus } from '@/lib/expiry'
+import { EXPIRY_IMMINENT_DAYS, EXPIRY_SOON_DAYS } from '@/lib/expiry'
 import type { ExpiryStatus } from '@/types/food.types'
+import { addDays, romeDay, statusOn } from './calendarDay'
 
-/** Il fuso di «oggi», qualunque sia quello della macchina. */
-export const SMOKE_TIME_ZONE = 'Europe/Rome'
+export { addDays, romeDay, SMOKE_TIME_ZONE, statusOn } from './calendarDay'
 
 export interface KnownFood {
   id: string
@@ -75,38 +75,6 @@ export const KNOWN_PHOTO_BYTES = Uint8Array.from(
   ),
   (char) => char.charCodeAt(0)
 )
-
-/** Il giorno di calendario di un istante a Roma, `AAAA-MM-GG`. */
-export function romeDay(instant: Date): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: SMOKE_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(instant)
-}
-
-/** `day` più `n` giorni di calendario. Aritmetica in UTC: nessun cambio d'ora di mezzo. */
-export function addDays(day: string, n: number): string {
-  const [year, month, date] = day.split('-').map(Number)
-  return new Date(Date.UTC(year, month - 1, date + n)).toISOString().slice(0, 10)
-}
-
-/** Mezzanotte locale di un giorno `AAAA-MM-GG`, costruita dai numeri e non dalla stringa. */
-function localMidnight(day: string): Date {
-  const [year, month, date] = day.split('-').map(Number)
-  return new Date(year, month - 1, date)
-}
-
-/**
- * Lo stato di scadenza di `expiryDate` visto dal giorno `referenceDay`.
- *
- * `getExpiryStatus` lavora sulle mezzanotti locali: passandogli due mezzanotti
- * costruite dai numeri, il risultato non dipende dal fuso della macchina.
- */
-export function statusOn(expiryDate: string, referenceDay: string): ExpiryStatus {
-  return getExpiryStatus(localMidnight(expiryDate), localMidnight(referenceDay))
-}
 
 /** Le colonne di `foods` che il controllo legge. */
 export interface KnownFoodRow {

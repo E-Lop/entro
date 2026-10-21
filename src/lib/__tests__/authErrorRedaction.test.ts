@@ -95,7 +95,7 @@ describe('il testo del server non diventa il messaggio, e resta in cause', () =>
   it.each([
     ['signUp', 'signUp', () => signUp('utente@example.com', 'Password1!', 'Mario Rossi')],
     ['signIn', 'signInWithPassword', () => signIn('utente@example.com', 'Password1!')],
-    ['resetPasswordRequest', 'resetPasswordForEmail', () => resetPasswordRequest('a@b.it')],
+    ['resetPasswordRequest', 'resetPasswordForEmail', () => resetPasswordRequest('a@example.test')],
     ['updatePassword', 'updateUser', () => updatePassword('Password1!')],
   ] as const)('%s', async (_name, method, call) => {
     auth[method].mockResolvedValue(refused(unavailable))

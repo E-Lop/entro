@@ -47,7 +47,7 @@ describe('requireAuthenticatedUser', () => {
   })
 
   it('returns the user for a valid token', async () => {
-    const user = { id: 'user-123', email: 'a@b.it' }
+    const user = { id: 'user-123', email: 'a@example.test' }
     const client = {
       auth: {
         getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }),

@@ -4,7 +4,7 @@ import {
   LOCAL_ANON_KEY,
   LOCAL_SERVICE_ROLE_KEY,
   LOCAL_SUPABASE_URL,
-} from './localSupabase'
+} from './localSupabase.ts'
 
 export { assertLocalSupabase }
 
@@ -16,7 +16,9 @@ const anonKey = process.env.E2E_SUPABASE_ANON_KEY ?? LOCAL_ANON_KEY
 // helper fallisce così prima di aprire una connessione.
 assertLocalSupabase(supabaseUrl, serviceRoleKey)
 
-const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+// Esportato per lo script del seme (#234), che scrive gli alimenti dell'utente
+// canonico e passa da qui per avere la stessa guardia.
+export const adminClient = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,

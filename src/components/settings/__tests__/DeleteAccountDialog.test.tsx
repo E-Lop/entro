@@ -23,7 +23,7 @@ const { signInWithPassword, signOut, rpc, preview, navigateMock, clearAuthStorag
 
 vi.mock('react-router-dom', () => ({ useNavigate: () => navigateMock }))
 vi.mock('@/lib/auth', () => ({ clearAuthStorage }))
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1', email: 'a@b.it' } }) }))
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1', email: 'a@example.test' } }) }))
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('@/lib/haptics', () => ({ triggerHaptic: vi.fn() }))
 vi.mock('@/lib/accountDeletion', () => ({ removePhotosOfDeletedFoods: removePhotos }))
