@@ -125,11 +125,11 @@ describe('registerPendingInvite', () => {
   it('calls the register_pending_invite RPC with normalized email (trim + lowercase)', async () => {
     mockRpc.mockResolvedValue({ data: true, error: null })
 
-    await registerPendingInvite('ABCDEF', ' User@TEST.com ')
+    await registerPendingInvite('ABCDEF', ' User@EXAMPLE.test ')
 
     expect(mockRpc).toHaveBeenCalledWith('register_pending_invite', {
       p_short_code: 'ABCDEF',
-      p_email: 'user@test.com',
+      p_email: 'user@example.test',
     })
   })
 

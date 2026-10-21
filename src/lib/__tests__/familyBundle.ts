@@ -114,3 +114,19 @@ export function unitForms(name: string): Map<string, { one: string; other: strin
   }
   return rows
 }
+
+/**
+ * I `name` della tabella di `core/categories.md`, nell'ordine della pagina.
+ *
+ * Si leggono le righe **dopo** il separatore: l'intestazione ha `name` fra
+ * apici inversi come le righe, e la prenderebbe per una categoria.
+ */
+export function categoryNames(): string[] {
+  const text = bundlePage('categories')
+  const separator = text.indexOf('\n|---')
+  if (separator === -1) throw new Error('Tabella delle categorie non trovata in core/categories.md')
+
+  const tableEnd = text.indexOf('\n\n', separator + 1)
+  const table = text.slice(separator, tableEnd === -1 ? undefined : tableEnd)
+  return [...table.matchAll(/^\|\s*`([a-z]+)`\s*\|/gm)].map((m) => m[1])
+}

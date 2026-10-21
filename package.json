@@ -1,7 +1,7 @@
 {
   "name": "entro",
   "private": true,
-  "version": "1.17.6",
+  "version": "1.18.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,6 +20,7 @@
     "smoke": "vitest run --config vitest.smoke.config.ts",
     "smoke:restore": "SMOKE_RUN=restore vitest run --config vitest.smoke.config.ts",
     "smoke:local": "vitest run --config vitest.smoke-local.config.ts",
+    "seed:local": "node scripts/test-data/seed.ts",
     "test:watch": "vitest"
   },
   "dependencies": {

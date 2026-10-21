@@ -5,6 +5,24 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.18.0] - 2026-10-21
+
+### Added
+- **`npm run seed:local` crea l'utente di prova locale e i suoi undici alimenti, leggendoli dal bundle di famiglia** ([#234](https://github.com/E-Lop/entro/issues/234)). Il seme prima stava in entro-mobile, che non possiede il database. Ora le righe sono un dato di `entro-family` (`conventions/test-data-seed.json`) ed entro le esegue:
+  - le date sono contate dal giorno di oggi a Roma, come i dati noti della suite smoke;
+  - l'utente `e2e@example.test` resta lo stesso, e gli si riscrivono gli alimenti. Così le sessioni aperte sui simulatori restano valide;
+  - con `--recreate` l'utente si cancella e si ricrea. Prima se ne tolgono gli alimenti e le foto della sua cartella: altrimenti chi era con lui in una lista condivisa li erediterebbe, e le foto resterebbero orfane nel bucket.
+
+  Lo script passa dalla guardia degli helper E2E: con un URL o una chiave che non sono quelli locali si ferma prima di creare un client, e un test lo prova. La password è `E2E_PASSWORD` degli helper, la stessa delle spec. Provato sul Supabase locale: undici alimenti, riletti con la sessione dell'utente attraverso la RLS. Con `--recreate` l'id cambia, la foto della cartella sparisce, e un co-membro della lista non eredita niente. Serve Node ≥ 22.18, come `npm run db:prepush`.
+- **Un guardiano del seme**, `testDataSeed.family.test.ts`. Ricalcola con `getExpiryStatus` lo stato che ogni riga dichiara, e misura la copertura di categorie, conservazioni, unità e stati contro `core/` del bundle. I casi che lo fanno diventare rosso sono nel test stesso.
+- **Un guardiano degli indirizzi email di prova**, `tests/testEmailDomains.test.ts`, dentro `npm test`. Negli script e nei test un indirizzo deve stare su un dominio che nessuno può registrare: `.test`, `.example`, `example.com`, `example.net`, `example.org` (RFC 6761). Chi registra un dominio ne riceve la posta, e con un reset si prende l'account. L'unica eccezione è il placeholder del campo email a schermo, che un test usa per trovarlo.
+
+### Changed
+- Sei indirizzi su domini registrabili nei test unitari (`a@b.it`, `user@test.com`) ora stanno su `example.test`. Il test della normalizzazione dell'invito tiene maiuscole e spazi.
+- Il calcolo del giorno a Roma della suite smoke sta in un modulo senza dipendenze, `tests/smoke/calendarDay.ts`, che lo script del seme legge senza build.
+
+  L'app non cambia: nessun file che il browser scarica è stato toccato.
+
 ## [1.17.6] - 2026-10-20
 
 ### Changed
@@ -1230,7 +1248,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.17.6...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.18.0...HEAD
+[1.18.0]: https://github.com/E-Lop/entro/compare/v1.17.6...v1.18.0
 [1.17.6]: https://github.com/E-Lop/entro/compare/v1.17.5...v1.17.6
 [1.17.5]: https://github.com/E-Lop/entro/compare/v1.17.4...v1.17.5
 [1.17.4]: https://github.com/E-Lop/entro/compare/v1.17.3...v1.17.4

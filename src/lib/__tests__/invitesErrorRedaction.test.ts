@@ -110,7 +110,7 @@ beforeEach(() => {
 const cases: [string, () => Promise<{ error: Error | null }>][] = [
   ['createInvite', () => createInvite('list-1')],
   ['validateInvite', () => validateInvite('ABC123')],
-  ['registerPendingInvite', () => registerPendingInvite('ABC123', 'a@b.it')],
+  ['registerPendingInvite', () => registerPendingInvite('ABC123', 'a@example.test')],
   ['acceptInviteByEmail', () => acceptInviteByEmail()],
   ['getUserList', () => getUserList()],
   ['getListMembers', () => getListMembers('list-1')],
