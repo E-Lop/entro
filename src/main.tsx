@@ -5,8 +5,12 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createIDBPersister, requestPersistentStorage } from './lib/queryPersister'
 import { registerMutationDefaults } from './lib/mutationDefaults'
 import { queryClient } from './lib/queryClient'
+import { initSentry } from './lib/sentry'
 import './index.css'
 import App from './App.tsx'
+
+// Sentry solo se c'è `VITE_SENTRY_DSN`: senza, l'SDK non si carica (#192).
+void initSentry()
 
 // Keep React Query's online state in sync with the browser
 onlineManager.setEventListener((setOnline) => {

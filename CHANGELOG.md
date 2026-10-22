@@ -5,6 +5,17 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.0] - 2026-10-22
+
+### Added
+- **Sentry sulla PWA, spento finché non c'è `VITE_SENTRY_DSN`** ([#192](https://github.com/E-Lop/entro/issues/192), gemella di [entro-mobile#199](https://github.com/E-Lop/entro-mobile/issues/199)). Con la variabile, ogni richiesta a Supabase che fallisce diventa un evento: tabelle, RPC, auth, storage, e le richieste che non arrivano al server. supabase-js non lancia eccezioni, restituisce `{ error }`, e nell'incidente #179 un 404 per tutti è passato inosservato per 41 ore. L'evento porta tre tag, `code`, `status` e l'operazione (`GET rest/foods`), e un titolo fisso. Restano fuori il messaggio del server, `details`, `hint`, la query string, il percorso dei file, gli header, i cookie, i corpi e i dati dell'utente. Lo stesso codice sulla stessa operazione è un gruppo solo.
+  - **Senza la variabile l'SDK non si scarica.** Si carica con un `import()` in un chunk suo (32 KB compressi), fuori dal bundle iniziale e fuori dalla precache del service worker. **In produzione la variabile non c'è**, e non va messa finché l'informativa non nomina Sentry (`docs/guides/DEPLOY.md`).
+  - Cosa entra nella segnalazione lo decide `src/lib/supabaseFailureReport.ts`, che ha lo stesso codice del gemello di entro-mobile, e lo tiene uguale un guardiano di famiglia, `supabaseFailureReportParity.family.test.ts`. Una lettura fallita che potrebbe ripetersi aspetta qualche secondo prima di partire: con la versione di supabase-js installata qui non si ripete niente e parte allo scadere, mentre su entro-mobile la ripetizione arriva e si segnala solo l'ultimo tentativo.
+  - Per ciò che non passa da Supabase c'è la rete di sicurezza di Sentry: ogni risposta da 400 a 599, con l'URL senza query string. Un fallimento resta un evento solo, perché le richieste a Supabase la rete di sicurezza le scarta.
+  - I breadcrumb della console non partono: `logError` vi scrive il messaggio degli errori di auth e di PostgREST, che è proprio il testo che resta fuori.
+
+  Provato nei test, con l'SDK e il client supabase-js veri e l'evento serializzato. Provato anche nel browser sul Supabase locale, con un DSN che punta a un finto punto di raccolta. Una lettura negata a tutti, come nella #179, dà eventi con il solo `42501`/`403`/`GET rest/foods`; una 404 fuori da Supabase dà un evento della rete di sicurezza senza query; senza la variabile non parte niente e l'SDK non si scarica. Una pagina ricaricata con la lettura negata produce nove eventi, perché React Query ripete e più componenti leggono gli alimenti: la mappa #185 dice «ogni `{error}`».
+
 ## [1.18.0] - 2026-10-21
 
 ### Added
@@ -1248,7 +1259,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.18.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.0...HEAD
+[1.19.0]: https://github.com/E-Lop/entro/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/E-Lop/entro/compare/v1.17.6...v1.18.0
 [1.17.6]: https://github.com/E-Lop/entro/compare/v1.17.5...v1.17.6
 [1.17.5]: https://github.com/E-Lop/entro/compare/v1.17.4...v1.17.5

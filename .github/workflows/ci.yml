@@ -134,17 +134,20 @@ jobs:
           repository: E-Lop/entro-mobile
           token: ${{ secrets.ENTRO_MOBILE_TOKEN }}
           path: .entro-mobile
-          # Quattro guardiani leggono di qui: lo schema di validazione (#120), la
+          # Cinque guardiani leggono di qui: lo schema di validazione (#120), la
           # tabella dei messaggi di autenticazione (#100), che
           # `authErrorMessageParity.family.test.ts` confronta col nostro, quella
-          # degli inviti (#101), per `inviteErrorMessageParity.family.test.ts`, e
+          # degli inviti (#101), per `inviteErrorMessageParity.family.test.ts`,
           # il `fetch` che trattiene le richieste senza token (#229), per
-          # `sessionBoundFetchParity.family.test.ts`. File singoli e non le
+          # `sessionBoundFetchParity.family.test.ts`, e quello che segnala le
+          # richieste fallite a Sentry (#192), per
+          # `supabaseFailureReportParity.family.test.ts`. File singoli e non le
           # cartelle `src/shared/lib` e `src/lib`: serve quello, non un progetto.
           sparse-checkout: |
             src/shared/validations
             src/shared/lib/authErrorMessage.ts
             src/shared/lib/inviteErrorMessage.ts
+            src/shared/lib/supabaseFailureReport.ts
             src/lib/sessionBoundFetch.ts
           # ⚠️ Non-cone **di proposito**, ed è il passo che ha reso rossa la
           # prima corsa di questa PR. In modalità cone lo sparse-checkout porta
