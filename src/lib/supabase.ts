@@ -5,6 +5,8 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from './supabase.overrides'
 import { createSessionBoundFetch, userIsInside } from './sessionBoundFetch'
 import { declareSessionCheck, pausingOnHeldBack, releaseOnAuthEvent } from './heldBackRequests'
+import { createFailureReportingFetch } from './supabaseFailureReport'
+import { reportSupabaseFailure } from './sentry'
 
 export type { Database } from './supabase.overrides'
 
@@ -32,12 +34,19 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true,
   },
   global: {
-    // Chi è dentro non manda richieste da anonimo, e una richiesta trattenuta
-    // mette in pausa React Query come una rete assente: il perché in
-    // `sessionBoundFetch.ts` e `heldBackRequests.ts` (#229).
-    fetch: pausingOnHeldBack(
-      createSessionBoundFetch({ publicKey: supabaseAnonKey, hasUser: userIsInside })
-    ),
+    // Ogni richiesta fallita diventa un evento Sentry con il solo codice
+    // (#192). Chi è dentro non manda richieste da anonimo, e una richiesta
+    // trattenuta mette in pausa React Query come una rete assente: il perché
+    // in `sessionBoundFetch.ts` e `heldBackRequests.ts` (#229). La
+    // segnalazione sta fuori, così vede anche le richieste trattenute: per
+    // supabase-js sono un `{ error }` come le altre.
+    fetch: createFailureReportingFetch({
+      supabaseUrl,
+      report: reportSupabaseFailure,
+      fetchImpl: pausingOnHeldBack(
+        createSessionBoundFetch({ publicKey: supabaseAnonKey, hasUser: userIsInside })
+      ),
+    }),
   },
   realtime: {
     params: {

@@ -14,6 +14,10 @@ export default defineConfig({
       filename: 'sw.ts',
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        // L'SDK di Sentry si carica solo con `VITE_SENTRY_DSN` (#192): in
+        // precache lo scaricherebbe ogni utente, anche senza. Il primo valore è
+        // il default di workbox-build, che un `globIgnores` esplicito sostituisce.
+        globIgnores: ['**/node_modules/**/*', '**/sentry-*.js'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB (bundle is ~2.65 MB)
       },
       includeAssets: ['icons/favicon-32x32.png', 'icons/apple-touch-icon.png'],
@@ -63,6 +67,8 @@ export default defineConfig({
             { name: 'react-vendor', test: /[\\/]node_modules[\\/](react|react-dom|react-router|react-router-dom)[\\/]/ },
             { name: 'react-query', test: /[\\/]node_modules[\\/]@tanstack[\\/]react-query[\\/]/ },
             { name: 'supabase', test: /[\\/]node_modules[\\/]@supabase[\\/]/ },
+            // Un nome fisso perché `globIgnores` lo tenga fuori dalla precache.
+            { name: 'sentry', test: /[\\/]node_modules[\\/]@sentry[\\/]/ },
             { name: 'date-fns', test: /[\\/]node_modules[\\/]date-fns[\\/]/ },
             { name: 'zxing', test: /[\\/]node_modules[\\/]@zxing[\\/](browser|library)[\\/]/ },
             { name: 'forms', test: /[\\/]node_modules[\\/](react-hook-form|@hookform[\\/]resolvers|zod)[\\/]/ },

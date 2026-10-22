@@ -105,6 +105,8 @@ Le impostazioni non sensibili possono restare in `netlify.toml`: la documentazio
 
 `VITE_APP_URL` non va impostata nella UI: `netlify.toml` la fissa a `https://entroapp.it`, e il file vince. Oggi nessun file di `src/` la legge; i link che l'app costruisce (invito, reset della password) partono da `window.location.origin`.
 
+⚠️ **`VITE_SENTRY_DSN` non va impostata in produzione** finché l'informativa (LegalBlink) non nomina Sentry fra le terze parti (#192). È l'interruttore di Sentry: senza, l'SDK non si carica e niente parte verso Sentry; con, ogni richiesta fallita a Supabase diventa un evento con il solo codice. Il DSN viene dall'org Sentry del maintainer, in regione UE (host `ingest.de.sentry.io`).
+
 ## 🗄️ Step 4: Supabase — migrazioni, Edge Functions, secret e cron
 
 Netlify pubblica solo il frontend. Database, Edge Functions e cron si pubblicano sul progetto Supabase con la Supabase CLI.
