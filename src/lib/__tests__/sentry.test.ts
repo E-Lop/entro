@@ -12,7 +12,7 @@
  * PR, dalla scheda Rete.
  */
 import { createClient } from '@supabase/supabase-js'
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /** Testo riconoscibile: se compare in un envelope, è uscito qualcosa di troppo. */
 const LEAK = 'TRACCIA-RICONOSCIBILE'
@@ -198,6 +198,72 @@ describe('con VITE_SENTRY_DSN', () => {
       expect(events().length).toBeGreaterThanOrEqual(2)
       expect(JSON.stringify(envelopes)).not.toContain(LEAK)
     })
+  })
+
+  /**
+   * `/join/:code` porta il codice d'invito nel **percorso**, e chi ha il codice
+   * entra nella lista. Togliere la query non basta: il percorso arriva con
+   * l'URL della pagina (`HttpContext`) e con i breadcrumb di navigazione.
+   */
+  describe('un fallimento sulla pagina di un invito', () => {
+    beforeEach(async () => {
+      await sent()
+      envelopes.length = 0
+      const Sentry = await import('@sentry/react')
+      Sentry.getCurrentScope().clearBreadcrumbs()
+    })
+
+    afterEach(() => {
+      Reflect.deleteProperty(globalThis, 'document')
+    })
+
+    it('non porta il codice d\u2019invito, né nell\u2019URL della pagina né nei breadcrumb', async () => {
+      // L'SDK legge l'URL della pagina da `document.location.href`
+      // (`@sentry/browser-utils`, `getLocationHref`).
+      Object.defineProperty(globalThis, 'document', {
+        value: { location: new URL(`http://localhost:5173/join/${LEAK}?x=1`) },
+        configurable: true,
+      })
+      const Sentry = await import('@sentry/react')
+      Sentry.addBreadcrumb({
+        category: 'navigation',
+        data: { from: `/join/${LEAK}`, to: '/' },
+      })
+
+      await (await appClient()).rpc('join_list_via_invite')
+      await sent()
+
+      expect(events()).toHaveLength(1)
+      expect(events()[0].request.url).toBe('http://localhost:5173/join/:code')
+      expect(JSON.stringify(envelopes)).not.toContain(LEAK)
+    })
+  })
+
+  // Il percorso di una foto è `<utente>/<istante>-<nome del file>`
+  // (`storage.ts`): l'id e il nome scelto sul telefono restano fuori.
+  it('il breadcrumb di una richiesta allo storage si ferma al bucket', async () => {
+    await sent()
+    envelopes.length = 0
+    const Sentry = await import('@sentry/react')
+    Sentry.getCurrentScope().clearBreadcrumbs()
+    Sentry.addBreadcrumb({
+      category: 'fetch',
+      type: 'http',
+      data: {
+        method: 'POST',
+        url: `${SUPABASE_URL}/storage/v1/object/sign/food-images/${LEAK}/1700000000-${LEAK}.jpg`,
+        status_code: 200,
+      },
+    })
+
+    await (await appClient()).rpc('join_list_via_invite')
+    await sent()
+
+    const crumb = events()[0] as unknown as { breadcrumbs: { category: string; data: { url: string } }[] }
+    expect(crumb.breadcrumbs.find((b) => b.data?.url?.includes('/storage/'))?.data.url).toBe(
+      `${SUPABASE_URL}/storage/v1/object/sign/food-images/:path`,
+    )
+    expect(JSON.stringify(envelopes)).not.toContain(LEAK)
   })
 
   describe('una richiesta fuori da Supabase che fallisce', () => {

@@ -52,9 +52,31 @@ export function reportSupabaseFailure(failure: SupabaseFailure): void {
   else if (starting && waiting.length < MAX_WAITING) waiting.push(failure)
 }
 
-/** Un URL senza query string né frammento: per PostgREST la query string è la query, con i valori. */
-function withoutQuery(url: string): string {
-  return url.split('#')[0].split('?')[0]
+/**
+ * La rotta `/join/:code` di `App.tsx` porta il codice d'invito nel percorso, e
+ * chi ha il codice entra nella lista: è una credenziale.
+ */
+const INVITE_CODE_IN_PATH = /\/join\/[^/]+/
+
+/**
+ * Un percorso dello storage fino al bucket, come per l'operazione in
+ * `supabaseFailureReport.ts`. Il resto è `<utente>/<istante>-<nome del file>`
+ * (`storage.ts`): l'id dell'utente e il nome scelto sul telefono.
+ */
+const STORAGE_OBJECT_PATH =
+  /(\/storage\/v1\/(?:(?:object|render|image|sign|upload|public|authenticated|info|list)\/)*[^/]+)\/.+$/
+
+/**
+ * Un URL che si può mandare: senza query string né frammento (per PostgREST la
+ * query string è la query, con i valori; nel reset della password il frammento
+ * porta i token), senza il codice d'invito e senza il percorso dei file.
+ */
+function scrubbedUrl(url: string): string {
+  return url
+    .split('#')[0]
+    .split('?')[0]
+    .replace(INVITE_CODE_IN_PATH, '/join/:code')
+    .replace(STORAGE_OBJECT_PATH, '$1/:path')
 }
 
 /**
@@ -104,8 +126,10 @@ export function sentryOptions(sentry: SentrySdk, dsn: string, supabaseUrl: strin
       }
 
       // L'evento della rete di sicurezza porta l'URL della richiesta intero
-      // (`@sentry/browser`, `integrations/httpclient.js`, sorgente installata).
-      if (event.request?.url) event.request.url = withoutQuery(event.request.url)
+      // (`@sentry/browser`, `integrations/httpclient.js`, sorgente installata),
+      // gli altri quello della pagina, che dalla v11 perde la query ma non il
+      // percorso.
+      if (event.request?.url) event.request.url = scrubbedUrl(event.request.url)
       if (event.request) delete event.request.query_string
       return event
     },
@@ -119,9 +143,9 @@ export function sentryOptions(sentry: SentrySdk, dsn: string, supabaseUrl: strin
       if (breadcrumb.category === 'console') return null
       const data = breadcrumb.data
       if (data) {
-        if (typeof data.url === 'string') data.url = withoutQuery(data.url)
-        if (typeof data.from === 'string') data.from = withoutQuery(data.from)
-        if (typeof data.to === 'string') data.to = withoutQuery(data.to)
+        if (typeof data.url === 'string') data.url = scrubbedUrl(data.url)
+        if (typeof data.from === 'string') data.from = scrubbedUrl(data.from)
+        if (typeof data.to === 'string') data.to = scrubbedUrl(data.to)
         delete data['http.query']
         delete data['http.fragment']
       }
