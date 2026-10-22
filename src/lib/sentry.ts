@@ -15,6 +15,7 @@
  * (`vite.config.ts`): senza DSN nessuno lo scarica.
  */
 import type { BrowserOptions } from '@sentry/react'
+import { matchRoutes } from 'react-router'
 import type { SupabaseFailure } from './supabaseFailureReport'
 
 type SentrySdk = typeof import('./sentrySdk')
@@ -54,10 +55,26 @@ export function reportSupabaseFailure(failure: SupabaseFailure): void {
 
 /**
  * La rotta `/join/:code` di `App.tsx` porta il codice d'invito nel percorso, e
- * chi ha il codice entra nella lista: è una credenziale. Senza badare alle
- * maiuscole, come il router (`caseSensitive` è falso di default).
+ * chi ha il codice entra nella lista: è una credenziale. La riconosce
+ * `matchRoutes` di React Router, cioè il router stesso: un confronto nostro
+ * perderebbe ciò che il router accetta e lui no — `/JOIN/…`, che non bada
+ * alle maiuscole, e `/j%6Fin/…`, che decodifica ogni segmento (`decodePath`).
  */
-const INVITE_CODE_IN_PATH = /\/join\/[^/]+/i
+const INVITE_ROUTE = [{ path: '/join/:code' }]
+
+/** Una base qualunque, perché anche un percorso relativo diventi un `URL`. */
+const RELATIVE_BASE = 'http://relative.invalid'
+
+function withoutInviteCode(url: string): string {
+  let parsed: URL
+  try {
+    parsed = new URL(url, RELATIVE_BASE)
+  } catch {
+    return url
+  }
+  if (!matchRoutes(INVITE_ROUTE, parsed.pathname)) return url
+  return parsed.origin === RELATIVE_BASE ? '/join/:code' : `${parsed.origin}/join/:code`
+}
 
 /**
  * Un percorso dello storage fino al bucket, come per l'operazione in
@@ -73,11 +90,7 @@ const STORAGE_OBJECT_PATH =
  * porta i token), senza il codice d'invito e senza il percorso dei file.
  */
 function scrubbedUrl(url: string): string {
-  return url
-    .split('#')[0]
-    .split('?')[0]
-    .replace(INVITE_CODE_IN_PATH, '/join/:code')
-    .replace(STORAGE_OBJECT_PATH, '$1/:path')
+  return withoutInviteCode(url.split('#')[0].split('?')[0]).replace(STORAGE_OBJECT_PATH, '$1/:path')
 }
 
 /**
