@@ -263,6 +263,11 @@ jobs:
       - name: Database concurrency (remove_list_member)
         run: bash supabase/tests/concurrency/remove_list_member_race.sh
 
+      # L'accettazione con conferma di un invito in gara con un'altra uscita
+      # dalla stessa lista, e due join incrociati (#239).
+      - name: Database concurrency (join_list_via_invite)
+        run: bash supabase/tests/concurrency/join_list_via_invite_race.sh
+
       # La suite di smoke API (#187) sullo stesso stack: crea le sentinelle A e
       # B, ripristino, livelli a, b e c, di nuovo ripristino. Prima dell'E2E
       # perché dura pochi secondi, e un rosso qui arriva quattro minuti prima.

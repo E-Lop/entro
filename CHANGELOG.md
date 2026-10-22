@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.1] - 2026-10-22
+
+### Fixed
+- **Due uscite insieme dalla stessa lista non la lasciano più senza membri** ([#239](https://github.com/E-Lop/entro/issues/239)). Chi accetta un invito confermando di lasciare la propria lista esce come con «Lascia la lista»: toglie la sua appartenenza, conta chi resta e cancella la lista se è vuota. Ma senza il lock sulla lista che le altre due uscite prendono. Gli ultimi due membri che uscivano nello stesso momento, accettando un invito o lasciando la lista, si contavano a vicenda ancora dentro, e la lista restava senza nessuno, con i suoi alimenti. Ora l'accettazione con conferma blocca la lista di partenza e quella di destinazione, in ordine di id, prima di toccare le appartenenze: si mette in fila con le altre uscite, e due accettazioni incrociate (da L1 a L2 e da L2 a L1) non si bloccano a vicenda.
+
+  Lo prova `supabase/tests/concurrency/join_list_via_invite_race.sh`, che gira in CI con gli altri tre script di gara. Sulla definizione di prima è rosso in 12 casi su 18 (liste senza membri). Con il lock sulla sola lista di partenza è rosso in 6 casi su 18, per deadlock (`40P01`) nei join incrociati. Con la migrazione è verde in 18 casi su 18. Le due accettazioni incrociate si intrecciano grazie a una terza sessione che le ferma a metà: senza, la prima finirebbe prima che la seconda cominci, e il deadlock non si vedrebbe mai.
+
 ## [1.19.0] - 2026-10-22
 
 ### Added
@@ -1260,7 +1267,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.1...HEAD
+[1.19.1]: https://github.com/E-Lop/entro/compare/v1.19.0...v1.19.1
 [1.19.0]: https://github.com/E-Lop/entro/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/E-Lop/entro/compare/v1.17.6...v1.18.0
 [1.17.6]: https://github.com/E-Lop/entro/compare/v1.17.5...v1.17.6
