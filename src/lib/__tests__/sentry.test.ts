@@ -227,7 +227,9 @@ describe('con VITE_SENTRY_DSN', () => {
       const Sentry = await import('@sentry/react')
       Sentry.addBreadcrumb({
         category: 'navigation',
-        data: { from: `/join/${LEAK}`, to: '/' },
+        // React Router confronta le rotte senza badare alle maiuscole
+        // (`compilePath`, `caseSensitive = false`): `/Join/…` apre la stessa pagina.
+        data: { from: `/Join/${LEAK}`, to: '/' },
       })
 
       await (await appClient()).rpc('join_list_via_invite')

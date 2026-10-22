@@ -54,9 +54,10 @@ export function reportSupabaseFailure(failure: SupabaseFailure): void {
 
 /**
  * La rotta `/join/:code` di `App.tsx` porta il codice d'invito nel percorso, e
- * chi ha il codice entra nella lista: è una credenziale.
+ * chi ha il codice entra nella lista: è una credenziale. Senza badare alle
+ * maiuscole, come il router (`caseSensitive` è falso di default).
  */
-const INVITE_CODE_IN_PATH = /\/join\/[^/]+/
+const INVITE_CODE_IN_PATH = /\/join\/[^/]+/i
 
 /**
  * Un percorso dello storage fino al bucket, come per l'operazione in
