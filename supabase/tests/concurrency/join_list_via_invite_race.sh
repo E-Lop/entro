@@ -162,24 +162,33 @@ for round in $(seq 1 "$ROUNDS"); do
     "prima «${FIRST}», seconda «${SECOND}», liste senza membri ${o}"
 
   # 2. U1 esce con leave_list() mentre U2 accetta con conferma. In fila, chi
-  #    arriva secondo trova il lavoro dell'altro fatto: se esce prima U1, U2 è
-  #    l'ultimo membro e la sua accettazione cancella la lista; se accetta
-  #    prima U2, U1 resta l'unico membro e leave_list() lo rifiuta con
-  #    'only_member', come fa sempre con l'unico membro.
+  #    prende il lock per secondo trova il lavoro dell'altro fatto: se esce
+  #    prima U1, U2 è l'ultimo membro e la sua accettazione cancella la lista;
+  #    se accetta prima U2, U1 resta l'unico membro e leave_list() lo rifiuta
+  #    con 'only_member', come fa sempre con l'unico membro. Chi parte per primo
+  #    non è detto che prenda il lock per primo (l'avvio di psql può costare
+  #    più dei 0,2 s di distacco): si accettano i due esiti, e si controlla che
+  #    lo stato finale sia quello del rispettivo.
   reset
   shared="$(new_list "$U1" "$U1" "$U2")"
   dest="$(new_list "$U3" "$U3")"; new_invite "$dest" "G239C${round}"
   if (( round % 2 == 1 )); then
     race "$U1" "public.leave_list()" "$U2" "public.join_list_via_invite('G239C${round}', true)"
-    expected_second=ok
+    leave="$FIRST" join="$SECOND"
   else
     race "$U2" "public.join_list_via_invite('G239C${round}', true)" "$U1" "public.leave_list()"
-    expected_second=only_member
+    join="$FIRST" leave="$SECOND"
   fi
+  in1_shared="$(sql -c "select count(*) from public.list_members where user_id = '${U1}' and list_id = '${shared}';")"
   in2="$(lists_of "$U2")"; o="$(orphans)"
-  [[ "$FIRST" == ok && "$SECOND" == "$expected_second" && "$in2" == "$dest" && "$o" == 0 ]] && ok=yes || ok=no
+  case "$leave" in
+    ok) leave_consistent=$([[ "$in1_shared" == 0 ]] && echo yes || echo no) ;;
+    only_member) leave_consistent=$([[ "$in1_shared" == 1 ]] && echo yes || echo no) ;;
+    *) leave_consistent=no ;;
+  esac
+  [[ "$join" == ok && "$leave_consistent" == yes && "$in2" == "$dest" && "$o" == 0 ]] && ok=yes || ok=no
   report "giro ${round}, uscita e accettazione con conferma" "$ok" \
-    "prima «${FIRST}», seconda «${SECOND}», liste senza membri ${o}"
+    "uscita «${leave}», accettazione «${join}», U1 nella lista condivisa ${in1_shared}, liste senza membri ${o}"
 
   # 3. Join incrociati: U1 da L1 a L2 mentre U2 da L2 a L1. In ognuna resta un
   #    membro (U3 in L1, U4 in L2), quindi nessuna lista si cancella. Le due
