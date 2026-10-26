@@ -10,9 +10,9 @@
  *
  * ## Perché non fallisce su «ci sono vulnerabilità»
  *
- * Sarebbe rosso sempre. Le due advisory qui sotto arrivano da Tailwind 3 e sono
- * state valutate e accettate nella #222: un controllo rosso per cose su cui è
- * già stato deciso insegna a ignorare il rosso.
+ * Sarebbe rosso sempre. Le advisory qui sotto sono state valutate e accettate,
+ * ciascuna nella issue che nomina: un controllo rosso per cose su cui è già
+ * stato deciso insegna a ignorare il rosso.
  *
  * ## Perché non si fida di `fixAvailable`
  *
@@ -60,11 +60,11 @@ export const ACCEPTED = {
     patched: '7.1.6',
     why: 'la correzione è nella serie 7 e Tailwind 3 chiede la 6; gira solo quando si genera il CSS',
   },
-  'GHSA-vfj7-8cjw-p6xm': {
-    issue: 222,
-    package: 'braces',
-    patched: null,
-    why: 'nessuna versione corretta pubblicata; gira solo dentro Tailwind 3, sui glob di questo repo',
+  'GHSA-m5mm-p8h7-m29v': {
+    issue: 251,
+    package: 'serialize-javascript',
+    patched: '7.1.3',
+    why: 'la 7.1.3 è in quarantena fino al 29 ott 2026; gira solo quando si genera il service worker',
   },
 }
 

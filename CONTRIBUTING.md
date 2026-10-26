@@ -89,7 +89,7 @@ Un test nuovo che legge i repo affiancati va chiamato `*.family.test.ts`. Se non
 
 ## Controllo settimanale delle dipendenze
 
-Ogni lunedì il workflow «Controllo settimanale delle dipendenze» confronta `npm audit` con l'elenco delle segnalazioni già valutate, `ACCEPTED` in `scripts/weekly-audit.mjs`. Si lancia anche a mano dalla scheda Actions. È verde finché non cambia niente, anche se `npm audit` riporta segnalazioni: quelle in elenco sono state valutate e accettate nella [#222](https://github.com/E-Lop/entro/issues/222).
+Ogni lunedì il workflow «Controllo settimanale delle dipendenze» confronta `npm audit` con l'elenco delle segnalazioni già valutate, `ACCEPTED` in `scripts/weekly-audit.mjs`. Si lancia anche a mano dalla scheda Actions. È verde finché non cambia niente, anche se `npm audit` riporta segnalazioni: quelle in elenco sono state valutate e accettate, ciascuna nella issue che la voce nomina.
 
 Quando esce rosso il log dice quale dei tre casi è:
 

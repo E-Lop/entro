@@ -4,7 +4,7 @@
  * che il workflow guarda.
  *
  * **Rosso = qualcuno ha qualcosa da fare.** Non «ci sono vulnerabilità»: su
- * questo albero ce ne sono due, già valutate nella #222, e un rosso permanente
+ * questo albero ce ne sono di già valutate, e un rosso permanente
  * insegnerebbe a ignorarlo. I modi di avere qualcosa da fare sono un caso
  * ciascuno, perché un guardiano che tace su uno di questi è indistinguibile da
  * un verde.
@@ -14,6 +14,8 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+// @ts-expect-error -- lo script è JavaScript senza dichiarazioni, e qui i tipi non provano niente
+import { compare, report } from '../scripts/weekly-audit.mjs'
 
 const SCRIPT = join(__dirname, '../scripts/weekly-audit.mjs')
 
@@ -115,16 +117,20 @@ describe('qualcosa da fare', () => {
     expect(code).toBe(1)
   })
 
+  // Dal 26 ott 2026 (#251) nessuna voce vera è senza correzione: il caso si
+  // prova sulle funzioni pure con un elenco sintetico, che lo script accetta
+  // per parametro.
   it('una accettata senza correzione che ora ne ha una: rosso, con la versione', () => {
-    const target = accepted.find((a) => a.patched === null)
-    expect(target).toBeDefined()
-    const now = accepted.map((a) => (a === target ? { ...a, patched: '9.9.9' } : a))
+    const synthetic = {
+      'GHSA-aaaa-bbbb-cccc': { issue: 999, package: 'some-package', patched: null, why: 'per il test' },
+    }
+    const versions = { 'GHSA-aaaa-bbbb-cccc': '9.9.9' }
 
-    const { code, out } = run(auditWith(all), ['--advisories', advisoriesFile(now)])
+    const { rows, exit } = report(compare(new Set(['GHSA-aaaa-bbbb-cccc']), versions, synthetic), versions, synthetic)
 
-    expect(out).toContain(`::error::${target!.ghsa} ha ora una versione corretta: 9.9.9`)
-    expect(out).toContain(`#${target!.issue}`)
-    expect(code).toBe(1)
+    expect(rows.join('\n')).toContain('::error::GHSA-aaaa-bbbb-cccc ha ora una versione corretta: 9.9.9')
+    expect(rows.join('\n')).toContain('#999')
+    expect(exit).toBe(1)
   })
 
   it('una accettata la cui versione corretta è cambiata: rosso', () => {

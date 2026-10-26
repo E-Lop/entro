@@ -5,6 +5,22 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.2] - 2026-10-26
+
+### Security
+- **Le segnalazioni nuove del controllo del 26 ott si chiudono aggiornando i pacchetti** ([#251](https://github.com/E-Lop/entro/issues/251)). Il controllo settimanale ne aveva trovate sedici, su sei pacchetti, e tutti hanno una versione corretta:
+  - `vite` 8.0.16 → 8.3.4: cinque advisory, la più grave high. Riguardano il server di sviluppo e `launch-editor`, tre di queste solo su Windows. Con vite sale anche `rolldown`, 1.0.3 → 1.2.14.
+  - `zod` 4.3.5 → 4.6.7: GHSA-mrhx-c7xc-m3w5, high. Validare una collezione molto più grande del suo limite esauriva la memoria. È l'unico dei sei che arriva nel bundle servito agli utenti, nel chunk `forms`.
+  - `undici` 7.30.0 → 7.30.1: tre advisory, arriva da `jsdom`, cioè dai test.
+  - `vitest` 4.1.11 → 4.1.12, con `@vitest/mocker`: due advisory. L'intervallo in `package.json` sale a `^4.1.12`, perché `npm update` restava sulla 4.1.11.
+  - `serialize-javascript` 7.0.5 resta, ed entra fra le accettate fino al 29 ott 2026: la 7.1.3 è del 22 ott, e la quarantena di sette giorni non la installa ancora. Gira solo quando si genera il service worker.
+
+  `braces` (GHSA-vfj7-8cjw-p6xm) esce dalle accettate: l'advisory è stata ritirata il 23 ott.
+
+  La build stampa due avvisi nuovi di rolldown, `advancedChunks` e `inlineDynamicImports` deprecati. Gli otto gruppi di `advancedChunks` escono ancora come chunk a sé, e quello di Sentry resta fuori dalla precache (in `sw.js` c'è solo `sentrySdk`, 151 byte di re-export).
+
+  Provato: lint, typecheck, 934 test, 93 test di famiglia, la build, e il controllo settimanale in locale.
+
 ## [1.19.1] - 2026-10-22
 
 ### Fixed
@@ -1267,7 +1283,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.2...HEAD
+[1.19.2]: https://github.com/E-Lop/entro/compare/v1.19.1...v1.19.2
 [1.19.1]: https://github.com/E-Lop/entro/compare/v1.19.0...v1.19.1
 [1.19.0]: https://github.com/E-Lop/entro/compare/v1.18.0...v1.19.0
 [1.18.0]: https://github.com/E-Lop/entro/compare/v1.17.6...v1.18.0
