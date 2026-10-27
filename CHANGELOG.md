@@ -5,7 +5,7 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.19.2] - 2026-10-26
+## [1.19.2] - 2026-10-27
 
 ### Security
 - **Le segnalazioni nuove del controllo del 26 ott si chiudono aggiornando i pacchetti** ([#251](https://github.com/E-Lop/entro/issues/251)). Il controllo settimanale ne aveva trovate sedici, su sei pacchetti, e tutti hanno una versione corretta:
@@ -13,6 +13,7 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
   - `zod` 4.3.5 → 4.6.7: GHSA-mrhx-c7xc-m3w5, high. Validare una collezione molto più grande del suo limite esauriva la memoria. È l'unico dei sei che arriva nel bundle servito agli utenti, nel chunk `forms`.
   - `undici` 7.30.0 → 7.30.1: tre advisory, arriva da `jsdom`, cioè dai test.
   - `vitest` 4.1.11 → 4.1.12, con `@vitest/mocker`: due advisory. L'intervallo in `package.json` sale a `^4.1.12`, perché `npm update` restava sulla 4.1.11.
+  - `fast-uri` 3.1.8 → 3.1.9: quattro advisory, due medium e due low, su scheme e host spoofing e normalizzazione dei percorsi. Arriva da `vite-plugin-pwa` → `workbox-build` → `ajv`, quindi gira solo quando si genera il service worker. La 3.1.9 è del 19 ott, e la quarantena l'ha installata dal 27.
   - `serialize-javascript` 7.0.5 resta, ed entra fra le accettate fino al 29 ott 2026: la 7.1.3 è del 22 ott, e la quarantena di sette giorni non la installa ancora. Gira solo quando si genera il service worker.
 
   `braces` (GHSA-vfj7-8cjw-p6xm) esce dalle accettate: l'advisory è stata ritirata il 23 ott.
