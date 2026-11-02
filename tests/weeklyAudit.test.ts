@@ -117,9 +117,10 @@ describe('qualcosa da fare', () => {
     expect(code).toBe(1)
   })
 
-  // Dal 26 ott 2026 (#251) nessuna voce vera è senza correzione: il caso si
-  // prova sulle funzioni pure con un elenco sintetico, che lo script accetta
-  // per parametro.
+  // Sulle funzioni pure con un elenco sintetico, che lo script accetta per
+  // parametro: una voce vera senza correzione può sparire dall'elenco, com'è
+  // successo il 26 ott 2026 (#251), e questo caso non deve dipendere da lei.
+  // Il collegamento con l'elenco vero lo prova il caso qui sotto.
   it('una accettata senza correzione che ora ne ha una: rosso, con la versione', () => {
     const synthetic = {
       'GHSA-aaaa-bbbb-cccc': { issue: 999, package: 'some-package', patched: null, why: 'per il test' },
