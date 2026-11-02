@@ -10,9 +10,9 @@
  *
  * ## Perché non fallisce su «ci sono vulnerabilità»
  *
- * Sarebbe rosso sempre. Le due advisory qui sotto arrivano da Tailwind 3 e sono
- * state valutate e accettate nella #222: un controllo rosso per cose su cui è
- * già stato deciso insegna a ignorare il rosso.
+ * Sarebbe rosso sempre. Le advisory qui sotto sono state valutate e accettate,
+ * ciascuna nella issue che nomina: un controllo rosso per cose su cui è già
+ * stato deciso insegna a ignorare il rosso.
  *
  * ## Perché non si fida di `fixAvailable`
  *
@@ -54,17 +54,23 @@ import { readFileSync } from 'node:fs'
  * l'advisory dichiarava il giorno della valutazione, `null` se non ce n'era.
  */
 export const ACCEPTED = {
-  'GHSA-rj75-hqrm-r3gf': {
-    issue: 222,
-    package: 'postcss-selector-parser',
-    patched: '7.1.6',
-    why: 'la correzione è nella serie 7 e Tailwind 3 chiede la 6; gira solo quando si genera il CSS',
+  'GHSA-3g3m-2fjr-6pw4': {
+    issue: 253,
+    package: 'glob',
+    patched: '14.0.2',
+    why: 'workbox-build chiede la serie 11 e la chiama senza `signal`, che il difetto richiede',
   },
-  'GHSA-vfj7-8cjw-p6xm': {
-    issue: 222,
-    package: 'braces',
+  'GHSA-g3hv-75wg-m249': {
+    issue: 253,
+    package: 'minimatch',
+    patched: '11.0.1',
+    why: 'eslint e glob 11 non accettano la 11, e forzarla svuota la precache; i pattern sono del repo',
+  },
+  'GHSA-gcqx-w48m-w2h4': {
+    issue: 253,
+    package: 'deepmerge',
     patched: null,
-    why: 'nessuna versione corretta pubblicata; gira solo dentro Tailwind 3, sui glob di questo repo',
+    why: 'nessuna versione corretta; il plugin di Rollup lo chiama solo su una costante propria',
   },
 }
 
