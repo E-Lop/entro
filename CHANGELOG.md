@@ -5,7 +5,7 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.19.2] - 2026-10-27
+## [1.19.2] - 2026-11-02
 
 ### Security
 - **Le segnalazioni nuove del controllo del 26 ott si chiudono aggiornando i pacchetti** ([#251](https://github.com/E-Lop/entro/issues/251)). Il controllo settimanale ne aveva trovate sedici, su sei pacchetti, e tutti hanno una versione corretta:
@@ -14,9 +14,13 @@ e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
   - `undici` 7.30.0 → 7.30.1: tre advisory, arriva da `jsdom`, cioè dai test.
   - `vitest` 4.1.11 → 4.1.12, con `@vitest/mocker`: due advisory. L'intervallo in `package.json` sale a `^4.1.12`, perché `npm update` restava sulla 4.1.11.
   - `fast-uri` 3.1.8 → 3.1.9: quattro advisory, due medium e due low, su scheme e host spoofing e normalizzazione dei percorsi. Arriva da `vite-plugin-pwa` → `workbox-build` → `ajv`, quindi gira solo quando si genera il service worker. La 3.1.9 è del 19 ott, e la quarantena l'ha installata dal 27.
-  - `serialize-javascript` 7.0.5 resta, ed entra fra le accettate fino al 29 ott 2026: la 7.1.3 è del 22 ott, e la quarantena di sette giorni non la installa ancora. Gira solo quando si genera il service worker.
+  - `serialize-javascript` 7.0.5 → 7.1.4: un'advisory low. Arriva da `workbox-build` e gira solo quando si genera il service worker. La 7.1.3 è del 22 ott, e la quarantena l'ha installata dal 29. L'override sale a `^7.1.3`.
 
   `braces` (GHSA-vfj7-8cjw-p6xm) esce dalle accettate: l'advisory è stata ritirata il 23 ott.
+
+  `postcss-selector-parser` 6.1.4 → 6.1.5 ([#222](https://github.com/E-Lop/entro/issues/222)): esce dalle accettate anche lei. La correzione mancava nella serie 6, l'unica che Tailwind 3 accetta, ed è arrivata il 19 ott. Il controllo non l'ha vista perché legge solo il primo intervallo dell'advisory ([#254](https://github.com/E-Lop/entro/issues/254)).
+
+  Entrano fra le accettate le tre advisory uscite o comparse dopo il 26 ott, tutte sugli strumenti di build e di lint: `glob`, `minimatch` e `deepmerge`, valutate nella [#253](https://github.com/E-Lop/entro/issues/253). Niente override su `minimatch`: forzare la 11 sotto `glob` 11 lascia la precache vuota senza errori (GoogleChrome/workbox#3594).
 
   La build stampa due avvisi nuovi di rolldown, `advancedChunks` e `inlineDynamicImports` deprecati. Gli otto gruppi di `advancedChunks` escono ancora come chunk a sé, e quello di Sentry resta fuori dalla precache (in `sw.js` c'è solo `sentrySdk`, 151 byte di re-export).
 

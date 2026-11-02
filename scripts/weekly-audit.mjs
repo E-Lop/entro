@@ -54,17 +54,23 @@ import { readFileSync } from 'node:fs'
  * l'advisory dichiarava il giorno della valutazione, `null` se non ce n'era.
  */
 export const ACCEPTED = {
-  'GHSA-rj75-hqrm-r3gf': {
-    issue: 222,
-    package: 'postcss-selector-parser',
-    patched: '7.1.6',
-    why: 'la correzione è nella serie 7 e Tailwind 3 chiede la 6; gira solo quando si genera il CSS',
+  'GHSA-3g3m-2fjr-6pw4': {
+    issue: 253,
+    package: 'glob',
+    patched: '14.0.2',
+    why: 'workbox-build chiede la serie 11 e la chiama senza `signal`, che il difetto richiede',
   },
-  'GHSA-m5mm-p8h7-m29v': {
-    issue: 251,
-    package: 'serialize-javascript',
-    patched: '7.1.3',
-    why: 'la 7.1.3 è in quarantena fino al 29 ott 2026; gira solo quando si genera il service worker',
+  'GHSA-g3hv-75wg-m249': {
+    issue: 253,
+    package: 'minimatch',
+    patched: '11.0.1',
+    why: 'eslint e glob 11 non accettano la 11, e forzarla svuota la precache; i pattern sono del repo',
+  },
+  'GHSA-gcqx-w48m-w2h4': {
+    issue: 253,
+    package: 'deepmerge',
+    patched: null,
+    why: 'nessuna versione corretta; il plugin di Rollup lo chiama solo su una costante propria',
   },
 }
 

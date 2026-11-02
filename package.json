@@ -55,7 +55,7 @@
     "zustand": "^5.0.9"
   },
   "overrides": {
-    "serialize-javascript": "^7.0.5",
+    "serialize-javascript": "^7.1.3",
     "picomatch": "^4.0.4",
     "flatted": "^3.3.4",
     "lodash": "^4.18.0",
