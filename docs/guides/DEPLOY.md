@@ -115,9 +115,11 @@ Netlify pubblica solo il frontend. Database, Edge Functions e cron si pubblicano
 
 ```bash
 supabase link --project-ref <project-ref>
-supabase migration list   # quali migrazioni mancano sul remoto
-supabase db push
+supabase migration list --linked   # quali migrazioni mancano sul remoto
+supabase db push --linked
 ```
+
+Il `--linked` non è superfluo. Dalla CLI v3 questi comandi, senza flag, vanno sullo stack locale ([guida di migrazione](https://supabase.com/docs/guides/local-development/cli/migrating-to-v3)), e il push riesce sul database sbagliato senza dirlo. `--linked` porta al progetto collegato sia sulla v2 sia sulla v3; nella v3 è deprecato, e con la v4 diventa `--remote`.
 
 La catena canonica è `supabase/migrations/`. La cartella `migrations/` nella radice è un archivio delle migrazioni storiche: non va applicata.
 
