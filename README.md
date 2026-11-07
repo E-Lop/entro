@@ -159,7 +159,7 @@ VITE_VAPID_PUBLIC_KEY=your-vapid-public-key-here
 VITE_KOFI_URL=
 ```
 
-4. Applica le migrazioni di [`supabase/migrations/`](supabase/migrations/) al tuo progetto: `supabase link --project-ref <ref>` e poi `supabase db push`
+4. Applica le migrazioni di [`supabase/migrations/`](supabase/migrations/) al tuo progetto: `supabase link --project-ref <ref>` e poi `supabase db push --linked`
 
 5. Avvia il server di sviluppo:
 
