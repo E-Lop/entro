@@ -93,9 +93,9 @@ Ogni lunedì il workflow «Controllo settimanale delle dipendenze» confronta `n
 
 Quando esce rosso il log dice quale dei tre casi è:
 
-- **una segnalazione non ancora valutata**: si aggiorna il pacchetto, se una versione corretta è installabile. Altrimenti si scrive la valutazione in una issue di questo repo (perché non si corregge, dove gira il codice, quando si rilegge) e si aggiunge la voce ad `ACCEPTED` con il numero della issue;
+- **una segnalazione non ancora valutata**: si aggiorna il pacchetto, se una versione corretta è installabile. Altrimenti si scrive la valutazione in una issue di questo repo (perché non si corregge, dove gira il codice, quando si rilegge) e si aggiunge la voce ad `ACCEPTED` con il numero della issue e con `patched`, cioè l'insieme delle versioni corrette che l'advisory dichiara oggi per quel pacchetto: un valore per ogni elemento di `vulnerabilities` che lo nomina, una serie ciascuno, e `null` per una serie senza correzione. Si leggono con `gh api /advisories/<GHSA> --jq '[.vulnerabilities[] | select(.package.name=="<pacchetto>") | .first_patched_version]'`. L'insieme intero, non la serie che usiamo: una correzione nuova in qualunque serie va guardata una volta (#254);
 - **una accettata non compare più**: si toglie la voce da `ACCEPTED` e dalla issue che la valutava;
-- **una accettata ha ora una versione corretta**: si rilegge la valutazione. Se la correzione è installabile si aggiorna il pacchetto e si toglie la voce; se non lo è si aggiorna `patched` nella voce e si scrive il perché nella issue.
+- **una accettata ha versioni corrette diverse**: il log dice quali sono comparse e quali sparite. Si rilegge la valutazione. Se una correzione è installabile si aggiorna il pacchetto e si toglie la voce; se non lo è si riscrive `patched` con l'insieme di oggi e si scrive il perché nella issue.
 
 In locale:
 

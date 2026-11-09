@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.5] - 2026-11-09
+
+### Fixed
+- **Il controllo settimanale delle dipendenze confronta tutte le versioni corrette di un'advisory accettata, non solo quella della prima serie** ([#254](https://github.com/E-Lop/entro/issues/254)). Un'advisory che copre più serie di un pacchetto ha un elemento per serie, e lo script leggeva solo il primo. Così la 6.1.5 di `postcss-selector-parser`, uscita il 19 ott nella seconda serie di GHSA-rj75-hqrm-r3gf, non ha fatto scattare il rosso: l'abbiamo trovata il 2 nov leggendo il JSON a mano. Ora ogni voce di `ACCEPTED` registra l'insieme delle versioni corrette di tutte le serie, e il controllo va rosso quando l'insieme cambia, in qualunque direzione. Il messaggio dice quali versioni sono comparse e quali sparite. L'ordine delle serie non conta, quindi il caso opposto della [#251](https://github.com/E-Lop/entro/issues/251), una voce `fast-uri` che sarebbe uscita rossa per la serie 2, non si ripete. I test girano sui JSON veri delle due advisory. `CONTRIBUTING.md` dice cosa registrare quando si accetta una segnalazione.
+
 ## [1.19.4] - 2026-11-09
 
 ### Fixed
@@ -1301,7 +1306,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.5...HEAD
+[1.19.5]: https://github.com/E-Lop/entro/compare/v1.19.4...v1.19.5
 [1.19.4]: https://github.com/E-Lop/entro/compare/v1.19.3...v1.19.4
 [1.19.3]: https://github.com/E-Lop/entro/compare/v1.19.2...v1.19.3
 [1.19.2]: https://github.com/E-Lop/entro/compare/v1.19.1...v1.19.2
