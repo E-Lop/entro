@@ -95,6 +95,24 @@ describe('updateFood — sostituire la foto', () => {
     expect(calls).toEqual([`update ${NEW}`, `remove ${NEW}`])
   })
 
+  it('se anche la cancellazione del nuovo fallisce, si scrive nei log e l’errore resta quello dell’UPDATE (#255)', async () => {
+    // Bundle, `core/food-images.md`: le cancellazioni fallite si loggano e
+    // basta. All'utente arriva una frase sola, quella del salvataggio.
+    rowThenUpdate(OLD, 'error')
+    mockDeleteFoodImage.mockRejectedValueOnce(new Error('Storage irraggiungibile'))
+    const { logError } = await import('@/lib/safeLog')
+
+    const { error } = await updateFood(FOOD_ID, { image_url: NEW })
+
+    expect(error?.message).toBe('Non è stato possibile salvare l\'alimento. Riprova.')
+    expect(mockDeleteFoodImage).toHaveBeenCalledTimes(1)
+    expect(mockDeleteFoodImage).toHaveBeenCalledWith(NEW)
+    expect(logError).toHaveBeenCalledWith(
+      'Foto caricata per una riga non scritta, rimasta orfana:',
+      expect.any(Error)
+    )
+  })
+
   it('se la cancellazione del vecchio fallisce, la modifica è salva lo stesso', async () => {
     rowThenUpdate(OLD)
     mockDeleteFoodImage.mockRejectedValueOnce(new Error('Storage irraggiungibile'))

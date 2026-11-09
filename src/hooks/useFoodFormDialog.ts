@@ -47,6 +47,20 @@ async function resolveImageFile(
   }
 }
 
+/**
+ * Vero se la scrittura è riuscita. Un fallimento qui non si lancia: l'ha già
+ * mostrato l'`onError` della mutazione, e il form aspetta il gestore con
+ * `await`, dove un rifiuto diventerebbe un errore non gestito.
+ */
+async function settled(write: Promise<unknown>): Promise<boolean> {
+  try {
+    await write
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function useFoodFormDialog() {
   const { user } = useAuth()
 
@@ -90,16 +104,26 @@ export function useFoodFormDialog() {
       deleted_at: null,
     }
 
-    // Use mutate (not mutateAsync) to avoid blocking when offline.
-    // mutateAsync returns a Promise that never resolves when the mutation
-    // is paused, causing the form to hang on "Creazione in corso...".
-    createMutation.mutate({ data: foodData, id: crypto.randomUUID() })
+    const variables = { data: foodData, id: crypto.randomUUID() }
+
+    // Offline la mutazione va in pausa, e il Promise di `mutateAsync` non si
+    // risolve finché la rete non torna: il form resterebbe su «Creazione in
+    // corso...». Lì si accoda con `mutate` e il dialogo si chiude subito.
+    if (!isOnline) {
+      createMutation.mutate(variables)
+      triggerHaptic('success')
+      setIsAddDialogOpen(false)
+      toast.info('Alimento salvato offline. Verrà sincronizzato quando torni online.')
+      return
+    }
+
+    // A rete presente il dialogo aspetta l'esito (#248). Se la scrittura
+    // fallisce senza essere trattenuta, il form resta aperto con i dati e la
+    // foto scelta, e un nuovo «Salva» rifà tutto. Il messaggio lo mostra
+    // l'`onError` della mutazione.
+    if (!(await settled(createMutation.mutateAsync(variables)))) return
     triggerHaptic('success')
     setIsAddDialogOpen(false)
-
-    if (!isOnline) {
-      toast.info('Alimento salvato offline. Verrà sincronizzato quando torni online.')
-    }
   }
 
   const handleUpdateFood = async (data: FoodFormData, barcode: string | null = null) => {
@@ -129,13 +153,21 @@ export function useFoodFormDialog() {
       barcode,
     }
 
-    updateMutation.mutate({ id: editingFood.id, data: foodData })
+    const variables = { id: editingFood.id, data: foodData }
+
+    // Come in creazione: offline in coda e dialogo chiuso subito, a rete
+    // presente si aspetta l'esito (#255).
+    if (!isOnline) {
+      updateMutation.mutate(variables)
+      triggerHaptic('success')
+      setEditingFood(null)
+      toast.info('Modifica salvata offline. Verrà sincronizzata quando torni online.')
+      return
+    }
+
+    if (!(await settled(updateMutation.mutateAsync(variables)))) return
     triggerHaptic('success')
     setEditingFood(null)
-
-    if (!isOnline) {
-      toast.info('Modifica salvata offline. Verrà sincronizzata quando torni online.')
-    }
   }
 
   const deleteOpenerRef = useRef<HTMLElement | null>(null)

@@ -24,6 +24,7 @@ import {
 } from '@/lib/focusAfterRemoval'
 import type { Food, FoodOutcome } from '@/lib/foods'
 import type { FoodFormData } from '@/lib/validations/food.schemas'
+import { WriteErrorAnnouncer } from '@/components/pwa/WriteErrorAnnouncer'
 
 const FoodForm = lazy(() => import('./FoodForm').then(m => ({ default: m.FoodForm })))
 
@@ -122,6 +123,14 @@ export function FoodModals({
           <DialogHeader>
             <DialogTitle>Aggiungi Nuovo Alimento</DialogTitle>
           </DialogHeader>
+          {/*
+            Il dialogo è modale: Radix mette `aria-hidden` su tutto il resto
+            della pagina, compreso l'alert di `AppLayout` (#121). Una scrittura
+            che fallisce a form aperto (#248, #255) va annunciata da qui. Si
+            monta vuoto con il dialogo, prima dell'errore, come vuole
+            `role="alert"`.
+          */}
+          <WriteErrorAnnouncer />
           <Suspense fallback={<FormSpinner />}>
             <FoodForm
               mode="create"
@@ -146,6 +155,7 @@ export function FoodModals({
           <DialogHeader>
             <DialogTitle>Modifica Alimento</DialogTitle>
           </DialogHeader>
+          <WriteErrorAnnouncer />
           {editingFood && isUpdating && (
             <p role="status" className="text-sm text-muted-foreground">
               Questo alimento ha una modifica in attesa di essere salvata: potrai modificarlo di nuovo quando sarà sincronizzata.
