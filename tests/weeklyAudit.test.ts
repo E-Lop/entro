@@ -15,7 +15,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 // @ts-expect-error -- lo script è JavaScript senza dichiarazioni, e qui i tipi non provano niente
-import { compare, report } from '../scripts/weekly-audit.mjs'
+import { compare, patchedVersions, report } from '../scripts/weekly-audit.mjs'
 
 const SCRIPT = join(__dirname, '../scripts/weekly-audit.mjs')
 
@@ -23,7 +23,8 @@ interface Accepted {
   ghsa: string
   issue: number
   packageName: string
-  patched: string | null
+  /** Le versioni corrette dell'advisory, una per serie: `null` dove una serie non ne ha (#254). */
+  patched: (string | null)[]
 }
 
 /**
@@ -34,12 +35,16 @@ function declaredAccepted(): Accepted[] {
   const source = readFileSync(SCRIPT, 'utf8')
   const start = source.indexOf('export const ACCEPTED')
   const block = source.slice(start, source.indexOf('\n}', start))
-  const entry = /'(GHSA-[\w-]+)':\s*\{\s*issue:\s*(\d+),\s*package:\s*'([^']+)',\s*patched:\s*(null|'[^']+')/g
+  const entry = /'(GHSA-[\w-]+)':\s*\{\s*issue:\s*(\d+),\s*package:\s*'([^']+)',\s*patched:\s*\[([^\]]*)\]/g
   return [...block.matchAll(entry)].map((m) => ({
     ghsa: m[1],
     issue: Number(m[2]),
     packageName: m[3],
-    patched: m[4] === 'null' ? null : m[4].slice(1, -1),
+    patched: m[4]
+      .split(',')
+      .map((v) => v.trim())
+      .filter((v) => v !== '')
+      .map((v) => (v === 'null' ? null : v.slice(1, -1))),
   }))
 }
 
@@ -64,7 +69,10 @@ function advisoriesFile(entries: Accepted[]): string {
     JSON.stringify(
       entries.map((e) => ({
         ghsa_id: e.ghsa,
-        vulnerabilities: [{ package: { name: e.packageName }, first_patched_version: e.patched }],
+        vulnerabilities: e.patched.map((version) => ({
+          package: { name: e.packageName },
+          first_patched_version: version,
+        })),
       }))
     )
   )
@@ -87,6 +95,10 @@ describe('l’elenco delle accettate', () => {
 
   it('ogni voce rimanda a una issue di questo repo, che è pubblico', () => {
     for (const { issue } of accepted) expect(issue).toBeGreaterThan(0)
+  })
+
+  it('ogni voce registra l’insieme delle versioni corrette, non una sola (#254)', () => {
+    for (const { patched } of accepted) expect(patched.length).toBeGreaterThan(0)
   })
 })
 
@@ -123,25 +135,27 @@ describe('qualcosa da fare', () => {
   // Il collegamento con l'elenco vero lo prova il caso qui sotto.
   it('una accettata senza correzione che ora ne ha una: rosso, con la versione', () => {
     const synthetic = {
-      'GHSA-aaaa-bbbb-cccc': { issue: 999, package: 'some-package', patched: null, why: 'per il test' },
+      'GHSA-aaaa-bbbb-cccc': { issue: 999, package: 'some-package', patched: [null], why: 'per il test' },
     }
-    const versions = { 'GHSA-aaaa-bbbb-cccc': '9.9.9' }
+    const versions = { 'GHSA-aaaa-bbbb-cccc': ['9.9.9'] }
 
     const { rows, exit } = report(compare(new Set(['GHSA-aaaa-bbbb-cccc']), versions, synthetic), versions, synthetic)
 
-    expect(rows.join('\n')).toContain('::error::GHSA-aaaa-bbbb-cccc ha ora una versione corretta: 9.9.9')
+    expect(rows.join('\n')).toContain('::error::GHSA-aaaa-bbbb-cccc ha versioni corrette diverse')
+    expect(rows.join('\n')).toContain('nuove: 9.9.9')
     expect(rows.join('\n')).toContain('#999')
     expect(exit).toBe(1)
   })
 
   it('una accettata la cui versione corretta è cambiata: rosso', () => {
-    const target = accepted.find((a) => a.patched !== null)
+    const target = accepted.find((a) => a.patched.some((v) => v !== null))
     expect(target).toBeDefined()
-    const now = accepted.map((a) => (a === target ? { ...a, patched: '6.99.0' } : a))
+    const now = accepted.map((a) => (a === target ? { ...a, patched: ['6.99.0'] } : a))
 
     const { code, out } = run(auditWith(all), ['--advisories', advisoriesFile(now)])
 
-    expect(out).toContain(`::error::${target!.ghsa} ha ora una versione corretta: 6.99.0`)
+    expect(out).toContain(`::error::${target!.ghsa} ha versioni corrette diverse`)
+    expect(out).toContain('nuove: 6.99.0')
     expect(code).toBe(1)
   })
 })
@@ -174,7 +188,7 @@ describe('input che non si capisce: si fallisce, non si tace', () => {
     const { code, out } = run(auditWith(all), ['--advisories', advisoriesFile(accepted.slice(1))])
 
     expect(out).toContain(`::error::${accepted[0].ghsa} manca nel file delle advisory`)
-    expect(out).not.toMatch(/ha ora una versione corretta/)
+    expect(out).not.toMatch(/versioni corrette diverse/)
     expect(code).toBe(1)
   })
 
@@ -186,6 +200,68 @@ describe('input che non si capisce: si fallisce, non si tace', () => {
 
     expect(out).toMatch(/::error::Non ho saputo leggere il file delle advisory/)
     expect(code).toBe(1)
+  })
+})
+
+/**
+ * Un'advisory con più serie ha un elemento di `vulnerabilities` per serie, e la
+ * versione corretta che riguarda noi può stare in uno qualunque (#254). Si
+ * confronta l'insieme: un rosso anche per una serie che non usiamo è voluto,
+ * perché una correzione nuova va guardata una volta.
+ *
+ * I JSON sono quelli veri di `GET /advisories/{ghsa_id}`, salvati il 9 nov
+ * 2026 in `tests/fixtures/advisories/`.
+ */
+describe('advisory con più serie (#254)', () => {
+  const fixture = (id: string) =>
+    JSON.parse(readFileSync(join(__dirname, `fixtures/advisories/${id}.json`), 'utf8'))
+  const RJ75 = 'GHSA-rj75-hqrm-r3gf'
+  const FAST_URI = 'GHSA-333x-w4r6-6crp'
+  const entry = (pkg: string, patched: (string | null)[]) => ({ issue: 999, package: pkg, patched, why: 'per il test' })
+
+  function check(id: string, advisory: unknown, pkg: string, registered: (string | null)[]) {
+    const synthetic = { [id]: entry(pkg, registered) }
+    const versions = patchedVersions([advisory], synthetic)
+    return report(compare(new Set([id]), versions, synthetic), versions, synthetic)
+  }
+
+  it('postcss-selector-parser registrata con il solo 7.1.6: rosso, e il messaggio nomina 6.1.5', () => {
+    const { rows, exit } = check(RJ75, fixture(RJ75), 'postcss-selector-parser', ['7.1.6'])
+
+    expect(rows.join('\n')).toContain(`::error::${RJ75} ha versioni corrette diverse`)
+    expect(rows.join('\n')).toContain('nuove: 6.1.5')
+    expect(exit).toBe(1)
+  })
+
+  it('registrata con tutte e due le serie: verde', () => {
+    const { rows, exit } = check(RJ75, fixture(RJ75), 'postcss-selector-parser', ['7.1.6', '6.1.5'])
+
+    expect(rows.join('\n')).toContain('::notice::Nessun cambiamento')
+    expect(exit).toBe(0)
+  })
+
+  it('fast-uri (#251), tre serie registrate in un altro ordine: verde, l’ordine non conta', () => {
+    const { rows, exit } = check(FAST_URI, fixture(FAST_URI), 'fast-uri', ['3.1.9', '4.2.3', '2.4.8'])
+
+    expect(rows.join('\n')).not.toMatch(/versioni corrette diverse/)
+    expect(exit).toBe(0)
+  })
+
+  it('una serie che perde la correzione: rosso, e il messaggio dice quale è sparita', () => {
+    const advisory = fixture(RJ75)
+    advisory.vulnerabilities[1].first_patched_version = null
+
+    const { rows, exit } = check(RJ75, advisory, 'postcss-selector-parser', ['7.1.6', '6.1.5'])
+
+    expect(rows.join('\n')).toContain('sparite: 6.1.5')
+    expect(rows.join('\n')).toContain('nuove: nessuna')
+    expect(exit).toBe(1)
+  })
+
+  it('un’advisory che non ha elementi per il pacchetto: errore, come prima', () => {
+    expect(() =>
+      patchedVersions([fixture(RJ75)], { [RJ75]: entry('un-altro-pacchetto', ['7.1.6']) })
+    ).toThrow(/non nomina `un-altro-pacchetto`/)
   })
 })
 

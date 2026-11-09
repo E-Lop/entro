@@ -37,8 +37,11 @@
  * 2. una accettata **non compare più**: si toglie dall'elenco. È una buona
  *    notizia ed è comunque lavoro: senza farla fallire l'elenco non si
  *    accorcerebbe mai, e diventerebbe il modo di ignorare le cose;
- * 3. una accettata **ha una versione corretta diversa** da quella di quando è
- *    stata valutata: la valutazione va riletta;
+ * 3. una accettata **ha versioni corrette diverse** da quelle di quando è
+ *    stata valutata, in una qualunque serie: la valutazione va riletta. Si
+ *    confronta l'insieme di tutte le serie (#254): fino al 2 nov 2026 si
+ *    leggeva solo la prima, e la 6.1.5 di `postcss-selector-parser` è passata
+ *    inosservata perché stava nella seconda;
  * 4. l'input non si capisce: si fallisce invece di tacere.
  *
  * Lo stesso controllo vive in entro-mobile, con un elenco suo. La logica in
@@ -50,26 +53,28 @@ import { readFileSync } from 'node:fs'
  * Le segnalazioni già valutate, con **dove** sta la valutazione.
  *
  * La issue è di questo repo, che è pubblico: chi legge un verde deve poter
- * risalire al ragionamento. `patched` è la prima versione corretta che
- * l'advisory dichiarava il giorno della valutazione, `null` se non ce n'era.
+ * risalire al ragionamento. `patched` è l'**insieme** delle versioni corrette
+ * che l'advisory dichiarava per il pacchetto il giorno della valutazione, una
+ * per serie (un elemento di `vulnerabilities` ciascuna), con `null` per una
+ * serie che non ne aveva. L'ordine non conta.
  */
 export const ACCEPTED = {
   'GHSA-3g3m-2fjr-6pw4': {
     issue: 253,
     package: 'glob',
-    patched: '14.0.2',
+    patched: ['14.0.2'],
     why: 'workbox-build chiede la serie 11 e la chiama senza `signal`, che il difetto richiede',
   },
   'GHSA-g3hv-75wg-m249': {
     issue: 253,
     package: 'minimatch',
-    patched: '11.0.1',
+    patched: ['11.0.1'],
     why: 'eslint e glob 11 non accettano la 11, e forzarla svuota la precache; i pattern sono del repo',
   },
   'GHSA-gcqx-w48m-w2h4': {
     issue: 253,
     package: 'deepmerge',
-    patched: null,
+    patched: [null],
     why: 'nessuna versione corretta; il plugin di Rollup lo chiama solo su una costante propria',
   },
 }
@@ -101,7 +106,9 @@ export function reportGhsa(report) {
 }
 
 /**
- * La prima versione corretta di ogni accettata, dalle advisory di GitHub.
+ * Le versioni corrette di ogni accettata, una per serie, dalle advisory di
+ * GitHub: tutti gli elementi di `vulnerabilities` che nominano il pacchetto,
+ * non il primo (#254).
  *
  * Un'accettata che nel file non c'è è un errore, non un «nessuna correzione»:
  * sono due risposte diverse e solo una è stata data.
@@ -111,12 +118,27 @@ export function patchedVersions(advisories, accepted = ACCEPTED) {
   const versions = {}
   for (const [id, { package: name }] of Object.entries(accepted)) {
     const advisory = byId.get(id)
-    const affected = advisory?.vulnerabilities?.find((v) => v?.package?.name === name)
-    if (!affected) throw new UnreadableInput(`${id} manca nel file delle advisory, o non nomina \`${name}\`.`)
-    versions[id] = affected.first_patched_version ?? null
+    const affected = (advisory?.vulnerabilities ?? []).filter((v) => v?.package?.name === name)
+    if (affected.length === 0) {
+      throw new UnreadableInput(`${id} manca nel file delle advisory, o non nomina \`${name}\`.`)
+    }
+    versions[id] = affected.map((v) => v.first_patched_version ?? null)
   }
   return versions
 }
+
+/** Cosa c'è in `now` e non in `before`, come insiemi: l'ordine delle serie non conta. */
+function missingFrom(before, now) {
+  const known = new Set(before)
+  return [...new Set(now)].filter((v) => !known.has(v))
+}
+
+/** Le versioni corrette comparse e sparite rispetto alla valutazione. */
+function patchedChange(registered, now) {
+  return { added: missingFrom(registered, now), removed: missingFrom(now, registered) }
+}
+
+const shown = (versions) => (versions.length === 0 ? '—' : versions.map((v) => v ?? 'nessuna').join(', '))
 
 /** Confronta ciò che `npm audit` e le advisory dicono con ciò che è già stato valutato. */
 export function compare(present, versions, accepted = ACCEPTED) {
@@ -125,7 +147,10 @@ export function compare(present, versions, accepted = ACCEPTED) {
   return {
     newOnes: [...present].filter((id) => !known.has(id)).sort(),
     gone: [...known].filter((id) => !present.has(id)).sort(),
-    patched: confirmed.filter((id) => versions[id] !== accepted[id].patched),
+    patched: confirmed.filter((id) => {
+      const { added, removed } = patchedChange(accepted[id].patched, versions[id])
+      return added.length > 0 || removed.length > 0
+    }),
     confirmed,
   }
 }
@@ -158,9 +183,17 @@ export function report(outcome, versions, accepted = ACCEPTED) {
 
   for (const id of outcome.patched) {
     const { issue, patched } = accepted[id]
+    const { added, removed } = patchedChange(patched, versions[id])
+    const change = [
+      added.length > 0 ? `nuove: ${shown(added)}` : null,
+      removed.length > 0 ? `sparite: ${shown(removed)}` : null,
+    ]
+      .filter(Boolean)
+      .join('; ')
     rows.push(
-      `::error::${id} ha ora una versione corretta: ${versions[id] ?? 'nessuna'} ` +
-        `(alla valutazione: ${patched ?? 'nessuna'}). La #${issue} va riletta: si aggiorna il pacchetto, o si aggiorna \`patched\` in ACCEPTED.`
+      `::error::${id} ha versioni corrette diverse da quelle della valutazione (${change}; ` +
+        `alla valutazione: ${shown(patched)}; oggi: ${shown(versions[id])}). ` +
+        `La #${issue} va riletta: si aggiorna il pacchetto, o si aggiorna \`patched\` in ACCEPTED con l'insieme di oggi.`
     )
     exit = 1
   }
