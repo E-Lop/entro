@@ -215,14 +215,26 @@ export async function createFood(
     // finiva **sempre** nel rifiuto della RLS — con il messaggio di Postgres
     // mostrato all'utente. Meglio fermarsi qui, dove si può dire cosa è
     // successo, che tentare una scrittura che non può riuscire.
-    const { data: listMemberData, error: listError } = await supabase
+    const {
+      data: listMemberData,
+      error: listError,
+      status: listMemberStatus,
+    } = await supabase
       .from('list_members')
       .select('list_id')
       .eq('user_id', user.id)
       .maybeSingle()
 
+    // Una lettura fallita non è «nessuna lista» (#244, come entro-mobile#293):
+    // chi ha perso la rete non deve sentirsi dire che l'account non ha una
+    // lista. Lo `status` della risposta va nell'errore, perché dice se la
+    // richiesta è arrivata al server: 0 quando no.
     if (listError) {
       logError('[createFood] Errore leggendo la lista dell\'utente:', listError)
+      throw userFacingError('Non è stato possibile salvare l\'alimento. Riprova.', {
+        ...listError,
+        status: listMemberStatus,
+      })
     }
 
     const listId = listMemberData?.list_id ?? null
