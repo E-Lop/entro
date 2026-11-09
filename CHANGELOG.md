@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.3] - 2026-11-09
+
+### Fixed
+- **Una creazione che non riesce a leggere la lista dell'utente dice che il salvataggio non è riuscito, non che l'account non ha una lista** ([#244](https://github.com/E-Lop/entro/issues/244)). Prima di scrivere un alimento `createFood` legge la lista dell'utente. Se quella lettura falliva, per rete o per un errore del server, il codice la trattava come una lista assente, e il toast diceva «Il tuo account non risulta collegato a una lista. Ricarica la pagina e riprova.», cioè la frase di chi una lista non ce l'ha davvero. Ora dice «Non è stato possibile salvare l'alimento. Riprova.», come quando il database rifiuta la scrittura, e la scrittura non parte. L'errore porta in `cause` l'originale con lo `status` della risposta, 0 quando la richiesta non è arrivata al server, come nella gemella di entro-mobile ([entro-mobile#293](https://github.com/E-Lop/entro-mobile/issues/293)). La frase della lista assente resta per la lettura riuscita senza righe. Il form che si chiude e la foto che si perde quando la scrittura fallisce sono la [#248](https://github.com/E-Lop/entro/issues/248).
+
 ## [1.19.2] - 2026-11-02
 
 ### Security
@@ -1288,7 +1293,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.2...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.3...HEAD
+[1.19.3]: https://github.com/E-Lop/entro/compare/v1.19.2...v1.19.3
 [1.19.2]: https://github.com/E-Lop/entro/compare/v1.19.1...v1.19.2
 [1.19.1]: https://github.com/E-Lop/entro/compare/v1.19.0...v1.19.1
 [1.19.0]: https://github.com/E-Lop/entro/compare/v1.18.0...v1.19.0

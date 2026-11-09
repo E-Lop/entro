@@ -114,6 +114,54 @@ describe('createFood quando il database rifiuta', () => {
   })
 })
 
+/**
+ * Una lettura della lista che fallisce non è «nessuna lista» (#244), come nella
+ * gemella di entro-mobile (#293): chi ha perso la rete non deve sentirsi dire
+ * che l'account non ha una lista. Lo `status` sta sulla risposta, e va in
+ * `cause`: 0 quando la richiesta non è arrivata al server.
+ */
+describe('createFood quando la lettura della lista fallisce (#244)', () => {
+  it('a rete assente: errore di salvataggio con `status` 0, e nessuna scrittura', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({
+      data: null,
+      error: { message: 'TypeError: Failed to fetch', details: '', hint: '', code: '' },
+      status: 0,
+    })
+
+    const { food, error } = await createFood(DATA)
+
+    expect(food).toBeNull()
+    expect(error?.message).toBe('Non è stato possibile salvare l\'alimento. Riprova.')
+    expect(error?.message).not.toContain('lista')
+    expect((error?.cause as { status?: number }).status).toBe(0)
+    expect(mockInsertBuilder.insert).not.toHaveBeenCalled()
+  })
+
+  it('con un errore del server: lo `status` è quello HTTP, e la frase non è quella della lista', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({
+      data: null,
+      error: { message: 'internal error', details: '', hint: '', code: 'XX000' },
+      status: 500,
+    })
+
+    const { error } = await createFood(DATA)
+
+    expect(error?.message).not.toContain('non risulta collegato')
+    expect((error?.cause as { status?: number }).status).toBe(500)
+    expect(mockInsertBuilder.insert).not.toHaveBeenCalled()
+  })
+
+  it('lettura riuscita senza righe: resta la frase di chi la lista non ce l’ha', async () => {
+    mockListBuilder.maybeSingle.mockResolvedValue({ data: null, error: null, status: 200 })
+
+    const { error } = await createFood(DATA)
+
+    expect(error?.message).toBe(
+      'Il tuo account non risulta collegato a una lista. Ricarica la pagina e riprova.'
+    )
+  })
+})
+
 describe('createFood sul percorso felice', () => {
   it('scrive con il `list_id` dell’utente', async () => {
     mockListBuilder.maybeSingle.mockResolvedValue({ data: { list_id: 'lista-1' }, error: null })
