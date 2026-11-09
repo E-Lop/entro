@@ -25,6 +25,8 @@ const { mocks } = vi.hoisted(() => ({
     savePendingImage: vi.fn(),
     createMutate: vi.fn(),
     updateMutate: vi.fn(),
+    createMutateAsync: vi.fn(),
+    updateMutateAsync: vi.fn(),
     toastError: vi.fn(),
     toastInfo: vi.fn(),
   },
@@ -38,8 +40,16 @@ vi.mock('@tanstack/react-query', () => ({
 }))
 vi.mock('../useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' } }) }))
 vi.mock('../useFoods', () => ({
-  useCreateFood: () => ({ mutate: mocks.createMutate, isPending: false }),
-  useUpdateFood: () => ({ mutate: mocks.updateMutate, isPending: false }),
+  useCreateFood: () => ({
+    mutate: mocks.createMutate,
+    mutateAsync: mocks.createMutateAsync,
+    isPending: false,
+  }),
+  useUpdateFood: () => ({
+    mutate: mocks.updateMutate,
+    mutateAsync: mocks.updateMutateAsync,
+    isPending: false,
+  }),
   useDeleteFood: () => ({ mutate: vi.fn(), isPending: false }),
 }))
 vi.mock('@/lib/storage', () => ({ uploadFoodImage: mocks.uploadFoodImage }))
@@ -71,6 +81,9 @@ const EDITING = { id: 'f1', name: 'Latte', image_url: 'u1/1-vecchia.jpg' } as Fo
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.isOnline.mockReturnValue(true)
+  // A rete presente la scrittura si aspetta (#248, #255): di serie riesce.
+  mocks.createMutateAsync.mockResolvedValue({ id: 'nuovo' })
+  mocks.updateMutateAsync.mockResolvedValue({ id: 'f1' })
 })
 
 afterEach(() => {
@@ -85,7 +98,7 @@ describe('creare con una foto', () => {
 
     await act(() => result.current.handleCreateFood(formData(PHOTO)))
 
-    expect(mocks.createMutate).toHaveBeenCalledWith(
+    expect(mocks.createMutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ image_url: 'u1/2-latte.jpg' }) })
     )
     expect(result.current.isAddDialogOpen).toBe(false)
@@ -99,6 +112,7 @@ describe('creare con una foto', () => {
     await act(() => result.current.handleCreateFood(formData(PHOTO)))
 
     expect(mocks.createMutate).not.toHaveBeenCalled()
+    expect(mocks.createMutateAsync).not.toHaveBeenCalled()
     expect(result.current.isAddDialogOpen).toBe(true)
     expect(mocks.toastError).toHaveBeenCalledTimes(1)
     // Il testo di Storage resta nei log: a schermo va una frase che l'utente
@@ -128,7 +142,7 @@ describe('creare con una foto', () => {
     await act(() => result.current.handleCreateFood(formData(null)))
 
     expect(mocks.uploadFoodImage).not.toHaveBeenCalled()
-    expect(mocks.createMutate).toHaveBeenCalledTimes(1)
+    expect(mocks.createMutateAsync).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -141,6 +155,7 @@ describe('modificare con una foto nuova', () => {
     await act(() => result.current.handleUpdateFood(formData(PHOTO)))
 
     expect(mocks.updateMutate).not.toHaveBeenCalled()
+    expect(mocks.updateMutateAsync).not.toHaveBeenCalled()
     expect(result.current.editingFood).toBe(EDITING)
     expect(mocks.toastError).toHaveBeenCalledTimes(1)
   })
@@ -152,7 +167,7 @@ describe('modificare con una foto nuova', () => {
 
     await act(() => result.current.handleUpdateFood(formData(PHOTO)))
 
-    expect(mocks.updateMutate).toHaveBeenCalledWith(
+    expect(mocks.updateMutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'f1', data: expect.objectContaining({ image_url: 'u1/3-nuova.jpg' }) })
     )
     expect(result.current.editingFood).toBeNull()
@@ -168,7 +183,7 @@ describe('modificare con una foto nuova', () => {
 
     await act(() => result.current.handleUpdateFood(formData(null)))
 
-    const [{ data }] = mocks.updateMutate.mock.calls[0] as [{ data: Record<string, unknown> }]
+    const [{ data }] = mocks.updateMutateAsync.mock.calls[0] as [{ data: Record<string, unknown> }]
     expect(data.image_url).toBeNull()
     expect(JSON.parse(JSON.stringify(data))).toHaveProperty('image_url', null)
   })
@@ -180,6 +195,155 @@ describe('modificare con una foto nuova', () => {
     await act(() => result.current.handleUpdateFood(formData('u1/1-vecchia.jpg')))
 
     expect(mocks.uploadFoodImage).not.toHaveBeenCalled()
-    expect(mocks.updateMutate).toHaveBeenCalledTimes(1)
+    expect(mocks.updateMutateAsync).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * A rete presente il form resta aperto fino all'esito della scrittura (#248
+ * per la creazione, #255 per la modifica). Prima si chiudeva subito: se la
+ * scrittura falliva senza essere trattenuta — la rete che cade con
+ * `navigator.onLine` vero, o un rifiuto del server — i dati e il `File`
+ * scelto se ne andavano con il form. Il form tiene tutto finché è montato, e
+ * lo è finché il dialogo resta aperto.
+ *
+ * Il toast dell'errore lo mostra l'`onError` della mutazione, con il messaggio
+ * della #244 (`useCreateFood.test.tsx`); l'oggetto caricato lo cancellano
+ * `createFood` e `updateFood` (`foodsCreate.test.ts`, `foodsUpdateImage.test.ts`).
+ * Qui si prova il dialogo.
+ *
+ * Offline resta come prima: la mutazione va in pausa e il suo Promise non si
+ * risolve finché la rete non torna, quindi lì il dialogo si chiude subito.
+ */
+const networkFailure = () =>
+  new Error('Non è stato possibile salvare l\'alimento. Riprova.', { cause: { status: 0 } })
+const serverRejection = () =>
+  new Error('Non è stato possibile salvare l\'alimento. Riprova.', { cause: { status: 403 } })
+
+describe('creare a rete presente: il dialogo aspetta l’esito (#248)', () => {
+  it('riuscita: il dialogo si chiude, senza il toast dell’offline', async () => {
+    mocks.uploadFoodImage.mockResolvedValue('u1/2-latte.jpg')
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.setIsAddDialogOpen(true))
+
+    await act(() => result.current.handleCreateFood(formData(PHOTO)))
+
+    expect(mocks.createMutateAsync).toHaveBeenCalledTimes(1)
+    expect(mocks.createMutate).not.toHaveBeenCalled()
+    expect(result.current.isAddDialogOpen).toBe(false)
+    expect(mocks.toastInfo).not.toHaveBeenCalled()
+  })
+
+  it('prima dell’esito il dialogo è ancora aperto', async () => {
+    let settle: (value: unknown) => void = () => {}
+    mocks.createMutateAsync.mockReturnValue(new Promise((resolve) => { settle = resolve }))
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.setIsAddDialogOpen(true))
+
+    let submitted: Promise<void> = Promise.resolve()
+    act(() => { submitted = result.current.handleCreateFood(formData(null)) })
+    await act(async () => {})
+
+    expect(mocks.createMutateAsync).toHaveBeenCalledTimes(1)
+    expect(result.current.isAddDialogOpen).toBe(true)
+
+    await act(async () => { settle({ id: 'nuovo' }); await submitted })
+    expect(result.current.isAddDialogOpen).toBe(false)
+  })
+
+  it.each([
+    ['per rete (status 0)', networkFailure],
+    ['per rifiuto del server', serverRejection],
+  ])('fallita %s: il dialogo resta aperto e non si ritenta da qui', async (_label, failure) => {
+    mocks.uploadFoodImage.mockResolvedValue('u1/2-latte.jpg')
+    mocks.createMutateAsync.mockRejectedValue(failure())
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.setIsAddDialogOpen(true))
+
+    // L'errore non esce dal gestore: il form lo aspetta con `await`, e un
+    // rifiuto qui diventerebbe un errore non gestito.
+    await act(() => result.current.handleCreateFood(formData(PHOTO)))
+
+    expect(result.current.isAddDialogOpen).toBe(true)
+    expect(mocks.createMutateAsync).toHaveBeenCalledTimes(1)
+    expect(mocks.toastInfo).not.toHaveBeenCalled()
+  })
+
+  it('un secondo «Salva» rifà tutto, foto compresa', async () => {
+    mocks.uploadFoodImage
+      .mockResolvedValueOnce('u1/2-latte.jpg')
+      .mockResolvedValueOnce('u1/3-latte.jpg')
+    mocks.createMutateAsync.mockRejectedValueOnce(networkFailure())
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.setIsAddDialogOpen(true))
+
+    await act(() => result.current.handleCreateFood(formData(PHOTO)))
+    await act(() => result.current.handleCreateFood(formData(PHOTO)))
+
+    expect(mocks.uploadFoodImage).toHaveBeenCalledTimes(2)
+    expect(mocks.createMutateAsync).toHaveBeenLastCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ image_url: 'u1/3-latte.jpg' }) })
+    )
+    expect(result.current.isAddDialogOpen).toBe(false)
+  })
+
+  it('a rete assente come prima: in coda, dialogo chiuso subito, toast dell’offline', async () => {
+    mocks.isOnline.mockReturnValue(false)
+    mocks.savePendingImage.mockResolvedValue('pending://abc')
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.setIsAddDialogOpen(true))
+
+    await act(() => result.current.handleCreateFood(formData(PHOTO)))
+
+    expect(mocks.createMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ image_url: 'pending://abc' }) })
+    )
+    expect(mocks.createMutateAsync).not.toHaveBeenCalled()
+    expect(result.current.isAddDialogOpen).toBe(false)
+    expect(mocks.toastInfo).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('modificare a rete presente: il dialogo aspetta l’esito (#255)', () => {
+  it('riuscita: il dialogo si chiude', async () => {
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.handleEditClick(EDITING))
+
+    await act(() => result.current.handleUpdateFood(formData('u1/1-vecchia.jpg')))
+
+    expect(mocks.updateMutateAsync).toHaveBeenCalledTimes(1)
+    expect(result.current.editingFood).toBeNull()
+    expect(mocks.toastInfo).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['per rete (status 0)', networkFailure],
+    ['per rifiuto del server', serverRejection],
+  ])('fallita %s: il dialogo resta aperto sull’alimento', async (_label, failure) => {
+    mocks.uploadFoodImage.mockResolvedValue('u1/3-nuova.jpg')
+    mocks.updateMutateAsync.mockRejectedValue(failure())
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.handleEditClick(EDITING))
+
+    await act(() => result.current.handleUpdateFood(formData(PHOTO)))
+
+    expect(result.current.editingFood).toBe(EDITING)
+    expect(mocks.toastInfo).not.toHaveBeenCalled()
+  })
+
+  it('a rete assente come prima: in coda, dialogo chiuso subito, toast dell’offline', async () => {
+    mocks.isOnline.mockReturnValue(false)
+    mocks.savePendingImage.mockResolvedValue('pending://def')
+    const { result } = renderHook(() => useFoodFormDialog())
+    act(() => result.current.handleEditClick(EDITING))
+
+    await act(() => result.current.handleUpdateFood(formData(PHOTO)))
+
+    expect(mocks.updateMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'f1', data: expect.objectContaining({ image_url: 'pending://def' }) })
+    )
+    expect(mocks.updateMutateAsync).not.toHaveBeenCalled()
+    expect(result.current.editingFood).toBeNull()
+    expect(mocks.toastInfo).toHaveBeenCalledTimes(1)
   })
 })

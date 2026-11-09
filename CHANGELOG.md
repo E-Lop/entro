@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.4] - 2026-11-09
+
+### Fixed
+- **A rete presente il form di un alimento resta aperto finché la scrittura non ha un esito, e se fallisce tiene i dati e la foto** ([#248](https://github.com/E-Lop/entro/issues/248), [#255](https://github.com/E-Lop/entro/issues/255)). Alla conferma, sia in creazione sia in modifica, il dialogo si chiudeva subito, prima dell'esito. Se la scrittura poi falliva senza essere trattenuta (la rete che cade mentre il browser dice di essere online, o un rifiuto del server), il toast arrivava ma i dati e il file scelto se n'erano andati con il form, e bisognava rifare tutto. Ora il dialogo aspetta l'esito, con il pulsante su «Creazione in corso…» o «Salvataggio in corso…». Se la scrittura riesce si chiude. Se fallisce resta aperto con tutto dentro e il messaggio «Non è stato possibile salvare l'alimento. Riprova.», e un nuovo «Salva» rifà tutto, foto compresa. Senza rete non cambia niente: la scrittura va in coda, il dialogo si chiude e il toast dice che si sincronizzerà.
+  - In creazione, a rete presente, non compare più la card provvisoria: l'alimento entra in lista con la riga che il server ha scritto. Una card che compare dietro il dialogo e sparisce se la scrittura fallisce non diceva niente di vero. Offline la card resta, perché è la sola traccia di ciò che è in coda.
+  - L'oggetto caricato per una scrittura fallita si cancella, come prima e come vuole il bundle (`core/food-images.md`): l'oggetto nuovo in creazione, quello che sostituiva la foto in modifica. La foto di prima resta, perché la riga la cita ancora. Se la cancellazione fallisce, finisce nei log.
+  - Con il dialogo aperto il resto della pagina è nascosto agli screen reader, compreso l'avviso degli errori di scrittura ([#121](https://github.com/E-Lop/entro/issues/121)). Ogni dialogo del form ha ora il suo avviso, che annuncia l'errore a form aperto.
+
 ## [1.19.3] - 2026-11-09
 
 ### Fixed
@@ -1293,7 +1301,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.3...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.4...HEAD
+[1.19.4]: https://github.com/E-Lop/entro/compare/v1.19.3...v1.19.4
 [1.19.3]: https://github.com/E-Lop/entro/compare/v1.19.2...v1.19.3
 [1.19.2]: https://github.com/E-Lop/entro/compare/v1.19.1...v1.19.2
 [1.19.1]: https://github.com/E-Lop/entro/compare/v1.19.0...v1.19.1

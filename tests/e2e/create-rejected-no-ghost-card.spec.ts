@@ -79,8 +79,20 @@ test.describe('una creazione rifiutata', () => {
       timeout: 15_000,
     })
 
-    await expect(page.getByRole('heading', { name: new RegExp(GHOST) })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: 'Mostra tutti gli alimenti (1)' })).toBeVisible()
+    // Dalla #248 il form resta aperto dopo l'errore, e il dialogo modale mette
+    // `aria-hidden` sul resto della pagina: senza `includeHidden` la ricerca
+    // della card non troverebbe niente anche se la card ci fosse.
+    await expect(page.getByRole('dialog', { name: 'Aggiungi Nuovo Alimento' })).toBeVisible()
+    // La stessa ricerca trova la card vera: lo zero qui sotto non è a vuoto.
+    await expect(
+      page.getByRole('heading', { name: /Food E2E 0/, includeHidden: true })
+    ).toHaveCount(1)
+    await expect(
+      page.getByRole('heading', { name: new RegExp(GHOST), includeHidden: true })
+    ).toHaveCount(0)
+    await expect(
+      page.getByRole('button', { name: 'Mostra tutti gli alimenti (1)', includeHidden: true })
+    ).toBeVisible()
     await expect(page.locator('[data-food-actions]')).toHaveCount(1)
   })
 })

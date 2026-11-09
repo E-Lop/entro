@@ -76,14 +76,42 @@ afterEach(() => {
   onlineManager.setOnline(true)
 })
 
-describe('useCreateFood', () => {
-  it('una creazione rifiutata toglie la sua card da tutte le liste, senza aspettare la rilettura', async () => {
+/**
+ * Una creazione offline va in pausa con la sua card, e riparte quando torna la
+ * rete: è lì che può fallire dopo aver mostrato la card, ed è lì che vale la
+ * #139.
+ */
+async function queuedOfflineThenOnline(
+  result: { current: ReturnType<typeof useCreateFood> },
+  variables: Variables,
+) {
+  act(() => result.current.mutate(variables))
+  await waitFor(() => expect(result.current.isPaused).toBe(true))
+}
+
+describe('useCreateFood offline: la card resta finché la scrittura non ha un esito (#139)', () => {
+  beforeEach(() => {
+    onlineManager.setOnline(false)
+  })
+
+  it('una creazione in pausa perché si è offline tiene la sua card', async () => {
+    // Offline la mutazione va in pausa e riparte da sola: non è un errore, e la
+    // card è la sola traccia che l'utente ha di ciò che ha appena inserito.
     const { result } = mountHook()
 
-    act(() => result.current.mutate({ data: insert('Yogurt'), id: 'yogurt' }))
-    await waitFor(() => expect(idsIn(ALL)).toEqual(['yogurt', 'latte']))
+    await queuedOfflineThenOnline(result, { data: insert('Yogurt'), id: 'yogurt' })
+
+    expect(idsIn(ALL)).toEqual(['yogurt', 'latte'])
+    expect(toastError).not.toHaveBeenCalled()
+  })
+
+  it('ripartita e rifiutata, toglie la sua card da tutte le liste, senza aspettare la rilettura', async () => {
+    const { result } = mountHook()
+    await queuedOfflineThenOnline(result, { data: insert('Yogurt'), id: 'yogurt' })
     expect(idsIn(FRIDGE)).toEqual(['yogurt', 'latte'])
 
+    act(() => onlineManager.setOnline(true))
+    await waitFor(() => expect(outcomes.has('yogurt')).toBe(true))
     await act(async () => outcomes.get('yogurt')?.reject(new Error('Non è stato possibile salvare')))
 
     await waitFor(() => expect(toastError).toHaveBeenCalledWith('Non è stato possibile salvare'))
@@ -91,44 +119,65 @@ describe('useCreateFood', () => {
     expect(idsIn(FRIDGE)).toEqual(['latte'])
   })
 
-  it('con due creazioni in volo, la prima che fallisce non porta via la card della seconda', async () => {
+  it('con due creazioni in coda, la prima che fallisce non porta via la card della seconda', async () => {
     const first = mountHook()
     const second = mountHook()
+    await queuedOfflineThenOnline(first.result, { data: insert('Yogurt'), id: 'yogurt' })
+    await queuedOfflineThenOnline(second.result, { data: insert('Burro'), id: 'burro' })
+    expect(idsIn(ALL)).toEqual(['burro', 'yogurt', 'latte'])
 
-    act(() => first.result.current.mutate({ data: insert('Yogurt'), id: 'yogurt' }))
-    await waitFor(() => expect(idsIn(ALL)).toContain('yogurt'))
-    act(() => second.result.current.mutate({ data: insert('Burro'), id: 'burro' }))
-    await waitFor(() => expect(idsIn(ALL)).toEqual(['burro', 'yogurt', 'latte']))
-
+    act(() => onlineManager.setOnline(true))
+    await waitFor(() => expect(outcomes.has('yogurt')).toBe(true))
     await act(async () => outcomes.get('yogurt')?.reject(new Error('rifiutata')))
 
     await waitFor(() => expect(toastError).toHaveBeenCalled())
     expect(idsIn(ALL)).toEqual(['burro', 'latte'])
   })
+})
 
-  it('una creazione riuscita lascia la card in lista', async () => {
+/**
+ * A rete presente il form aspetta l'esito (#248): una card che compare dietro
+ * al dialogo e sparisce se la scrittura fallisce non dice niente di vero.
+ * L'alimento entra in lista quando il server l'ha scritto, con la riga che il
+ * server restituisce.
+ */
+describe('useCreateFood a rete presente: niente card prima dell’esito (#248)', () => {
+  it('in volo la lista non cambia', async () => {
     const { result } = mountHook()
 
     act(() => result.current.mutate({ data: insert('Yogurt'), id: 'yogurt' }))
-    await waitFor(() => expect(idsIn(ALL)).toContain('yogurt'))
+    await waitFor(() => expect(outcomes.has('yogurt')).toBe(true))
 
-    await act(async () => outcomes.get('yogurt')?.resolve({ id: 'yogurt', name: 'Yogurt' } as Food))
+    expect(idsIn(ALL)).toEqual(['latte'])
+    expect(idsIn(FRIDGE)).toEqual(['latte'])
+  })
+
+  it('riuscita: in lista entra la riga del server', async () => {
+    const { result } = mountHook()
+
+    act(() => result.current.mutate({ data: insert('Yogurt'), id: 'yogurt' }))
+    await waitFor(() => expect(outcomes.has('yogurt')).toBe(true))
+    const saved = { id: 'yogurt', name: 'Yogurt', list_id: 'lista-1' } as Food
+    await act(async () => outcomes.get('yogurt')?.resolve(saved))
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(idsIn(ALL)).toEqual(['yogurt', 'latte'])
+    expect(queryClient.getQueryData<Food[]>(ALL)?.[0]).toEqual(saved)
     expect(toastError).not.toHaveBeenCalled()
   })
 
-  // Offline la mutazione va in pausa e riparte da sola: non è un errore, e la
-  // card è la sola traccia che l'utente ha di ciò che ha appena inserito.
-  it('una creazione in pausa perché si è offline tiene la sua card', async () => {
-    onlineManager.setOnline(false)
+  it('fallita: la lista non è mai cambiata, e l’errore arriva a schermo', async () => {
     const { result } = mountHook()
 
     act(() => result.current.mutate({ data: insert('Yogurt'), id: 'yogurt' }))
+    await waitFor(() => expect(outcomes.has('yogurt')).toBe(true))
+    await act(async () =>
+      outcomes.get('yogurt')?.reject(new Error('Non è stato possibile salvare l\'alimento. Riprova.'))
+    )
 
-    await waitFor(() => expect(result.current.isPaused).toBe(true))
-    expect(idsIn(ALL)).toEqual(['yogurt', 'latte'])
-    expect(toastError).not.toHaveBeenCalled()
+    await waitFor(() =>
+      expect(toastError).toHaveBeenCalledWith('Non è stato possibile salvare l\'alimento. Riprova.')
+    )
+    expect(idsIn(ALL)).toEqual(['latte'])
   })
 })

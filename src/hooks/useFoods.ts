@@ -204,6 +204,13 @@ export function useCreateFood() {
     onMutate: async (variables: { data: FoodInsert; id: string }) => {
       await queryClient.cancelQueries({ queryKey: foodsKeys.lists() })
 
+      // A rete presente il form aspetta l'esito (#248), e l'alimento entra in
+      // lista con la riga del server, in `onSuccess`. Una card che compare
+      // dietro al dialogo e sparisce se la scrittura fallisce non direbbe
+      // niente di vero. La card serve offline, dove la scrittura va in pausa
+      // ed è la sola traccia di ciò che l'utente ha inserito.
+      if (onlineManager.isOnline()) return
+
       const optimisticFood: Food = {
         id: variables.id,
         name: variables.data.name,
@@ -231,7 +238,15 @@ export function useCreateFood() {
 
       return { optimisticFood }
     },
-    onSuccess: () => onlineToast('Alimento aggiunto con successo'),
+    onSuccess: (food: Food) => {
+      // La riga del server prende il posto della card, se c'era (creazione
+      // ripartita dopo l'offline), o entra in testa.
+      queryClient.setQueriesData<Food[]>(
+        { queryKey: foodsKeys.lists() },
+        (old) => [food, ...(old ?? []).filter((item) => item.id !== food.id)],
+      )
+      onlineToast('Alimento aggiunto con successo')
+    },
     onError: (error: Error, variables: { data: FoodInsert; id: string }) => {
       // La card ottimistica si toglie qui, e non si lascia alla rilettura di
       // `onSettled`: se fallisce anche quella — il server irraggiungibile, che
