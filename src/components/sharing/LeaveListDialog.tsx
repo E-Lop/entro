@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -13,8 +12,7 @@ import {
 import { Button } from '../ui/button'
 import { Alert, AlertDescription } from '../ui/alert'
 import { leaveSharedList } from '../../lib/invites'
-import { clearSignedImageCaches } from '../../lib/signedImageCache'
-import { foodsKeys } from '../../hooks/useFoods'
+import { clearListData } from '../../lib/listDataCleanup'
 
 interface LeaveListDialogProps {
   open: boolean
@@ -25,7 +23,6 @@ export function LeaveListDialog({
   open,
   onOpenChange,
 }: LeaveListDialogProps) {
-  const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLeave = async () => {
@@ -43,21 +40,14 @@ export function LeaveListDialog({
         toast.success('Hai abbandonato la lista condivisa')
         onOpenChange(false)
 
-        // Le foto della lista lasciata non devono restare su questo dispositivo
-        // (#213). Se non si svuota, l'uscita è avvenuta lo stesso.
-        await clearSignedImageCaches().catch(() => {})
-
-        // Invalida TUTTA la cache dei foods per forzare il reload della nuova lista personale
-        await queryClient.invalidateQueries({ queryKey: foodsKeys.all })
+        // Ciò che il dispositivo tiene della lista lasciata sparisce: query in
+        // memoria e su disco, e foto (#213, #240). Prima nel client persistito
+        // restava la firma delle foto della lista lasciata. La seconda pulizia
+        // delle foto, per quelle già in viaggio, la fa `clearListData`.
+        await clearListData()
 
         // Reload page to show new personal list
-        setTimeout(() => {
-          // Di nuovo prima del reload: finché la pagina è questa, le card della
-          // lista lasciata possono ancora caricare una foto e rimetterla in cache.
-          clearSignedImageCaches()
-            .catch(() => {})
-            .finally(() => window.location.reload())
-        }, 100)
+        window.location.reload()
       }
     } catch {
       toast.error('Si è verificato un errore. Riprova.')

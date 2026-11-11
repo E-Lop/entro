@@ -22,9 +22,7 @@ import {
   type RemovableMember,
 } from '../../lib/invites'
 import { logError } from '@/lib/safeLog'
-import { queryClient } from '@/lib/queryClient'
-import { clearPersistedCache } from '@/lib/queryPersister'
-import { clearSignedImageCaches } from '@/lib/signedImageCache'
+import { clearListData } from '@/lib/listDataCleanup'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,9 +81,13 @@ export function AppLayout() {
       // Chi è stato tolto da una lista lo scopre qui, una volta sola:
       // l'avviso resta finché non lo chiude (#196).
       if (await takeRemovalNotice(user.id, listId)) {
-        // Le foto di quella lista non sono più sue da vedere, e la cache del
-        // service worker le servirebbe senza chiedere al server (#213).
-        clearSignedImageCaches().catch(() => {})
+        // Ciò che il dispositivo tiene di quella lista non è più suo da vedere,
+        // e sparisce tutto, non solo le foto (#213). Il client persistito è
+        // appena stato ripristinato, e la rilettura dopo il ripristino tocca
+        // solo le query a schermo: le altre, come la firma delle foto della
+        // lista di prima, restavano su disco (#256). Qui non si ricarica,
+        // perché l'avviso si è appena consumato.
+        await clearListData()
         toast.info('Non fai più parte della lista condivisa. I tuoi alimenti sono rimasti lì.', {
           duration: Infinity,
           closeButton: true,
@@ -113,9 +115,7 @@ export function AppLayout() {
         return
       }
 
-      queryClient.clear()
-      await clearPersistedCache().catch(() => {})
-      await clearSignedImageCaches().catch(() => {})
+      await clearListData()
       window.location.reload()
     }
 

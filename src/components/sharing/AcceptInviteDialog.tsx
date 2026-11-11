@@ -13,6 +13,7 @@ import {
 import { Button } from '../ui/button'
 import { Alert, AlertDescription } from '../ui/alert'
 import { acceptInviteWithConfirmation } from '../../lib/invites'
+import { clearListData } from '../../lib/listDataCleanup'
 import { foodsKeys } from '../../hooks/useFoods'
 
 interface AcceptInviteDialogProps {
@@ -62,8 +63,16 @@ export function AcceptInviteDialog({
         toast.success('Ti sei unito alla lista condivisa!')
         onOpenChange(false)
 
-        // Invalidate foods cache to force reload with new shared list data
-        await queryClient.invalidateQueries({ queryKey: foodsKeys.all })
+        if (force) {
+          // Con la conferma l'utente ha lasciato la sua lista: il server la
+          // chiede ogni volta che ce n'è una. Ciò che il dispositivo ne tiene
+          // sparisce come negli altri momenti (#240), e le query si rileggono
+          // con la lista nuova.
+          await clearListData()
+        } else {
+          // Invalidate foods cache to force reload with new shared list data
+          await queryClient.invalidateQueries({ queryKey: foodsKeys.all })
+        }
 
         // Callback or fallback to page reload
         if (onSuccess) {
