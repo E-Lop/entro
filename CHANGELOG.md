@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.7] - 2026-11-12
+
+### Fixed
+- **Il pre-push delle migrazioni legge `supabase/config.toml` come lo legge la CLI** ([#258](https://github.com/E-Lop/entro/issues/258)). Lo stack ombra di `npm run db:prepush` aveva una configurazione fatta di `project_id = "entro-prodshape"`, poi `[db]` con la versione di Postgres, poi la copia del file vero. Così ogni chiave in testa al file vero finiva dentro `[db]`, e la CLI 3.0.0 la ignora senza avvisare: un `project_id`, che la guida della v3 propone di aggiungere a chi non ritrova i dati dopo l'aggiornamento, diventava `db.project_id`. L'ombra si chiamava comunque `entro-prodshape`, ma per caso. Lo stack di sviluppo invece si cercava con il solo nome della cartella, che con un `project_id` diverso non è il nome dei container. Ora le righe in testa al file vero restano in testa, senza il loro `project_id`, e quello delle tabelle `[remotes]` resta dov'è. Il nome dello stack di sviluppo segue la regola della CLI: il `project_id` del file, altrimenti la cartella, ripulita come fa `sanitizeProjectId`. Il comando si ferma se `SUPABASE_PROJECT_ID` arriva dall'ambiente o da un `.env`, perché vince sul file: nella v3 rinomina i container, nella v2 sceglie anche il progetto ospitato. Accanto ai flag un commento ricorda che `--linked` e `--local` sono deprecati nella v3 e spariscono con la v4. Provato con la CLI 3.0.0: due corse di `npm run db:prepush -- <issue> --local`, una con il file di oggi e una con un `project_id = "entro"` temporaneo. Tutte e due verdi, il container dell'ombra `supabase_db_entro-prodshape`, e lo sviluppo con gli stessi utenti, alimenti e volumi di prima.
+
 ## [1.19.6] - 2026-11-11
 
 ### Fixed
@@ -1311,7 +1316,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.6...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.7...HEAD
+[1.19.7]: https://github.com/E-Lop/entro/compare/v1.19.6...v1.19.7
 [1.19.6]: https://github.com/E-Lop/entro/compare/v1.19.5...v1.19.6
 [1.19.5]: https://github.com/E-Lop/entro/compare/v1.19.4...v1.19.5
 [1.19.4]: https://github.com/E-Lop/entro/compare/v1.19.3...v1.19.4

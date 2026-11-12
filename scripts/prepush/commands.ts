@@ -5,13 +5,16 @@
  *   node scripts/prepush/commands.ts migrations <applied.json> <branch-files.txt>
  *   node scripts/prepush/commands.ts compare <source.json> <shadow.json>
  *   node scripts/prepush/commands.ts column <rows.json> <colonna>
+ *   node scripts/prepush/commands.ts project-id <config.toml> <cartella>
+ *   node scripts/prepush/commands.ts shadow-config <config.toml> <project_id> <major>
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { compareFingerprints, parseQueryRows, type FingerprintRow } from './fingerprint.ts'
 import { checkMigrations, migrationVersion } from './migrations.ts'
+import { localProjectId, shadowConfig } from './projectConfig.ts'
 
-const [command, first, second] = process.argv.slice(2)
+const [command, first, second, third] = process.argv.slice(2)
 const rows = (path: string) => parseQueryRows(readFileSync(path, 'utf8'))
 
 function report(problems: string[]): void {
@@ -30,7 +33,11 @@ if (command === 'migrations') {
   report(compareFingerprints(rows(first) as unknown as FingerprintRow[], rows(second) as unknown as FingerprintRow[]))
 } else if (command === 'column') {
   for (const row of rows(first)) console.log(String(row[second]))
+} else if (command === 'project-id') {
+  console.log(localProjectId(readFileSync(first, 'utf8'), second))
+} else if (command === 'shadow-config') {
+  process.stdout.write(shadowConfig(readFileSync(first, 'utf8'), second, third))
 } else {
-  console.error('uso: commands.ts migrations|compare|column …')
+  console.error('uso: commands.ts migrations|compare|column|project-id|shadow-config …')
   process.exitCode = 2
 }

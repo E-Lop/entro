@@ -23,9 +23,11 @@ fi
 
 ROOT="$(git rev-parse --show-toplevel)"
 PRODSHAPE=entro-prodshape
-DEV_PROJECT="$(basename "$ROOT")"
-DEV_DB="supabase_db_${DEV_PROJECT}"
 SHADOW_DB="supabase_db_${PRODSHAPE}"
+# --linked e --local sono deprecati dalla CLI v3 (avviso su stderr, che qui va
+# nel log) e spariscono con la v4: --linked diventa --remote, --local diventa
+# niente perché il locale è il default. Restano finché la CLI è la v3 (#258).
+# https://supabase.com/docs/guides/local-development/cli/migrating-to-v3
 SOURCE_FLAG="--${MODE}"
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/entro-prodshape.XXXXXX")"
 chmod 700 "$WORK"
@@ -110,10 +112,22 @@ cd "$ROOT"
 step "1. precondizioni"
 node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit(a>22||(a===22&&b>=18)?0:1)' \
   || die "serve Node ≥ 22.18, che esegue i moduli TypeScript del comando senza build"
+# Il nome che la CLI dà allo stack di sviluppo: il project_id di config.toml,
+# altrimenti la cartella (#258).
+DEV_PROJECT="$(node scripts/prepush/commands.ts project-id supabase/config.toml "$(basename "$ROOT")")" \
+  || die "nome dello stack di sviluppo non letto da supabase/config.toml"
+DEV_DB="supabase_db_${DEV_PROJECT}"
 if [[ "$MODE" == linked ]]; then
   [[ "${SUPABASE_ACCESS_TOKEN:-}" =~ ^sbp_[a-f0-9]{40}$ ]] || die "SUPABASE_ACCESS_TOKEN mancante o di forma sbagliata"
 fi
 [[ -z "$(git status --porcelain)" ]] || die "l'albero non è pulito"
+# SUPABASE_PROJECT_ID vince su config.toml: nella v3 rinomina i container, e lo
+# stack ombra partirebbe sui volumi di sviluppo; nella v2 sceglie anche il
+# progetto ospitato. La CLI la legge anche dai .env di supabase/ e della radice.
+[[ -z "${SUPABASE_PROJECT_ID:-}" ]] || die "SUPABASE_PROJECT_ID è nell'ambiente: toglila prima del pre-push"
+if grep -qsE '^[[:space:]]*(export[[:space:]]+)?SUPABASE_PROJECT_ID[[:space:]]*=' .env* supabase/.env*; then
+  die "SUPABASE_PROJECT_ID è in un file .env: toglila prima del pre-push"
+fi
 git fetch -q origin main
 git diff --name-only --diff-filter=A origin/main...HEAD -- 'supabase/migrations/*.sql' | sort >"$WORK/branch.txt"
 echo "select version from supabase_migrations.schema_migrations order by version" >"$WORK/applied.sql"
@@ -163,14 +177,8 @@ echo "$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[
 # --- 5. Stack ombra con la forma della sorgente
 step "5. stack ombra"
 mkdir -p "$SHADOW/supabase"
-{
-  echo "project_id = \"${PRODSHAPE}\""
-  echo
-  echo "[db]"
-  echo "major_version = ${MAJOR}"
-  echo
-  cat supabase/config.toml
-} >"$SHADOW/supabase/config.toml"
+node scripts/prepush/commands.ts shadow-config supabase/config.toml "$PRODSHAPE" "$MAJOR" >"$SHADOW/supabase/config.toml" \
+  || die "configurazione dello stack ombra non scritta"
 cp -R supabase/functions supabase/tests "$SHADOW/supabase/"
 if [[ "$DEV_WAS_RUNNING" == 1 ]]; then
   logged supabase stop || die "lo stack di sviluppo non si è fermato"
