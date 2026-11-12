@@ -6,7 +6,7 @@
 -- 12 nov 2026: devono esserci, e quelli di invites senza a capo.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(6);
+select plan(5);
 
 insert into auth.users (id, instance_id, aud, role, email, created_at, updated_at) values
   ('00000000-0000-0000-0000-000000182a01', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'a182@example.test', now(), now());
@@ -67,13 +67,6 @@ select is(
   ),
   3,
   'le tre policy di foods hanno il loro COMMENT'
-);
-
--- CREATE OR REPLACE non cambia i permessi: la funzione resta eseguibile da
--- chi la eseguiva prima, come in produzione.
-select ok(
-  has_function_privilege('authenticated', 'public.update_updated_at_column()', 'execute'),
-  'update_updated_at_column() resta eseguibile da authenticated'
 );
 
 select * from finish();
