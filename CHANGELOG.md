@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.7] - 2026-11-12
+
+### Fixed
+- **Il pre-push delle migrazioni regge un `project_id` in `supabase/config.toml`** ([#258](https://github.com/E-Lop/entro/issues/258)). Lo stack ombra di `npm run db:prepush` aveva una configurazione fatta di `project_id = "entro-prodshape"` seguito dalla copia del file vero. Oggi il file non ha un `project_id` e funziona. Ma la guida della CLI Supabase v3 propone di aggiungerlo a chi non ritrova i dati dopo l'aggiornamento, e con un `project_id` nel file la chiave sarebbe comparsa due volte, cosa che TOML non ammette. Per la stessa ragione il nome dello stack di sviluppo, ricavato dalla sola cartella, avrebbe smesso di essere quello dei container. Ora la configurazione dell'ombra sostituisce il `project_id` invece di ripeterlo, e lascia stare quello delle tabelle `[remotes]`. Il nome dello stack di sviluppo segue la regola della CLI: il `project_id` del file, altrimenti la cartella, ripulita come fa `sanitizeProjectId`. Il comando si ferma se `SUPABASE_PROJECT_ID` arriva dall'ambiente o da un `.env`, perché vince sul file: nella v3 rinomina i container, nella v2 sceglie anche il progetto ospitato. Accanto ai flag un commento ricorda che `--linked` e `--local` sono deprecati nella v3 e spariscono con la v4.
+
 ## [1.19.6] - 2026-11-11
 
 ### Fixed
@@ -1311,7 +1316,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.6...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.7...HEAD
+[1.19.7]: https://github.com/E-Lop/entro/compare/v1.19.6...v1.19.7
 [1.19.6]: https://github.com/E-Lop/entro/compare/v1.19.5...v1.19.6
 [1.19.5]: https://github.com/E-Lop/entro/compare/v1.19.4...v1.19.5
 [1.19.4]: https://github.com/E-Lop/entro/compare/v1.19.3...v1.19.4

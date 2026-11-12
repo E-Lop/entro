@@ -172,7 +172,7 @@ npm run db:prepush -- <numero della issue>
 
 Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza build. I passi:
 
-1. **Precondizioni**: token, albero pulito, e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
+1. **Precondizioni**: token, albero pulito, nessun `SUPABASE_PROJECT_ID` nell'ambiente o in un `.env` (nella CLI v3 rinomina i container, nella v2 sceglie anche il progetto ospitato), e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
 2. **Backup**: `backup_pre<issue>_<data>-<ora>_{schema,data}.sql` nella radice (per esempio `backup_pre184_20260929-153012_schema.sql`: due corse nello stesso giorno non si sovrascrivono), ignorati da git, permessi 600.
 3. **Diff pg-delta** fra produzione e migrazioni, da leggere. Non blocca finché la #182 non chiude la deriva di oggi.
 4. **Impronta di produzione**, solo catalogo:
@@ -181,7 +181,7 @@ Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza b
    - trigger su `auth.users`;
    - permessi, RLS e privilegi di default di `public`;
    - bucket e categorie.
-5. **Stack ombra** `entro-prodshape`, con lo stack di sviluppo fermo ma i suoi volumi conservati. Ci si carica la forma di produzione: il dump di schema, più ciò che il dump non porta (policy di storage, trigger su `auth.users`, bucket, i permessi esatti e le categorie). La sua impronta deve essere identica a quella di produzione, o il comando si ferma con «forma di produzione non fedele» e nomina gli oggetti.
+5. **Stack ombra** `entro-prodshape`, con lo stack di sviluppo fermo ma i suoi volumi conservati. Lo stack di sviluppo ha il nome che gli dà la CLI: il `project_id` di `supabase/config.toml`, o il nome della cartella se manca; nella configurazione dell'ombra quel `project_id` è sostituito, non ripetuto (#258). Ci si carica la forma di produzione: il dump di schema, più ciò che il dump non porta (policy di storage, trigger su `auth.users`, bucket, i permessi esatti e le categorie). La sua impronta deve essere identica a quella di produzione, o il comando si ferma con «forma di produzione non fedele» e nomina gli oggetti.
 6. **Prova**: le migrazioni del ramo, poi pgTAP e la suite di smoke (`npm run smoke:local`) sullo stack ombra.
 7. **Pulizia**, anche su errore o Ctrl-C:
    - si toglie lo stack ombra, con i soli volumi `com.supabase.cli.project=entro-prodshape`;
