@@ -7,11 +7,13 @@
  *   node scripts/prepush/commands.ts column <rows.json> <colonna>
  *   node scripts/prepush/commands.ts project-id <config.toml> <cartella>
  *   node scripts/prepush/commands.ts shadow-config <config.toml> <project_id> <major>
+ *   node scripts/prepush/commands.ts cli-version <uscita di supabase --version>
  */
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { compareFingerprints, parseQueryRows, type FingerprintRow } from './fingerprint.ts'
 import { checkMigrations, migrationVersion } from './migrations.ts'
+import { isSupportedCliVersion } from './cliVersion.ts'
 import { localProjectId, shadowConfig } from './projectConfig.ts'
 
 const [command, first, second, third] = process.argv.slice(2)
@@ -37,7 +39,9 @@ if (command === 'migrations') {
   console.log(localProjectId(readFileSync(first, 'utf8'), second))
 } else if (command === 'shadow-config') {
   process.stdout.write(shadowConfig(readFileSync(first, 'utf8'), second, third))
+} else if (command === 'cli-version') {
+  process.exitCode = isSupportedCliVersion(first ?? '') ? 0 : 1
 } else {
-  console.error('uso: commands.ts migrations|compare|column|project-id|shadow-config …')
+  console.error('uso: commands.ts migrations|compare|column|project-id|shadow-config|cli-version …')
   process.exitCode = 2
 }

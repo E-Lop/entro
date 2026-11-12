@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.8] - 2026-11-12
+
+### Fixed
+- **Con la CLI Supabase v3 il pre-push contro la produzione legge senza fermarsi** ([#266](https://github.com/E-Lop/entro/issues/266)). Dalla v3 una `supabase db query` su un progetto ospitato chiede conferma, perché la CLI non distingue una lettura da una scrittura. Con l'uscita JSON la conferma non si può chiedere, e la query fallisce con `HostedMutationConsentRequiredError`. `npm run db:prepush` contro la produzione si sarebbe quindi fermato al passo 1, su «non riesco a leggere le migrazioni applicate». Ce ne siamo accorti il 12 nov, quando due letture di catalogo per la [#182](https://github.com/E-Lop/entro/issues/182) sono fallite così. Ora le quattro letture del pre-push passano `--read-only`, che salta la conferma e sulla produzione passa dal modo di sola lettura della Management API. Nessuna passa `--yes`, che approverebbe anche una scrittura. `--read-only` la v2 non lo ha, quindi il pre-push dichiara di volere la v3: lo controlla al passo 1, prima di leggere qualunque cosa, e si ferma con la versione trovata. In locale le quattro letture danno con e senza il flag la stessa uscita, byte per byte.
+
 ## [1.19.7] - 2026-11-12
 
 ### Fixed
@@ -1316,7 +1321,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.7...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.8...HEAD
+[1.19.8]: https://github.com/E-Lop/entro/compare/v1.19.7...v1.19.8
 [1.19.7]: https://github.com/E-Lop/entro/compare/v1.19.6...v1.19.7
 [1.19.6]: https://github.com/E-Lop/entro/compare/v1.19.5...v1.19.6
 [1.19.5]: https://github.com/E-Lop/entro/compare/v1.19.4...v1.19.5

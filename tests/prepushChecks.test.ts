@@ -10,6 +10,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { compareFingerprints, parseQueryRows, type FingerprintRow } from '../scripts/prepush/fingerprint.ts'
 import { checkMigrations, migrationVersion } from '../scripts/prepush/migrations.ts'
+import { isSupportedCliVersion } from '../scripts/prepush/cliVersion.ts'
 import { localProjectId, shadowConfig, topLevelProjectId } from '../scripts/prepush/projectConfig.ts'
 
 const row = (kind: string, name: string, value: string): FingerprintRow => ({ kind, name, value })
@@ -181,6 +182,26 @@ describe('shadowConfig', () => {
   })
 })
 
+// #266: le letture del pre-push passano `--read-only`, che c'è dalla v3; la v4
+// toglie `--linked` e `--local`, che lo script usa ancora.
+describe('isSupportedCliVersion', () => {
+  it('accetta la v3', () => {
+    expect(isSupportedCliVersion('3.0.0')).toBe(true)
+    expect(isSupportedCliVersion('3.1.0\n')).toBe(true)
+  })
+
+  it('ferma la v2 e la v4', () => {
+    expect(isSupportedCliVersion('2.122.0')).toBe(false)
+    expect(isSupportedCliVersion('4.0.0')).toBe(false)
+  })
+
+  it('ferma ciò che non è una versione, invece di lasciarlo passare', () => {
+    expect(isSupportedCliVersion('')).toBe(false)
+    expect(isSupportedCliVersion('command not found')).toBe(false)
+    expect(isSupportedCliVersion('3')).toBe(false)
+  })
+})
+
 describe('db-prepush.sh', () => {
   // Letto come testo: il comando ferma lo stack di sviluppo, e qui si
   // controllano solo le regole che, violate, toccano dati veri.
@@ -225,6 +246,23 @@ describe('db-prepush.sh', () => {
 
   // SUPABASE_PROJECT_ID vince sul file: nella v3 rinomina i container, nella v2
   // sceglie anche il progetto ospitato. Lo script non la usa e non la accetta.
+  // Dalla v3 una db query su un progetto ospitato chiede conferma, e con
+  // l'uscita JSON non può chiederla. --read-only la salta; --yes e
+  // SUPABASE_YES approverebbero anche una scrittura (ADR 0033 della CLI).
+  it('ogni db query è di sola lettura, e niente approva una scrittura', () => {
+    const queries = commands.filter((line) => line.includes('supabase db query'))
+    expect(queries.length).toBeGreaterThanOrEqual(1)
+    expect(queries.filter((line) => !line.includes('--read-only'))).toEqual([])
+    expect(commands.filter((line) => /--yes\b|SUPABASE_YES/.test(line))).toEqual([])
+  })
+
+  it('controlla la versione della CLI prima della prima lettura', () => {
+    const check = commands.findIndex((line) => line.includes('commands.ts cli-version'))
+    const firstQuery = commands.findIndex((line) => /^query /.test(line))
+    expect(check).toBeGreaterThan(-1)
+    expect(check).toBeLessThan(firstQuery)
+  })
+
   it('non imposta SUPABASE_PROJECT_ID, e si ferma se arriva dall’ambiente o da un .env', () => {
     expect(commands.filter((line) => /SUPABASE_PROJECT_ID=/.test(line) && !/grep/.test(line))).toEqual([])
     const guards = commands.filter((line) => line.includes('SUPABASE_PROJECT_ID'))

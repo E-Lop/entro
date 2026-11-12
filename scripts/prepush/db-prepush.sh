@@ -47,11 +47,14 @@ die() {
 # chiavi e JWT, e i messaggi d'errore possono nominare l'utente del database.
 logged() { "$@" >>"$LOG" 2>&1; }
 # query <out.json> <file.sql> <flag…>: `--agent no` perché dentro un agente la
-# CLI cambia la forma del JSON; un solo statement per file.
+# CLI cambia la forma del JSON; un solo statement per file. `--read-only`
+# perché dalla v3 una query su un progetto ospitato chiede conferma, e con
+# l'uscita JSON non può chiederla; mai `--yes`, che approverebbe anche una
+# scrittura (#266, ADR 0033 della CLI).
 query() {
   local out="$1" file="$2"
   shift 2
-  supabase db query "$@" --agent no --output-format json -f "$file" >"$out" 2>>"$LOG" || {
+  supabase db query "$@" --read-only --agent no --output-format json -f "$file" >"$out" 2>>"$LOG" || {
     # Solo il codice: il messaggio può nominare l'utente del database.
     echo "  ($(grep -o '"code":"[A-Za-z]*"' "$out" | head -1 || true))" >&2
     return 1
@@ -117,6 +120,9 @@ node -e 'const [a,b]=process.versions.node.split(".").map(Number); process.exit(
 DEV_PROJECT="$(node scripts/prepush/commands.ts project-id supabase/config.toml "$(basename "$ROOT")")" \
   || die "nome dello stack di sviluppo non letto da supabase/config.toml"
 DEV_DB="supabase_db_${DEV_PROJECT}"
+CLI_VERSION="$(supabase --version 2>/dev/null || true)"
+node scripts/prepush/commands.ts cli-version "$CLI_VERSION" \
+  || die "serve la CLI Supabase v3 (trovata: ${CLI_VERSION:-nessuna}): le letture usano db query --read-only"
 if [[ "$MODE" == linked ]]; then
   [[ "${SUPABASE_ACCESS_TOKEN:-}" =~ ^sbp_[a-f0-9]{40}$ ]] || die "SUPABASE_ACCESS_TOKEN mancante o di forma sbagliata"
 fi
