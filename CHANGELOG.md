@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.6] - 2026-11-11
+
+### Fixed
+- **Quando si perde l'accesso a una lista, il dispositivo la dimentica tutta, in ognuno dei quattro momenti** ([#240](https://github.com/E-Lop/entro/issues/240), [#256](https://github.com/E-Lop/entro/issues/256)). I quattro momenti sono «Lascia la lista», un invito accettato confermando di lasciare la propria lista, la rimozione scoperta al ritorno in primo piano e quella scoperta all'apertura. Ognuno svuotava un insieme diverso. L'invito accettato con conferma non svuotava niente, e il service worker continuava a servire le foto della lista lasciata, fino a 7 giorni. Negli altri tre casi nel client di React Query salvato in IndexedDB restava la query che firma la foto di un altro membro, con il percorso del file nella chiave. Ora c'è una funzione sola, `clearListData`, come chiede la convenzione `local-data-when-access-ends.md` di entro-family. Svuota la cache delle query in memoria con le scritture in coda, quella persistita e quella delle foto, e la chiamano tutti e quattro i momenti. L'ordine conta: prima si tolgono i dati, così le card della lista di prima si smontano senza chiedere di firmare le loro foto, poi si rileggono le query a schermo. Se una cancellazione fallisce l'uscita avviene lo stesso. Provato nel browser, sulla build con il service worker e la Supabase locale. Su `main` i tre casi fallivano, ognuno con la propria traccia rimasta. Con la correzione la Cache Storage e IndexedDB non hanno più niente della lista lasciata.
+
 ## [1.19.5] - 2026-11-09
 
 ### Fixed
@@ -1306,7 +1311,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.5...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.6...HEAD
+[1.19.6]: https://github.com/E-Lop/entro/compare/v1.19.5...v1.19.6
 [1.19.5]: https://github.com/E-Lop/entro/compare/v1.19.4...v1.19.5
 [1.19.4]: https://github.com/E-Lop/entro/compare/v1.19.3...v1.19.4
 [1.19.3]: https://github.com/E-Lop/entro/compare/v1.19.2...v1.19.3

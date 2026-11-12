@@ -24,7 +24,7 @@ const { navigateMock, signOutMock, invitesMock, toastMock, localMock } = vi.hois
     takeRemovalNotice: vi.fn(),
   },
   toastMock: { info: vi.fn() },
-  localMock: { clear: vi.fn(), clearPersistedCache: vi.fn(), clearSignedImageCaches: vi.fn() },
+  localMock: { clearListData: vi.fn() },
 }))
 
 vi.mock('react-router-dom', () => ({
@@ -46,9 +46,7 @@ vi.mock('@/hooks/useAuth', () => ({
 // montarla davvero trascinerebbe dentro Supabase e React Query.
 vi.mock('../../../lib/invites', () => invitesMock)
 vi.mock('sonner', () => ({ toast: toastMock }))
-vi.mock('@/lib/queryClient', () => ({ queryClient: { clear: localMock.clear } }))
-vi.mock('@/lib/queryPersister', () => ({ clearPersistedCache: localMock.clearPersistedCache }))
-vi.mock('@/lib/signedImageCache', () => ({ clearSignedImageCaches: localMock.clearSignedImageCaches }))
+vi.mock('@/lib/listDataCleanup', () => ({ clearListData: localMock.clearListData }))
 vi.mock('../../guide/QuickGuideDialog', () => ({ QuickGuideDialog: () => null }))
 vi.mock('../../sharing/InviteMenuItem', () => ({ InviteMenuItem: () => null }))
 vi.mock('../../sharing/InviteDialog', () => ({ InviteDialog: () => null }))
@@ -77,8 +75,7 @@ beforeEach(() => {
   invitesMock.getRemovableMembers.mockResolvedValue({ members: [], error: null })
   invitesMock.peekRemovalNotice.mockResolvedValue(null)
   invitesMock.takeRemovalNotice.mockResolvedValue(false)
-  localMock.clearPersistedCache.mockResolvedValue(undefined)
-  localMock.clearSignedImageCaches.mockResolvedValue(undefined)
+  localMock.clearListData.mockResolvedValue(undefined)
 })
 
 afterEach(() => {
@@ -154,8 +151,9 @@ describe('AppLayout — avviso a chi è stato tolto da una lista', () => {
     await waitFor(() => expect(toastMock.info).toHaveBeenCalledTimes(1))
     expect(toastMock.info).toHaveBeenCalledWith(NOTICE, { duration: Infinity, closeButton: true })
     expect(invitesMock.takeRemovalNotice).toHaveBeenCalledWith('u1', 'lista-nuova')
-    // Le foto della lista di prima non restano su questo dispositivo.
-    expect(localMock.clearSignedImageCaches).toHaveBeenCalledTimes(1)
+    // Ciò che il dispositivo tiene della lista di prima sparisce, cache
+    // persistita compresa (#256): la stessa pulizia del ritorno in primo piano.
+    expect(localMock.clearListData).toHaveBeenCalledTimes(1)
   })
 
   it('senza avviso non dice niente', async () => {
@@ -165,7 +163,8 @@ describe('AppLayout — avviso a chi è stato tolto da una lista', () => {
 
     await waitFor(() => expect(invitesMock.takeRemovalNotice).toHaveBeenCalled())
     expect(toastMock.info).not.toHaveBeenCalled()
-    expect(localMock.clearSignedImageCaches).not.toHaveBeenCalled()
+    // Senza avviso la cache resta: serve all'offline.
+    expect(localMock.clearListData).not.toHaveBeenCalled()
   })
 })
 
@@ -194,9 +193,7 @@ describe('AppLayout — tolto da una lista con l’app aperta', () => {
     await mountThenReturn()
 
     await waitFor(() => expect(reload).toHaveBeenCalledTimes(1))
-    expect(localMock.clear).toHaveBeenCalled()
-    expect(localMock.clearPersistedCache).toHaveBeenCalled()
-    expect(localMock.clearSignedImageCaches).toHaveBeenCalled()
+    expect(localMock.clearListData).toHaveBeenCalledTimes(1)
     // L'avviso non si consuma qui: lo mostra l'apertura dopo il ricaricamento.
     expect(invitesMock.takeRemovalNotice).not.toHaveBeenCalled()
   })
@@ -206,7 +203,20 @@ describe('AppLayout — tolto da una lista con l’app aperta', () => {
     await waitFor(() => expect(invitesMock.peekRemovalNotice).toHaveBeenCalled())
 
     expect(reload).not.toHaveBeenCalled()
-    expect(localMock.clear).not.toHaveBeenCalled()
+    expect(localMock.clearListData).not.toHaveBeenCalled()
+  })
+
+  it('la pagina riparte solo a pulizia finita', async () => {
+    invitesMock.peekRemovalNotice.mockResolvedValue({ listId: 'lista-di-prima' })
+    let finishCleanup: () => void = () => {}
+    localMock.clearListData.mockReturnValue(new Promise<void>((resolve) => (finishCleanup = resolve)))
+
+    await mountThenReturn()
+
+    await waitFor(() => expect(localMock.clearListData).toHaveBeenCalled())
+    expect(reload).not.toHaveBeenCalled()
+    finishCleanup()
+    await waitFor(() => expect(reload).toHaveBeenCalledTimes(1))
   })
 
   it('chi nel frattempo è rientrato nella stessa lista non viene ricaricato: l’avviso sparisce e basta', async () => {
@@ -216,5 +226,6 @@ describe('AppLayout — tolto da una lista con l’app aperta', () => {
 
     await waitFor(() => expect(invitesMock.takeRemovalNotice).toHaveBeenCalledWith('u1', 'lista-nuova'))
     expect(reload).not.toHaveBeenCalled()
+    expect(localMock.clearListData).not.toHaveBeenCalled()
   })
 })
