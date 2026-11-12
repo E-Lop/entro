@@ -165,9 +165,29 @@ logged supabase db dump "$SOURCE_FLAG" --data-only -f "${BACKUP}_data.sql" || di
 chmod 600 "${BACKUP}_schema.sql" "${BACKUP}_data.sql"
 echo "$(basename "${BACKUP}")_{schema,data}.sql, permessi 600 (il contenuto non si stampa)"
 
-# --- 3. Diff (non bloccante finché la #182 non chiude la deriva)
-step "3. diff pg-delta (da leggere, non blocca: #182)"
-supabase db diff "$SOURCE_FLAG" --use-pg-delta --agent no 2>>"$LOG" || echo "(diff non riuscito: vedi il log)"
+# --- 3. Diff fra le migrazioni di main e la sorgente (#182)
+# Dalle migrazioni del ramo il diff mostrerebbe sempre ciò che il ramo porta:
+# si parte da una cartella con le sole migrazioni di main, cioè tutte tranne
+# quelle del ramo, che al passo 1 sono risultate esattamente le mancanti. Il
+# project_id è quello dello sviluppo, perché la CLI non prenda il nome della
+# cartella; del collegamento al progetto si copia solo ciò che lo identifica.
+step "3. diff fra le migrazioni di main e la sorgente"
+MAIN_DIR="$WORK/main"
+mkdir -p "$MAIN_DIR/supabase/.temp"
+cp -R supabase/migrations "$MAIN_DIR/supabase/"
+while read -r migration; do
+  rm "$MAIN_DIR/$migration"
+done <"$WORK/branch.txt"
+node scripts/prepush/commands.ts project-config supabase/config.toml "$DEV_PROJECT" >"$MAIN_DIR/supabase/config.toml" \
+  || die "configurazione della cartella di main non scritta"
+for linked_file in project-ref linked-project.json pooler-url postgres-version; do
+  [[ -f "supabase/.temp/$linked_file" ]] && cp "supabase/.temp/$linked_file" "$MAIN_DIR/supabase/.temp/"
+done
+supabase db diff "$SOURCE_FLAG" --use-pg-delta --agent no --workdir "$MAIN_DIR" >"$WORK/diff.sql" 2>>"$LOG" \
+  || die "il diff pg-delta non è riuscito: vedi il log"
+cat "$WORK/diff.sql"
+node scripts/prepush/commands.ts drift "$WORK/diff.sql" scripts/prepush/declared-drift.json "$MODE" \
+  || die "differenze fra main e la sorgente che non sono dichiarate (sopra): o si riallineano con una migrazione, o si dichiarano in scripts/prepush/declared-drift.json, con la ragione"
 
 # --- 4. Impronta della sorgente
 step "4. impronta della sorgente"

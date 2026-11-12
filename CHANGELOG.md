@@ -5,6 +5,14 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.20.0] - 2026-11-12
+
+### Added
+- **Le derive dichiarate fra il repo e la produzione** ([#182](https://github.com/E-Lop/entro/issues/182)): `scripts/prepush/declared-drift.json` elenca ciò che è proprio dell'ambiente e non entra nelle migrazioni, una voce per oggetto con la ragione. Oggi sono tre: le estensioni `pg_cron` e `pg_net`, accese dalla dashboard, e il job `send-expiry-notifications`, che contiene l'URL del progetto.
+
+### Changed
+- **Il diff del pre-push blocca** ([#182](https://github.com/E-Lop/entro/issues/182)). Il passo 3 di `npm run db:prepush` confrontava la produzione con le migrazioni del ramo, e stampava il risultato senza fermarsi: dal 25 settembre era il controllo che avrebbe dovuto prendere una deriva come quella della [#179](https://github.com/E-Lop/entro/issues/179), ma la deriva di partenza lo rendeva illeggibile. Con la v1.19.9 la deriva è chiusa, e ora il passo blocca: tolte le derive dichiarate, qualunque differenza ferma il comando e viene elencata. Il confronto parte dalle migrazioni di `main`, cioè tutte tranne quelle del ramo: altrimenti il diff mostrerebbe sempre ciò che il ramo porta, e il pre-push della v1.19.9 si sarebbe fermato sui cinque `COMMENT` che stava per cambiare. Una voce dichiarata che non compare più nel diff viene segnalata. La guida spiega come si aggiunge una deriva dichiarata.
+
 ## [1.19.9] - 2026-11-12
 
 ### Fixed
@@ -1326,7 +1334,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.9...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.0...HEAD
+[1.20.0]: https://github.com/E-Lop/entro/compare/v1.19.9...v1.20.0
 [1.19.9]: https://github.com/E-Lop/entro/compare/v1.19.8...v1.19.9
 [1.19.8]: https://github.com/E-Lop/entro/compare/v1.19.7...v1.19.8
 [1.19.7]: https://github.com/E-Lop/entro/compare/v1.19.6...v1.19.7
