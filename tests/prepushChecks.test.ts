@@ -210,8 +210,8 @@ describe('db-prepush.sh', () => {
     expect(naming[0]).toMatch(/date \+%Y%m%d-%H%M%S/)
   })
 
-  // #258: un project_id in supabase/config.toml, copiato in coda a quello
-  // dell'ombra, ripeterebbe la chiave, e TOML non lo ammette.
+  // #258: copiato dopo `[db]`, un project_id in supabase/config.toml diventava
+  // db.project_id, e la CLI 3.0.0 lo ignora senza avvisare.
   it('la configurazione dell’ombra passa dal filtro sul project_id, mai dalla copia del file vero', () => {
     expect(commands.filter((line) => /cat .*supabase\/config\.toml/.test(line))).toEqual([])
     expect(commands.filter((line) => line.includes('commands.ts shadow-config'))).toHaveLength(1)

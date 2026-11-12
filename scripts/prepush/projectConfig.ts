@@ -52,9 +52,10 @@ export function localProjectId(toml: string, folder: string): string {
 /**
  * La configurazione dello stack ombra: il suo `project_id`, la versione di
  * Postgres della sorgente e il resto del file vero, senza il `project_id` in
- * testa. TOML non ammette una chiave ripetuta, e la CLI v3 si ferma su una
- * configurazione non valida. Le altre righe in testa al file restano prima di
- * `[db]`: dopo, una chiave in testa diventerebbe una chiave di `[db]`.
+ * testa. Le righe in testa al file vero restano prima di `[db]`: dopo,
+ * diventerebbero chiavi di `[db]`, e la CLI 3.0.0 le ignora senza avvisare
+ * (misurato il 12 nov 2026). Due `project_id` in testa invece li rifiuta:
+ * «Invalid TOML document: trying to redefine an already defined table or value».
  */
 export function shadowConfig(toml: string, projectId: string, major: string): string {
   const top = topLevelLines(toml)
