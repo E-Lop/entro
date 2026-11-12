@@ -121,7 +121,7 @@ DEV_PROJECT="$(node scripts/prepush/commands.ts project-id supabase/config.toml 
   || die "nome dello stack di sviluppo non letto da supabase/config.toml"
 DEV_DB="supabase_db_${DEV_PROJECT}"
 CLI_VERSION="$(supabase --version 2>/dev/null || true)"
-node scripts/prepush/commands.ts cli-version "$CLI_VERSION" \
+node scripts/prepush/commands.ts supabase-version "$CLI_VERSION" \
   || die "serve la CLI Supabase v3 (trovata: ${CLI_VERSION:-nessuna}): le letture usano db query --read-only"
 if [[ "$MODE" == linked ]]; then
   [[ "${SUPABASE_ACCESS_TOKEN:-}" =~ ^sbp_[a-f0-9]{40}$ ]] || die "SUPABASE_ACCESS_TOKEN mancante o di forma sbagliata"

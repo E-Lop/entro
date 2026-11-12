@@ -10,7 +10,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { compareFingerprints, parseQueryRows, type FingerprintRow } from '../scripts/prepush/fingerprint.ts'
 import { checkMigrations, migrationVersion } from '../scripts/prepush/migrations.ts'
-import { isSupportedCliVersion } from '../scripts/prepush/cliVersion.ts'
+import { isSupportedSupabaseVersion } from '../scripts/prepush/supabaseVersion.ts'
 import { localProjectId, shadowConfig, topLevelProjectId } from '../scripts/prepush/projectConfig.ts'
 
 const row = (kind: string, name: string, value: string): FingerprintRow => ({ kind, name, value })
@@ -184,21 +184,21 @@ describe('shadowConfig', () => {
 
 // #266: le letture del pre-push passano `--read-only`, che c'è dalla v3; la v4
 // toglie `--linked` e `--local`, che lo script usa ancora.
-describe('isSupportedCliVersion', () => {
+describe('isSupportedSupabaseVersion', () => {
   it('accetta la v3', () => {
-    expect(isSupportedCliVersion('3.0.0')).toBe(true)
-    expect(isSupportedCliVersion('3.1.0\n')).toBe(true)
+    expect(isSupportedSupabaseVersion('3.0.0')).toBe(true)
+    expect(isSupportedSupabaseVersion('3.1.0\n')).toBe(true)
   })
 
   it('ferma la v2 e la v4', () => {
-    expect(isSupportedCliVersion('2.122.0')).toBe(false)
-    expect(isSupportedCliVersion('4.0.0')).toBe(false)
+    expect(isSupportedSupabaseVersion('2.122.0')).toBe(false)
+    expect(isSupportedSupabaseVersion('4.0.0')).toBe(false)
   })
 
   it('ferma ciò che non è una versione, invece di lasciarlo passare', () => {
-    expect(isSupportedCliVersion('')).toBe(false)
-    expect(isSupportedCliVersion('command not found')).toBe(false)
-    expect(isSupportedCliVersion('3')).toBe(false)
+    expect(isSupportedSupabaseVersion('')).toBe(false)
+    expect(isSupportedSupabaseVersion('command not found')).toBe(false)
+    expect(isSupportedSupabaseVersion('3')).toBe(false)
   })
 })
 
@@ -257,7 +257,7 @@ describe('db-prepush.sh', () => {
   })
 
   it('controlla la versione della CLI prima della prima lettura', () => {
-    const check = commands.findIndex((line) => line.includes('commands.ts cli-version'))
+    const check = commands.findIndex((line) => line.includes('commands.ts supabase-version'))
     const firstQuery = commands.findIndex((line) => /^query /.test(line))
     expect(check).toBeGreaterThan(-1)
     expect(check).toBeLessThan(firstQuery)

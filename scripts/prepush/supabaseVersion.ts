@@ -8,7 +8,7 @@
 const SEMVER = /^(\d+)\.\d+\.\d+$/
 
 /** `true` solo per una versione `3.x.y`; qualunque altra cosa ferma il comando. */
-export function isSupportedCliVersion(output: string): boolean {
+export function isSupportedSupabaseVersion(output: string): boolean {
   const match = SEMVER.exec(output.trim())
   return match !== null && Number(match[1]) === 3
 }
