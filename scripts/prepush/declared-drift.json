@@ -1,0 +1,20 @@
+{
+  "description": "Derive dichiarate fra le migrazioni di main e la produzione (#182): ciò che è proprio dell'ambiente e non entra nelle migrazioni. Il pre-push le toglie dal diff, e qualunque altra differenza lo ferma. Ogni voce nomina l'oggetto, dice perché non può essere uguale, e riconosce i suoi statement nel diff di pg-delta con espressioni regolari ancorate all'inizio. Una voce nuova si aggiunge in una PR, con la ragione.",
+  "entries": [
+    {
+      "name": "pg_cron",
+      "reason": "Estensione accesa dalla dashboard di Supabase, come dice la migrazione delle notifiche: in locale non c'è, perché il job che la usa chiama la Edge Function del progetto ospitato.",
+      "statements": ["^CREATE EXTENSION \"pg_cron\"", "^COMMENT ON EXTENSION \"pg_cron\" IS "]
+    },
+    {
+      "name": "pg_net",
+      "reason": "Estensione accesa dalla dashboard di Supabase, nello schema extensions, per le chiamate HTTP del job delle notifiche: stessa ragione di pg_cron.",
+      "statements": ["^CREATE EXTENSION \"pg_net\"", "^COMMENT ON EXTENSION \"pg_net\" IS "]
+    },
+    {
+      "name": "send-expiry-notifications",
+      "reason": "Job di pg_cron delle 8:00 che chiama la Edge Function send-expiry-notifications con il segreto cron_secret del vault: contiene l'URL dell'ambiente, quindi in locale e in produzione non può essere uguale (decisione del 2 ott 2026 nella #182).",
+      "statements": ["^SELECT cron\\.schedule_in_database\\('send-expiry-notifications', "]
+    }
+  ]
+}

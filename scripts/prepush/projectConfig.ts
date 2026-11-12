@@ -50,6 +50,17 @@ export function localProjectId(toml: string, folder: string): string {
 }
 
 /**
+ * Il file vero con un `project_id` dato, in testa e una volta sola. Serve alla
+ * cartella del diff con le migrazioni di main: senza, la CLI prenderebbe il
+ * nome della cartella e cercherebbe un altro stack.
+ */
+export function withProjectId(toml: string, projectId: string): string {
+  const top = topLevelLines(toml)
+  const tables = toml.split('\n').slice(top.length)
+  return [`project_id = "${projectId}"`, ...top.filter((line) => !PROJECT_ID_KEY.test(line)), ...tables].join('\n')
+}
+
+/**
  * La configurazione dello stack ombra: il suo `project_id`, la versione di
  * Postgres della sorgente e il resto del file vero, senza il `project_id` in
  * testa. Le righe in testa al file vero restano prima di `[db]`: dopo,

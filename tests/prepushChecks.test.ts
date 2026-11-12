@@ -10,8 +10,9 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { compareFingerprints, parseQueryRows, type FingerprintRow } from '../scripts/prepush/fingerprint.ts'
 import { checkMigrations, migrationVersion } from '../scripts/prepush/migrations.ts'
+import { checkDrift, parseDeclaredDrift, splitStatements, type DeclaredDrift } from '../scripts/prepush/drift.ts'
 import { isSupportedSupabaseVersion } from '../scripts/prepush/supabaseVersion.ts'
-import { localProjectId, shadowConfig, topLevelProjectId } from '../scripts/prepush/projectConfig.ts'
+import { localProjectId, shadowConfig, topLevelProjectId, withProjectId as configWithProjectId } from '../scripts/prepush/projectConfig.ts'
 
 const row = (kind: string, name: string, value: string): FingerprintRow => ({ kind, name, value })
 
@@ -154,6 +155,17 @@ describe('localProjectId', () => {
   })
 })
 
+describe('configWithProjectId', () => {
+  it('scrive il project_id in testa, una volta sola, e lascia il resto com’è', () => {
+    for (const source of [functionsOnly, withProjectId]) {
+      const config = configWithProjectId(source, 'entro')
+      expect(config.split('\n').filter((line) => /^\s*project_id\s*=/.test(line))).toEqual(['project_id = "entro"'])
+      expect(config).toContain('[functions.create-invite]\nverify_jwt = false\n')
+      expect(config).not.toContain('[db]')
+    }
+  })
+})
+
 describe('shadowConfig', () => {
   const projectIds = (toml: string) => toml.split('\n').filter((line) => /^\s*project_id\s*=/.test(line))
 
@@ -179,6 +191,79 @@ describe('shadowConfig', () => {
   it('non tocca il project_id di una tabella [remotes]', () => {
     const source = `${withProjectId}\n[remotes.staging]\nproject_id = "abcdefghijklmnopqrst"\n`
     expect(shadowConfig(source, 'entro-prodshape', '17')).toContain('[remotes.staging]\nproject_id = "abcdefghijklmnopqrst"\n')
+  })
+})
+
+// #182: il diff fra le migrazioni di main e la sorgente blocca il pre-push,
+// tolte le derive dichiarate dell'ambiente.
+describe('splitStatements', () => {
+  it('divide sui punti e virgola fuori da stringhe, identificatori, dollari e commenti', () => {
+    const sql = [
+      'SET local check_function_bodies = off;',
+      "COMMENT ON TABLE \"public\".\"a;b\" IS 'uno; due';",
+      "SELECT f('x', ' ); '' ;');",
+      'CREATE FUNCTION g() RETURNS int AS $body$ select 1; $body$ LANGUAGE sql;',
+      '-- un commento; con punto e virgola',
+      '/* un altro; */ SELECT 1;',
+    ].join('\n\n')
+    expect(splitStatements(sql)).toEqual([
+      'SET local check_function_bodies = off;',
+      "COMMENT ON TABLE \"public\".\"a;b\" IS 'uno; due';",
+      "SELECT f('x', ' ); '' ;');",
+      'CREATE FUNCTION g() RETURNS int AS $body$ select 1; $body$ LANGUAGE sql;',
+      '/* un altro; */ SELECT 1;',
+    ])
+  })
+
+  it('un diff vuoto non ha statement', () => {
+    expect(splitStatements('')).toEqual([])
+    expect(splitStatements('\n\nSET local check_function_bodies = off;\n')).toEqual(['SET local check_function_bodies = off;'])
+  })
+})
+
+describe('checkDrift', () => {
+  const declared: DeclaredDrift[] = [
+    { name: 'pg_cron', reason: 'accesa dalla dashboard', statements: ['^CREATE EXTENSION "pg_cron"'] },
+    { name: 'pg_net', reason: 'accesa dalla dashboard', statements: ['^CREATE EXTENSION "pg_net"'] },
+  ]
+
+  it('con le sole voci dichiarate non c’è niente di non dichiarato', () => {
+    const result = checkDrift(['SET local check_function_bodies = off;', 'CREATE EXTENSION "pg_cron";', 'CREATE EXTENSION "pg_net" SCHEMA "extensions";'], declared)
+    expect(result).toEqual({ undeclared: [], matched: ['pg_cron', 'pg_net'], stale: [] })
+  })
+
+  it('una differenza non dichiarata viene nominata, con la sua prima riga', () => {
+    const result = checkDrift(['CREATE EXTENSION "pg_cron";', 'REVOKE ALL ON TABLE "public"."foods"\n  FROM "anon";'], declared)
+    expect(result.undeclared).toEqual(['REVOKE ALL ON TABLE "public"."foods"'])
+  })
+
+  it('una voce dichiarata senza riscontro viene segnalata', () => {
+    expect(checkDrift(['CREATE EXTENSION "pg_cron";'], declared).stale).toEqual(['pg_net'])
+  })
+})
+
+describe('parseDeclaredDrift', () => {
+  it('rifiuta una voce senza ragione, senza statement o con un’espressione non valida', () => {
+    const entry = { name: 'x', reason: 'perché', statements: ['^X'] }
+    expect(() => parseDeclaredDrift(JSON.stringify({ entries: [{ ...entry, reason: '' }] }))).toThrow(/ragione/)
+    expect(() => parseDeclaredDrift(JSON.stringify({ entries: [{ ...entry, statements: [] }] }))).toThrow(/statement/)
+    expect(() => parseDeclaredDrift(JSON.stringify({ entries: [{ ...entry, statements: ['('] }] }))).toThrow(/espressione/)
+    expect(() => parseDeclaredDrift(JSON.stringify({ entries: [entry, entry] }))).toThrow(/ripetut/)
+  })
+
+  // Il diff vero contro la produzione dopo la #269, con l'URL della funzione
+  // sostituito: le tre voci dell'ambiente passano, e nessuna resta senza riscontro.
+  it('il file del repo copre il diff di produzione del 12 nov 2026, e nient’altro', () => {
+    const declaredFile = parseDeclaredDrift(readFileSync(join(__dirname, '..', 'scripts', 'prepush', 'declared-drift.json'), 'utf8'))
+    const diff = readFileSync(join(__dirname, 'fixtures', 'prepush-production-diff-2026-11-12.sql'), 'utf8')
+    expect(checkDrift(splitStatements(diff), declaredFile)).toEqual({
+      undeclared: [],
+      matched: ['pg_cron', 'pg_net', 'send-expiry-notifications'],
+      stale: [],
+    })
+    expect(checkDrift(splitStatements(`${diff}\nCOMMENT ON TABLE "public"."foods" IS 'x';\n`), declaredFile).undeclared).toEqual([
+      'COMMENT ON TABLE "public"."foods" IS \'x\';',
+    ])
   })
 })
 
@@ -261,6 +346,22 @@ describe('db-prepush.sh', () => {
     const firstQuery = commands.findIndex((line) => /^query /.test(line))
     expect(check).toBeGreaterThan(-1)
     expect(check).toBeLessThan(firstQuery)
+  })
+
+  // #182: il diff si fa dalle migrazioni di main, perché quelle del ramo ci
+  // comparirebbero sempre, e si ferma su ciò che non è dichiarato.
+  it('il diff parte da una cartella con le migrazioni di main, e blocca su ciò che non è dichiarato', () => {
+    const diff = commands.filter((line) => /supabase db diff /.test(line))
+    expect(diff).toHaveLength(1)
+    expect(diff[0]).toContain('--workdir "$MAIN_DIR"')
+    const check = commands.filter((line) => line.includes('commands.ts drift'))
+    expect(check).toHaveLength(1)
+    expect(commands.filter((line) => /non blocca|diff non riuscito/.test(line))).toEqual([])
+  })
+
+  it('nella cartella di main copia del collegamento al progetto solo ciò che serve, mai i segreti di avvio', () => {
+    expect(commands.filter((line) => /\.temp/.test(line) && /cp /.test(line) && /\.temp"?\s+"?\$MAIN_DIR/.test(line))).toEqual([])
+    expect(commands.filter((line) => line.includes('start-secrets'))).toEqual([])
   })
 
   it('non imposta SUPABASE_PROJECT_ID, e si ferma se arriva dall’ambiente o da un .env', () => {

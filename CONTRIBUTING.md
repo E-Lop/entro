@@ -174,7 +174,7 @@ Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza b
 
 1. **Precondizioni**: CLI v3, token, albero pulito, nessun `SUPABASE_PROJECT_ID` nell'ambiente o in un `.env` (nella CLI v3 rinomina i container, nella v2 sceglie anche il progetto ospitato), e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
 2. **Backup**: `backup_pre<issue>_<data>-<ora>_{schema,data}.sql` nella radice (per esempio `backup_pre184_20260929-153012_schema.sql`: due corse nello stesso giorno non si sovrascrivono), ignorati da git, permessi 600.
-3. **Diff pg-delta** fra produzione e migrazioni, da leggere. Non blocca finché la #182 non chiude la deriva di oggi.
+3. **Diff pg-delta fra le migrazioni di `main` e la produzione**, cioè tutte tranne quelle del ramo, che il diff mostrerebbe sempre. **Blocca**: tolte le derive dichiarate, qualunque differenza ferma il comando e viene elencata. Una voce dichiarata che non compare più nel diff viene segnalata, senza fermare.
 4. **Impronta di produzione**, solo catalogo:
    - funzioni di `public` con corpo, `search_path` e permessi;
    - policy di `public` e `storage`;
@@ -193,8 +193,11 @@ Durate misurate: **129 secondi** per la prima corsa vera contro la produzione, i
 
 **Quando si ferma**, il messaggio dice il passo e cosa guardare; i dettagli stanno nel log, di cui stampa il percorso.
 - Al passo 1, una migrazione mancante che non è del ramo si decide prima: o entra in una sua PR, o si spiega perché va con questa.
+- Al passo 3, la produzione ha qualcosa che le migrazioni di `main` non producono, o il contrario. Si decide voce per voce, col criterio della #182: sui permessi vince il più restrittivo; sul corpo di una funzione vince il repo solo se quello di produzione è sbagliato, altrimenti il repo si adegua. La correzione è una migrazione in una sua PR, prima di questa.
 - Al passo 5, un oggetto diverso vuol dire che la copia non è fedele: la prova non vale finché non lo è.
 - Al passo 6, la migrazione ha rotto qualcosa sulla forma di produzione: è esattamente il caso della #179.
+
+**Derive dichiarate.** Ciò che è proprio dell'ambiente e non può entrare nelle migrazioni sta in `scripts/prepush/declared-drift.json`: oggi le estensioni `pg_cron` e `pg_net`, accese dalla dashboard, e il job `send-expiry-notifications`, che contiene l'URL del progetto. Ogni voce ha un nome, la ragione per cui non può essere uguale, e le espressioni regolari che riconoscono i suoi statement nel diff, ancorate all'inizio (per esempio `^CREATE EXTENSION "pg_cron"`). Una voce nuova si aggiunge in una PR, con la ragione: senza, il comando non parte. Il test del pre-push controlla il file contro il diff vero di produzione del 12 novembre 2026 (`tests/fixtures/`, con l'URL del progetto tolto).
 
 **Autoverifica.** `npm run db:prepush -- <issue> --local` fa tutto uguale, ma con lo stack di sviluppo al posto della produzione: nessun token e nessun push, e i backup vanno nella cartella temporanea della corsa. Con `PREPUSH_TAMPER_SQL=<file.sql>`, accettato solo in locale, il file si esegue sullo stack ombra fra il caricamento e il confronto delle impronte. Serve a provare che il confronto se ne accorge, per esempio togliendo una policy di `storage.objects`.
 
