@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.19.9] - 2026-11-12
+
+### Fixed
+- **Lo schema che producono le migrazioni e quello di produzione coincidono nel corpo di `update_updated_at_column()` e nei `COMMENT`** ([#182](https://github.com/E-Lop/entro/issues/182)). Il diff fra le migrazioni e la produzione, misurato il 12 nov, aveva otto voci che non sono dell'ambiente, e questa migrazione le chiude. Il corpo di `update_updated_at_column()` aveva in produzione le parole in maiuscolo: fa la stessa cosa, quindi il repo prende quel testo. I `COMMENT` di tre colonne di `invites` avevano in produzione a capo e spazi a metà frase, residui di un incolla, e tornano al testo pulito del repo. Quelli di `create_personal_list()` e di tre policy di `foods` c'erano solo in produzione, e ora stanno anche nel repo. Quello di `delete_user()` diceva che la funzione cancella tutti i dati e gli inviti, ma dalla 20260922 la funzione cancella solo l'utente, e la pulizia la fa il trigger `on_auth_user_deleted`, che lascia le liste condivise agli altri membri: il testo nuovo dice questo. Restano fuori dal diff, perché dell'ambiente, le estensioni `pg_cron` e `pg_net` e il job delle notifiche: le dichiarerà la prossima PR della #182, che rende il diff bloccante.
+
 ## [1.19.8] - 2026-11-12
 
 ### Fixed
@@ -1321,7 +1326,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.8...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.19.9...HEAD
+[1.19.9]: https://github.com/E-Lop/entro/compare/v1.19.8...v1.19.9
 [1.19.8]: https://github.com/E-Lop/entro/compare/v1.19.7...v1.19.8
 [1.19.7]: https://github.com/E-Lop/entro/compare/v1.19.6...v1.19.7
 [1.19.6]: https://github.com/E-Lop/entro/compare/v1.19.5...v1.19.6
