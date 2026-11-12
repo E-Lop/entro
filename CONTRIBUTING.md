@@ -170,9 +170,9 @@ Il 25 settembre 2026 una migrazione verde su pgTAP e sugli E2E ha rotto ogni let
 npm run db:prepush -- <numero della issue>
 ```
 
-Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza build. I passi:
+Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza build, e la CLI Supabase v3: le sue letture usano `db query --read-only`, che la v2 non ha e senza il quale la v3 chiede una conferma su ogni query alla produzione (#266). I passi:
 
-1. **Precondizioni**: token, albero pulito, nessun `SUPABASE_PROJECT_ID` nell'ambiente o in un `.env` (nella CLI v3 rinomina i container, nella v2 sceglie anche il progetto ospitato), e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
+1. **Precondizioni**: CLI v3, token, albero pulito, nessun `SUPABASE_PROJECT_ID` nell'ambiente o in un `.env` (nella CLI v3 rinomina i container, nella v2 sceglie anche il progetto ospitato), e le migrazioni che mancano in produzione devono essere **esattamente** quelle nuove del ramo. Il push applica tutto ciò che manca: il 22 settembre mancava anche una migrazione di agosto.
 2. **Backup**: `backup_pre<issue>_<data>-<ora>_{schema,data}.sql` nella radice (per esempio `backup_pre184_20260929-153012_schema.sql`: due corse nello stesso giorno non si sovrascrivono), ignorati da git, permessi 600.
 3. **Diff pg-delta** fra produzione e migrazioni, da leggere. Non blocca finché la #182 non chiude la deriva di oggi.
 4. **Impronta di produzione**, solo catalogo:
