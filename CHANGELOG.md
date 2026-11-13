@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.20.1] - 2026-11-13
+
+### Fixed
+- **In CI le prove del database non si fermano più per apt né per un solo registro di immagini** ([#250](https://github.com/E-Lop/entro/issues/250)). Nel job E2E i passi di Playwright che installano le librerie di sistema con apt venivano prima dello stack Supabase. Quando apt non rispondeva (un mirror lento il 22 e il 26 ott, il DNS di Canonical giù l'11 nov) scadevano a 5 minuti, e pgTAP, gli script di gara e lo smoke restavano «skipped», anche nelle PR di migrazione che dovevano provare. Ora vengono dopo, e un apt che non risponde fa fallire solo l'E2E nel browser. Inoltre `supabase/setup-cli` imponeva `SUPABASE_INTERNAL_IMAGE_REGISTRY=ghcr.io`, e la CLI scaricava ogni immagine dal solo ghcr.io: il 22 e il 27 ott ha risposto `toomanyrequests`, una volta all'avvio dello stack e una scaricando `pg_prove`. Ora i passi che lanciano la CLI tolgono la variabile, e la CLI usa la sua catena: public.ecr.aws, poi ghcr.io, poi Docker Hub. Un passo nuovo elenca le immagini scaricate, con il loro registro.
+
 ## [1.20.0] - 2026-11-12
 
 ### Added
@@ -1335,6 +1340,7 @@ Lancio pubblico di Entro su LinkedIn.
 - CRUD completo gestione alimenti con React Query
 
 [Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.0...HEAD
+[1.20.1]: https://github.com/E-Lop/entro/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/E-Lop/entro/compare/v1.19.9...v1.20.0
 [1.19.9]: https://github.com/E-Lop/entro/compare/v1.19.8...v1.19.9
 [1.19.8]: https://github.com/E-Lop/entro/compare/v1.19.7...v1.19.8
