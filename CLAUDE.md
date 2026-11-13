@@ -38,7 +38,8 @@ CREATE POLICY "Users can manage own rows"
 -- 3. GRANT espliciti (RICHIESTI: senza questi la tabella è invisibile a supabase-js)
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.my_table TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.my_table TO service_role;
--- GRANT SELECT ON public.my_table TO anon;  -- aggiungere SOLO se davvero pubblica
+-- anon non riceve niente: dalla #267 nemmeno i privilegi di default gli danno qualcosa.
+-- GRANT SELECT ON public.my_table TO anon;  -- aggiungere SOLO se davvero pubblica: la coppia va anche nella lista del guardiano, supabase/tests/relation_grants.test.sql
 
 -- 4. Sequences (solo se PK è SERIAL/IDENTITY, non per uuid)
 -- GRANT USAGE, SELECT ON SEQUENCE public.my_table_id_seq TO authenticated;

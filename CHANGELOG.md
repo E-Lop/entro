@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.20.2] - 2026-11-13
+
+### Security
+- **`anon` non ha più privilegi sulle relazioni che non usa, e i privilegi di default non glieli danno più** ([#267](https://github.com/E-Lop/entro/issues/267)). Le tabelle nate prima dell'opt-in al Data API hardening avevano preso i default di Supabase: `anon` aveva `SELECT`, `TRIGGER` e `MAINTAIN` su `foods`, `lists`, `list_members` e `categories`, e tutti i privilegi su `notification_preferences` e `push_subscriptions`. In più l'opt-in aveva tolto dai default solo `select, insert, update, delete`, quindi ogni tabella nuova nasceva ancora con `TRUNCATE`, `REFERENCES`, `TRIGGER` e `MAINTAIN` per `anon` (`inherited_food_images`), e ogni sequenza con `UPDATE`. Le righe le proteggeva la RLS, e nessun client legge queste tabelle senza sessione. Ma un errore in una policy sarebbe stato raggiungibile senza accesso. La migrazione revoca tutto ad `anon` e a `PUBLIC` su tutte le relazioni di `public`, e chiude i default per tabelle e sequenze, con e senza `in schema public`. Resta il `SELECT` su `categories`, che il bundle di dominio dichiara a lettura pubblica. Il guardiano `relation_grants.test.sql` controlla sul database i privilegi effettivi di `anon` su relazioni, colonne e sequenze, le relazioni nuove create da `postgres`, e che senza sessione la lettura fallisca per il permesso sulla tabella.
+
 ## [1.20.1] - 2026-11-13
 
 ### Fixed
@@ -1340,6 +1345,7 @@ Lancio pubblico di Entro su LinkedIn.
 - CRUD completo gestione alimenti con React Query
 
 [Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.0...HEAD
+[1.20.2]: https://github.com/E-Lop/entro/compare/v1.20.1...v1.20.2
 [1.20.1]: https://github.com/E-Lop/entro/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/E-Lop/entro/compare/v1.19.9...v1.20.0
 [1.19.9]: https://github.com/E-Lop/entro/compare/v1.19.8...v1.19.9
