@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.20.3] - 2026-11-13
+
+### Security
+- **`authenticated` non ha più `TRUNCATE`, `REFERENCES`, `TRIGGER` e `MAINTAIN` sulle relazioni, né le scritture su `categories`, e i default non glieli danno più** ([#271](https://github.com/E-Lop/entro/issues/271)). La causa è la stessa della v1.20.2: i default di Supabase per le tabelle nate prima dell'opt-in, e un opt-in che ne toglieva solo una parte. `TRUNCATE` non passa dalla RLS, e avrebbe svuotato le righe di tutti gli utenti. Oggi non lo raggiungeva nessuno, perché PostgREST non lo espone. Nessun percorso usava i privilegi tolti: i client su `categories` leggono soltanto, le funzioni che `authenticated` chiama come RPC sono `SECURITY DEFINER`, e le Edge Function usano la `service_role`. Tutti gli altri privilegi di `authenticated` restano com'erano. Il guardiano `relation_grants.test.sql` ora controlla anche `authenticated`: i quattro privilegi su relazioni e colonne, le scritture su `categories`, le relazioni nuove, i privilegi che i client usano, e che `truncate` e un insert su `categories` falliscano per il permesso sulla tabella.
+
 ## [1.20.2] - 2026-11-13
 
 ### Security
@@ -1345,6 +1350,7 @@ Lancio pubblico di Entro su LinkedIn.
 - CRUD completo gestione alimenti con React Query
 
 [Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.0...HEAD
+[1.20.3]: https://github.com/E-Lop/entro/compare/v1.20.2...v1.20.3
 [1.20.2]: https://github.com/E-Lop/entro/compare/v1.20.1...v1.20.2
 [1.20.1]: https://github.com/E-Lop/entro/compare/v1.20.0...v1.20.1
 [1.20.0]: https://github.com/E-Lop/entro/compare/v1.19.9...v1.20.0
