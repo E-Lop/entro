@@ -177,9 +177,13 @@ jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
-    # Un'esecuzione sana dura ~4 minuti: 25 erano cinque volte il normale, e
-    # quel margine è stato pagato per intero due volte in attese inutili.
-    timeout-minutes: 15
+    # Il budget è il caso peggiore di una corsa sana, non un multiplo (#250).
+    # Corsa 43458254539, cache presente: 451 s in tutto. Il passo apt che ha
+    # girato (9 s) si conta col suo limite di 300 s: 742 s. Più 180 s per i
+    # ripieghi della catena dei registri di Supabase (2 ritentativi a 4 s e
+    # 8 s per registro, ECR a 1 pull/s senza autenticazione): 922 s, cioè 16
+    # minuti per eccesso. Con 25 il margine si pagava per intero in attese inutili.
+    timeout-minutes: 16
     env:
       VITE_SUPABASE_URL: http://127.0.0.1:54321
       VITE_SUPABASE_ANON_KEY: ${{ vars.LOCAL_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' }}
