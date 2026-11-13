@@ -105,7 +105,7 @@ Genera token da https://supabase.com/dashboard/account/tokens e **revocalo dopo 
 
 ## Agent skills
 
-Il set `mattpocock-skills` legge tre dei quattro file in `docs/agents/`; il quarto, `pull-requests.md`, corregge la skill `pr`, che non legge niente da lì. Si modificano a mano: rilanciare `/setup-matt-pocock-skills` serve solo per cambiare tracker o ricominciare da zero.
+Il set `mattpocock-skills` legge tre dei cinque file in `docs/agents/`. Il quarto, `pull-requests.md`, corregge la skill `pr`, che non legge niente da lì; il quinto, `brief-review.md`, è per la revisione dei brief con EGM. Si modificano a mano: rilanciare `/setup-matt-pocock-skills` serve solo per cambiare tracker o ricominciare da zero.
 
 ### Issue tracker
 
@@ -122,3 +122,7 @@ Single-context, ma il glossario **non** vive in questo repo: è `../entro-family
 ### Corpo delle PR
 
 Vince `.github/PULL_REQUEST_TEMPLATE.md`, con la sezione «Rischio del merge» presa dalla skill `pr`: la skill cede al template. Vedi `docs/agents/pull-requests.md`.
+
+### Revisione dei brief
+
+Un agent brief si può far rivedere con `/egm:egm-review-loop` prima del `ready-for-agent`: due revisori, le regole del progetto come standard, due round. Configurazione e regole in `docs/agents/brief-review.md`.
