@@ -177,9 +177,13 @@ jobs:
   e2e:
     name: Playwright E2E
     runs-on: ubuntu-latest
-    # Un'esecuzione sana dura ~4 minuti: 25 erano cinque volte il normale, e
-    # quel margine è stato pagato per intero due volte in attese inutili.
-    timeout-minutes: 15
+    # Il budget è il caso peggiore di una corsa sana, non un multiplo (#250).
+    # Corsa 43458254539, cache presente: 451 s in tutto. Il passo apt che ha
+    # girato (9 s) si conta col suo limite di 300 s: 742 s. Più 180 s per i
+    # ripieghi della catena dei registri di Supabase (2 ritentativi a 4 s e
+    # 8 s per registro, ECR a 1 pull/s senza autenticazione): 922 s, cioè 16
+    # minuti per eccesso. Con 25 il margine si pagava per intero in attese inutili.
+    timeout-minutes: 16
     env:
       VITE_SUPABASE_URL: http://127.0.0.1:54321
       VITE_SUPABASE_ANON_KEY: ${{ vars.LOCAL_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' }}
@@ -219,36 +223,49 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
 
-      # Il passo che si è bloccato due volte, consumando l'intero budget del
-      # job. In condizioni normali dura ~1m12s: a cinque minuti è patologico, e
-      # fallire subito è un'informazione mentre aspettare venti minuti non lo è.
-      - name: Install Playwright browser
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        timeout-minutes: 5
-        run: npx playwright install --with-deps chromium
-
-      # Con la cache i binari ci sono già, ma le librerie di sistema no: stanno
-      # fuori da `~/.cache/ms-playwright` e vanno installate lo stesso.
-      - name: Dipendenze di sistema (cache presente)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        timeout-minutes: 5
-        run: npx playwright install-deps chromium
-
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v2.1.1
         with:
           version: 2.108.0
 
+      # Le porte dello stack locale (54320-54329) stanno nell'intervallo delle
+      # porte effimere di Linux (32768-60999): una connessione in uscita può
+      # prenderne una prima che Docker la apra. Successo il 13 nov sulla PR #273,
+      # durante i download ripetuti verso ECR: «failed to bind host port
+      # 0.0.0.0:54324/tcp: address already in use». Le porte riservate non vengono
+      # date alle connessioni in uscita, e i server le aprono lo stesso (doc del
+      # kernel, ip-sysctl, ip_local_reserved_ports) (#250).
+      - name: Porte di Supabase fuori da quelle effimere
+        run: sudo sysctl -w net.ipv4.ip_local_reserved_ports=54320-54329
+
+      # `setup-cli` v2.1.1 esporta SUPABASE_INTERNAL_IMAGE_REGISTRY=ghcr.io in
+      # GITHUB_ENV, e con quella variabile la CLI 2.108.0 scarica ogni immagine
+      # dal solo ghcr.io: il 22 e il 27 ott ha risposto `toomanyrequests` e il
+      # job si è fermato (#250). Senza, la CLI prova public.ecr.aws, poi ghcr.io,
+      # poi Docker Hub. Si toglie nello script di ogni passo che lancia la CLI,
+      # perché un `env:` di passo contro un valore di GITHUB_ENV non è verificato.
       - name: Start Supabase local stack
-        run: supabase start
+        run: |
+          unset SUPABASE_INTERNAL_IMAGE_REGISTRY
+          supabase start
+
+      # Da quale registro sono arrivate le immagini: è la prova della catena (#250).
+      - name: Immagini scaricate
+        run: docker images --format '{{.Repository}}:{{.Tag}}' | sort
 
       - name: Reset local database
-        run: supabase db reset
+        run: |
+          unset SUPABASE_INTERNAL_IMAGE_REGISTRY
+          supabase db reset
 
       # I permessi delle funzioni si vedono solo sul database: a leggere le
       # migrazioni l'EXECUTE a PUBLIC non compare, perché è un default (#160).
+      # `supabase test db` scarica pg_prove: il 22 ott è caduto proprio lì, con
+      # ghcr.io a `toomanyrequests` (#250).
       - name: Database tests (pgTAP)
-        run: supabase test db
+        run: |
+          unset SUPABASE_INTERNAL_IMAGE_REGISTRY
+          supabase test db
 
       # La gara fra due create_personal_list concorrenti (#195): pgTAP gira
       # in una transazione sola e non la può provare, qui le sessioni sono due.
@@ -273,6 +290,25 @@ jobs:
       # perché dura pochi secondi, e un rosso qui arriva quattro minuti prima.
       - name: Suite di smoke API
         run: npm run smoke:local
+
+      # I due passi che passano da apt vengono dopo le prove del database (#250):
+      # un mirror lento o il DNS di Canonical giù (22 e 26 ott, 11 nov) li fa
+      # scadere, e prima si portavano dietro pgTAP, gli script di gara e lo
+      # smoke, che restavano «skipped». Ora può fallire solo l'E2E.
+      # A cache mancante scarica il browser e le librerie di sistema. In
+      # condizioni normali dura ~1m12s: a cinque minuti è patologico, e fallire
+      # subito è un'informazione mentre aspettare venti minuti non lo è.
+      - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        run: npx playwright install --with-deps chromium
+
+      # Con la cache i binari ci sono già, ma le librerie di sistema no: stanno
+      # fuori da `~/.cache/ms-playwright` e vanno installate lo stesso.
+      - name: Dipendenze di sistema (cache presente)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium
 
       - name: Run Playwright E2E
         run: npm run test:e2e
