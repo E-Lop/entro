@@ -1,5 +1,4 @@
 import { supabase } from './supabase'
-import { extractPathFromUrlOrPath } from './storage'
 import { isPendingUrl } from './pendingImages'
 
 const PHOTOS_NOT_REMOVED = 'Non siamo riusciti a eliminare le tue foto. Riprova tra poco.'
@@ -31,9 +30,8 @@ export async function removePhotosOfDeletedFoods(): Promise<void> {
   const paths = new Set<string>()
   for (const { image_url } of data ?? []) {
     if (!image_url || isPendingUrl(image_url)) continue
-    const path = extractPathFromUrlOrPath(image_url)
-    // Un URL che non è del nostro bucket torna com'era: non c'è niente da togliere.
-    if (!path.startsWith('http')) paths.add(path)
+    // `image_url` è sempre un percorso del bucket: lo impone il database (#230).
+    paths.add(image_url)
   }
   if (paths.size === 0) return
 
