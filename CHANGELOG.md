@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.20.4] - 2026-11-19
+
+### Changed
+- **Comincia la prova di Modern Web Guidance, e la politica di supporto dei browser è scritta** ([#263](https://github.com/E-Lop/entro/issues/263)). Modern Web Guidance è un pacchetto di guide per agenti mantenuto dai team di Chrome, Edge, Firefox e MDN: per ogni pattern dice quale API della piattaforma usare. Il plugin è abilitato solo in questo repo, in `.claude/settings.json`, con la telemetria spenta (`DISABLE_TELEMETRY=1`): la CLI altrimenti manda a Google le query di ricerca. La regola che lascia partire la CLI senza conferma sta solo nelle impostazioni locali, perché tracciata farebbe partire su ogni macchina anche una versione uscita da poche ore. Lo controlla `tests/claudeSettings.test.ts`. La prova dura cinque PR che toccano l'interfaccia, o fino al 31 gennaio 2027, e il plugin resta solo se cambia il codice in meglio. La politica dei browser, in `CLAUDE.md`, è Baseline Widely available, cioè quella che la build già seguiva col target di default di Vite.
+
+  L'app non cambia: nessun file che il browser scarica è stato toccato.
+
 ## [1.20.3] - 2026-11-13
 
 ### Security
@@ -1349,7 +1356,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.4...HEAD
+[1.20.4]: https://github.com/E-Lop/entro/compare/v1.20.3...v1.20.4
 [1.20.3]: https://github.com/E-Lop/entro/compare/v1.20.2...v1.20.3
 [1.20.2]: https://github.com/E-Lop/entro/compare/v1.20.1...v1.20.2
 [1.20.1]: https://github.com/E-Lop/entro/compare/v1.20.0...v1.20.1

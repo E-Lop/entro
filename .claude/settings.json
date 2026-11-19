@@ -1,0 +1,8 @@
+{
+  "enabledPlugins": {
+    "modern-web-guidance@claude-plugins-official": true
+  },
+  "env": {
+    "DISABLE_TELEMETRY": "1"
+  }
+}

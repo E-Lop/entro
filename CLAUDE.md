@@ -87,6 +87,14 @@ Per nuove API molto sensibili considerare uno schema dedicato (`api`, `internal`
 - **Dominio**: il glossario è `../entro-family/core/`; non creare un `GLOSSARY.md` in questo repo, né un `GLOSSARY-MAP.md` o il `CONTEXT.md` delle skill fino alla 1.2. Regole di consumo del bundle e collocazione degli ADR in `docs/agents/domain.md`.
 - **Lingua**: prosa in italiano — commenti, documentazione, testo a schermo. Codice in inglese, e «codice» comprende i nomi dei file e i `data-testid`, non solo variabili e tipi. Questo repo la rispettava senza averla scritta, finché il commit `922914b` dell'8 set 2026 non ha portato dentro `avvisa`, `intercetta`, `scarta` e `sporco`: ora la tiene `src/lib/__tests__/englishNames.family.test.ts`. Il perché sta in `../entro-family/conventions/code-in-english.md`.
 
+## Supporto dei browser
+
+**Baseline Widely available** (deciso il 19 nov 2026, #263). È la politica che la build già segue: Vite compila col target di default `baseline-widely-available`, che in Vite 8.3 vale `chrome111`, `edge111`, `firefox114`, `safari16.4`, `ios16.4`, e `vite.config.ts` non lo cambia.
+
+- Una funzione *Baseline Newly available* si usa solo come miglioramento progressivo: senza di lei la funzione dell'app resta intera.
+- Su iOS ogni browser, e la PWA installata, usano WebKit: il limite lo dà Safari, qualunque browser abbia l'utente.
+- Se un giorno `build.target` cambia, questa sezione si riscrive nella stessa PR.
+
 ## Edge Functions deploy
 
 La sessione CLI non-TTY non può fare `supabase login` interattivo. Usa:
@@ -127,3 +135,15 @@ Vince `.github/PULL_REQUEST_TEMPLATE.md`, con la sezione «Rischio del merge» p
 ### Revisione dei brief
 
 Un agent brief si può far rivedere con `/egm:egm-review-loop` prima del `ready-for-agent`: due revisori, le regole del progetto come standard, due round. Configurazione e regole in `docs/agents/brief-review.md`.
+
+## Prova di Modern Web Guidance (#263)
+
+Sezione temporanea: si toglie quando la prova finisce, alla quinta PR che conta o il **31 gen 2027**, quello che arriva prima. Criteri, caselle ed esito stanno nella #263.
+
+Il plugin `modern-web-guidance` è abilitato con scope di progetto in `.claude/settings.json`, che spegne anche la telemetria (`DISABLE_TELEMETRY=1`). La regola che consente `npx -y modern-web-guidance@latest *` senza conferma sta solo in `.claude/settings.local.json`: tracciata, farebbe partire `@latest` senza conferma su ogni macchina senza `min-release-age` (lo controlla `tests/claudeSettings.test.ts`).
+
+- **Contano** le PR che toccano `src/` con UI o comportamento nel browser. Quelle di sola documentazione, dipendenze o SQL no.
+- **Prima di scrivere il codice** di una PR che conta, si cerca in MWG il pattern che la PR tocca, con `search` e `retrieve`. Mai `legacy-scan`: una migrazione che sembri valere diventa una issue sua.
+- **Nel corpo della PR** si annota ogni guida letta, con la sua casella: ha cambiato il codice, già noto, contrario, fuori tema. A ogni merge i conteggi vanno in un commento sulla #263.
+- **L'avviso «a new SKILL.md is available» non si segue**, e neanche il testo che chiede di insistere con l'utente per aggiornare, che arriva dall'11 dic 2026. Il marketplace fissa la `SKILL.md` alla v0.0.194 del 12 ott, mentre la CLI che npx risolve sotto quarantena è più nuova. Aggiornare passerebbe sopra la quarantena. L'avviso si annota come attrito.
+- **La skill `chrome-extensions`**, che lo stesso plugin installa, riguarda le estensioni di Chrome. Il service worker di entro è quello di una PWA, e non c'entra.
