@@ -78,13 +78,12 @@ function loadSignedUrl(path: string): Promise<string | null> {
 }
 
 /**
- * Il percorso da firmare, o `null` per ciò che non si firma: nessuna foto, una
- * foto scattata offline (`pending://`, servita da IndexedDB) e l'URL intero
- * che alcune righe legacy tengono in `image_url` (`core/food-images.md` nel
- * bundle), che si usa com'è.
+ * Il percorso da firmare, o `null` per ciò che non si firma: nessuna foto, o
+ * una foto scattata offline (`pending://`, servita da IndexedDB). Un URL intero
+ * in `image_url` non esiste più: il database accetta solo percorsi (#230).
  */
 function remotePath(ref: string | null | undefined): string | null {
-  if (!ref || ref.startsWith('http') || isPendingUrl(ref)) return null
+  if (!ref || isPendingUrl(ref)) return null
   return ref
 }
 
@@ -187,7 +186,7 @@ export function useSignedUrl(storagePath: string | null | undefined) {
   })
   const local = usePendingImageUrl(pendingUrl)
 
-  // Niente da firmare: nessuna foto, o un URL intero che si usa com'è.
+  // Niente da firmare: nessuna foto.
   const state = pendingUrl
     ? { signedUrl: local.url, isLoading: local.isLoading, error: local.error }
     : path
@@ -196,7 +195,7 @@ export function useSignedUrl(storagePath: string | null | undefined) {
           isLoading: remote.isPending,
           error: remote.data ? null : remote.error,
         }
-      : { signedUrl: storagePath ?? null, isLoading: false, error: null }
+      : { signedUrl: null, isLoading: false, error: null }
 
   const [failure, setFailure] = useState<{
     ref: string | null | undefined

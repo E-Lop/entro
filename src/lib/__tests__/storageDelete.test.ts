@@ -39,14 +39,6 @@ describe('deleteFoodImage — decide la policy di Storage', () => {
     expect(mockRemove).toHaveBeenCalledWith(['utente-a/1-latte.jpg'])
   })
 
-  it('da una riga legacy cancella il percorso estratto dall’URL firmato', async () => {
-    await deleteFoodImage(
-      'https://ref.supabase.co/storage/v1/object/sign/food-images/utente-a/1-latte.jpg?token=eyJabc'
-    )
-
-    expect(mockRemove).toHaveBeenCalledWith(['utente-a/1-latte.jpg'])
-  })
-
   it('se la policy rifiuta, l’errore arriva al chiamante', async () => {
     // Senza guardia la difesa è la RLS: il suo rifiuto non va inghiottito
     // qui, perché chi chiama deve poterlo loggare come oggetto orfano.

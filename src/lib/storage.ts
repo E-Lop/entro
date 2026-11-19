@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import imageCompression from 'browser-image-compression'
-import { logError, redactUrl } from './safeLog'
+import { logError } from './safeLog'
 
 /**
  * Storage service for uploading and managing food images
@@ -9,29 +9,6 @@ import { logError, redactUrl } from './safeLog'
 const BUCKET_NAME = 'food-images'
 const MAX_FILE_SIZE_MB = 5
 const COMPRESSED_MAX_SIZE_MB = 1
-
-/**
- * Extract storage path from URL or return path as is
- * Handles both storage paths and full URLs for backward compatibility
- */
-export function extractPathFromUrlOrPath(urlOrPath: string): string {
-  // If it's already a path (doesn't start with http), return as is
-  if (!urlOrPath.startsWith('http')) {
-    return urlOrPath
-  }
-
-  // Extract path from URL
-  // URL format: https://[project].supabase.co/storage/v1/object/public/food-images/{path}
-  // or signed: https://[project].supabase.co/storage/v1/object/sign/food-images/{path}?token=...
-  const parts = urlOrPath.split('/food-images/')
-  if (parts.length === 2) {
-    // Remove query params if present (for signed URLs)
-    return parts[1].split('?')[0]
-  }
-
-  // If we can't parse it, return as is and let error handling deal with it
-  return urlOrPath
-}
 
 /**
  * Compress image before upload
@@ -103,18 +80,16 @@ export async function uploadFoodImage(file: File, userId: string): Promise<strin
 
 /**
  * Delete image from Supabase Storage
- * @param imagePathOrUrl - Storage path or URL of the image to delete
+ * @param imagePath - Storage path (e.g. "user_id/filename.jpg"): `foods.image_url`
+ *   contiene solo percorsi, lo impone il database (#230)
  *
  * Nessuna guardia sullo userId: le policy di `storage.objects` ammettono anche
  * la cartella di chi condivide una lista, e la guardia `startsWith(userId)` che
  * stava qui lasciava orfana la foto di A quando B la sostituiva (#116). Decide
  * la policy.
  */
-export async function deleteFoodImage(imagePathOrUrl: string): Promise<void> {
+export async function deleteFoodImage(imagePath: string): Promise<void> {
   try {
-    // Extract path from URL if needed (backward compatibility)
-    const imagePath = extractPathFromUrlOrPath(imagePathOrUrl)
-
     const { error } = await supabase.storage
       .from(BUCKET_NAME)
       .remove([imagePath])
@@ -130,19 +105,6 @@ export async function deleteFoodImage(imagePathOrUrl: string): Promise<void> {
       throw error
     }
   }
-}
-
-/**
- * Un riferimento a immagine come si può scrivere in un log.
- *
- * Un percorso d'archivio (`utente/foto.jpg`) resta com'è: sapere *quale*
- * immagine è fallita è tutto il motivo per cui lo si logga. Un URL firmato —
- * che alcune righe in DB tengono ancora al posto del percorso, vedi
- * `extractPathFromUrlOrPath` — porta invece il token nella query, e va ridotto
- * a origine e percorso prima di uscire.
- */
-function safeImageRef(pathOrUrl: string): string {
-  return pathOrUrl.startsWith('http') ? redactUrl(pathOrUrl) : pathOrUrl
 }
 
 /**
@@ -169,7 +131,9 @@ export async function getSignedImageUrl(imagePath: string, expiresIn: number = 3
     }
 
     // For other errors, log and throw
-    logError(`Error creating signed URL for ${safeImageRef(imagePath)}:`, error)
+    // Un percorso si logga intero: sapere *quale* immagine è fallita è tutto il
+    // motivo per cui lo si scrive, e non porta token (#230).
+    logError(`Error creating signed URL for ${imagePath}:`, error)
     throw new Error('Errore durante il recupero dell\'immagine')
   }
 
