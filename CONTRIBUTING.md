@@ -131,6 +131,23 @@ npm run smoke:local
 
 Contro un altro database la suite si configura dall'ambiente (`SMOKE_SUPABASE_URL`, `SMOKE_SUPABASE_ANON_KEY`, `SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL`, `SMOKE_B_PASSWORD`): `npm run smoke:restore` rimette i dati noti, `SMOKE_LEVELS=a npm run smoke` lancia i livelli scelti. L'output riporta solo il nome del test e una categoria d'errore, perché gira anche in produzione e i log di questo repo sono pubblici.
 
+### Nel browser
+
+`tests/smoke-browser/` guarda la PWA servita: entra come A e controlla che la dashboard mostri i cinque alimenti noti, ciascuno con la sua etichetta di scadenza. Il controllo decisivo è «Scade oggi», che il giorno dopo diventa «Scaduto»: distingue una schermata viva da una vecchia. Non tocca niente. Sul Supabase locale crea le sentinelle se mancano, rimette i dati noti e apre la dashboard in un dev server suo:
+
+```bash
+npm run smoke:browser:local
+```
+
+Contro un sito vero si lancia **sempre subito dopo il ripristino**, perché le etichette attese valgono nel giorno in cui i dati sono stati riscritti:
+
+```bash
+npm run smoke:restore
+SMOKE_SITE_URL=https://entroapp.it npm run smoke:browser
+```
+
+Le credenziali di A vengono da `SMOKE_A_EMAIL` e `SMOKE_A_PASSWORD`. Senza `SMOKE_SITE_URL` la suite avvia un dev server sulla porta 5174, puntato al Supabase locale, e non ne riusa mai uno già acceso: il `.env.local` di questo repo punta alla produzione. Nessuna corsa lascia tracce, video o scatti, e l'output, come quello della suite API, contiene solo nomi di test e categorie.
+
 ## Regole database
 
 Ogni nuova tabella o funzione nello schema `public` deve includere:

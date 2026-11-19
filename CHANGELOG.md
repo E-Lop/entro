@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.21.0] - 2026-11-19
+
+### Added
+- **La suite di smoke nel browser** ([#191](https://github.com/E-Lop/entro/issues/191)). La suite API prova il database; questa prova la schermata. Entra come la sentinella A e controlla che la dashboard mostri i cinque alimenti noti, ciascuno con la sua etichetta di scadenza, e niente altro. «Scade oggi» è il controllo decisivo: il giorno dopo diventa «Scaduto», quindi distingue una schermata viva da una vecchia. Durante la [#179](https://github.com/E-Lop/entro/issues/179) l'API rispondeva 404 e la PWA mostrava una dispensa vuota: qui la schermata d'errore e la dispensa vuota sono rosse, ciascuna col suo nome. È in sola lettura, e il suo output contiene solo nomi di test e categorie d'errore: nessun testo delle card, perché girerà anche contro entroapp.it e i log di questo repo sono pubblici. Non lascia tracce, video né scatti. In locale e in CI gira con `npm run smoke:browser:local`, dopo il ripristino dei dati noti. Contro un sito si lancia `npm run smoke:browser` con `SMOKE_SITE_URL`, subito dopo `npm run smoke:restore`. La prima corsa su entroapp.it aspetta gli account sentinella della [#189](https://github.com/E-Lop/entro/issues/189); quando gira e chi avvisa è la [#190](https://github.com/E-Lop/entro/issues/190).
+
+  L'app non cambia: nessun file che il browser scarica è stato toccato.
+
 ## [1.20.4] - 2026-11-19
 
 ### Changed
@@ -1356,7 +1363,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.20.4...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.21.0...HEAD
+[1.21.0]: https://github.com/E-Lop/entro/compare/v1.20.4...v1.21.0
 [1.20.4]: https://github.com/E-Lop/entro/compare/v1.20.3...v1.20.4
 [1.20.3]: https://github.com/E-Lop/entro/compare/v1.20.2...v1.20.3
 [1.20.2]: https://github.com/E-Lop/entro/compare/v1.20.1...v1.20.2

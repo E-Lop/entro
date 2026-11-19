@@ -294,7 +294,8 @@ jobs:
       # I due passi che passano da apt vengono dopo le prove del database (#250):
       # un mirror lento o il DNS di Canonical giù (22 e 26 ott, 11 nov) li fa
       # scadere, e prima si portavano dietro pgTAP, gli script di gara e lo
-      # smoke, che restavano «skipped». Ora può fallire solo l'E2E.
+      # smoke, che restavano «skipped». Ora possono fallire solo i passi nel
+      # browser: lo smoke nel browser e l'E2E.
       # A cache mancante scarica il browser e le librerie di sistema. In
       # condizioni normali dura ~1m12s: a cinque minuti è patologico, e fallire
       # subito è un'informazione mentre aspettare venti minuti non lo è.
@@ -309,6 +310,12 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         timeout-minutes: 5
         run: npx playwright install-deps chromium
+
+      # La suite di smoke nel browser (#191), sulle sentinelle che la suite API
+      # ha appena creato: ripristino, poi la dashboard di A in Chromium. Prima
+      # dell'E2E per la stessa ragione della suite API: dura pochi secondi.
+      - name: Suite di smoke nel browser
+        run: npm run smoke:browser:local
 
       - name: Run Playwright E2E
         run: npm run test:e2e
