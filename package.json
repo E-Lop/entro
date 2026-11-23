@@ -1,7 +1,7 @@
 {
   "name": "entro",
   "private": true,
-  "version": "1.20.4",
+  "version": "1.21.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,6 +20,8 @@
     "smoke": "vitest run --config vitest.smoke.config.ts",
     "smoke:restore": "SMOKE_RUN=restore vitest run --config vitest.smoke.config.ts",
     "smoke:local": "vitest run --config vitest.smoke-local.config.ts",
+    "smoke:browser": "playwright test --config playwright.smoke.config.ts",
+    "smoke:browser:local": "SMOKE_LOCAL_RUN=browser vitest run --config vitest.smoke-local.config.ts",
     "seed:local": "node scripts/test-data/seed.ts",
     "test:watch": "vitest"
   },
