@@ -47,7 +47,10 @@ async function signInAsA(page: Page): Promise<void> {
   const email = required('SMOKE_A_EMAIL')
   const password = required('SMOKE_A_PASSWORD')
   try {
-    await page.goto('/login')
+    // Esplicito: `navigationTimeout` vale 0 di default, e senza limite un
+    // `/login` che non arriva a `load` consuma il timeout del test, il cui
+    // errore prende il posto della categoria.
+    await page.goto('/login', { timeout: WAIT_MS })
   } catch {
     fail('sito non raggiungibile')
   }

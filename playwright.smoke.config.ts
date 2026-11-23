@@ -25,7 +25,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  // Più delle attese dello spec messe insieme (otto da 20 s): se scadesse
+  // Più delle attese dello spec messe insieme (nove da 20 s, navigazione compresa): se scadesse
   // prima il test, il suo errore prenderebbe il posto della categoria. È
   // successo con Kong spento, quando il timeout era quello di default, 30 s.
   timeout: 240_000,
