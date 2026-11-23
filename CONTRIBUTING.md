@@ -227,6 +227,8 @@ Prima di aprire una PR:
 - aggiungi test per validation, authorization, business rules e azioni distruttive;
 - verifica le modifiche UI in viewport mobile.
 
+Dopo averla aperta, chiedi la revisione di CodeRabbit con un commento `@coderabbitai review`. Il repo ha meno di 10 stelle, e sotto quella soglia CodeRabbit non parte da solo: dal 13 nov 2026 quattro PR sono state mergiate senza la sua revisione (#232). Va chiesta prima del merge, perché su una PR chiusa CodeRabbit rifiuta il comando, e prima del merge si aspetta che finisca: la risposta «Review triggered» arriva in pochi secondi e dice solo che è partita, la revisione è finita quando il check CodeRabbit della PR è completato. Va chiesta di nuovo dopo ogni push successivo: senza revisioni automatiche, i commit nuovi li rivede solo una richiesta nuova. Il piano gratuito dà una revisione l'ora per tutto il repo: se risponde «Review limit reached», si rilancia il comando all'ora che indica. Ogni suo commento riceve una risposta prima del merge, come quello di una persona. È consultivo: non blocca il merge.
+
 Usa Conventional Commits per i messaggi principali, per esempio `feat:`, `fix:`, `docs:`, `test:`, `chore:`.
 
 **La parola chiave che chiude una issue va scritta in inglese**, anche in un messaggio per il resto in italiano: `Closes #123`, non «Chiude #123». GitHub riconosce solo `close/closes/closed`, `fix/fixes/fixed`, `resolve/resolves/resolved`, e ignora in silenzio qualunque altra cosa — quindi la issue resta aperta e non c'è nessun errore che lo segnali. La convenzione «documentazione in italiano» non si applica qui: quelle parole non sono prosa, sono l'interfaccia con cui la PR parla al tracker.
