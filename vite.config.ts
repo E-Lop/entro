@@ -2,11 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
+import { versionFile } from './scripts/versionFile'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    versionFile(),
     VitePWA({
       registerType: 'autoUpdate',
       strategies: 'injectManifest',

@@ -148,6 +148,48 @@ SMOKE_SITE_URL=https://entroapp.it npm run smoke:browser
 
 Le credenziali di A vengono da `SMOKE_A_EMAIL` e `SMOKE_A_PASSWORD`. Senza `SMOKE_SITE_URL` la suite avvia un dev server sulla porta 5174, puntato al Supabase locale, e non ne riusa mai uno già acceso: il `.env.local` di questo repo punta alla produzione. Nessuna corsa lascia tracce, video o scatti, e l'output, come quello della suite API, contiene solo nomi di test e categorie.
 
+## Smoke in produzione
+
+Tre workflow fanno girare le due suite contro entroapp.it e il suo database. Durante la #179 l'API ha risposto 404 per 41 ore e se n'è accorto un utente: questi giri lo dicono entro un'ora.
+
+| Workflow | Quando | Cosa | Chi avvisa |
+|---|---|---|---|
+| `smoke-hourly.yml` | ogni ora al minuto 17 (UTC) | livello (a), sola lettura | Healthchecks |
+| `smoke-daily.yml` | ogni giorno alle 05:43 UTC | ripristino, poi la suite nel browser | Healthchecks |
+| `smoke-deploy.yml` | a ogni push su `main`, e a mano | ripristino, livelli a, b e c, ripristino, suite nel browser | GitHub, a chi ha fatto il push o il lancio |
+
+Dopo un push su `main` il primo job di `smoke-deploy.yml` legge `https://entroapp.it/version.json` ogni 15 secondi, finché lo SHA non è quello del push, per dieci minuti al massimo. Il file lo scrive la build (`scripts/versionFile.ts`), e il dev server lo serve uguale. Netlify non manda a GitHub un evento di deploy di produzione, quindi si interroga. Un push più recente cancella l'attesa di quello prima.
+
+Le corse contro la produzione stanno in un gruppo di `concurrency` solo, `smoke-production`, quindi si mettono in fila. GitHub tiene in attesa al massimo una corsa per gruppo: se ne arriva una terza, quella in attesa viene cancellata.
+
+**Secret.** Il job che tocca la produzione legge i secret dall'Environment `production`, legato al solo ramo `main`: una pull request non li vede. Sono otto, li crea il maintainer (#189), e nessuno è la chiave `service_role`:
+
+- `SMOKE_SUPABASE_URL`, `SMOKE_SUPABASE_ANON_KEY`, `SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL`, `SMOKE_B_PASSWORD`;
+- `HEALTHCHECKS_HOURLY_URL` e `HEALTHCHECKS_DAILY_URL`, gli indirizzi dei due controlli. Sono secret perché chi li conosce può mandare segnali falsi.
+
+Ogni passo riceve solo i secret che usa: `npm ci` non ne vede nessuno. Finché ne manca uno il giro si ferma al primo passo, verde, e l'avviso della corsa nomina quelli mancanti (`scripts/smoke/require-secrets.sh`). Quando la #189 li crea, i giri partono da soli.
+
+**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: GitHub che scarta una pianificazione, il workflow disattivato dopo 60 giorni senza commit, le Actions sospese. I due controlli si configurano così:
+
+| Controllo | Pianificazione (cron, UTC) | Tolleranza |
+|---|---|---|
+| ogni ora | `17 * * * *` | 90 minuti |
+| giornaliero | `43 5 * * *` | 3 ore |
+
+La documentazione di GitHub avverte che nelle ore di carico i giri pianificati partono in ritardo, e qualcuno viene scartato. Con 90 minuti di tolleranza una corsa scartata non avvisa, perché la successiva arriva prima; due di fila sì.
+
+### Quando arriva un avviso
+
+Il log della corsa dice il nome del test e la categoria dell'errore, mai un valore letto dalla produzione: il repo è pubblico.
+
+- **Fallimento del giro orario o di quello dopo il deploy.** Si apre la corsa nella scheda Actions e si legge la categoria. Una lettura che fallisce su `lists` o `foods` è la forma della #179: si guarda prima l'ultimo `db push`, poi l'ultimo deploy. Se il rosso arriva subito dopo un deploy, su Netlify si ripubblica il deploy precedente, poi si cerca la causa.
+- **Fallimento del giro giornaliero.** Se il ripristino è verde e la suite nel browser no, l'API funziona e la schermata no: la categoria dice quale card manca o quale etichetta è sbagliata.
+- **Segnale mancato, senza un fallimento.** Il giro non è partito, o si è piantato. Nella scheda Actions si guarda se il workflow c'è ancora ed è attivo. Uno disattivato per inattività si riaccende con `gh workflow enable smoke-hourly.yml` (o `smoke-daily.yml`).
+- **«il sito non ha servito il commit atteso»** in `smoke-deploy.yml`: il deploy di Netlify è fallito o è ancora in coda. Si guarda il log del deploy su Netlify.
+- **«Giro saltato: all'Environment production mancano …»**: non è un guasto, mancano i secret nominati.
+
+Un giro si rilancia a mano dalla scheda Actions, o con `gh workflow run <file> --ref main`.
+
 ## Regole database
 
 Ogni nuova tabella o funzione nello schema `public` deve includere:
@@ -205,6 +247,8 @@ Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza b
    - riparte lo stack di sviluppo;
    - il comando controlla che utenti, alimenti e volumi siano quelli di prima.
 8. **Esito**: se è tutto verde stampa `supabase db push --linked --dry-run` e `supabase db push --linked`. **Il push lo fai tu**: il comando non lo fa mai.
+
+**Dopo il push**, ultimo passo della procedura e prima del merge, il giro contro la produzione: `gh workflow run smoke-deploy.yml --ref main`, poi si aspetta la corsa verde con `gh run watch`. Lanciato a mano non aspetta nessun deploy: prova la suite API e la PWA servita contro lo schema appena cambiato, cioè il controllo che durante la #179 mancava. Se è rossa non si mergia, e la categoria si legge come in «Smoke in produzione».
 
 Durate misurate: **129 secondi** per la prima corsa vera contro la produzione, il 28 settembre 2026, backup compresi; da 70 a 80 secondi in modalità locale. In tutte e due, circa 30 secondi sono l'avvio dello stack ombra. Lo stack di sviluppo resta fermo per circa un minuto e mezzo.
 
