@@ -29,7 +29,7 @@ jobs:
     # Un gruppo solo per tutti i giri contro la produzione: si mettono in fila.
     # Nota di GitHub: in un gruppo resta in attesa al massimo un giro, e uno
     # nuovo sostituisce quello in attesa. Per i giri pianificati vuol dire un
-    # segnale saltato, che Healthchecks segnala se si ripete oltre la tolleranza.
+    # segnale saltato, che con i 30 minuti di tolleranza diventa un avviso.
     concurrency:
       group: smoke-production
       cancel-in-progress: false

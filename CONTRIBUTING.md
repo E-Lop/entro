@@ -162,21 +162,21 @@ Dopo un push su `main` il primo job di `smoke-deploy.yml` legge `https://entroap
 
 Le corse contro la produzione stanno in un gruppo di `concurrency` solo, `smoke-production`, quindi si mettono in fila. GitHub tiene in attesa al massimo una corsa per gruppo: se ne arriva una terza, quella in attesa viene cancellata.
 
-**Secret.** Il job che tocca la produzione legge i secret dall'Environment `production`, legato al solo ramo `main`: una pull request non li vede. Sono otto, li crea il maintainer (#189), e nessuno è la chiave `service_role`:
+**Secret.** Il job che tocca la produzione legge i secret dall'Environment `production`, che va legato al solo ramo `main`: così una pull request non li vede. La regola sul ramo la imposta il maintainer nella #189, prima di metterci i secret. Fino ad allora l'Environment può non esistere: lo crea GitHub, senza regole, al primo giro che lo nomina. Sono otto secret, nessuno è la chiave `service_role`, e li crea il maintainer:
 
-- `SMOKE_SUPABASE_URL`, `SMOKE_SUPABASE_ANON_KEY`, `SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL`, `SMOKE_B_PASSWORD`;
-- `HEALTHCHECKS_HOURLY_URL` e `HEALTHCHECKS_DAILY_URL`, gli indirizzi dei due controlli. Sono secret perché chi li conosce può mandare segnali falsi.
+- `SMOKE_SUPABASE_URL`, `SMOKE_SUPABASE_ANON_KEY`, `SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL`, `SMOKE_B_PASSWORD`, con le sentinelle della #189;
+- `HEALTHCHECKS_HOURLY_URL` e `HEALTHCHECKS_DAILY_URL`, gli indirizzi dei due controlli, con l'account Healthchecks e l'app Pushover della #190. Sono secret perché chi li conosce può mandare segnali falsi.
 
 Ogni passo riceve solo i secret che usa: `npm ci` non ne vede nessuno. Finché ne manca uno il giro si ferma al primo passo, verde, e l'avviso della corsa nomina quelli mancanti (`scripts/smoke/require-secrets.sh`). Quando la #189 li crea, i giri partono da soli. L'eccezione è `smoke-deploy.yml` lanciato a mano: senza secret è rosso, perché chi lo lancia vuole una prova.
 
-**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: GitHub che scarta una pianificazione, il workflow disattivato dopo 60 giorni senza commit, le Actions sospese. I due controlli si configurano così:
+**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: GitHub che scarta una pianificazione, il workflow disattivato dopo 60 giorni senza commit, le Actions sospese. Gli avvisi arrivano solo quando i due controlli esistono, e li crea il maintainer: Healthchecks consegna gli avvisi su Pushover, e l'email di GitHub sui fallimenti fa da seconda strada. Periodo e tolleranza sono quelli decisi nella #185:
 
-| Controllo | Pianificazione (cron, UTC) | Tolleranza |
+| Controllo | Periodo | Tolleranza |
 |---|---|---|
-| ogni ora | `17 * * * *` | 90 minuti |
-| giornaliero | `43 5 * * *` | 3 ore |
+| ogni ora | 1 ora | 30 minuti |
+| giornaliero | 1 giorno | 2 ore |
 
-La documentazione di GitHub avverte che nelle ore di carico i giri pianificati partono in ritardo, e qualcuno viene scartato. Con 90 minuti di tolleranza una corsa scartata non avvisa, perché la successiva arriva prima; due di fila sì.
+La documentazione di GitHub avverte che nelle ore di carico i giri pianificati partono in ritardo, e qualcuno viene scartato. Con questi valori anche una sola corsa oraria scartata avvisa.
 
 ### Quando arriva un avviso
 
