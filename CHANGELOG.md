@@ -5,7 +5,12 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
-## [1.21.0] - 2026-11-19
+## [1.21.1] - 2026-11-24
+
+### Fixed
+- **`foods.image_url` accetta solo un percorso d'archivio, e la PWA smette di trattare gli URL interi** ([#230](https://github.com/E-Lop/entro/issues/230)). La colonna era `text` senza vincoli, e in una lista condivisa ogni membro scrive le righe degli alimenti: un client poteva leggere qualunque forma l'avesse scritta un altro. Un valore che cominciava con `http` la PWA lo metteva com'era nell'immagine della card, quindi un membro poteva far caricare ai browser degli altri un indirizzo qualunque. Ora il vincolo `foods_image_url_is_archive_path` rifiuta, in insert e in update, ogni valore non `null` che non sia `{uuid minuscolo}/{nome senza «/»}`, la forma che le policy di `storage.objects` leggono. Il conteggio in produzione del 20 ott ha trovato 14 valori, tutti percorsi, quindi il vincolo entra in un passo solo e non c'è niente da riscrivere. La PWA perde i rami per gli URL interi: il percorso ricavato da un URL, l'URL usato com'era al posto della firma, il filtro della cancellazione dell'account e la riduzione del token nei log, che non ha più niente da ridurre. Sui percorsi non cambia niente. L'app nativa scrive solo percorsi (verificato il 23 nov nella [entro-mobile#354](https://github.com/E-Lop/entro-mobile/issues/354)), e il suo ramo legacy si toglie lì. Il guardiano `foods_image_url_path_only.test.sql` prova nove forme rifiutate in insert e in update, e che la cancellazione dell'account di chi ha alimenti in una lista condivisa riesce ancora.
+
+## [1.21.0] - 2026-11-23
 
 ### Added
 - **La suite di smoke nel browser** ([#191](https://github.com/E-Lop/entro/issues/191)). La suite API prova il database; questa prova la schermata. Entra come la sentinella A e controlla che la dashboard mostri i cinque alimenti noti, ciascuno con la sua etichetta di scadenza, e niente altro. «Scade oggi» è il controllo decisivo: il giorno dopo diventa «Scaduto», quindi distingue una schermata viva da una vecchia. Durante la [#179](https://github.com/E-Lop/entro/issues/179) l'API rispondeva 404 e la PWA mostrava una dispensa vuota: qui la schermata d'errore e la dispensa vuota sono rosse, ciascuna col suo nome. È in sola lettura, e il suo output contiene solo nomi di test e categorie d'errore: nessun testo delle card, perché girerà anche contro entroapp.it e i log di questo repo sono pubblici. Non lascia tracce, video né scatti. In locale e in CI gira con `npm run smoke:browser:local`, dopo il ripristino dei dati noti. Contro un sito si lancia `npm run smoke:browser` con `SMOKE_SITE_URL`, subito dopo `npm run smoke:restore`. La prima corsa su entroapp.it aspetta gli account sentinella della [#189](https://github.com/E-Lop/entro/issues/189); quando gira e chi avvisa è la [#190](https://github.com/E-Lop/entro/issues/190).
@@ -1363,7 +1368,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.21.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.21.1...HEAD
+[1.21.1]: https://github.com/E-Lop/entro/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/E-Lop/entro/compare/v1.20.4...v1.21.0
 [1.20.4]: https://github.com/E-Lop/entro/compare/v1.20.3...v1.20.4
 [1.20.3]: https://github.com/E-Lop/entro/compare/v1.20.2...v1.20.3

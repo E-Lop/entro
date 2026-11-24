@@ -40,20 +40,8 @@ describe('removePhotosOfDeletedFoods', () => {
     expect(mocks.remove).toHaveBeenCalledWith(['u1/1-latte.jpg'])
   })
 
-  it('dall’URL firmato storico ricava il percorso senza query string', async () => {
-    mocks.foodsQuery.mockResolvedValue(
-      rows('http://x/storage/v1/object/sign/food-images/u1/2-pane.jpg?token=abc')
-    )
-
-    await removePhotosOfDeletedFoods()
-
-    expect(mocks.remove).toHaveBeenCalledWith(['u1/2-pane.jpg'])
-  })
-
-  it('salta le foto in attesa di caricamento e gli URL che non sono del bucket', async () => {
-    mocks.foodsQuery.mockResolvedValue(
-      rows('pending://abc', 'https://images.openfoodfacts.org/x.jpg', 'u1/3-uova.jpg')
-    )
+  it('salta le foto in attesa di caricamento', async () => {
+    mocks.foodsQuery.mockResolvedValue(rows('pending://abc', 'u1/3-uova.jpg'))
 
     await removePhotosOfDeletedFoods()
 

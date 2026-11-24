@@ -110,18 +110,6 @@ describe('useSignedUrl', () => {
     expect(mocks.getSignedImageUrls).toHaveBeenCalledWith(['u/a.jpg'], 3600)
   })
 
-  // `core/food-images.md`: alcune righe legacy tengono in `image_url` un URL
-  // intero, e chi legge deve accettarlo. Si usa com'è, come prima.
-  it('un URL intero non viene firmato di nuovo', async () => {
-    const legacy = 'https://ref.supabase.co/storage/v1/object/sign/food-images/u/vecchia.jpg?token=x'
-
-    const { result } = mountCards([legacy])
-
-    expect(result.current[0]).toMatchObject({ signedUrl: legacy, isLoading: false, error: null })
-    await act(async () => new Promise((resolve) => setTimeout(resolve, 20)))
-    expect(mocks.getSignedImageUrls).not.toHaveBeenCalled()
-  })
-
   it('senza foto non chiede niente', async () => {
     const { result } = mountCards([null])
 
@@ -174,7 +162,7 @@ describe('usePrefetchSignedUrls', () => {
   // li mette in coda tutti insieme, e le card trovano la loro voce in volo.
   it('la lista mette in coda tutte le foto insieme, e le card che montano dopo non chiedono altro', async () => {
     const list = renderHook(
-      () => usePrefetchSignedUrls(['u/a.jpg', 'u/b.jpg', null, 'pending://x', 'https://intero/y.jpg']),
+      () => usePrefetchSignedUrls(['u/a.jpg', 'u/b.jpg', null, 'pending://x']),
       { wrapper }
     )
     const cards = mountCards(['u/a.jpg', 'u/b.jpg'])
@@ -361,7 +349,7 @@ describe('una foto che non si carica (#211)', () => {
   })
 
   it('per una foto che non si firma non c’è niente da richiedere', () => {
-    const { result } = mountCards(['https://vecchio.example/intero.jpg'])
+    const { result } = mountCards(['pending://x'])
 
     act(() => result.current[0].onLoadError())
 

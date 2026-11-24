@@ -77,17 +77,12 @@ test.describe('cancellazione account e foto (#145)', () => {
     const client = await signInAsUser(email, password)
     try {
       const barePath = await uploadE2EFoodImage(user.id, `${Date.now()}-nudo.jpg`)
-      const legacyPath = await uploadE2EFoodImage(user.id, `${Date.now()}-legacy.jpg`)
+      const secondPath = await uploadE2EFoodImage(user.id, `${Date.now()}-secondo.jpg`)
       const removedPath = await uploadE2EFoodImage(user.id, `${Date.now()}-tolto.jpg`)
       await addFood(client, user, listId, 'con il percorso nudo', barePath)
-      // La forma di prima del bucket privato: l'URL firmato intero.
-      await addFood(
-        client,
-        user,
-        listId,
-        'con l\'URL firmato storico',
-        `http://127.0.0.1:54321/storage/v1/object/sign/food-images/${legacyPath}?token=e2e`
-      )
+      // Qui c'era una riga con l'URL firmato intero, la forma di prima del
+      // bucket privato: dalla #230 il database non la accetta più.
+      await addFood(client, user, listId, 'con un secondo percorso', secondPath)
       await addFood(client, user, listId, 'tolto, con la foto ancora', removedPath, true)
       expect(await listE2EFoodImages(user.id)).toHaveLength(3)
 
