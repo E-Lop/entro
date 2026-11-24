@@ -104,6 +104,15 @@ describe('il giro dopo il deploy e dopo il push dello schema', () => {
     expect(source).toContain("if: github.event_name == 'push'")
   })
 
+  it('lanciato a mano senza secret è rosso: chi lo lancia dopo un push dello schema aspetta una prova, non un verde vuoto', () => {
+    const lines = code(source)
+    const at = lines.findIndex((line) => line.includes("if: steps.secrets.outputs.ready != 'true' && github.event_name == 'workflow_dispatch'"))
+    expect(at).toBeGreaterThan(-1)
+    const step = lines.slice(at, at + 4).join('\n')
+    expect(step).toContain('::error::')
+    expect(step).toContain('exit 1')
+  })
+
   it('ripristino, livelli a, b e c, ripristino, poi il browser, in quest’ordine', () => {
     const steps = [
       'run: npm run smoke:restore',

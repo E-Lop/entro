@@ -85,6 +85,15 @@ jobs:
           SMOKE_B_PASSWORD: ${{ secrets.SMOKE_B_PASSWORD }}
         run: bash scripts/smoke/require-secrets.sh SMOKE_SUPABASE_URL SMOKE_SUPABASE_ANON_KEY SMOKE_A_EMAIL SMOKE_A_PASSWORD SMOKE_B_EMAIL SMOKE_B_PASSWORD
 
+      # Al push, senza secret, il giro si ferma verde come quelli pianificati.
+      # Lanciato a mano no: è la prova dopo un push dello schema, e un verde
+      # senza aver guardato niente lascerebbe mergiare una migrazione non provata.
+      - name: Lancio a mano senza secret
+        if: steps.secrets.outputs.ready != 'true' && github.event_name == 'workflow_dispatch'
+        run: |
+          echo "::error::Lanciato a mano, il giro deve provare la produzione: senza i secret dell'Environment production non prova niente (#189)."
+          exit 1
+
       - name: Setup Node
         if: steps.secrets.outputs.ready == 'true'
         uses: actions/setup-node@v5

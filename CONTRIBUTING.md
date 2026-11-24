@@ -167,7 +167,7 @@ Le corse contro la produzione stanno in un gruppo di `concurrency` solo, `smoke-
 - `SMOKE_SUPABASE_URL`, `SMOKE_SUPABASE_ANON_KEY`, `SMOKE_A_EMAIL`, `SMOKE_A_PASSWORD`, `SMOKE_B_EMAIL`, `SMOKE_B_PASSWORD`;
 - `HEALTHCHECKS_HOURLY_URL` e `HEALTHCHECKS_DAILY_URL`, gli indirizzi dei due controlli. Sono secret perché chi li conosce può mandare segnali falsi.
 
-Ogni passo riceve solo i secret che usa: `npm ci` non ne vede nessuno. Finché ne manca uno il giro si ferma al primo passo, verde, e l'avviso della corsa nomina quelli mancanti (`scripts/smoke/require-secrets.sh`). Quando la #189 li crea, i giri partono da soli.
+Ogni passo riceve solo i secret che usa: `npm ci` non ne vede nessuno. Finché ne manca uno il giro si ferma al primo passo, verde, e l'avviso della corsa nomina quelli mancanti (`scripts/smoke/require-secrets.sh`). Quando la #189 li crea, i giri partono da soli. L'eccezione è `smoke-deploy.yml` lanciato a mano: senza secret è rosso, perché chi lo lancia vuole una prova.
 
 **Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: GitHub che scarta una pianificazione, il workflow disattivato dopo 60 giorni senza commit, le Actions sospese. I due controlli si configurano così:
 
@@ -248,7 +248,7 @@ Serve Node ≥ 22.18, perché il comando esegue i suoi moduli TypeScript senza b
    - il comando controlla che utenti, alimenti e volumi siano quelli di prima.
 8. **Esito**: se è tutto verde stampa `supabase db push --linked --dry-run` e `supabase db push --linked`. **Il push lo fai tu**: il comando non lo fa mai.
 
-**Dopo il push**, ultimo passo della procedura e prima del merge, il giro contro la produzione: `gh workflow run smoke-deploy.yml --ref main`, poi si aspetta la corsa verde con `gh run watch`. Lanciato a mano non aspetta nessun deploy: prova la suite API e la PWA servita contro lo schema appena cambiato, cioè il controllo che durante la #179 mancava. Se è rossa non si mergia, e la categoria si legge come in «Smoke in produzione».
+**Dopo il push**, ultimo passo della procedura e prima del merge, il giro contro la produzione: `gh workflow run smoke-deploy.yml --ref main`, poi si aspetta la corsa verde con `gh run watch`. Lanciato a mano il giro non si ferma verde per mancanza di secret, come fa al push: senza secret è rosso, quindi un verde vuol dire che ripristino, livelli e browser hanno girato. Non aspetta nessun deploy: prova la suite API e la PWA servita contro lo schema appena cambiato, cioè il controllo che durante la #179 mancava. Se è rossa non si mergia, e la categoria si legge come in «Smoke in produzione».
 
 Durate misurate: **129 secondi** per la prima corsa vera contro la produzione, il 28 settembre 2026, backup compresi; da 70 a 80 secondi in modalità locale. In tutte e due, circa 30 secondi sono l'avvio dello stack ombra. Lo stack di sviluppo resta fermo per circa un minuto e mezzo.
 
