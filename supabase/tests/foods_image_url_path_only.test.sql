@@ -17,7 +17,7 @@
 -- del vincolo, così un altro errore non lo fa passare.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(25);
 
 select col_has_check('public', 'foods', 'image_url', 'image_url ha un CHECK');
 
@@ -50,37 +50,40 @@ select lives_ok(
 );
 select lives_ok($$ select pg_temp.insert_food(null) $$, 'un alimento senza foto entra');
 
--- 2. Non entrano.
+-- 2. Non entrano, né in insert né in update.
+create temp table rejected (image text, description text);
+insert into rejected values
+  ('https://rmbmmwcxtnanacxbkihc.supabase.co/storage/v1/object/sign/food-images/00000000-0000-0000-0000-000000230b01/latte.jpg?token=t',
+   'un URL firmato del nostro bucket'),
+  ('https://rmbmmwcxtnanacxbkihc.supabase.co/storage/v1/object/public/food-images/00000000-0000-0000-0000-000000230b01/latte.jpg',
+   'un URL pubblico del nostro bucket'),
+  ('pending://00000000-0000-0000-0000-000000230b01', 'un pending://'),
+  ('latte.jpg', 'un nome senza cartella'),
+  ('utente/latte.jpg', 'una cartella che non è un uuid'),
+  ('00000000-0000-0000-0000-000000230B01/latte.jpg', 'una cartella con l''uuid maiuscolo'),
+  ('00000000-0000-0000-0000-000000230b01/foto/latte.jpg', 'un nome che contiene «/»'),
+  ('00000000-0000-0000-0000-000000230b01/', 'una cartella senza nome'),
+  ('', 'la stringa vuota');
+
 select throws_ok(
-  format($$ select pg_temp.insert_food(%L) $$, v.image),
+  format($$ select pg_temp.insert_food(%L) $$, r.image),
   '23514',
   'new row for relation "foods" violates check constraint "foods_image_url_is_archive_path"',
-  v.description
+  r.description || ' non entra in insert'
 )
-from (values
-  ('https://rmbmmwcxtnanacxbkihc.supabase.co/storage/v1/object/sign/food-images/00000000-0000-0000-0000-000000230b01/latte.jpg?token=t',
-   'un URL firmato del nostro bucket non entra'),
-  ('https://rmbmmwcxtnanacxbkihc.supabase.co/storage/v1/object/public/food-images/00000000-0000-0000-0000-000000230b01/latte.jpg',
-   'un URL pubblico del nostro bucket non entra'),
-  ('pending://00000000-0000-0000-0000-000000230b01', 'un pending:// non entra'),
-  ('latte.jpg', 'un nome senza cartella non entra'),
-  ('utente/latte.jpg', 'una cartella che non è un uuid non entra'),
-  ('00000000-0000-0000-0000-000000230B01/latte.jpg', 'una cartella con l''uuid maiuscolo non entra'),
-  ('00000000-0000-0000-0000-000000230b01/foto/latte.jpg', 'un nome che contiene «/» non entra'),
-  ('00000000-0000-0000-0000-000000230b01/', 'una cartella senza nome non entra'),
-  ('', 'la stringa vuota non entra')
-) v(image, description);
+from rejected r;
 
 create temp table conforming as
   select id from public.foods
   where image_url = '00000000-0000-0000-0000-000000230b01/1763550000000-latte.jpg';
 
 select throws_ok(
-  $$ update public.foods set image_url = 'https://example.com/latte.jpg' where id = (select id from conforming) $$,
+  format($$ update public.foods set image_url = %L where id = (select id from conforming) $$, r.image),
   '23514',
   'new row for relation "foods" violates check constraint "foods_image_url_is_archive_path"',
-  'un update a un URL non passa'
-);
+  r.description || ' non entra in update'
+)
+from rejected r;
 
 -- 3. Le modifiche che restano nella forma passano.
 select lives_ok(
