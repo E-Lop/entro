@@ -1,0 +1,72 @@
+# Il livello (a) della suite di smoke contro la produzione, ogni ora (#190).
+#
+# Sola lettura: le sentinelle entrano e leggono la lista di A. Durante la #179
+# l'API rispondeva 404 per 41 ore e lo ha detto un utente: questo giro lo
+# avrebbe detto entro un'ora. Avvisa Healthchecks a inizio e fine giro, quindi
+# arriva un avviso anche quando il giro non parte.
+#
+# Cosa fare quando arriva un avviso: `CONTRIBUTING.md`, «Smoke in produzione».
+
+name: Smoke in produzione, ogni ora
+
+on:
+  schedule:
+    # Al minuto 17 e non allo 0: allo scoccare dell'ora GitHub ha più code, e
+    # una pianificazione in ritardo o scartata è più probabile.
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Livello a
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # I secret stanno solo qui, e l'Environment è legato a `main` (#189).
+    environment: production
+    # Un gruppo solo per tutti i giri contro la produzione: si mettono in fila.
+    # Nota di GitHub: in un gruppo resta in attesa al massimo un giro, e uno
+    # nuovo sostituisce quello in attesa. Per i giri pianificati vuol dire un
+    # segnale saltato, che con i 30 minuti di tolleranza diventa un avviso.
+    concurrency:
+      group: smoke-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Ogni passo riceve solo i secret che usa: `npm ci` e gli script
+      # d'installazione delle dipendenze non ne vedono nessuno.
+      - name: Secret presenti?
+        id: secrets
+        env:
+          SMOKE_SUPABASE_URL: ${{ secrets.SMOKE_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.SMOKE_SUPABASE_ANON_KEY }}
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+          HEALTHCHECKS_URL: ${{ secrets.HEALTHCHECKS_HOURLY_URL }}
+        run: bash scripts/smoke/require-secrets.sh SMOKE_SUPABASE_URL SMOKE_SUPABASE_ANON_KEY SMOKE_A_EMAIL SMOKE_A_PASSWORD HEALTHCHECKS_URL
+
+      - name: Setup Node
+        if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Livello a, con i segnali a Healthchecks
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SMOKE_SUPABASE_URL: ${{ secrets.SMOKE_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.SMOKE_SUPABASE_ANON_KEY }}
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+          HEALTHCHECKS_URL: ${{ secrets.HEALTHCHECKS_HOURLY_URL }}
+        run: node scripts/smoke/healthchecks.mjs 'SMOKE_LEVELS=a npm run smoke'

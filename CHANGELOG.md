@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.22.0] - 2026-11-25
+
+### Added
+- **La suite di smoke gira da sola contro la produzione, e Healthchecks avvisa quando fallisce o non parte** ([#190](https://github.com/E-Lop/entro/issues/190)). Durante la [#179](https://github.com/E-Lop/entro/issues/179) le letture in produzione sono state rotte per circa 41 ore, e se n'è accorto un utente. Tre workflow nuovi. `smoke-hourly.yml` lancia il livello (a), in sola lettura, ogni ora al minuto 17. `smoke-daily.yml` fa il giro giornaliero della [#191](https://github.com/E-Lop/entro/issues/191): ripristino dei dati noti, poi la suite nel browser su entroapp.it. `smoke-deploy.yml` parte a ogni push su `main`: aspetta che il sito serva il commit, poi lancia ripristino, livelli a, b e c, ripristino e la suite nel browser. Lo stesso giro si lancia a mano dopo un push dello schema, ed è l'ultimo passo della procedura in «Migrazioni in produzione». Netlify non manda a GitHub un evento di deploy di produzione: per questo la build scrive `/version.json` con lo SHA del commit, e il workflow lo interroga per dieci minuti al massimo. I due giri pianificati mandano a Healthchecks il segnale d'inizio, di successo e di fallimento. Quando il maintainer avrà creato i due controlli (orario con 30 minuti di tolleranza, giornaliero con 2 ore), con gli avvisi su Pushover, un avviso arriverà anche quando un giro non parte. Le corse contro la produzione si mettono in fila in un gruppo solo. I secret vengono dal solo Environment `production`, che il maintainer legherà a `main` nella #189 prima di metterci i secret, e ogni passo riceve solo quelli che usa. I log contengono nomi di test e categorie, mai valori dal database né gli indirizzi dei controlli. Finché i secret della [#189](https://github.com/E-Lop/entro/issues/189) non esistono, ogni giro si ferma al primo passo, verde, e nomina quelli che mancano; lanciato a mano dopo un push dello schema, invece, senza secret è rosso. La guida dice cosa fare per ogni tipo di avviso.
+
+  L'app non cambia: il sito pubblica un file in più, `/version.json`, che la PWA non legge e il service worker non mette in cache.
+
 ## [1.21.1] - 2026-11-24
 
 ### Fixed
@@ -1368,7 +1375,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.21.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.22.0...HEAD
+[1.22.0]: https://github.com/E-Lop/entro/compare/v1.21.1...v1.22.0
 [1.21.1]: https://github.com/E-Lop/entro/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/E-Lop/entro/compare/v1.20.4...v1.21.0
 [1.20.4]: https://github.com/E-Lop/entro/compare/v1.20.3...v1.20.4

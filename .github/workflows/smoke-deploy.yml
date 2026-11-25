@@ -1,0 +1,175 @@
+# Il giro completo contro la produzione, dopo ogni deploy e dopo ogni push
+# dello schema (#190).
+#
+# - **Dopo il deploy**: a ogni push su `main` il primo job aspetta che
+#   entroapp.it serva il commit appena spinto, leggendo `/version.json`.
+#   Netlify non manda a GitHub un evento di deploy di produzione, per questo
+#   si interroga. Se in dieci minuti lo SHA non compare, il workflow fallisce
+#   e lo dice.
+# - **Dopo il push dello schema**: si lancia a mano, da `main`, senza attesa
+#   (`gh workflow run smoke-deploy.yml --ref main`). È l'ultimo passo della
+#   procedura in `CONTRIBUTING.md`, «Migrazioni in produzione».
+#
+# Il giro è quello di `npm run smoke:local`, più la suite nel browser:
+# ripristino, livelli a, b e c, ripristino, dashboard di A. Si ferma al primo
+# rosso: un passo dopo un ripristino fallito misurerebbe lo stato sbagliato.
+# Questi giri non avvisano Healthchecks: un rosso lo notifica GitHub a chi ha
+# fatto il push o il lancio.
+
+name: Smoke in produzione, dopo il deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Il sito serve il commit?
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # I dieci minuti dell'attesa, più il checkout.
+    timeout-minutes: 13
+    # Un push più recente rende inutile aspettare il deploy di quello prima:
+    # Netlify pubblicherà il nuovo, e il suo giro guarderà quello.
+    concurrency:
+      group: smoke-deploy-wait
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Attesa del deploy
+        env:
+          SMOKE_SITE_URL: https://entroapp.it
+          EXPECTED_SHA: ${{ github.sha }}
+        run: node scripts/smoke/wait-for-deploy.mjs
+
+  smoke:
+    name: Livelli a, b e c, poi la dashboard di A
+    needs: deploy
+    # Al lancio a mano il job dell'attesa è saltato, e questo parte lo stesso.
+    if: ${{ !cancelled() && (needs.deploy.result == 'success' || needs.deploy.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # I secret stanno solo qui, e l'Environment è legato a `main` (#189).
+    environment: production
+    # In fila con gli altri giri contro la produzione: vedi `smoke-hourly.yml`.
+    concurrency:
+      group: smoke-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Ogni passo riceve solo i secret che usa: `npm ci` e gli script
+      # d'installazione delle dipendenze non ne vedono nessuno.
+      - name: Secret presenti?
+        id: secrets
+        env:
+          SMOKE_SUPABASE_URL: ${{ secrets.SMOKE_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.SMOKE_SUPABASE_ANON_KEY }}
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+          SMOKE_B_EMAIL: ${{ secrets.SMOKE_B_EMAIL }}
+          SMOKE_B_PASSWORD: ${{ secrets.SMOKE_B_PASSWORD }}
+        run: bash scripts/smoke/require-secrets.sh SMOKE_SUPABASE_URL SMOKE_SUPABASE_ANON_KEY SMOKE_A_EMAIL SMOKE_A_PASSWORD SMOKE_B_EMAIL SMOKE_B_PASSWORD
+
+      # Al push, senza secret, il giro si ferma verde come quelli pianificati.
+      # Lanciato a mano no: è la prova dopo un push dello schema, e un verde
+      # senza aver guardato niente lascerebbe mergiare una migrazione non provata.
+      - name: Lancio a mano senza secret
+        if: steps.secrets.outputs.ready != 'true' && github.event_name == 'workflow_dispatch'
+        run: |
+          echo "::error::Lanciato a mano, il giro deve provare la produzione: senza i secret dell'Environment production non prova niente (#189)."
+          exit 1
+
+      - name: Setup Node
+        if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+
+      # Come nel job E2E della CI: la chiave della cache è la versione di
+      # Playwright, letta dal pacchetto installato.
+      - name: Versione di Playwright
+        if: steps.secrets.outputs.ready == 'true'
+        id: playwright-version
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache dei browser Playwright
+        if: steps.secrets.outputs.ready == 'true'
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browser
+        if: steps.secrets.outputs.ready == 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        run: npx playwright install --with-deps chromium
+
+      - name: Dipendenze di sistema (cache presente)
+        if: steps.secrets.outputs.ready == 'true' && steps.playwright-cache.outputs.cache-hit == 'true'
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium
+
+      - name: Ripristino dei dati noti
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SMOKE_SUPABASE_URL: ${{ secrets.SMOKE_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.SMOKE_SUPABASE_ANON_KEY }}
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+          SMOKE_B_EMAIL: ${{ secrets.SMOKE_B_EMAIL }}
+          SMOKE_B_PASSWORD: ${{ secrets.SMOKE_B_PASSWORD }}
+        run: npm run smoke:restore
+
+      - name: Livelli a, b e c
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SMOKE_LEVELS: a,b,c
+          SMOKE_SUPABASE_URL: ${{ secrets.SMOKE_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.SMOKE_SUPABASE_ANON_KEY }}
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+          SMOKE_B_EMAIL: ${{ secrets.SMOKE_B_EMAIL }}
+          SMOKE_B_PASSWORD: ${{ secrets.SMOKE_B_PASSWORD }}
+        run: npm run smoke
+
+      # Le etichette che la suite nel browser si aspetta valgono nel giorno
+      # del ripristino: si rimettono i dati subito prima di guardarli.
+      - name: Ripristino dei dati noti, di nuovo
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SMOKE_SUPABASE_URL: ${{ secrets.SMOKE_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.SMOKE_SUPABASE_ANON_KEY }}
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+          SMOKE_B_EMAIL: ${{ secrets.SMOKE_B_EMAIL }}
+          SMOKE_B_PASSWORD: ${{ secrets.SMOKE_B_PASSWORD }}
+        run: npm run smoke:restore
+
+      - name: Dashboard di A nel browser
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SMOKE_SITE_URL: https://entroapp.it
+          SMOKE_A_EMAIL: ${{ secrets.SMOKE_A_EMAIL }}
+          SMOKE_A_PASSWORD: ${{ secrets.SMOKE_A_PASSWORD }}
+        run: npm run smoke:browser
