@@ -5,6 +5,11 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.22.1] - 2026-11-25
+
+### Security
+- **`deepmerge` (GHSA-gcqx-w48m-w2h4) esce dalle accettate: l'advisory è stata ritirata il 16 nov** ([#253](https://github.com/E-Lop/entro/issues/253)). Da allora non compare più in `npm audit`, e il controllo settimanale del 23 nov è uscito rosso con «va tolta da ACCEPTED», come vuole la procedura di `CONTRIBUTING.md`. Restano accettate `glob` e `minimatch`, con la valutazione della #253. Provato in locale con lo stesso comando del workflow: sul codice di prima esce 1 con quel messaggio, dopo esce 0 con «2 segnalazioni, tutte già valutate». Le dipendenze non cambiano.
+
 ## [1.22.0] - 2026-11-25
 
 ### Added
@@ -1375,7 +1380,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.22.0...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.22.1...HEAD
+[1.22.1]: https://github.com/E-Lop/entro/compare/v1.22.0...v1.22.1
 [1.22.0]: https://github.com/E-Lop/entro/compare/v1.21.1...v1.22.0
 [1.21.1]: https://github.com/E-Lop/entro/compare/v1.21.0...v1.21.1
 [1.21.0]: https://github.com/E-Lop/entro/compare/v1.20.4...v1.21.0

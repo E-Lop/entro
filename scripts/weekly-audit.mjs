@@ -71,12 +71,6 @@ export const ACCEPTED = {
     patched: ['11.0.1'],
     why: 'eslint e glob 11 non accettano la 11, e forzarla svuota la precache; i pattern sono del repo',
   },
-  'GHSA-gcqx-w48m-w2h4': {
-    issue: 253,
-    package: 'deepmerge',
-    patched: [null],
-    why: 'nessuna versione corretta; il plugin di Rollup lo chiama solo su una costante propria',
-  },
 }
 
 /** Sollevata quando un input non ha la forma che questo script sa leggere. */
