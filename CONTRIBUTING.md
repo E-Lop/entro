@@ -277,6 +277,8 @@ Dopo averla aperta, chiedi la revisione di CodeRabbit con un commento `@coderabb
 
 Usa Conventional Commits per i messaggi principali, per esempio `feat:`, `fix:`, `docs:`, `test:`, `chore:`.
 
+**Le PR scritte dall'agente di sviluppo** le mergia l'agente stesso, quando sono verificate. Se una PR chiude una issue `ready-for-agent` con un brief, prima del merge un subagente che non ha scritto il codice dà un esito a ogni criterio di accettazione, e un criterio «non soddisfatto» ferma il merge. Il resoconto va in un commento della PR, con il titolo «Verifica dei criteri del brief». La regola completa sta nel bundle di famiglia, che è privato: `../entro-family/conventions/agent-autonomous-merge.md`.
+
 **La parola chiave che chiude una issue va scritta in inglese**, anche in un messaggio per il resto in italiano: `Closes #123`, non «Chiude #123». GitHub riconosce solo `close/closes/closed`, `fix/fixes/fixed`, `resolve/resolves/resolved`, e ignora in silenzio qualunque altra cosa — quindi la issue resta aperta e non c'è nessun errore che lo segnali. La convenzione «documentazione in italiano» non si applica qui: quelle parole non sono prosa, sono l'interfaccia con cui la PR parla al tracker.
 
 ## Release
