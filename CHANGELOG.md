@@ -5,6 +5,13 @@ Tutte le modifiche rilevanti al progetto Entro sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/)
 e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
 
+## [1.22.2] - 2026-11-26
+
+### Fixed
+- **I giri di smoke pianificati contro la produzione li avvia Netlify, perché lo `schedule` di GitHub non li faceva partire** ([#286](https://github.com/E-Lop/entro/issues/286)). Dal merge della v1.22.0 GitHub ha fatto partire 2 giri orari su 22, ore dopo l'orario, e nessun giro giornaliero. Lo stesso sintomo è segnalato nella community di GitHub dal 26 ago 2026, senza una risposta ufficiale, e nei dati del repo non c'è nessuna corsa cancellata o nascosta. Healthchecks avvisava a ogni giro mancato. Il controllo giornaliero invece non ha mai ricevuto un segnale, quindi non poteva avvisare.
+
+  Due Netlify Scheduled Function, al minuto 17 di ogni ora e alle 05:43 UTC, chiedono a GitHub un `workflow_dispatch` dei due workflow su `main`. Lo `schedule` esce dai workflow, così un segnale mancato ha una causa sola da cercare. Una chiamata fallita non si ripete: la funzione fallisce, il log dice il codice di GitHub e il workflow, mai il token, e il giro mancato lo segnala Healthchecks. Il token è un fine-grained PAT sul solo repo, con il solo permesso *Actions: write*. Scade dopo un anno e sta in una variabile d'ambiente di Netlify. Sul piano gratuito quella variabile la vede anche la build: il rischio è scritto e accettato in `CONTRIBUTING.md`, che dice anche come rinnovare il token e come leggere un avviso. ESLint controlla anche i file `.mts`, perché le due funzioni non restino fuori dal lint.
+
 ## [1.22.1] - 2026-11-25
 
 ### Security
@@ -1380,7 +1387,8 @@ Lancio pubblico di Entro su LinkedIn.
 - Sistema di autenticazione Supabase completo
 - CRUD completo gestione alimenti con React Query
 
-[Unreleased]: https://github.com/E-Lop/entro/compare/v1.22.1...HEAD
+[Unreleased]: https://github.com/E-Lop/entro/compare/v1.22.2...HEAD
+[1.22.2]: https://github.com/E-Lop/entro/compare/v1.22.1...v1.22.2
 [1.22.1]: https://github.com/E-Lop/entro/compare/v1.22.0...v1.22.1
 [1.22.0]: https://github.com/E-Lop/entro/compare/v1.21.1...v1.22.0
 [1.21.1]: https://github.com/E-Lop/entro/compare/v1.21.0...v1.21.1

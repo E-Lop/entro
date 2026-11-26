@@ -16,10 +16,11 @@
 name: Smoke in produzione, giro giornaliero
 
 on:
-  schedule:
-    # 05:43 UTC, cioè 06:43 o 07:43 a Roma: lontano dalla mezzanotte di Roma,
-    # così ripristino e controllo cadono nello stesso giorno delle etichette.
-    - cron: '43 5 * * *'
+  # Lo avvia ogni giorno alle 05:43 UTC la Netlify Scheduled Function
+  # `netlify/functions/smoke-daily-dispatch.mts`, non lo `schedule` di GitHub,
+  # che questo giro non l'ha mai fatto partire (#286). 05:43 UTC è 06:43 o 07:43
+  # a Roma: lontano dalla mezzanotte di Roma, così ripristino e controllo cadono
+  # nello stesso giorno delle etichette.
   workflow_dispatch:
 
 permissions:

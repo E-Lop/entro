@@ -12,7 +12,8 @@ export default tseslint.config(
   { ignores: ['dist', 'playwright-report', 'test-results', 'supabase/.temp'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
+    // `.mts`: le Netlify Function di `netlify/functions/` (#286).
+    files: ['**/*.{ts,tsx,mts}'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
