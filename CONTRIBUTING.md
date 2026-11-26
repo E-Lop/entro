@@ -186,14 +186,14 @@ Per rinnovarlo:
 
 Ogni passo riceve solo i secret che usa: `npm ci` non ne vede nessuno. Finché ne manca uno il giro si ferma al primo passo, verde, e l'avviso della corsa nomina quelli mancanti (`scripts/smoke/require-secrets.sh`). Quando la #189 li crea, i giri partono da soli. L'eccezione è `smoke-deploy.yml` lanciato a mano: senza secret è rosso, perché chi lo lancia vuole una prova.
 
-**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: la funzione di Netlify che non chiama o riceve un errore, GitHub che non avvia la corsa chiesta, un workflow spento, le Actions sospese. Gli avvisi arrivano solo quando i due controlli esistono, e li crea il maintainer: Healthchecks consegna gli avvisi su Pushover, e l'email di GitHub sui fallimenti fa da seconda strada. **Dopo aver creato un controllo, il primo giro si lancia a mano:** un controllo che non ha mai ricevuto un segnale resta «new», e da «new» Healthchecks non avvisa, nemmeno se il giro non parte mai. Periodo e tolleranza sono quelli decisi nella #185:
+**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: la funzione di Netlify che non chiama o riceve un errore, GitHub che non avvia la corsa chiesta, un workflow spento, le Actions sospese. Gli avvisi arrivano solo quando i due controlli esistono, e li crea il maintainer: Healthchecks consegna gli avvisi su Pushover, e l'email di GitHub sui fallimenti fa da seconda strada. **Dopo aver creato un controllo, il primo giro si lancia a mano:** un controllo che non ha mai ricevuto un segnale resta «new», e da «new» Healthchecks non avvisa, nemmeno se il giro non parte mai. Il giro manda il segnale solo se nell'Environment ci sono tutti i secret, compreso l'indirizzo del controllo: senza, si ferma verde al primo passo e il controllo resta «new». Dopo il giro si guarda su Healthchecks che il controllo sia uscito da «new». Periodo e tolleranza sono quelli decisi nella #185:
 
 | Controllo | Periodo | Tolleranza |
 |---|---|---|
 | ogni ora | 1 ora | 30 minuti |
 | giornaliero | 1 giorno | 2 ore |
 
-Con questi valori anche un solo giro orario che non parte avvisa.
+La tolleranza si conta dall'ultimo segnale. Se il giro prima è partito in orario, un solo giro orario che non parte avvisa. Se invece il giro prima è partito con mezz'ora di ritardo, il turno mancato subito dopo può non avvisare. Esempio: successo alle 10:50, giro delle 11:17 mancato, successo alle 12:17. Fra i due segnali passano 87 minuti, meno di 1 h + 30 min. Avvisano invece due turni mancati di fila.
 
 ### Quando arriva un avviso
 
