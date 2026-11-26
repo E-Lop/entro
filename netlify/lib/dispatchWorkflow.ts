@@ -3,8 +3,9 @@
  *
  * Lo `schedule` di GitHub non faceva partire i giri contro la produzione: in 22
  * ore 2 orari su 22, nessun giornaliero, e la community lo segnala da agosto
- * 2026. Li avviano le Netlify Scheduled Function in `netlify/functions/`, con
- * questa chiamata a «Create a workflow dispatch event».
+ * 2026 (fonti nei commenti della #286). Li avviano le Netlify Scheduled
+ * Function in `netlify/functions/`, con questa chiamata a «Create a workflow
+ * dispatch event».
  *
  * Una chiamata per turno e nessun nuovo tentativo: se fallisce, il giro non
  * parte e lo segnala Healthchecks, che avvisa quando un segnale manca. Un ciclo
@@ -26,12 +27,16 @@ const REF = 'main'
 /** La funzione pianificata ha 30 secondi in tutto. */
 const REQUEST_TIMEOUT_MS = 10_000
 
+/** Scrive il messaggio nel log della funzione e la fa fallire. */
+function fail(message: string): never {
+  console.error(message)
+  throw new Error(message)
+}
+
 export async function dispatchWorkflow(workflow: string): Promise<void> {
   const token = process.env[TOKEN_VARIABLE]
   if (!token) {
-    const message = `Avvio di ${workflow} non chiesto: manca la variabile d'ambiente ${TOKEN_VARIABLE}.`
-    console.error(message)
-    throw new Error(message)
+    fail(`Avvio di ${workflow} non chiesto: manca la variabile d'ambiente ${TOKEN_VARIABLE}.`)
   }
 
   let response: Response
@@ -51,16 +56,12 @@ export async function dispatchWorkflow(workflow: string): Promise<void> {
   } catch (error) {
     // Solo il tipo dell'errore: il messaggio non si riporta (vedi sopra).
     const kind = error instanceof Error ? error.name : typeof error
-    const message = `Avvio di ${workflow} fallito: GitHub non ha risposto (${kind}).`
-    console.error(message)
-    throw new Error(message)
+    fail(`Avvio di ${workflow} fallito: GitHub non ha risposto (${kind}).`)
   }
 
   if (!response.ok) {
     const hint = response.status === 401 ? ' Il token è scaduto o revocato: va rinnovato (CONTRIBUTING.md, «Smoke in produzione»).' : ''
-    const message = `Avvio di ${workflow} fallito: GitHub ha risposto ${response.status}.${hint}`
-    console.error(message)
-    throw new Error(message)
+    fail(`Avvio di ${workflow} fallito: GitHub ha risposto ${response.status}.${hint}`)
   }
 
   console.log(`Avvio di ${workflow} su ${REF} chiesto a GitHub (${response.status}).`)
