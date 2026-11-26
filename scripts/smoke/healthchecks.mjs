@@ -4,9 +4,9 @@
  * (#190): inizio, poi successo o fallimento, ed esce col codice del giro.
  *
  * Healthchecks avvisa quando un segnale non arriva in tempo. È così che si
- * viene a sapere anche di un giro che **non parte**: una pianificazione
- * scartata da GitHub, il workflow disattivato dopo 60 giorni senza commit,
- * le Actions sospese. Un giro che parte e si pianta manda l'inizio e non la
+ * viene a sapere anche di un giro che **non parte**: la funzione di Netlify
+ * che non lo avvia (#286), GitHub che non fa partire la corsa chiesta, un
+ * workflow spento, le Actions sospese. Un giro che parte e si pianta manda l'inizio e non la
  * fine, e anche quello diventa un avviso.
  *
  * L'indirizzo del controllo sta in `HEALTHCHECKS_URL` ed è un secret: chi lo

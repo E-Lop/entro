@@ -154,13 +154,30 @@ Tre workflow fanno girare le due suite contro entroapp.it e il suo database. Dur
 
 | Workflow | Quando | Cosa | Chi avvisa |
 |---|---|---|---|
-| `smoke-hourly.yml` | ogni ora al minuto 17 (UTC) | livello (a), sola lettura | Healthchecks |
-| `smoke-daily.yml` | ogni giorno alle 05:43 UTC | ripristino, poi la suite nel browser | Healthchecks |
+| `smoke-hourly.yml` | ogni ora al minuto 17 (UTC), lo avvia Netlify | livello (a), sola lettura | Healthchecks |
+| `smoke-daily.yml` | ogni giorno alle 05:43 UTC, lo avvia Netlify | ripristino, poi la suite nel browser | Healthchecks |
 | `smoke-deploy.yml` | a ogni push su `main`, e a mano | ripristino, livelli a, b e c, ripristino, suite nel browser | GitHub, a chi ha fatto il push o il lancio |
 
 Dopo un push su `main` il primo job di `smoke-deploy.yml` legge `https://entroapp.it/version.json` ogni 15 secondi, finché lo SHA non è quello del push, per dieci minuti al massimo. Il file lo scrive la build (`scripts/versionFile.ts`), e il dev server lo serve uguale. Netlify non manda a GitHub un evento di deploy di produzione, quindi si interroga. Un push più recente cancella l'attesa di quello prima.
 
 Le corse contro la produzione stanno in un gruppo di `concurrency` solo, `smoke-production`, quindi si mettono in fila. GitHub tiene in attesa al massimo una corsa per gruppo: se ne arriva una terza, quella in attesa viene cancellata.
+
+**Chi avvia i giri pianificati.** Non lo `schedule` di GitHub: dal 25 nov 2026 ha fatto partire 2 giri orari su 22, ore dopo, e nessun giornaliero, e la community lo segnala da agosto senza una risposta di GitHub (#286). Li avviano due Netlify Scheduled Function, `netlify/functions/smoke-hourly-dispatch.mts` e `smoke-daily-dispatch.mts`, che chiedono a GitHub un `workflow_dispatch` su `main` e non fanno altro. Girano solo sul deploy pubblicato e non hanno un URL. Si provano dalla pagina Functions del sito su Netlify, con «Run now». Se la chiamata fallisce la funzione fallisce e non riprova: il giro mancato lo segnala Healthchecks. Superare le invocazioni del piano gratuito di Netlify metterebbe in pausa tutti i siti dell'account.
+
+Il token sta nella variabile d'ambiente `SMOKE_DISPATCH_TOKEN` di Netlify. È un fine-grained PAT del maintainer con questi limiti:
+- vale per il solo repo `E-Lop/entro`, con il solo permesso *Actions: write*;
+- scade dopo un anno.
+
+La variabile è segnata come segreta («Contains secret values»), quindi Netlify la maschera nell'interfaccia, nell'API, nella CLI e nei log di build. Ha un valore solo nel contesto **Production**. Deploy Previews, Branch deploys, Preview Server & Agent Runners e Local development restano vuoti, perché le funzioni pianificate girano solo sul deploy pubblicato: così la build di una pull request, anche da un fork, non riceve il token. Sul piano gratuito invece una variabile non si può limitare alle sole Functions, quindi il token lo vedono anche la build di produzione e gli script d'installazione delle dipendenze. Il rischio è accettato, perché il danno possibile è limitato:
+- chi lo ruba può avviare, annullare o spegnere workflow, ma non scrivere codice né leggere secret;
+- una corsa avviata su un altro ramo non riceve i secret dell'Environment `production`;
+- se i giri venissero spenti, Healthchecks avviserebbe.
+
+Per rinnovarlo:
+1. si rigenera il token su GitHub, in *Settings → Developer settings → Fine-grained tokens*;
+2. si sostituisce su Netlify il valore di Production, lasciando vuoti gli altri contesti;
+3. si fa un deploy nuovo, perché le funzioni leggono le variabili del deploy in cui sono nate;
+4. si prova con «Run now».
 
 **Secret.** Il job che tocca la produzione legge i secret dall'Environment `production`, che va legato al solo ramo `main`: così una pull request non li vede. La regola sul ramo la imposta il maintainer nella #189, prima di metterci i secret. Fino ad allora l'Environment può non esistere: lo crea GitHub, senza regole, al primo giro che lo nomina. Sono otto secret, nessuno è la chiave `service_role`, e li crea il maintainer:
 
@@ -169,14 +186,14 @@ Le corse contro la produzione stanno in un gruppo di `concurrency` solo, `smoke-
 
 Ogni passo riceve solo i secret che usa: `npm ci` non ne vede nessuno. Finché ne manca uno il giro si ferma al primo passo, verde, e l'avviso della corsa nomina quelli mancanti (`scripts/smoke/require-secrets.sh`). Quando la #189 li crea, i giri partono da soli. L'eccezione è `smoke-deploy.yml` lanciato a mano: senza secret è rosso, perché chi lo lancia vuole una prova.
 
-**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: GitHub che scarta una pianificazione, il workflow disattivato dopo 60 giorni senza commit, le Actions sospese. Gli avvisi arrivano solo quando i due controlli esistono, e li crea il maintainer: Healthchecks consegna gli avvisi su Pushover, e l'email di GitHub sui fallimenti fa da seconda strada. Periodo e tolleranza sono quelli decisi nella #185:
+**Healthchecks.** I due giri pianificati passano dentro `scripts/smoke/healthchecks.mjs`, che manda il segnale d'inizio, esegue il giro e manda quello di successo o di fallimento. Un fallimento avvisa subito. Un segnale che non arriva avvisa allo scadere della tolleranza, ed è il caso del giro che non parte: la funzione di Netlify che non chiama o riceve un errore, GitHub che non avvia la corsa chiesta, un workflow spento, le Actions sospese. Gli avvisi arrivano solo quando i due controlli esistono, e li crea il maintainer: Healthchecks consegna gli avvisi su Pushover, e l'email di GitHub sui fallimenti fa da seconda strada. **Dopo aver creato un controllo, il primo giro si lancia a mano:** un controllo che non ha mai ricevuto un segnale resta «new», e da «new» Healthchecks non avvisa, nemmeno se il giro non parte mai. Il giro manda il segnale solo se nell'Environment ci sono tutti i secret, compreso l'indirizzo del controllo: senza, si ferma verde al primo passo e il controllo resta «new». Dopo il giro si guarda su Healthchecks che il controllo sia uscito da «new». Periodo e tolleranza sono quelli decisi nella #185:
 
 | Controllo | Periodo | Tolleranza |
 |---|---|---|
 | ogni ora | 1 ora | 30 minuti |
 | giornaliero | 1 giorno | 2 ore |
 
-La documentazione di GitHub avverte che nelle ore di carico i giri pianificati partono in ritardo, e qualcuno viene scartato. Con questi valori anche una sola corsa oraria scartata avvisa.
+La tolleranza si conta dall'ultimo segnale. Se il giro prima è partito in orario, un solo giro orario che non parte avvisa. Se invece il giro prima è partito con mezz'ora di ritardo, il turno mancato subito dopo può non avvisare. Esempio: successo alle 10:50, giro delle 11:17 mancato, successo alle 12:17. Fra i due segnali passano 87 minuti, meno di 1 h + 30 min. Avvisano invece due turni mancati di fila.
 
 ### Quando arriva un avviso
 
@@ -184,7 +201,12 @@ Il log della corsa dice il nome del test e la categoria dell'errore, mai un valo
 
 - **Fallimento del giro orario o di quello dopo il deploy.** Si apre la corsa nella scheda Actions e si legge la categoria. Una lettura che fallisce su `lists` o `foods` è la forma della #179: si guarda prima l'ultimo `db push`, poi l'ultimo deploy. Se il rosso arriva subito dopo un deploy, su Netlify si ripubblica il deploy precedente, poi si cerca la causa.
 - **Fallimento del giro giornaliero.** Se il ripristino è verde e la suite nel browser no, l'API funziona e la schermata no: la categoria dice quale card manca o quale etichetta è sbagliata.
-- **Segnale mancato, senza un fallimento.** Il giro non è partito, o si è piantato. Nella scheda Actions si guarda se il workflow c'è ancora ed è attivo. Uno disattivato per inattività si riaccende con `gh workflow enable smoke-hourly.yml` (o `smoke-daily.yml`).
+- **Segnale mancato, senza un fallimento.** Il giro non è partito, o si è piantato.
+  - Prima si guarda la corsa: nella scheda Actions, se ce n'è una `workflow_dispatch` all'ora attesa.
+  - Se non c'è, si guarda il log della funzione su Netlify (pagina Functions, `smoke-hourly-dispatch` o `smoke-daily-dispatch`). Il log dice il codice con cui GitHub ha risposto, mai il token.
+  - Un **401** vuol dire token scaduto o revocato: si rinnova come detto sopra.
+  - Se il log manca del tutto, la funzione non è partita: si controlla che l'ultimo deploy di produzione sia pubblicato e la contenga.
+  - Se la corsa non è partita, si guarda anche che il workflow sia attivo. Uno spento si riaccende con `gh workflow enable smoke-hourly.yml` (o `smoke-daily.yml`).
 - **«il sito non ha servito il commit atteso»** in `smoke-deploy.yml`: il deploy di Netlify è fallito o è ancora in coda. Si guarda il log del deploy su Netlify.
 - **«Giro saltato: all'Environment production mancano …»**: non è un guasto, mancano i secret nominati.
 

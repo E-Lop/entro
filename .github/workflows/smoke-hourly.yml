@@ -10,10 +10,9 @@
 name: Smoke in produzione, ogni ora
 
 on:
-  schedule:
-    # Al minuto 17 e non allo 0: allo scoccare dell'ora GitHub ha più code, e
-    # una pianificazione in ritardo o scartata è più probabile.
-    - cron: '17 * * * *'
+  # Lo avvia ogni ora al minuto 17 (UTC) la Netlify Scheduled Function
+  # `netlify/functions/smoke-hourly-dispatch.mts`, non lo `schedule` di GitHub:
+  # dal 25 nov 2026 GitHub faceva partire 2 giri su 22, ore dopo (#286).
   workflow_dispatch:
 
 permissions:

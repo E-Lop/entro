@@ -68,26 +68,29 @@ describe.each(Object.entries(WORKFLOWS))('il workflow %s', (_, path) => {
 })
 
 describe('i giri pianificati', () => {
-  it('ogni ora al minuto 17: livello a, avvolto dai segnali a Healthchecks', () => {
+  // Gli orari stanno nelle Netlify Scheduled Function, e li controlla
+  // `smokeDispatch.test.ts` (#286).
+  it.each([WORKFLOWS.hourly, WORKFLOWS.daily])(
+    '%s parte solo con workflow_dispatch: lo schedule di GitHub non li faceva partire (#286)',
+    (path) => {
+      const source = code(read(path)).join('\n')
+      expect(source).toMatch(/\non:\n {2}workflow_dispatch:\n/)
+      expect(source).not.toMatch(/\bschedule:/)
+      expect(source).not.toMatch(/- cron:/)
+    },
+  )
+
+  it('ogni ora: livello a, avvolto dai segnali a Healthchecks', () => {
     const source = read(WORKFLOWS.hourly)
-    expect(source).toContain("- cron: '17 * * * *'")
     expect(source).toContain('secrets.HEALTHCHECKS_HOURLY_URL')
     expect(source).toMatch(/node scripts\/smoke\/healthchecks\.mjs 'SMOKE_LEVELS=a npm run smoke'/)
   })
 
   it('una volta al giorno: ripristino, poi la suite nel browser su entroapp.it, avvolti dai segnali', () => {
     const source = read(WORKFLOWS.daily)
-    expect(source).toMatch(/- cron: '\d+ \d+ \* \* \*'/)
     expect(source).toContain('secrets.HEALTHCHECKS_DAILY_URL')
     expect(source).toMatch(/node scripts\/smoke\/healthchecks\.mjs 'npm run smoke:restore && npm run smoke:browser'/)
     expect(source).toContain('SMOKE_SITE_URL: https://entroapp.it')
-  })
-
-  it('il giro giornaliero sta lontano dalla mezzanotte di Roma: ripristino e controllo nello stesso giorno', () => {
-    const [, hour] = read(WORKFLOWS.daily).match(/- cron: '\d+ (\d+) \* \* \*'/) ?? []
-    // Roma è UTC+1 o UTC+2: fra le 3 e le 20 UTC la mezzanotte è lontana ore.
-    expect(Number(hour)).toBeGreaterThanOrEqual(3)
-    expect(Number(hour)).toBeLessThanOrEqual(20)
   })
 })
 
