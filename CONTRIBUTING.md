@@ -168,14 +168,14 @@ Il token sta nella variabile d'ambiente `SMOKE_DISPATCH_TOKEN` di Netlify. È un
 - vale per il solo repo `E-Lop/entro`, con il solo permesso *Actions: write*;
 - scade dopo un anno.
 
-Sul piano gratuito una variabile non si può limitare alle sole Functions, quindi il token lo vedono anche la build e gli script d'installazione delle dipendenze. Il rischio è accettato, perché il danno possibile è limitato:
+La variabile è segnata come segreta («Contains secret values»), quindi Netlify la maschera nell'interfaccia, nell'API, nella CLI e nei log di build. Ha un valore solo nel contesto **Production**. Deploy Previews, Branch deploys, Preview Server & Agent Runners e Local development restano vuoti, perché le funzioni pianificate girano solo sul deploy pubblicato: così la build di una pull request, anche da un fork, non riceve il token. Sul piano gratuito invece una variabile non si può limitare alle sole Functions, quindi il token lo vedono anche la build di produzione e gli script d'installazione delle dipendenze. Il rischio è accettato, perché il danno possibile è limitato:
 - chi lo ruba può avviare, annullare o spegnere workflow, ma non scrivere codice né leggere secret;
 - una corsa avviata su un altro ramo non riceve i secret dell'Environment `production`;
 - se i giri venissero spenti, Healthchecks avviserebbe.
 
 Per rinnovarlo:
 1. si rigenera il token su GitHub, in *Settings → Developer settings → Fine-grained tokens*;
-2. si sostituisce il valore su Netlify;
+2. si sostituisce su Netlify il valore di Production, lasciando vuoti gli altri contesti;
 3. si fa un deploy nuovo, perché le funzioni leggono le variabili del deploy in cui sono nate;
 4. si prova con «Run now».
 
